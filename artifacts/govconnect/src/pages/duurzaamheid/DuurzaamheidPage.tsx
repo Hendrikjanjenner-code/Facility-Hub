@@ -12,7 +12,7 @@ import {
   useGetSustainabilityReport,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet } from "lucide-react";
+import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet, Download } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip,
   Legend, CartesianGrid, PieChart, Pie, Cell,
@@ -169,6 +169,45 @@ export default function DuurzaamheidPage() {
     });
   };
 
+  const exportCsv = () => {
+    if (!report) return;
+
+    const rows: string[] = [];
+
+    // Section 1: monthly energy / water usage
+    rows.push("# Maandelijks verbruik");
+    rows.push("maand;type;verbruik;eenheid");
+    for (const u of report.monthlyUsage) {
+      rows.push(`${u.month};${u.meterType};${u.usage.toString().replace(".", ",")};${u.unit}`);
+    }
+
+    rows.push(""); // blank separator
+
+    // Section 2: waste by month and category
+    rows.push("# Afval per maand");
+    rows.push("maand;categorie;gewicht_kg");
+    for (const w of report.wasteByMonth) {
+      rows.push(`${w.month};${w.category};${w.totalKg.toString().replace(".", ",")}`);
+    }
+
+    rows.push(""); // blank separator
+
+    // Section 3: waste totals by category
+    rows.push("# Afval totaal per categorie");
+    rows.push("categorie;totaal_kg");
+    for (const w of report.wasteByCategory) {
+      rows.push(`${w.category};${w.totalKg.toString().replace(".", ",")}`);
+    }
+
+    const blob = new Blob([rows.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `duurzaamheidsrapportage_${new Date().toLocaleDateString("sv-SE")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Chart data: pivot monthlyUsage naar per-maand rijen per type
   const usageChart = useMemo(() => {
     const months = new Map<string, Record<string, number | string>>();
@@ -222,6 +261,12 @@ export default function DuurzaamheidPage() {
         </TabsList>
 
         <TabsContent value="rapportage" className="space-y-6 pt-4">
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={exportCsv} disabled={!report}>
+              <Download className="mr-2 h-4 w-4" />
+              Exporteer CSV
+            </Button>
+          </div>
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
               <CardHeader>
