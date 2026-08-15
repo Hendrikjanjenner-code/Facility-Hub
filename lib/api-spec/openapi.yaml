@@ -2730,6 +2730,9 @@ components:
           description: ingediend | goedgekeurd | afgekeurd | besteld | geleverd
         totalAmount:
           type: number
+        budgetExceeded:
+          type: boolean
+          description: true als de bestelling het resterende afdelingsbudget overschreed op moment van indienen
         approverId:
           type:
             - integer
@@ -2759,6 +2762,7 @@ components:
         - department
         - status
         - totalAmount
+        - budgetExceeded
         - lines
         - createdAt
     ShopOrderInput:

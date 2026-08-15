@@ -11,7 +11,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ShoppingCart, Search, Plus, Minus, Trash2, Loader2, PackageCheck,
-  CheckCircle2, XCircle, Wallet, ClipboardList,
+  CheckCircle2, XCircle, Wallet, ClipboardList, AlertTriangle,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -73,7 +73,8 @@ export default function WebshopPage() {
   const categories = Array.from(new Set(products?.map((p) => p.category) || []));
   const cartTotal = cart.reduce((s, l) => s + l.price * l.quantity, 0);
   const cartCount = cart.reduce((s, l) => s + l.quantity, 0);
-  const myBudget = budgets?.find((b) => b.department === user?.department);
+  const currentYear = new Date().getFullYear();
+  const myBudget = budgets?.find((b) => b.department === user?.department && b.year === currentYear);
 
   const addToCart = (p: { id: number; name: string; unit: string; price: number; stock: number }) => {
     setCart((prev) => {
@@ -260,13 +261,16 @@ export default function WebshopPage() {
                       {isManager && <TableHead>Aanvrager</TableHead>}
                       <TableHead>Artikelen</TableHead>
                       <TableHead>Bedrag</TableHead>
+                      {isManager && <TableHead>Budgeteffect</TableHead>}
                       <TableHead>Status</TableHead>
                       {isManager && <TableHead className="text-right">Actie</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {orders.map((o) => (
-                      <TableRow key={o.id}>
+                    {orders.map((o) => {
+                      const deptBudget = budgets?.find((b) => b.department === o.department && b.year === currentYear);
+                      return (
+                      <TableRow key={o.id} className={cn(isManager && o.budgetExceeded && o.status === "ingediend" && "bg-red-50/50")}>
                         <TableCell>
                           <div className="font-medium">{o.number}</div>
                           <div className="text-xs text-muted-foreground">
@@ -283,6 +287,25 @@ export default function WebshopPage() {
                           {o.lines.map((l) => `${l.quantity}× ${l.productName}`).join(", ")}
                         </TableCell>
                         <TableCell className="font-medium">{eur(o.totalAmount)}</TableCell>
+                        {isManager && (
+                          <TableCell>
+                            {deptBudget ? (
+                              <div className="text-xs space-y-0.5">
+                                <div className={cn("font-medium", deptBudget.remaining < 0 ? "text-destructive" : deptBudget.remaining < o.totalAmount ? "text-amber-600" : "text-muted-foreground")}>
+                                  Resterend: {eur(deptBudget.remaining)}
+                                </div>
+                                {o.budgetExceeded && (
+                                  <div className="flex items-center gap-1 text-destructive font-medium">
+                                    <AlertTriangle className="h-3 w-3" />
+                                    Boven budget
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                        )}
                         <TableCell>
                           <Badge variant="secondary" className={cn("capitalize border-transparent", orderStatusBadge(o.status))}>{o.status}</Badge>
                           {o.decisionNote && <div className="text-xs text-muted-foreground mt-1 max-w-[200px]">{o.decisionNote}</div>}
@@ -310,7 +333,8 @@ export default function WebshopPage() {
                           </TableCell>
                         )}
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </CardContent>

@@ -36,6 +36,7 @@ export const shopOrdersTable = pgTable("shop_orders", {
   department: text("department").notNull(),
   status: text("status").notNull().default("ingediend"), // ingediend | goedgekeurd | afgekeurd | besteld | geleverd
   totalAmount: real("total_amount").notNull(),
+  budgetExceeded: integer("budget_exceeded").notNull().default(0), // 1 = bestelling overschrijdt restbudget op moment van indienen
   approverId: integer("approver_id").references(() => usersTable.id),
   decisionNote: text("decision_note"),
   createdAt: timestamp("created_at", { withTimezone: true })
