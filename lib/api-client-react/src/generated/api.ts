@@ -24,19 +24,27 @@ import type {
   ApiMessage,
   Asset,
   AssetInput,
+  Bouwdeel,
+  BouwdeelInput,
   BudgetStatus,
   CateringItem,
+  Conditiemeting,
+  ConditiemetingInput,
   Contract,
   ContractInput,
   ContractUpdate,
   DashboardSummary,
   DemoAccount,
+  ErrorEnvelope,
   GetSustainabilityReportParams,
   HealthStatus,
   ImportResult,
+  JaarplanningEntry,
   ListAssetsParams,
+  ListBouwdelenParams,
   ListContractsParams,
   ListMeterReadingsParams,
+  ListMjopTakenParams,
   ListReservationsParams,
   ListRoomsParams,
   ListShopOrdersParams,
@@ -49,6 +57,9 @@ import type {
   MeterReading,
   MeterReadingImportInput,
   MeterReadingInput,
+  MjopTaak,
+  MjopTaakInput,
+  MjopTaakUpdate,
   Notification,
   Organization,
   Reservation,
@@ -70,6 +81,7 @@ import type {
   TicketCommentInput,
   TicketInput,
   TicketUpdate,
+  UploadResult,
   User,
   Visitor,
   VisitorInput,
@@ -3865,4 +3877,967 @@ export function useGetSustainabilityReport<TData = Awaited<ReturnType<typeof get
 
 
 
+
+export const getListBouwdelenUrl = (params?: ListBouwdelenParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/bouwdelen?${stringifiedParams}` : `/api/bouwdelen`
+}
+
+/**
+ * @summary List bouwdelen with latest condition score
+ */
+export const listBouwdelen = async (params?: ListBouwdelenParams, options?: Parameters<typeof customFetch>[1]): Promise<Bouwdeel[]> => {
+
+  return customFetch<Bouwdeel[]>(getListBouwdelenUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListBouwdelenQueryKey = (params?: ListBouwdelenParams,) => {
+    return [
+    `/api/bouwdelen`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListBouwdelenQueryOptions = <TData = Awaited<ReturnType<typeof listBouwdelen>>, TError = ErrorType<unknown>>(params?: ListBouwdelenParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBouwdelen>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListBouwdelenQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listBouwdelen>>> = ({ signal }) => listBouwdelen(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listBouwdelen>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListBouwdelenQueryResult = NonNullable<Awaited<ReturnType<typeof listBouwdelen>>>
+export type ListBouwdelenQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List bouwdelen with latest condition score
+ */
+
+export function useListBouwdelen<TData = Awaited<ReturnType<typeof listBouwdelen>>, TError = ErrorType<unknown>>(
+ params?: ListBouwdelenParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listBouwdelen>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListBouwdelenQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateBouwdeelUrl = () => {
+
+
+
+
+  return `/api/bouwdelen`
+}
+
+/**
+ * @summary Register a bouwdeel linked to the building structure
+ */
+export const createBouwdeel = async (bouwdeelInput: BouwdeelInput, options?: Parameters<typeof customFetch>[1]): Promise<Bouwdeel> => {
+
+  return customFetch<Bouwdeel>(getCreateBouwdeelUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(bouwdeelInput)
+  }
+);}
+
+
+
+
+
+export const getCreateBouwdeelMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBouwdeel>>, TError,{data: BodyType<BouwdeelInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createBouwdeel>>, TError,{data: BodyType<BouwdeelInput>}, TContext> => {
+
+const mutationKey = ['createBouwdeel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createBouwdeel>>, {data: BodyType<BouwdeelInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createBouwdeel(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateBouwdeelMutationResult = NonNullable<Awaited<ReturnType<typeof createBouwdeel>>>
+    export type CreateBouwdeelMutationBody = BodyType<BouwdeelInput>
+    export type CreateBouwdeelMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Register a bouwdeel linked to the building structure
+ */
+export const useCreateBouwdeel = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBouwdeel>>, TError,{data: BodyType<BouwdeelInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createBouwdeel>>,
+        TError,
+        {data: BodyType<BouwdeelInput>},
+        TContext
+      > => {
+      return useMutation(getCreateBouwdeelMutationOptions(options));
+    }
+
+export const getGetBouwdeelUrl = (id: number,) => {
+
+
+
+
+  return `/api/bouwdelen/${id}`
+}
+
+export const getBouwdeel = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<Bouwdeel> => {
+
+  return customFetch<Bouwdeel>(getGetBouwdeelUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBouwdeelQueryKey = (id: number,) => {
+    return [
+    `/api/bouwdelen/${id}`
+    ] as const;
+    }
+
+
+export const getGetBouwdeelQueryOptions = <TData = Awaited<ReturnType<typeof getBouwdeel>>, TError = ErrorType<ApiMessage>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBouwdeel>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBouwdeelQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBouwdeel>>> = ({ signal }) => getBouwdeel(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBouwdeel>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBouwdeelQueryResult = NonNullable<Awaited<ReturnType<typeof getBouwdeel>>>
+export type GetBouwdeelQueryError = ErrorType<ApiMessage>
+
+
+
+export function useGetBouwdeel<TData = Awaited<ReturnType<typeof getBouwdeel>>, TError = ErrorType<ApiMessage>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBouwdeel>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBouwdeelQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListConditiemetingenUrl = (id: number,) => {
+
+
+
+
+  return `/api/bouwdelen/${id}/conditiemetingen`
+}
+
+/**
+ * @summary Condition measurements (NEN 2767) for a bouwdeel
+ */
+export const listConditiemetingen = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<Conditiemeting[]> => {
+
+  return customFetch<Conditiemeting[]>(getListConditiemetingenUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListConditiemetingenQueryKey = (id: number,) => {
+    return [
+    `/api/bouwdelen/${id}/conditiemetingen`
+    ] as const;
+    }
+
+
+export const getListConditiemetingenQueryOptions = <TData = Awaited<ReturnType<typeof listConditiemetingen>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listConditiemetingen>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListConditiemetingenQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listConditiemetingen>>> = ({ signal }) => listConditiemetingen(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listConditiemetingen>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListConditiemetingenQueryResult = NonNullable<Awaited<ReturnType<typeof listConditiemetingen>>>
+export type ListConditiemetingenQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Condition measurements (NEN 2767) for a bouwdeel
+ */
+
+export function useListConditiemetingen<TData = Awaited<ReturnType<typeof listConditiemetingen>>, TError = ErrorType<unknown>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listConditiemetingen>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListConditiemetingenQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateConditiemetingUrl = (id: number,) => {
+
+
+
+
+  return `/api/bouwdelen/${id}/conditiemetingen`
+}
+
+/**
+ * @summary Record a NEN 2767 condition measurement with optional defects/photos
+ */
+export const createConditiemeting = async (id: number,
+    conditiemetingInput: ConditiemetingInput, options?: Parameters<typeof customFetch>[1]): Promise<Conditiemeting> => {
+
+  return customFetch<Conditiemeting>(getCreateConditiemetingUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(conditiemetingInput)
+  }
+);}
+
+
+
+
+
+export const getCreateConditiemetingMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConditiemeting>>, TError,{id: number;data: BodyType<ConditiemetingInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createConditiemeting>>, TError,{id: number;data: BodyType<ConditiemetingInput>}, TContext> => {
+
+const mutationKey = ['createConditiemeting'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createConditiemeting>>, {id: number;data: BodyType<ConditiemetingInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createConditiemeting(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateConditiemetingMutationResult = NonNullable<Awaited<ReturnType<typeof createConditiemeting>>>
+    export type CreateConditiemetingMutationBody = BodyType<ConditiemetingInput>
+    export type CreateConditiemetingMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Record a NEN 2767 condition measurement with optional defects/photos
+ */
+export const useCreateConditiemeting = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createConditiemeting>>, TError,{id: number;data: BodyType<ConditiemetingInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createConditiemeting>>,
+        TError,
+        {id: number;data: BodyType<ConditiemetingInput>},
+        TContext
+      > => {
+      return useMutation(getCreateConditiemetingMutationOptions(options));
+    }
+
+export const getListMjopTakenUrl = (params?: ListMjopTakenParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/mjop-taken?${stringifiedParams}` : `/api/mjop-taken`
+}
+
+/**
+ * @summary List MJOP tasks with optional filters
+ */
+export const listMjopTaken = async (params?: ListMjopTakenParams, options?: Parameters<typeof customFetch>[1]): Promise<MjopTaak[]> => {
+
+  return customFetch<MjopTaak[]>(getListMjopTakenUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListMjopTakenQueryKey = (params?: ListMjopTakenParams,) => {
+    return [
+    `/api/mjop-taken`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListMjopTakenQueryOptions = <TData = Awaited<ReturnType<typeof listMjopTaken>>, TError = ErrorType<unknown>>(params?: ListMjopTakenParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMjopTaken>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListMjopTakenQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listMjopTaken>>> = ({ signal }) => listMjopTaken(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listMjopTaken>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListMjopTakenQueryResult = NonNullable<Awaited<ReturnType<typeof listMjopTaken>>>
+export type ListMjopTakenQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List MJOP tasks with optional filters
+ */
+
+export function useListMjopTaken<TData = Awaited<ReturnType<typeof listMjopTaken>>, TError = ErrorType<unknown>>(
+ params?: ListMjopTakenParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listMjopTaken>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListMjopTakenQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateMjopTaakUrl = () => {
+
+
+
+
+  return `/api/mjop-taken`
+}
+
+export const createMjopTaak = async (mjopTaakInput: MjopTaakInput, options?: Parameters<typeof customFetch>[1]): Promise<MjopTaak> => {
+
+  return customFetch<MjopTaak>(getCreateMjopTaakUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(mjopTaakInput)
+  }
+);}
+
+
+
+
+
+export const getCreateMjopTaakMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMjopTaak>>, TError,{data: BodyType<MjopTaakInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createMjopTaak>>, TError,{data: BodyType<MjopTaakInput>}, TContext> => {
+
+const mutationKey = ['createMjopTaak'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createMjopTaak>>, {data: BodyType<MjopTaakInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createMjopTaak(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateMjopTaakMutationResult = NonNullable<Awaited<ReturnType<typeof createMjopTaak>>>
+    export type CreateMjopTaakMutationBody = BodyType<MjopTaakInput>
+    export type CreateMjopTaakMutationError = ErrorType<unknown>
+
+    export const useCreateMjopTaak = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMjopTaak>>, TError,{data: BodyType<MjopTaakInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createMjopTaak>>,
+        TError,
+        {data: BodyType<MjopTaakInput>},
+        TContext
+      > => {
+      return useMutation(getCreateMjopTaakMutationOptions(options));
+    }
+
+export const getUpdateMjopTaakUrl = (id: number,) => {
+
+
+
+
+  return `/api/mjop-taken/${id}`
+}
+
+export const updateMjopTaak = async (id: number,
+    mjopTaakUpdate: MjopTaakUpdate, options?: Parameters<typeof customFetch>[1]): Promise<MjopTaak> => {
+
+  return customFetch<MjopTaak>(getUpdateMjopTaakUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(mjopTaakUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateMjopTaakMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMjopTaak>>, TError,{id: number;data: BodyType<MjopTaakUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateMjopTaak>>, TError,{id: number;data: BodyType<MjopTaakUpdate>}, TContext> => {
+
+const mutationKey = ['updateMjopTaak'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMjopTaak>>, {id: number;data: BodyType<MjopTaakUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateMjopTaak(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateMjopTaakMutationResult = NonNullable<Awaited<ReturnType<typeof updateMjopTaak>>>
+    export type UpdateMjopTaakMutationBody = BodyType<MjopTaakUpdate>
+    export type UpdateMjopTaakMutationError = ErrorType<ApiMessage>
+
+    export const useUpdateMjopTaak = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMjopTaak>>, TError,{id: number;data: BodyType<MjopTaakUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateMjopTaak>>,
+        TError,
+        {id: number;data: BodyType<MjopTaakUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateMjopTaakMutationOptions(options));
+    }
+
+export const getConvertMjopTaakToTicketUrl = (id: number,) => {
+
+
+
+
+  return `/api/mjop-taken/${id}/ticket`
+}
+
+/**
+ * @summary Convert an MJOP task into a servicedesk ticket
+ */
+export const convertMjopTaakToTicket = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<MjopTaak> => {
+
+  return customFetch<MjopTaak>(getConvertMjopTaakToTicketUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getConvertMjopTaakToTicketMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof convertMjopTaakToTicket>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof convertMjopTaakToTicket>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['convertMjopTaakToTicket'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof convertMjopTaakToTicket>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  convertMjopTaakToTicket(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConvertMjopTaakToTicketMutationResult = NonNullable<Awaited<ReturnType<typeof convertMjopTaakToTicket>>>
+
+    export type ConvertMjopTaakToTicketMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Convert an MJOP task into a servicedesk ticket
+ */
+export const useConvertMjopTaakToTicket = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof convertMjopTaakToTicket>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof convertMjopTaakToTicket>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getConvertMjopTaakToTicketMutationOptions(options));
+    }
+
+export const getGetJaarplanningUrl = () => {
+
+
+
+
+  return `/api/mjop/jaarplanning`
+}
+
+/**
+ * @summary Multi-year planning overview with cost totals per year
+ */
+export const getJaarplanning = async ( options?: Parameters<typeof customFetch>[1]): Promise<JaarplanningEntry[]> => {
+
+  return customFetch<JaarplanningEntry[]>(getGetJaarplanningUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetJaarplanningQueryKey = () => {
+    return [
+    `/api/mjop/jaarplanning`
+    ] as const;
+    }
+
+
+export const getGetJaarplanningQueryOptions = <TData = Awaited<ReturnType<typeof getJaarplanning>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJaarplanning>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetJaarplanningQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getJaarplanning>>> = ({ signal }) => getJaarplanning({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getJaarplanning>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetJaarplanningQueryResult = NonNullable<Awaited<ReturnType<typeof getJaarplanning>>>
+export type GetJaarplanningQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Multi-year planning overview with cost totals per year
+ */
+
+export function useGetJaarplanning<TData = Awaited<ReturnType<typeof getJaarplanning>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJaarplanning>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetJaarplanningQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetPublicObjectUrl = (filePath: string,) => {
+
+
+
+
+  return `/api/storage/public-objects/${filePath}`
+}
+
+/**
+ * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ */
+export const getPublicObject = async (filePath: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getGetPublicObjectUrl(filePath),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicObjectQueryKey = (filePath: string,) => {
+    return [
+    `/api/storage/public-objects/${filePath}`
+    ] as const;
+    }
+
+
+export const getGetPublicObjectQueryOptions = <TData = Awaited<ReturnType<typeof getPublicObject>>, TError = ErrorType<ErrorEnvelope>>(filePath: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicObjectQueryKey(filePath);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicObject>>> = ({ signal }) => getPublicObject(filePath, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: filePath !== null && filePath !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicObjectQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicObject>>>
+export type GetPublicObjectQueryError = ErrorType<ErrorEnvelope>
+
+
+/**
+ * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ */
+
+export function useGetPublicObject<TData = Awaited<ReturnType<typeof getPublicObject>>, TError = ErrorType<ErrorEnvelope>>(
+ filePath: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicObjectQueryOptions(filePath,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetStorageObjectUrl = (objectPath: string,) => {
+
+
+
+
+  return `/api/storage/objects/${objectPath}`
+}
+
+/**
+ * @summary Serve an object entity from PRIVATE_OBJECT_DIR
+ */
+export const getStorageObject = async (objectPath: string, options?: Parameters<typeof customFetch>[1]): Promise<Blob> => {
+
+  return customFetch<Blob>(getGetStorageObjectUrl(objectPath),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetStorageObjectQueryKey = (objectPath: string,) => {
+    return [
+    `/api/storage/objects/${objectPath}`
+    ] as const;
+    }
+
+
+export const getGetStorageObjectQueryOptions = <TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<ErrorEnvelope>>(objectPath: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetStorageObjectQueryKey(objectPath);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStorageObject>>> = ({ signal }) => getStorageObject(objectPath, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: objectPath !== null && objectPath !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetStorageObjectQueryResult = NonNullable<Awaited<ReturnType<typeof getStorageObject>>>
+export type GetStorageObjectQueryError = ErrorType<ErrorEnvelope>
+
+
+/**
+ * @summary Serve an object entity from PRIVATE_OBJECT_DIR
+ */
+
+export function useGetStorageObject<TData = Awaited<ReturnType<typeof getStorageObject>>, TError = ErrorType<ErrorEnvelope>>(
+ objectPath: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getStorageObject>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetStorageObjectQueryOptions(objectPath,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUploadStorageObjectUrl = () => {
+
+
+
+
+  return `/api/storage/uploads`
+}
+
+/**
+ * @summary Upload een afbeelding (max 10 MB) naar private storage; bestandstype wordt server-side geverifieerd
+ */
+export const uploadStorageObject = async (uploadStorageObjectBody: Blob, options?: Parameters<typeof customFetch>[1]): Promise<UploadResult> => {
+
+  return customFetch<UploadResult>(getUploadStorageObjectUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'image/*', ...options?.headers },
+    body: uploadStorageObjectBody
+  }
+);}
+
+
+
+
+
+export const getUploadStorageObjectMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadStorageObject>>, TError,{data: BodyType<Blob>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof uploadStorageObject>>, TError,{data: BodyType<Blob>}, TContext> => {
+
+const mutationKey = ['uploadStorageObject'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof uploadStorageObject>>, {data: BodyType<Blob>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  uploadStorageObject(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UploadStorageObjectMutationResult = NonNullable<Awaited<ReturnType<typeof uploadStorageObject>>>
+    export type UploadStorageObjectMutationBody = BodyType<Blob>
+    export type UploadStorageObjectMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Upload een afbeelding (max 10 MB) naar private storage; bestandstype wordt server-side geverifieerd
+ */
+export const useUploadStorageObject = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof uploadStorageObject>>, TError,{data: BodyType<Blob>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof uploadStorageObject>>,
+        TError,
+        {data: BodyType<Blob>},
+        TContext
+      > => {
+      return useMutation(getUploadStorageObjectMutationOptions(options));
+    }
 

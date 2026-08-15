@@ -704,6 +704,163 @@ export interface SustainabilityReport {
   wasteByMonth: SustainabilityReportWasteByMonthItem[];
 }
 
+export interface Bouwdeel {
+  id: number;
+  code: string;
+  name: string;
+  /** dak | gevel | installaties | interieur | terrein | transport */
+  category: string;
+  buildingId: number;
+  /** @nullable */
+  buildingName?: string | null;
+  /** @nullable */
+  floorId?: number | null;
+  /** @nullable */
+  floorName?: string | null;
+  /** @nullable */
+  roomId?: number | null;
+  /** @nullable */
+  roomName?: string | null;
+  /** @nullable */
+  material?: string | null;
+  installYear: number;
+  expectedLifespanYears: number;
+  replacementCost: number;
+  /** @nullable */
+  notes?: string | null;
+  /**
+     * Meest recente NEN 2767-conditiescore (1-6)
+     * @nullable
+     */
+  laatsteScore?: number | null;
+  /** @nullable */
+  laatsteMetingDatum?: string | null;
+  openTaken: number;
+}
+
+export interface BouwdeelInput {
+  /** @minLength 1 */
+  code: string;
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  category: string;
+  buildingId: number;
+  /** @nullable */
+  floorId?: number | null;
+  /** @nullable */
+  roomId?: number | null;
+  /** @nullable */
+  material?: string | null;
+  installYear: number;
+  expectedLifespanYears: number;
+  replacementCost: number;
+  /** @nullable */
+  notes?: string | null;
+}
+
+export interface Gebrek {
+  description: string;
+  /** licht | serieus | ernstig */
+  ernst: string;
+  /** @nullable */
+  omvang?: string | null;
+  /**
+     * Object storage pad van de foto (/objects/...)
+     * @nullable
+     */
+  photoPath?: string | null;
+}
+
+export interface Conditiemeting {
+  id: number;
+  bouwdeelId: number;
+  inspectorId: number;
+  /** @nullable */
+  inspectorName?: string | null;
+  /** NEN 2767: 1 (uitstekend) t/m 6 (zeer slecht) */
+  score: number;
+  /** @nullable */
+  toelichting?: string | null;
+  gebreken: Gebrek[];
+  measuredAt: string;
+}
+
+export interface ConditiemetingInput {
+  /**
+     * @minimum 1
+     * @maximum 6
+     */
+  score: number;
+  /** @nullable */
+  toelichting?: string | null;
+  gebreken?: Gebrek[];
+}
+
+export interface MjopTaak {
+  id: number;
+  bouwdeelId: number;
+  /** @nullable */
+  bouwdeelName?: string | null;
+  /** @nullable */
+  bouwdeelCode?: string | null;
+  /** @nullable */
+  buildingName?: string | null;
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  /** inspectie | onderhoud | vervanging | renovatie */
+  taskType: string;
+  plannedYear: number;
+  estimatedCost: number;
+  /** gepland | in_uitvoering | afgerond */
+  status: string;
+  /** @nullable */
+  ticketId?: number | null;
+  /** @nullable */
+  ticketNumber?: string | null;
+  createdAt: string;
+}
+
+export interface MjopTaakInput {
+  bouwdeelId: number;
+  /** @minLength 1 */
+  title: string;
+  /** @nullable */
+  description?: string | null;
+  /** @minLength 1 */
+  taskType: string;
+  plannedYear: number;
+  estimatedCost: number;
+}
+
+export interface MjopTaakUpdate {
+  /** @minLength 1 */
+  title?: string;
+  /** @nullable */
+  description?: string | null;
+  taskType?: string;
+  plannedYear?: number;
+  estimatedCost?: number;
+  status?: string;
+}
+
+export interface JaarplanningEntry {
+  year: number;
+  taskCount: number;
+  totalCost: number;
+  byType: CountByKey[];
+  byStatus: CountByKey[];
+}
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
+export interface UploadResult {
+  objectPath: string;
+}
+
 export type ListTicketsParams = {
 status?: string;
 priority?: string;
@@ -778,5 +935,17 @@ buildingId?: number;
 
 export type GetSustainabilityReportParams = {
 buildingId?: number;
+};
+
+export type ListBouwdelenParams = {
+buildingId?: number;
+category?: string;
+search?: string;
+};
+
+export type ListMjopTakenParams = {
+year?: number;
+status?: string;
+bouwdeelId?: number;
 };
 

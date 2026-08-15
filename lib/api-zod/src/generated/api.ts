@@ -1274,3 +1274,334 @@ export const GetSustainabilityReportResponse = zod.object({
 })
 
 
+/**
+ * @summary List bouwdelen with latest condition score
+ */
+export const ListBouwdelenQueryParams = zod.object({
+  "buildingId": zod.coerce.number().int().optional(),
+  "category": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const ListBouwdelenResponseItem = zod.object({
+  "id": zod.int(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "category": zod.string().describe('dak | gevel | installaties | interieur | terrein | transport'),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "floorId": zod.int().nullish(),
+  "floorName": zod.string().nullish(),
+  "roomId": zod.int().nullish(),
+  "roomName": zod.string().nullish(),
+  "material": zod.string().nullish(),
+  "installYear": zod.int(),
+  "expectedLifespanYears": zod.int(),
+  "replacementCost": zod.number(),
+  "notes": zod.string().nullish(),
+  "laatsteScore": zod.int().nullish().describe('Meest recente NEN 2767-conditiescore (1-6)'),
+  "laatsteMetingDatum": zod.string().nullish(),
+  "openTaken": zod.int()
+})
+export const ListBouwdelenResponse = zod.array(ListBouwdelenResponseItem)
+
+
+/**
+ * @summary Register a bouwdeel linked to the building structure
+ */
+
+
+
+
+
+export const CreateBouwdeelBody = zod.object({
+  "code": zod.string().min(1),
+  "name": zod.string().min(1),
+  "category": zod.string().min(1),
+  "buildingId": zod.int(),
+  "floorId": zod.int().nullish(),
+  "roomId": zod.int().nullish(),
+  "material": zod.string().nullish(),
+  "installYear": zod.int(),
+  "expectedLifespanYears": zod.int(),
+  "replacementCost": zod.number(),
+  "notes": zod.string().nullish()
+})
+
+export const CreateBouwdeelResponse = zod.object({
+  "id": zod.int(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "category": zod.string().describe('dak | gevel | installaties | interieur | terrein | transport'),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "floorId": zod.int().nullish(),
+  "floorName": zod.string().nullish(),
+  "roomId": zod.int().nullish(),
+  "roomName": zod.string().nullish(),
+  "material": zod.string().nullish(),
+  "installYear": zod.int(),
+  "expectedLifespanYears": zod.int(),
+  "replacementCost": zod.number(),
+  "notes": zod.string().nullish(),
+  "laatsteScore": zod.int().nullish().describe('Meest recente NEN 2767-conditiescore (1-6)'),
+  "laatsteMetingDatum": zod.string().nullish(),
+  "openTaken": zod.int()
+})
+
+
+export const GetBouwdeelParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetBouwdeelResponse = zod.object({
+  "id": zod.int(),
+  "code": zod.string(),
+  "name": zod.string(),
+  "category": zod.string().describe('dak | gevel | installaties | interieur | terrein | transport'),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "floorId": zod.int().nullish(),
+  "floorName": zod.string().nullish(),
+  "roomId": zod.int().nullish(),
+  "roomName": zod.string().nullish(),
+  "material": zod.string().nullish(),
+  "installYear": zod.int(),
+  "expectedLifespanYears": zod.int(),
+  "replacementCost": zod.number(),
+  "notes": zod.string().nullish(),
+  "laatsteScore": zod.int().nullish().describe('Meest recente NEN 2767-conditiescore (1-6)'),
+  "laatsteMetingDatum": zod.string().nullish(),
+  "openTaken": zod.int()
+})
+
+
+/**
+ * @summary Condition measurements (NEN 2767) for a bouwdeel
+ */
+export const ListConditiemetingenParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const ListConditiemetingenResponseItem = zod.object({
+  "id": zod.int(),
+  "bouwdeelId": zod.int(),
+  "inspectorId": zod.int(),
+  "inspectorName": zod.string().nullish(),
+  "score": zod.int().describe('NEN 2767: 1 (uitstekend) t\/m 6 (zeer slecht)'),
+  "toelichting": zod.string().nullish(),
+  "gebreken": zod.array(zod.object({
+  "description": zod.string(),
+  "ernst": zod.string().describe('licht | serieus | ernstig'),
+  "omvang": zod.string().nullish(),
+  "photoPath": zod.string().nullish().describe('Object storage pad van de foto (\/objects\/...)')
+})),
+  "measuredAt": zod.string()
+})
+export const ListConditiemetingenResponse = zod.array(ListConditiemetingenResponseItem)
+
+
+/**
+ * @summary Record a NEN 2767 condition measurement with optional defects/photos
+ */
+export const CreateConditiemetingParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const createConditiemetingBodyScoreMax = 6;
+
+
+
+export const CreateConditiemetingBody = zod.object({
+  "score": zod.int().min(1).max(createConditiemetingBodyScoreMax),
+  "toelichting": zod.string().nullish(),
+  "gebreken": zod.array(zod.object({
+  "description": zod.string(),
+  "ernst": zod.string().describe('licht | serieus | ernstig'),
+  "omvang": zod.string().nullish(),
+  "photoPath": zod.string().nullish().describe('Object storage pad van de foto (\/objects\/...)')
+})).optional()
+})
+
+export const CreateConditiemetingResponse = zod.object({
+  "id": zod.int(),
+  "bouwdeelId": zod.int(),
+  "inspectorId": zod.int(),
+  "inspectorName": zod.string().nullish(),
+  "score": zod.int().describe('NEN 2767: 1 (uitstekend) t\/m 6 (zeer slecht)'),
+  "toelichting": zod.string().nullish(),
+  "gebreken": zod.array(zod.object({
+  "description": zod.string(),
+  "ernst": zod.string().describe('licht | serieus | ernstig'),
+  "omvang": zod.string().nullish(),
+  "photoPath": zod.string().nullish().describe('Object storage pad van de foto (\/objects\/...)')
+})),
+  "measuredAt": zod.string()
+})
+
+
+/**
+ * @summary List MJOP tasks with optional filters
+ */
+export const ListMjopTakenQueryParams = zod.object({
+  "year": zod.coerce.number().int().optional(),
+  "status": zod.coerce.string().optional(),
+  "bouwdeelId": zod.coerce.number().int().optional()
+})
+
+export const ListMjopTakenResponseItem = zod.object({
+  "id": zod.int(),
+  "bouwdeelId": zod.int(),
+  "bouwdeelName": zod.string().nullish(),
+  "bouwdeelCode": zod.string().nullish(),
+  "buildingName": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "taskType": zod.string().describe('inspectie | onderhoud | vervanging | renovatie'),
+  "plannedYear": zod.int(),
+  "estimatedCost": zod.number(),
+  "status": zod.string().describe('gepland | in_uitvoering | afgerond'),
+  "ticketId": zod.int().nullish(),
+  "ticketNumber": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListMjopTakenResponse = zod.array(ListMjopTakenResponseItem)
+
+
+
+
+
+
+export const CreateMjopTaakBody = zod.object({
+  "bouwdeelId": zod.int(),
+  "title": zod.string().min(1),
+  "description": zod.string().nullish(),
+  "taskType": zod.string().min(1),
+  "plannedYear": zod.int(),
+  "estimatedCost": zod.number()
+})
+
+export const CreateMjopTaakResponse = zod.object({
+  "id": zod.int(),
+  "bouwdeelId": zod.int(),
+  "bouwdeelName": zod.string().nullish(),
+  "bouwdeelCode": zod.string().nullish(),
+  "buildingName": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "taskType": zod.string().describe('inspectie | onderhoud | vervanging | renovatie'),
+  "plannedYear": zod.int(),
+  "estimatedCost": zod.number(),
+  "status": zod.string().describe('gepland | in_uitvoering | afgerond'),
+  "ticketId": zod.int().nullish(),
+  "ticketNumber": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+export const UpdateMjopTaakParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+
+
+
+export const UpdateMjopTaakBody = zod.object({
+  "title": zod.string().min(1).optional(),
+  "description": zod.string().nullish(),
+  "taskType": zod.string().optional(),
+  "plannedYear": zod.int().optional(),
+  "estimatedCost": zod.number().optional(),
+  "status": zod.string().optional()
+})
+
+export const UpdateMjopTaakResponse = zod.object({
+  "id": zod.int(),
+  "bouwdeelId": zod.int(),
+  "bouwdeelName": zod.string().nullish(),
+  "bouwdeelCode": zod.string().nullish(),
+  "buildingName": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "taskType": zod.string().describe('inspectie | onderhoud | vervanging | renovatie'),
+  "plannedYear": zod.int(),
+  "estimatedCost": zod.number(),
+  "status": zod.string().describe('gepland | in_uitvoering | afgerond'),
+  "ticketId": zod.int().nullish(),
+  "ticketNumber": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Convert an MJOP task into a servicedesk ticket
+ */
+export const ConvertMjopTaakToTicketParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const ConvertMjopTaakToTicketResponse = zod.object({
+  "id": zod.int(),
+  "bouwdeelId": zod.int(),
+  "bouwdeelName": zod.string().nullish(),
+  "bouwdeelCode": zod.string().nullish(),
+  "buildingName": zod.string().nullish(),
+  "title": zod.string(),
+  "description": zod.string().nullish(),
+  "taskType": zod.string().describe('inspectie | onderhoud | vervanging | renovatie'),
+  "plannedYear": zod.int(),
+  "estimatedCost": zod.number(),
+  "status": zod.string().describe('gepland | in_uitvoering | afgerond'),
+  "ticketId": zod.int().nullish(),
+  "ticketNumber": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Multi-year planning overview with cost totals per year
+ */
+export const GetJaarplanningResponseItem = zod.object({
+  "year": zod.int(),
+  "taskCount": zod.int(),
+  "totalCost": zod.number(),
+  "byType": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.int()
+})),
+  "byStatus": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.int()
+}))
+})
+export const GetJaarplanningResponse = zod.array(GetJaarplanningResponseItem)
+
+
+/**
+ * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ */
+export const GetPublicObjectParams = zod.object({
+  "filePath": zod.coerce.string()
+})
+
+export const GetPublicObjectResponse = zod.unknown()
+
+
+/**
+ * @summary Serve an object entity from PRIVATE_OBJECT_DIR
+ */
+export const GetStorageObjectParams = zod.object({
+  "objectPath": zod.coerce.string()
+})
+
+export const GetStorageObjectResponse = zod.unknown()
+
+
+/**
+ * @summary Upload een afbeelding (max 10 MB) naar private storage; bestandstype wordt server-side geverifieerd
+ */
+export const UploadStorageObjectResponse = zod.object({
+  "objectPath": zod.string()
+})
+
+

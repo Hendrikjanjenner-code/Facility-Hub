@@ -25,6 +25,9 @@ import {
   shopOrderLinesTable,
   meterReadingsTable,
   wasteRegistrationsTable,
+  bouwdelenTable,
+  conditiemetingenTable,
+  mjopTakenTable,
 } from "@workspace/db";
 import { sql } from "drizzle-orm";
 import { scryptSync, randomBytes } from "node:crypto";
@@ -48,7 +51,8 @@ function hoursAgo(h: number): Date {
 
 async function main() {
   await db.execute(sql`
-    TRUNCATE TABLE notifications, catering_order_lines, reservations, catering_items,
+    TRUNCATE TABLE mjop_taken, conditiemetingen, bouwdelen,
+      notifications, catering_order_lines, reservations, catering_items,
       ticket_comments, tickets, ticket_categories, assets, workplaces, rooms, floors,
       shop_order_lines, shop_orders, shop_products, budgets, contracts, suppliers,
       meter_readings, waste_registrations,
@@ -408,6 +412,55 @@ async function main() {
     { userId: u("fatima").id, title: "Je bezoeker is gearriveerd", body: "Peter van den Berg heeft ingecheckt bij de receptie.", kind: "bezoeker", linkPath: "/bezoekers", read: false, createdAt: hoursAgo(2) },
     { userId: u("joris").id, title: "Nieuwe cateringbestelling", body: "Bij Raadscommissie Ruimte vanavond is catering besteld voor 45 personen.", kind: "reservering", linkPath: "/reserveringen/" + reservations[1]!.id, read: false, createdAt: hoursAgo(12) },
     { userId: u("linda").id, title: "Systeemonderhoud", body: "Zaterdag tussen 22:00 en 23:00 is GovConnect kort niet beschikbaar.", kind: "systeem", linkPath: null, read: false, createdAt: hoursAgo(30) },
+  ]);
+
+  // MJOP: bouwdelen gekoppeld aan de gebouwstructuur
+  const bouwdelen = await db
+    .insert(bouwdelenTable)
+    .values([
+      { code: "BD-DAK-001", name: "Bitumen dakbedekking Stadhuis", category: "dak", buildingId: stadhuis!.id, floorId: null, roomId: null, material: "bitumen", installYear: 2004, expectedLifespanYears: 25, replacementCost: 185000, notes: "Laatste renovatie 2004, plaatselijke blaasvorming." },
+      { code: "BD-GEV-001", name: "Kozijnen voorgevel Stadhuis", category: "gevel", buildingId: stadhuis!.id, floorId: null, roomId: null, material: "hardhout", installYear: 1998, expectedLifespanYears: 40, replacementCost: 240000, notes: "Monumentale gevel, schilderwerk cyclus 6 jaar." },
+      { code: "BD-INS-001", name: "Klimaatinstallatie Stadhuis", category: "installaties", buildingId: stadhuis!.id, floorId: null, roomId: null, material: "VRV-systeem", installYear: 2019, expectedLifespanYears: 15, replacementCost: 320000, notes: null },
+      { code: "BD-INS-002", name: "Liftinstallatie Stadhuis", category: "transport", buildingId: stadhuis!.id, floorId: sh0.id, roomId: null, material: "staal", installYear: 2010, expectedLifespanYears: 25, replacementCost: 95000, notes: "Jaarlijkse keuring verplicht." },
+      { code: "BD-INT-001", name: "Parketvloer Raadzaal", category: "interieur", buildingId: stadhuis!.id, floorId: sh0.id, roomId: room("SH-0.01").id, material: "eiken parket", installYear: 2012, expectedLifespanYears: 30, replacementCost: 48000, notes: null },
+      { code: "BD-DAK-002", name: "Dakbedekking Stadskantoor", category: "dak", buildingId: stadskantoor!.id, floorId: null, roomId: null, material: "EPDM", installYear: 2016, expectedLifespanYears: 30, replacementCost: 130000, notes: null },
+      { code: "BD-INS-003", name: "Verwarmingsketels Stadskantoor", category: "installaties", buildingId: stadskantoor!.id, floorId: null, roomId: null, material: "HR-ketels", installYear: 2011, expectedLifespanYears: 18, replacementCost: 75000, notes: "Vervanging door warmtepomp overwegen." },
+      { code: "BD-GEV-002", name: "Overheaddeuren Gemeentewerf", category: "gevel", buildingId: werf!.id, floorId: wf0.id, roomId: room("GW-0.01").id, material: "staal", installYear: 2008, expectedLifespanYears: 25, replacementCost: 42000, notes: null },
+    ])
+    .returning();
+  const bd = (code: string) => bouwdelen.find((b) => b.code === code)!;
+
+  await db.insert(conditiemetingenTable).values([
+    { bouwdeelId: bd("BD-DAK-001").id, inspectorId: u("ruben").id, score: 4, toelichting: "Dakbedekking toont veroudering; einde levensduur nadert.", gebreken: [
+      { description: "Blaasvorming in bitumen aan zuidzijde", ernst: "serieus", omvang: "10-30%", photoPath: null },
+      { description: "Craquelé rond dakdoorvoeren", ernst: "licht", omvang: "2-10%", photoPath: null },
+    ], measuredAt: hoursAgo(24 * 45) },
+    { bouwdeelId: bd("BD-DAK-001").id, inspectorId: u("ruben").id, score: 3, toelichting: "Reguliere inspectie, plaatselijke gebreken hersteld.", gebreken: [], measuredAt: hoursAgo(24 * 400) },
+    { bouwdeelId: bd("BD-GEV-001").id, inspectorId: u("fatima").id, score: 3, toelichting: "Schilderwerk verweerd, houtrot beperkt.", gebreken: [
+      { description: "Houtrot in onderdorpel raadzaalzijde", ernst: "serieus", omvang: "< 2%", photoPath: null },
+    ], measuredAt: hoursAgo(24 * 60) },
+    { bouwdeelId: bd("BD-INS-001").id, inspectorId: u("ruben").id, score: 2, toelichting: "Installatie in goede conditie, filters vervangen.", gebreken: [], measuredAt: hoursAgo(24 * 20) },
+    { bouwdeelId: bd("BD-INS-003").id, inspectorId: u("ruben").id, score: 4, toelichting: "Ketels naderen einde levensduur, rendement loopt terug.", gebreken: [
+      { description: "Corrosie aan rookgasafvoer ketel 2", ernst: "ernstig", omvang: "2-10%", photoPath: null },
+    ], measuredAt: hoursAgo(24 * 10) },
+    { bouwdeelId: bd("BD-GEV-002").id, inspectorId: u("ruben").id, score: 5, toelichting: "Deuren zwaar belast, aandrijving storingsgevoelig.", gebreken: [
+      { description: "Aandrijfmotor deur 2 hapert bij openen", ernst: "ernstig", omvang: "30-70%", photoPath: null },
+      { description: "Lakschade en roestvorming onderzijde", ernst: "serieus", omvang: "10-30%", photoPath: null },
+    ], measuredAt: hoursAgo(24 * 5) },
+  ]);
+
+  const jaar = new Date().getFullYear();
+  await db.insert(mjopTakenTable).values([
+    { bouwdeelId: bd("BD-DAK-001").id, title: "Dakbedekking Stadhuis vervangen", description: "Volledige vervanging bitumen dakbedekking incl. isolatie-upgrade.", taskType: "vervanging", plannedYear: jaar + 3, estimatedCost: 185000, status: "gepland" },
+    { bouwdeelId: bd("BD-DAK-001").id, title: "Noodreparatie blaasvorming dak", description: "Plaatselijk herstel blazen zuidzijde.", taskType: "onderhoud", plannedYear: jaar, estimatedCost: 8500, status: "gepland" },
+    { bouwdeelId: bd("BD-GEV-001").id, title: "Schilderwerk kozijnen voorgevel", description: "Cyclisch schilderwerk en herstel houtrot.", taskType: "onderhoud", plannedYear: jaar + 1, estimatedCost: 36000, status: "gepland" },
+    { bouwdeelId: bd("BD-INS-001").id, title: "Groot onderhoud klimaatinstallatie", description: "Compressoren reviseren en koudemiddel controleren.", taskType: "onderhoud", plannedYear: jaar + 2, estimatedCost: 22000, status: "gepland" },
+    { bouwdeelId: bd("BD-INS-002").id, title: "Periodieke liftkeuring", description: "Wettelijke keuring en smering.", taskType: "inspectie", plannedYear: jaar, estimatedCost: 1800, status: "afgerond" },
+    { bouwdeelId: bd("BD-INT-001").id, title: "Parket Raadzaal schuren en lakken", description: null, taskType: "onderhoud", plannedYear: jaar + 1, estimatedCost: 9500, status: "gepland" },
+    { bouwdeelId: bd("BD-INS-003").id, title: "Vervanging ketels door warmtepomp", description: "Verduurzaming warmteopwekking Stadskantoor.", taskType: "renovatie", plannedYear: jaar + 2, estimatedCost: 145000, status: "gepland" },
+    { bouwdeelId: bd("BD-INS-003").id, title: "Herstel rookgasafvoer ketel 2", description: "Corrosie verhelpen, urgent.", taskType: "onderhoud", plannedYear: jaar, estimatedCost: 4200, status: "gepland" },
+    { bouwdeelId: bd("BD-GEV-002").id, title: "Revisie aandrijving overheaddeuren", description: "Motor deur 2 reviseren of vervangen.", taskType: "onderhoud", plannedYear: jaar, estimatedCost: 6800, status: "gepland" },
+    { bouwdeelId: bd("BD-DAK-002").id, title: "Dakinspectie Stadskantoor", description: "Tweejaarlijkse conditiemeting EPDM-dak.", taskType: "inspectie", plannedYear: jaar + 1, estimatedCost: 1500, status: "gepland" },
   ]);
 
   console.log("Seed voltooid:", {

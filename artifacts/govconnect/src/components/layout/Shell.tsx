@@ -18,6 +18,7 @@ import {
   Building2, 
   DoorOpen, 
   PcCase,
+  Wrench,
   Bell,
   LogOut,
   User as UserIcon,
@@ -125,6 +126,12 @@ const navItems: NavItem[] = [
     href: "/duurzaamheid",
     icon: Leaf,
     roles: ["servicedesk", "facilitair_manager", "beheerder"]
+  },
+  {
+    title: "MJOP",
+    href: "/mjop",
+    icon: Wrench,
+    roles: ["facilitair_manager", "beheerder"]
   }
 ];
 

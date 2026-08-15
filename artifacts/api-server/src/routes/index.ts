@@ -11,9 +11,10 @@ import dashboardRouter from "./dashboard";
 import contractsRouter from "./contracts";
 import shopRouter from "./shop";
 import sustainabilityRouter from "./sustainability";
+import mjopRouter from "./mjop";
+import storageRouter from "./storage";
 
 const router: IRouter = Router();
-
 router.use(healthRouter);
 router.use(authRouter);
 router.use(ticketsRouter);
@@ -26,5 +27,7 @@ router.use(dashboardRouter);
 router.use(contractsRouter);
 router.use(shopRouter);
 router.use(sustainabilityRouter);
+router.use(mjopRouter);
+router.use(storageRouter);
 
 export default router;

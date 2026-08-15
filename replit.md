@@ -15,6 +15,8 @@ Modulair facilitair managementplatform (SaaS) voor overheidsorganisaties. Volled
 - Bezoekers: badge-status verwacht/aanwezig/vertrokken, check-in/out.
 - Vastgoed: structuurboom, ruimteregister, assets.
 - Notificaties: in-app, per gebruiker.
+- MJOP: bouwdeelregistratie gekoppeld aan gebouwstructuur, conditiemeting NEN 2767 (score 1–6, gebreken met foto-upload via App Storage), MJOP-taken met kostenraming, jaarplanningsoverzicht, taak → servicedesk-ticket conversie. Rollen: facilitair_manager, beheerder.
+- Object storage (App Storage): presigned-URL uploads via `/api/storage/uploads/request-url`, serving via `/api/storage/objects/*` (routes in `api-server/src/routes/storage.ts`).
 
 ## Demo accounts
 Alle accounts gebruiken wachtwoord `demo2026` (zie loginpagina, 1-klik login). Seed: `pnpm --filter @workspace/scripts run seed` (truncate + herseed).

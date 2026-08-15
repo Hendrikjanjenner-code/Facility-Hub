@@ -1,6 +1,5 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
   description: GovConnect 2.0 API
@@ -20,1506 +19,2625 @@ tags:
   - name: contracts
   - name: shop
   - name: sustainability
+  - name: mjop
+  - name: Storage
 paths:
   /healthz:
     get:
       operationId: healthCheck
-      tags: [health]
+      tags:
+        - health
       summary: Health check
       responses:
-        "200":
+        '200':
           description: Healthy
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HealthStatus"
+                $ref: '#/components/schemas/HealthStatus'
   /auth/login:
     post:
       operationId: login
-      tags: [auth]
+      tags:
+        - auth
       summary: Log in with email and password
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginInput"
+              $ref: '#/components/schemas/LoginInput'
       responses:
-        "200":
+        '200':
           description: Logged in
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-        "401":
+                $ref: '#/components/schemas/User'
+        '401':
           description: Invalid credentials
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
   /auth/logout:
     post:
       operationId: logout
-      tags: [auth]
+      tags:
+        - auth
       summary: Log out
       responses:
-        "200":
+        '200':
           description: Logged out
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
   /auth/me:
     get:
       operationId: getCurrentUser
-      tags: [auth]
+      tags:
+        - auth
       summary: Get current logged-in user
       responses:
-        "200":
+        '200':
           description: Current user
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
-        "401":
+                $ref: '#/components/schemas/User'
+        '401':
           description: Not logged in
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
   /auth/demo-accounts:
     get:
       operationId: listDemoAccounts
-      tags: [auth]
+      tags:
+        - auth
       summary: List demo accounts per role (for the login screen)
       responses:
-        "200":
+        '200':
           description: Demo accounts
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/DemoAccount"
+                  $ref: '#/components/schemas/DemoAccount'
   /users:
     get:
       operationId: listUsers
-      tags: [auth]
+      tags:
+        - auth
       summary: List all users
       responses:
-        "200":
+        '200':
           description: Users
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/User"
+                  $ref: '#/components/schemas/User'
   /tickets:
     get:
       operationId: listTickets
-      tags: [tickets]
+      tags:
+        - tickets
       summary: List tickets with optional filters
       parameters:
         - name: status
           in: query
-          schema: { type: string }
+          schema:
+            type: string
         - name: priority
           in: query
-          schema: { type: string }
+          schema:
+            type: string
         - name: category
           in: query
-          schema: { type: string }
+          schema:
+            type: string
         - name: assigneeId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: reporterId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: search
           in: query
-          schema: { type: string }
+          schema:
+            type: string
       responses:
-        "200":
+        '200':
           description: Tickets
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Ticket"
+                  $ref: '#/components/schemas/Ticket'
     post:
       operationId: createTicket
-      tags: [tickets]
+      tags:
+        - tickets
       summary: Create a ticket (self-service melding)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TicketInput"
+              $ref: '#/components/schemas/TicketInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Ticket"
+                $ref: '#/components/schemas/Ticket'
   /tickets/{id}:
     get:
       operationId: getTicket
-      tags: [tickets]
+      tags:
+        - tickets
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Ticket
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Ticket"
-        "404":
+                $ref: '#/components/schemas/Ticket'
+        '404':
           description: Not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
     patch:
       operationId: updateTicket
-      tags: [tickets]
+      tags:
+        - tickets
       summary: Update ticket (status, assignee, priority, planning)
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TicketUpdate"
+              $ref: '#/components/schemas/TicketUpdate'
       responses:
-        "200":
+        '200':
           description: Updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Ticket"
+                $ref: '#/components/schemas/Ticket'
   /tickets/{id}/comments:
     get:
       operationId: listTicketComments
-      tags: [tickets]
+      tags:
+        - tickets
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Comments
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TicketComment"
+                  $ref: '#/components/schemas/TicketComment'
     post:
       operationId: createTicketComment
-      tags: [tickets]
+      tags:
+        - tickets
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TicketCommentInput"
+              $ref: '#/components/schemas/TicketCommentInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TicketComment"
+                $ref: '#/components/schemas/TicketComment'
   /ticket-categories:
     get:
       operationId: listTicketCategories
-      tags: [tickets]
+      tags:
+        - tickets
       summary: Categories with dynamic form field definitions and routing rules
       responses:
-        "200":
+        '200':
           description: Categories
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/TicketCategory"
+                  $ref: '#/components/schemas/TicketCategory'
   /rooms:
     get:
       operationId: listRooms
-      tags: [vastgoed]
+      tags:
+        - vastgoed
       summary: List rooms with optional filters
       parameters:
         - name: floorId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: buildingId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: bookable
           in: query
-          schema: { type: boolean }
+          schema:
+            type: boolean
         - name: minCapacity
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Rooms
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Room"
+                  $ref: '#/components/schemas/Room'
   /rooms/{id}:
     get:
       operationId: getRoom
-      tags: [vastgoed]
+      tags:
+        - vastgoed
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Room
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Room"
-        "404":
+                $ref: '#/components/schemas/Room'
+        '404':
           description: Not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
   /structure:
     get:
       operationId: getStructure
-      tags: [vastgoed]
+      tags:
+        - vastgoed
       summary: Full vastgoedstructuur (organisatie > vestiging > gebouw > verdieping)
       responses:
-        "200":
+        '200':
           description: Structure tree
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Organization"
+                  $ref: '#/components/schemas/Organization'
   /reservations:
     get:
       operationId: listReservations
-      tags: [reservations]
+      tags:
+        - reservations
       summary: List reservations with optional filters
       parameters:
         - name: date
           in: query
-          schema: { type: string }
-          description: "ISO date (YYYY-MM-DD)"
+          schema:
+            type: string
+          description: ISO date (YYYY-MM-DD)
         - name: roomId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: userId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: kind
           in: query
-          schema: { type: string }
-          description: "room | workplace"
+          schema:
+            type: string
+          description: room | workplace
       responses:
-        "200":
+        '200':
           description: Reservations
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Reservation"
+                  $ref: '#/components/schemas/Reservation'
     post:
       operationId: createReservation
-      tags: [reservations]
+      tags:
+        - reservations
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReservationInput"
+              $ref: '#/components/schemas/ReservationInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Reservation"
-        "409":
+                $ref: '#/components/schemas/Reservation'
+        '409':
           description: Time conflict
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
   /reservations/{id}:
     get:
       operationId: getReservation
-      tags: [reservations]
+      tags:
+        - reservations
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Reservation
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Reservation"
-        "404":
+                $ref: '#/components/schemas/Reservation'
+        '404':
           description: Not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
     patch:
       operationId: updateReservation
-      tags: [reservations]
+      tags:
+        - reservations
       summary: Update reservation (status, check-in/out)
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ReservationUpdate"
+              $ref: '#/components/schemas/ReservationUpdate'
       responses:
-        "200":
+        '200':
           description: Updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Reservation"
+                $ref: '#/components/schemas/Reservation'
   /workplaces:
     get:
       operationId: listWorkplaces
-      tags: [reservations]
+      tags:
+        - reservations
       summary: List bookable workplaces (flexplekken)
       parameters:
         - name: floorId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: date
           in: query
-          schema: { type: string }
-          description: "When given, includes availability for that ISO date"
+          schema:
+            type: string
+          description: When given, includes availability for that ISO date
       responses:
-        "200":
+        '200':
           description: Workplaces
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Workplace"
+                  $ref: '#/components/schemas/Workplace'
   /catering-items:
     get:
       operationId: listCateringItems
-      tags: [reservations]
+      tags:
+        - reservations
       responses:
-        "200":
+        '200':
           description: Catering items
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/CateringItem"
+                  $ref: '#/components/schemas/CateringItem'
   /visitors:
     get:
       operationId: listVisitors
-      tags: [visitors]
+      tags:
+        - visitors
       parameters:
         - name: date
           in: query
-          schema: { type: string }
+          schema:
+            type: string
         - name: status
           in: query
-          schema: { type: string }
+          schema:
+            type: string
       responses:
-        "200":
+        '200':
           description: Visitors
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Visitor"
+                  $ref: '#/components/schemas/Visitor'
     post:
       operationId: createVisitor
-      tags: [visitors]
+      tags:
+        - visitors
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/VisitorInput"
+              $ref: '#/components/schemas/VisitorInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Visitor"
+                $ref: '#/components/schemas/Visitor'
   /visitors/{id}:
     patch:
       operationId: updateVisitor
-      tags: [visitors]
+      tags:
+        - visitors
       summary: Update badge status (check-in / check-out)
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/VisitorUpdate"
+              $ref: '#/components/schemas/VisitorUpdate'
       responses:
-        "200":
+        '200':
           description: Updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Visitor"
+                $ref: '#/components/schemas/Visitor'
   /assets:
     get:
       operationId: listAssets
-      tags: [assets]
+      tags:
+        - assets
       parameters:
         - name: roomId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: category
           in: query
-          schema: { type: string }
+          schema:
+            type: string
         - name: search
           in: query
-          schema: { type: string }
+          schema:
+            type: string
       responses:
-        "200":
+        '200':
           description: Assets
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Asset"
+                  $ref: '#/components/schemas/Asset'
     post:
       operationId: createAsset
-      tags: [assets]
+      tags:
+        - assets
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AssetInput"
+              $ref: '#/components/schemas/AssetInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Asset"
+                $ref: '#/components/schemas/Asset'
   /assets/{id}:
     get:
       operationId: getAsset
-      tags: [assets]
+      tags:
+        - assets
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Asset
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Asset"
-        "404":
+                $ref: '#/components/schemas/Asset'
+        '404':
           description: Not found
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
   /notifications:
     get:
       operationId: listNotifications
-      tags: [notifications]
+      tags:
+        - notifications
       summary: Notifications for the current user
       responses:
-        "200":
+        '200':
           description: Notifications
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Notification"
+                  $ref: '#/components/schemas/Notification'
   /notifications/{id}/read:
     patch:
       operationId: markNotificationRead
-      tags: [notifications]
+      tags:
+        - notifications
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Notification"
+                $ref: '#/components/schemas/Notification'
   /notifications/read-all:
     post:
       operationId: markAllNotificationsRead
-      tags: [notifications]
+      tags:
+        - notifications
       responses:
-        "200":
+        '200':
           description: Done
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
   /dashboard/summary:
     get:
       operationId: getDashboardSummary
-      tags: [dashboard]
+      tags:
+        - dashboard
       summary: Role-aware dashboard summary counts
       responses:
-        "200":
+        '200':
           description: Summary
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DashboardSummary"
+                $ref: '#/components/schemas/DashboardSummary'
   /dashboard/activity:
     get:
       operationId: getRecentActivity
-      tags: [dashboard]
+      tags:
+        - dashboard
       summary: Recent activity feed (tickets, reservations, visitors)
       responses:
-        "200":
+        '200':
           description: Activity
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ActivityItem"
+                  $ref: '#/components/schemas/ActivityItem'
   /suppliers:
     get:
       operationId: listSuppliers
-      tags: [contracts]
+      tags:
+        - contracts
       summary: List suppliers
       responses:
-        "200":
+        '200':
           description: Suppliers
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Supplier"
+                  $ref: '#/components/schemas/Supplier'
     post:
       operationId: createSupplier
-      tags: [contracts]
+      tags:
+        - contracts
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SupplierInput"
+              $ref: '#/components/schemas/SupplierInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Supplier"
+                $ref: '#/components/schemas/Supplier'
   /contracts:
     get:
       operationId: listContracts
-      tags: [contracts]
+      tags:
+        - contracts
       summary: List contracts (leverancier sees only own contracts)
       parameters:
         - name: status
           in: query
-          schema: { type: string }
+          schema:
+            type: string
         - name: expiringWithinDays
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Contracts
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Contract"
+                  $ref: '#/components/schemas/Contract'
     post:
       operationId: createContract
-      tags: [contracts]
+      tags:
+        - contracts
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ContractInput"
+              $ref: '#/components/schemas/ContractInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Contract"
+                $ref: '#/components/schemas/Contract'
   /contracts/{id}:
     patch:
       operationId: updateContract
-      tags: [contracts]
+      tags:
+        - contracts
       summary: Update contract status or details
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ContractUpdate"
+              $ref: '#/components/schemas/ContractUpdate'
       responses:
-        "200":
+        '200':
           description: Updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Contract"
+                $ref: '#/components/schemas/Contract'
   /shop/products:
     get:
       operationId: listShopProducts
-      tags: [shop]
+      tags:
+        - shop
       summary: List webshop products (incl. voorraadstatus)
       parameters:
         - name: category
           in: query
-          schema: { type: string }
+          schema:
+            type: string
         - name: search
           in: query
-          schema: { type: string }
+          schema:
+            type: string
         - name: belowMinStock
           in: query
-          schema: { type: boolean }
+          schema:
+            type: boolean
       responses:
-        "200":
+        '200':
           description: Products
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ShopProduct"
+                  $ref: '#/components/schemas/ShopProduct'
     post:
       operationId: createShopProduct
-      tags: [shop]
+      tags:
+        - shop
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ShopProductInput"
+              $ref: '#/components/schemas/ShopProductInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ShopProduct"
+                $ref: '#/components/schemas/ShopProduct'
   /shop/products/{id}:
     patch:
       operationId: updateShopProduct
-      tags: [shop]
+      tags:
+        - shop
       summary: Update product (voorraad bijwerken, minimumvoorraad, prijs)
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ShopProductUpdate"
+              $ref: '#/components/schemas/ShopProductUpdate'
       responses:
-        "200":
+        '200':
           description: Updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ShopProduct"
+                $ref: '#/components/schemas/ShopProduct'
   /shop/orders:
     get:
       operationId: listShopOrders
-      tags: [shop]
+      tags:
+        - shop
       summary: List orders (eindgebruiker sees own; manager sees all)
       parameters:
         - name: status
           in: query
-          schema: { type: string }
+          schema:
+            type: string
       responses:
-        "200":
+        '200':
           description: Orders
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ShopOrder"
+                  $ref: '#/components/schemas/ShopOrder'
     post:
       operationId: createShopOrder
-      tags: [shop]
+      tags:
+        - shop
       summary: Place order from cart (starts approval flow)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ShopOrderInput"
+              $ref: '#/components/schemas/ShopOrderInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ShopOrder"
-        "409":
+                $ref: '#/components/schemas/ShopOrder'
+        '409':
           description: Insufficient stock
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
   /shop/orders/{id}:
     patch:
       operationId: updateShopOrder
-      tags: [shop]
+      tags:
+        - shop
       summary: Approve/reject order or update fulfilment status
       parameters:
         - name: id
           in: path
           required: true
-          schema: { type: integer }
+          schema:
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ShopOrderUpdate"
+              $ref: '#/components/schemas/ShopOrderUpdate'
       responses:
-        "200":
+        '200':
           description: Updated
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ShopOrder"
-        "409":
+                $ref: '#/components/schemas/ShopOrder'
+        '409':
           description: Insufficient stock
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiMessage"
+                $ref: '#/components/schemas/ApiMessage'
   /budgets:
     get:
       operationId: listBudgets
-      tags: [shop]
+      tags:
+        - shop
       summary: Department budgets with spent amounts (budgetbewaking)
       responses:
-        "200":
+        '200':
           description: Budgets
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/BudgetStatus"
+                  $ref: '#/components/schemas/BudgetStatus'
   /meter-readings:
     get:
       operationId: listMeterReadings
-      tags: [sustainability]
+      tags:
+        - sustainability
       parameters:
         - name: buildingId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
         - name: meterType
           in: query
-          schema: { type: string }
+          schema:
+            type: string
       responses:
-        "200":
+        '200':
           description: Meter readings
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/MeterReading"
+                  $ref: '#/components/schemas/MeterReading'
     post:
       operationId: createMeterReading
-      tags: [sustainability]
+      tags:
+        - sustainability
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MeterReadingInput"
+              $ref: '#/components/schemas/MeterReadingInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/MeterReading"
+                $ref: '#/components/schemas/MeterReading'
   /meter-readings/import:
     post:
       operationId: importMeterReadings
-      tags: [sustainability]
+      tags:
+        - sustainability
       summary: Bulk import meter readings (parsed CSV rows)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/MeterReadingImportInput"
+              $ref: '#/components/schemas/MeterReadingImportInput'
       responses:
-        "201":
+        '201':
           description: Import result
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ImportResult"
+                $ref: '#/components/schemas/ImportResult'
   /waste-registrations:
     get:
       operationId: listWasteRegistrations
-      tags: [sustainability]
+      tags:
+        - sustainability
       parameters:
         - name: buildingId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Waste registrations
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/WasteRegistration"
+                  $ref: '#/components/schemas/WasteRegistration'
     post:
       operationId: createWasteRegistration
-      tags: [sustainability]
+      tags:
+        - sustainability
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WasteRegistrationInput"
+              $ref: '#/components/schemas/WasteRegistrationInput'
       responses:
-        "201":
+        '201':
           description: Created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WasteRegistration"
+                $ref: '#/components/schemas/WasteRegistration'
   /sustainability/report:
     get:
       operationId: getSustainabilityReport
-      tags: [sustainability]
+      tags:
+        - sustainability
       summary: Aggregated monthly usage per meter type and waste per category
       parameters:
         - name: buildingId
           in: query
-          schema: { type: integer }
+          schema:
+            type: integer
       responses:
-        "200":
+        '200':
           description: Report
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SustainabilityReport"
+                $ref: '#/components/schemas/SustainabilityReport'
+  /bouwdelen:
+    get:
+      operationId: listBouwdelen
+      tags:
+        - mjop
+      summary: List bouwdelen with latest condition score
+      parameters:
+        - name: buildingId
+          in: query
+          schema:
+            type: integer
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bouwdelen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Bouwdeel'
+    post:
+      operationId: createBouwdeel
+      tags:
+        - mjop
+      summary: Register a bouwdeel linked to the building structure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BouwdeelInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bouwdeel'
+  /bouwdelen/{id}:
+    get:
+      operationId: getBouwdeel
+      tags:
+        - mjop
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Bouwdeel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Bouwdeel'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /bouwdelen/{id}/conditiemetingen:
+    get:
+      operationId: listConditiemetingen
+      tags:
+        - mjop
+      summary: Condition measurements (NEN 2767) for a bouwdeel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Conditiemetingen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conditiemeting'
+    post:
+      operationId: createConditiemeting
+      tags:
+        - mjop
+      summary: Record a NEN 2767 condition measurement with optional defects/photos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConditiemetingInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conditiemeting'
+  /mjop-taken:
+    get:
+      operationId: listMjopTaken
+      tags:
+        - mjop
+      summary: List MJOP tasks with optional filters
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: bouwdeelId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: MJOP-taken
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MjopTaak'
+    post:
+      operationId: createMjopTaak
+      tags:
+        - mjop
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MjopTaakInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MjopTaak'
+  /mjop-taken/{id}:
+    patch:
+      operationId: updateMjopTaak
+      tags:
+        - mjop
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MjopTaakUpdate'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MjopTaak'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /mjop-taken/{id}/ticket:
+    post:
+      operationId: convertMjopTaakToTicket
+      tags:
+        - mjop
+      summary: Convert an MJOP task into a servicedesk ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: Ticket created and linked to the MJOP task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MjopTaak'
+        '409':
+          description: Task already linked to a ticket
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /mjop/jaarplanning:
+    get:
+      operationId: getJaarplanning
+      tags:
+        - mjop
+      summary: Multi-year planning overview with cost totals per year
+      responses:
+        '200':
+          description: Jaarplanning
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/JaarplanningEntry'
+  /storage/public-objects/{filePath}:
+    get:
+      tags:
+        - Storage
+      operationId: getPublicObject
+      summary: Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Object content streamed with correct Content-Type.
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: File not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /storage/objects/{objectPath}:
+    get:
+      tags:
+        - Storage
+      operationId: getStorageObject
+      summary: Serve an object entity from PRIVATE_OBJECT_DIR
+      parameters:
+        - name: objectPath
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Object content streamed with correct Content-Type.
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Object not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /storage/uploads:
+    post:
+      tags:
+        - Storage
+      operationId: uploadStorageObject
+      summary: Upload een afbeelding (max 10 MB) naar private storage; bestandstype wordt server-side geverifieerd
+      requestBody:
+        required: true
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          description: Bestand opgeslagen.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResult'
+        '400':
+          description: Geen geldige afbeelding of bestand te groot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Upload mislukt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
 components:
   schemas:
     HealthStatus:
       type: object
       properties:
-        status: { type: string }
-      required: [status]
+        status:
+          type: string
+      required:
+        - status
     ApiMessage:
       type: object
       properties:
-        message: { type: string }
-      required: [message]
+        message:
+          type: string
+      required:
+        - message
     LoginInput:
       type: object
       properties:
-        email: { type: string }
-        password: { type: string }
-      required: [email, password]
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
     DemoAccount:
       type: object
       properties:
-        email: { type: string }
-        name: { type: string }
-        role: { type: string }
-        roleLabel: { type: string }
-      required: [email, name, role, roleLabel]
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        roleLabel:
+          type: string
+      required:
+        - email
+        - name
+        - role
+        - roleLabel
     User:
       type: object
       properties:
-        id: { type: integer }
-        email: { type: string }
-        name: { type: string }
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
         role:
           type: string
-          description: "eindgebruiker | servicedesk | facilitair_manager | cateraar | receptie | beheerder | leverancier"
-        department: { type: ["string", "null"] }
-        avatarColor: { type: ["string", "null"] }
-      required: [id, email, name, role]
+          description: eindgebruiker | servicedesk | facilitair_manager | cateraar | receptie | beheerder | leverancier
+        department:
+          type:
+            - string
+            - 'null'
+        avatarColor:
+          type:
+            - string
+            - 'null'
+      required:
+        - id
+        - email
+        - name
+        - role
     TicketCategory:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        description: { type: ["string", "null"] }
-        defaultPriority: { type: string }
-        routeToRole: { type: string }
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type:
+            - string
+            - 'null'
+        defaultPriority:
+          type: string
+        routeToRole:
+          type: string
         formFields:
           type: array
           description: Dynamic form field definitions for this category
           items:
-            $ref: "#/components/schemas/FormField"
-      required: [id, name, defaultPriority, routeToRole, formFields]
+            $ref: '#/components/schemas/FormField'
+      required:
+        - id
+        - name
+        - defaultPriority
+        - routeToRole
+        - formFields
     FormField:
       type: object
       properties:
-        key: { type: string }
-        label: { type: string }
+        key:
+          type: string
+        label:
+          type: string
         type:
           type: string
-          description: "text | textarea | select | number | date | checkbox"
-        required: { type: boolean }
+          description: text | textarea | select | number | date | checkbox
+        required:
+          type: boolean
         options:
-          type: ["array", "null"]
-          items: { type: string }
-      required: [key, label, type, required]
+          type:
+            - array
+            - 'null'
+          items:
+            type: string
+      required:
+        - key
+        - label
+        - type
+        - required
     Ticket:
       type: object
       properties:
-        id: { type: integer }
-        number: { type: string }
-        title: { type: string }
-        description: { type: string }
+        id:
+          type: integer
+        number:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
         status:
           type: string
-          description: "nieuw | in_behandeling | wacht_op_info | ingepland | gereed | gesloten"
+          description: nieuw | in_behandeling | wacht_op_info | ingepland | gereed | gesloten
         priority:
           type: string
-          description: "P1 | P2 | P3 | P4"
-        categoryId: { type: integer }
-        categoryName: { type: ["string", "null"] }
-        roomId: { type: ["integer", "null"] }
-        roomName: { type: ["string", "null"] }
-        buildingName: { type: ["string", "null"] }
-        assetId: { type: ["integer", "null"] }
-        assetName: { type: ["string", "null"] }
-        reporterId: { type: integer }
-        reporterName: { type: ["string", "null"] }
-        assigneeId: { type: ["integer", "null"] }
-        assigneeName: { type: ["string", "null"] }
+          description: P1 | P2 | P3 | P4
+        categoryId:
+          type: integer
+        categoryName:
+          type:
+            - string
+            - 'null'
+        roomId:
+          type:
+            - integer
+            - 'null'
+        roomName:
+          type:
+            - string
+            - 'null'
+        buildingName:
+          type:
+            - string
+            - 'null'
+        assetId:
+          type:
+            - integer
+            - 'null'
+        assetName:
+          type:
+            - string
+            - 'null'
+        reporterId:
+          type: integer
+        reporterName:
+          type:
+            - string
+            - 'null'
+        assigneeId:
+          type:
+            - integer
+            - 'null'
+        assigneeName:
+          type:
+            - string
+            - 'null'
         formData:
-          type: ["object", "null"]
+          type:
+            - object
+            - 'null'
           additionalProperties: true
-        slaDueAt: { type: ["string", "null"] }
-        plannedAt: { type: ["string", "null"] }
-        createdAt: { type: string }
-        updatedAt: { type: string }
-      required: [id, number, title, description, status, priority, categoryId, reporterId, createdAt, updatedAt]
+        slaDueAt:
+          type:
+            - string
+            - 'null'
+        plannedAt:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - number
+        - title
+        - description
+        - status
+        - priority
+        - categoryId
+        - reporterId
+        - createdAt
+        - updatedAt
     TicketInput:
       type: object
       properties:
-        title: { type: string, minLength: 1 }
-        description: { type: string }
-        categoryId: { type: integer }
-        roomId: { type: ["integer", "null"] }
-        assetId: { type: ["integer", "null"] }
-        priority: { type: ["string", "null"] }
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        categoryId:
+          type: integer
+        roomId:
+          type:
+            - integer
+            - 'null'
+        assetId:
+          type:
+            - integer
+            - 'null'
+        priority:
+          type:
+            - string
+            - 'null'
         formData:
-          type: ["object", "null"]
+          type:
+            - object
+            - 'null'
           additionalProperties: true
-      required: [title, description, categoryId]
+      required:
+        - title
+        - description
+        - categoryId
     TicketUpdate:
       type: object
       properties:
-        status: { type: string }
-        priority: { type: string }
-        assigneeId: { type: ["integer", "null"] }
-        plannedAt: { type: ["string", "null"] }
-        title: { type: string }
-        description: { type: string }
+        status:
+          type: string
+        priority:
+          type: string
+        assigneeId:
+          type:
+            - integer
+            - 'null'
+        plannedAt:
+          type:
+            - string
+            - 'null'
+        title:
+          type: string
+        description:
+          type: string
     TicketComment:
       type: object
       properties:
-        id: { type: integer }
-        ticketId: { type: integer }
-        authorId: { type: integer }
-        authorName: { type: ["string", "null"] }
-        authorRole: { type: ["string", "null"] }
-        body: { type: string }
-        createdAt: { type: string }
-      required: [id, ticketId, authorId, body, createdAt]
+        id:
+          type: integer
+        ticketId:
+          type: integer
+        authorId:
+          type: integer
+        authorName:
+          type:
+            - string
+            - 'null'
+        authorRole:
+          type:
+            - string
+            - 'null'
+        body:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - ticketId
+        - authorId
+        - body
+        - createdAt
     TicketCommentInput:
       type: object
       properties:
-        body: { type: string, minLength: 1 }
-      required: [body]
+        body:
+          type: string
+          minLength: 1
+      required:
+        - body
     Organization:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
+        id:
+          type: integer
+        name:
+          type: string
         sites:
           type: array
           items:
-            $ref: "#/components/schemas/Site"
-      required: [id, name, sites]
+            $ref: '#/components/schemas/Site'
+      required:
+        - id
+        - name
+        - sites
     Site:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        city: { type: string }
+        id:
+          type: integer
+        name:
+          type: string
+        city:
+          type: string
         buildings:
           type: array
           items:
-            $ref: "#/components/schemas/Building"
-      required: [id, name, city, buildings]
+            $ref: '#/components/schemas/Building'
+      required:
+        - id
+        - name
+        - city
+        - buildings
     Building:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        address: { type: string }
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
         floors:
           type: array
           items:
-            $ref: "#/components/schemas/Floor"
-      required: [id, name, address, floors]
+            $ref: '#/components/schemas/Floor'
+      required:
+        - id
+        - name
+        - address
+        - floors
     Floor:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        level: { type: integer }
-        roomCount: { type: integer }
-      required: [id, name, level, roomCount]
+        id:
+          type: integer
+        name:
+          type: string
+        level:
+          type: integer
+        roomCount:
+          type: integer
+      required:
+        - id
+        - name
+        - level
+        - roomCount
     Room:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        code: { type: string }
-        floorId: { type: integer }
-        floorName: { type: ["string", "null"] }
-        buildingId: { type: ["integer", "null"] }
-        buildingName: { type: ["string", "null"] }
-        siteName: { type: ["string", "null"] }
-        functionType: { type: string }
-        areaM2: { type: number }
-        floorFinish: { type: ["string", "null"] }
-        capacity: { type: ["integer", "null"] }
-        bookable: { type: boolean }
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        floorId:
+          type: integer
+        floorName:
+          type:
+            - string
+            - 'null'
+        buildingId:
+          type:
+            - integer
+            - 'null'
+        buildingName:
+          type:
+            - string
+            - 'null'
+        siteName:
+          type:
+            - string
+            - 'null'
+        functionType:
+          type: string
+        areaM2:
+          type: number
+        floorFinish:
+          type:
+            - string
+            - 'null'
+        capacity:
+          type:
+            - integer
+            - 'null'
+        bookable:
+          type: boolean
         facilities:
           type: array
-          items: { type: string }
-        assetCount: { type: ["integer", "null"] }
-        openTicketCount: { type: ["integer", "null"] }
-      required: [id, name, code, floorId, functionType, areaM2, bookable, facilities]
+          items:
+            type: string
+        assetCount:
+          type:
+            - integer
+            - 'null'
+        openTicketCount:
+          type:
+            - integer
+            - 'null'
+      required:
+        - id
+        - name
+        - code
+        - floorId
+        - functionType
+        - areaM2
+        - bookable
+        - facilities
     Reservation:
       type: object
       properties:
-        id: { type: integer }
+        id:
+          type: integer
         kind:
           type: string
-          description: "room | workplace"
-        roomId: { type: ["integer", "null"] }
-        roomName: { type: ["string", "null"] }
-        workplaceId: { type: ["integer", "null"] }
-        workplaceName: { type: ["string", "null"] }
-        buildingName: { type: ["string", "null"] }
-        userId: { type: integer }
-        userName: { type: ["string", "null"] }
-        title: { type: string }
-        date: { type: string }
-        startTime: { type: string }
-        endTime: { type: string }
-        attendees: { type: ["integer", "null"] }
-        setupBufferMin: { type: integer }
-        cleanupBufferMin: { type: integer }
+          description: room | workplace
+        roomId:
+          type:
+            - integer
+            - 'null'
+        roomName:
+          type:
+            - string
+            - 'null'
+        workplaceId:
+          type:
+            - integer
+            - 'null'
+        workplaceName:
+          type:
+            - string
+            - 'null'
+        buildingName:
+          type:
+            - string
+            - 'null'
+        userId:
+          type: integer
+        userName:
+          type:
+            - string
+            - 'null'
+        title:
+          type: string
+        date:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        attendees:
+          type:
+            - integer
+            - 'null'
+        setupBufferMin:
+          type: integer
+        cleanupBufferMin:
+          type: integer
         status:
           type: string
-          description: "bevestigd | ingecheckt | uitgecheckt | geannuleerd"
+          description: bevestigd | ingecheckt | uitgecheckt | geannuleerd
         cateringOrders:
           type: array
           items:
-            $ref: "#/components/schemas/CateringOrderLine"
-        createdAt: { type: string }
-      required: [id, kind, userId, title, date, startTime, endTime, setupBufferMin, cleanupBufferMin, status, cateringOrders, createdAt]
+            $ref: '#/components/schemas/CateringOrderLine'
+        createdAt:
+          type: string
+      required:
+        - id
+        - kind
+        - userId
+        - title
+        - date
+        - startTime
+        - endTime
+        - setupBufferMin
+        - cleanupBufferMin
+        - status
+        - cateringOrders
+        - createdAt
     ReservationInput:
       type: object
       properties:
-        kind: { type: string }
-        roomId: { type: ["integer", "null"] }
-        workplaceId: { type: ["integer", "null"] }
-        title: { type: string, minLength: 1 }
-        date: { type: string }
-        startTime: { type: string }
-        endTime: { type: string }
-        attendees: { type: ["integer", "null"] }
-        setupBufferMin: { type: ["integer", "null"] }
-        cleanupBufferMin: { type: ["integer", "null"] }
+        kind:
+          type: string
+        roomId:
+          type:
+            - integer
+            - 'null'
+        workplaceId:
+          type:
+            - integer
+            - 'null'
+        title:
+          type: string
+          minLength: 1
+        date:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        attendees:
+          type:
+            - integer
+            - 'null'
+        setupBufferMin:
+          type:
+            - integer
+            - 'null'
+        cleanupBufferMin:
+          type:
+            - integer
+            - 'null'
         cateringOrders:
-          type: ["array", "null"]
+          type:
+            - array
+            - 'null'
           items:
-            $ref: "#/components/schemas/CateringOrderLineInput"
-      required: [kind, title, date, startTime, endTime]
+            $ref: '#/components/schemas/CateringOrderLineInput'
+      required:
+        - kind
+        - title
+        - date
+        - startTime
+        - endTime
     ReservationUpdate:
       type: object
       properties:
-        status: { type: string }
-        startTime: { type: string }
-        endTime: { type: string }
-        title: { type: string }
+        status:
+          type: string
+        startTime:
+          type: string
+        endTime:
+          type: string
+        title:
+          type: string
     CateringOrderLine:
       type: object
       properties:
-        id: { type: integer }
-        cateringItemId: { type: integer }
-        itemName: { type: ["string", "null"] }
-        quantity: { type: integer }
-        unitPrice: { type: number }
-      required: [id, cateringItemId, quantity, unitPrice]
+        id:
+          type: integer
+        cateringItemId:
+          type: integer
+        itemName:
+          type:
+            - string
+            - 'null'
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+      required:
+        - id
+        - cateringItemId
+        - quantity
+        - unitPrice
     CateringOrderLineInput:
       type: object
       properties:
-        cateringItemId: { type: integer }
-        quantity: { type: integer }
-      required: [cateringItemId, quantity]
+        cateringItemId:
+          type: integer
+        quantity:
+          type: integer
+      required:
+        - cateringItemId
+        - quantity
     CateringItem:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        description: { type: ["string", "null"] }
-        price: { type: number }
-        category: { type: string }
-      required: [id, name, price, category]
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type:
+            - string
+            - 'null'
+        price:
+          type: number
+        category:
+          type: string
+      required:
+        - id
+        - name
+        - price
+        - category
     Workplace:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        code: { type: string }
-        floorId: { type: integer }
-        floorName: { type: ["string", "null"] }
-        buildingName: { type: ["string", "null"] }
-        zone: { type: string }
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        floorId:
+          type: integer
+        floorName:
+          type:
+            - string
+            - 'null'
+        buildingName:
+          type:
+            - string
+            - 'null'
+        zone:
+          type: string
         features:
           type: array
-          items: { type: string }
-        available: { type: ["boolean", "null"] }
-        bookedByName: { type: ["string", "null"] }
-      required: [id, name, code, floorId, zone, features]
+          items:
+            type: string
+        available:
+          type:
+            - boolean
+            - 'null'
+        bookedByName:
+          type:
+            - string
+            - 'null'
+      required:
+        - id
+        - name
+        - code
+        - floorId
+        - zone
+        - features
     Visitor:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        company: { type: ["string", "null"] }
-        email: { type: ["string", "null"] }
-        hostId: { type: integer }
-        hostName: { type: ["string", "null"] }
-        visitDate: { type: string }
-        expectedArrival: { type: string }
-        badgeCode: { type: string }
+        id:
+          type: integer
+        name:
+          type: string
+        company:
+          type:
+            - string
+            - 'null'
+        email:
+          type:
+            - string
+            - 'null'
+        hostId:
+          type: integer
+        hostName:
+          type:
+            - string
+            - 'null'
+        visitDate:
+          type: string
+        expectedArrival:
+          type: string
+        badgeCode:
+          type: string
         status:
           type: string
-          description: "verwacht | aanwezig | vertrokken"
-        checkedInAt: { type: ["string", "null"] }
-        checkedOutAt: { type: ["string", "null"] }
-        createdAt: { type: string }
-      required: [id, name, hostId, visitDate, expectedArrival, badgeCode, status, createdAt]
+          description: verwacht | aanwezig | vertrokken
+        checkedInAt:
+          type:
+            - string
+            - 'null'
+        checkedOutAt:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - hostId
+        - visitDate
+        - expectedArrival
+        - badgeCode
+        - status
+        - createdAt
     VisitorInput:
       type: object
       properties:
-        name: { type: string, minLength: 1 }
-        company: { type: ["string", "null"] }
-        email: { type: ["string", "null"] }
-        hostId: { type: ["integer", "null"] }
-        visitDate: { type: string }
-        expectedArrival: { type: string }
-      required: [name, visitDate, expectedArrival]
+        name:
+          type: string
+          minLength: 1
+        company:
+          type:
+            - string
+            - 'null'
+        email:
+          type:
+            - string
+            - 'null'
+        hostId:
+          type:
+            - integer
+            - 'null'
+        visitDate:
+          type: string
+        expectedArrival:
+          type: string
+      required:
+        - name
+        - visitDate
+        - expectedArrival
     VisitorUpdate:
       type: object
       properties:
-        status: { type: string }
+        status:
+          type: string
     Asset:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        code: { type: string }
-        category: { type: string }
-        brand: { type: ["string", "null"] }
-        model: { type: ["string", "null"] }
-        serialNumber: { type: ["string", "null"] }
-        roomId: { type: ["integer", "null"] }
-        roomName: { type: ["string", "null"] }
-        buildingName: { type: ["string", "null"] }
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        category:
+          type: string
+        brand:
+          type:
+            - string
+            - 'null'
+        model:
+          type:
+            - string
+            - 'null'
+        serialNumber:
+          type:
+            - string
+            - 'null'
+        roomId:
+          type:
+            - integer
+            - 'null'
+        roomName:
+          type:
+            - string
+            - 'null'
+        buildingName:
+          type:
+            - string
+            - 'null'
         status:
           type: string
-          description: "in_gebruik | in_onderhoud | defect | afgeschreven"
-        purchaseDate: { type: ["string", "null"] }
-        openTicketCount: { type: ["integer", "null"] }
-      required: [id, name, code, category, status]
+          description: in_gebruik | in_onderhoud | defect | afgeschreven
+        purchaseDate:
+          type:
+            - string
+            - 'null'
+        openTicketCount:
+          type:
+            - integer
+            - 'null'
+      required:
+        - id
+        - name
+        - code
+        - category
+        - status
     AssetInput:
       type: object
       properties:
-        name: { type: string, minLength: 1 }
-        code: { type: string, minLength: 1 }
-        category: { type: string }
-        brand: { type: ["string", "null"] }
-        model: { type: ["string", "null"] }
-        serialNumber: { type: ["string", "null"] }
-        roomId: { type: ["integer", "null"] }
-        status: { type: ["string", "null"] }
-        purchaseDate: { type: ["string", "null"] }
-      required: [name, code, category]
+        name:
+          type: string
+          minLength: 1
+        code:
+          type: string
+          minLength: 1
+        category:
+          type: string
+        brand:
+          type:
+            - string
+            - 'null'
+        model:
+          type:
+            - string
+            - 'null'
+        serialNumber:
+          type:
+            - string
+            - 'null'
+        roomId:
+          type:
+            - integer
+            - 'null'
+        status:
+          type:
+            - string
+            - 'null'
+        purchaseDate:
+          type:
+            - string
+            - 'null'
+      required:
+        - name
+        - code
+        - category
     Notification:
       type: object
       properties:
-        id: { type: integer }
-        userId: { type: integer }
-        title: { type: string }
-        body: { type: string }
+        id:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
         kind:
           type: string
-          description: "ticket | reservering | bezoeker | systeem"
-        linkPath: { type: ["string", "null"] }
-        read: { type: boolean }
-        createdAt: { type: string }
-      required: [id, userId, title, body, kind, read, createdAt]
+          description: ticket | reservering | bezoeker | systeem
+        linkPath:
+          type:
+            - string
+            - 'null'
+        read:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - userId
+        - title
+        - body
+        - kind
+        - read
+        - createdAt
     DashboardSummary:
       type: object
       properties:
-        openTickets: { type: integer }
+        openTickets:
+          type: integer
         ticketsByStatus:
           type: array
           items:
-            $ref: "#/components/schemas/CountByKey"
+            $ref: '#/components/schemas/CountByKey'
         ticketsByPriority:
           type: array
           items:
-            $ref: "#/components/schemas/CountByKey"
+            $ref: '#/components/schemas/CountByKey'
         slaAtRisk:
           type: integer
           description: Open tickets due within 4 hours or overdue
-        reservationsToday: { type: integer }
-        workplaceBookingsToday: { type: integer }
-        visitorsExpectedToday: { type: integer }
-        visitorsPresent: { type: integer }
-        myOpenTickets: { type: integer }
-        myReservationsToday: { type: integer }
-        assetCount: { type: integer }
-        roomCount: { type: integer }
-      required: [openTickets, ticketsByStatus, ticketsByPriority, slaAtRisk, reservationsToday, workplaceBookingsToday, visitorsExpectedToday, visitorsPresent, myOpenTickets, myReservationsToday, assetCount, roomCount]
+        reservationsToday:
+          type: integer
+        workplaceBookingsToday:
+          type: integer
+        visitorsExpectedToday:
+          type: integer
+        visitorsPresent:
+          type: integer
+        myOpenTickets:
+          type: integer
+        myReservationsToday:
+          type: integer
+        assetCount:
+          type: integer
+        roomCount:
+          type: integer
+      required:
+        - openTickets
+        - ticketsByStatus
+        - ticketsByPriority
+        - slaAtRisk
+        - reservationsToday
+        - workplaceBookingsToday
+        - visitorsExpectedToday
+        - visitorsPresent
+        - myOpenTickets
+        - myReservationsToday
+        - assetCount
+        - roomCount
     CountByKey:
       type: object
       properties:
-        key: { type: string }
-        count: { type: integer }
-      required: [key, count]
+        key:
+          type: string
+        count:
+          type: integer
+      required:
+        - key
+        - count
     ActivityItem:
       type: object
       properties:
-        id: { type: string }
-        kind: { type: string }
-        title: { type: string }
-        subtitle: { type: ["string", "null"] }
-        linkPath: { type: ["string", "null"] }
-        timestamp: { type: string }
-      required: [id, kind, title, timestamp]
+        id:
+          type: string
+        kind:
+          type: string
+        title:
+          type: string
+        subtitle:
+          type:
+            - string
+            - 'null'
+        linkPath:
+          type:
+            - string
+            - 'null'
+        timestamp:
+          type: string
+      required:
+        - id
+        - kind
+        - title
+        - timestamp
     Supplier:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        category: { type: string }
-        contactName: { type: ["string", "null"] }
-        email: { type: ["string", "null"] }
-        phone: { type: ["string", "null"] }
-        kvkNumber: { type: ["string", "null"] }
-        userId: { type: ["integer", "null"] }
-        userName: { type: ["string", "null"] }
-        contractCount: { type: integer }
-      required: [id, name, category, contractCount]
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        contactName:
+          type:
+            - string
+            - 'null'
+        email:
+          type:
+            - string
+            - 'null'
+        phone:
+          type:
+            - string
+            - 'null'
+        kvkNumber:
+          type:
+            - string
+            - 'null'
+        userId:
+          type:
+            - integer
+            - 'null'
+        userName:
+          type:
+            - string
+            - 'null'
+        contractCount:
+          type: integer
+      required:
+        - id
+        - name
+        - category
+        - contractCount
     SupplierInput:
       type: object
       properties:
-        name: { type: string, minLength: 1 }
-        category: { type: string, minLength: 1 }
-        contactName: { type: ["string", "null"] }
-        email: { type: ["string", "null"] }
-        phone: { type: ["string", "null"] }
-        kvkNumber: { type: ["string", "null"] }
-        userId: { type: ["integer", "null"] }
-      required: [name, category]
+        name:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          minLength: 1
+        contactName:
+          type:
+            - string
+            - 'null'
+        email:
+          type:
+            - string
+            - 'null'
+        phone:
+          type:
+            - string
+            - 'null'
+        kvkNumber:
+          type:
+            - string
+            - 'null'
+        userId:
+          type:
+            - integer
+            - 'null'
+      required:
+        - name
+        - category
     Contract:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        supplierId: { type: integer }
-        supplierName: { type: ["string", "null"] }
-        category: { type: string }
-        description: { type: ["string", "null"] }
-        startDate: { type: string }
-        endDate: { type: string }
-        noticePeriodDays: { type: integer }
-        annualValue: { type: ["number", "null"] }
-        status: { type: string, description: "actief | verlopen | opgezegd" }
-        ownerId: { type: ["integer", "null"] }
-        ownerName: { type: ["string", "null"] }
-        daysUntilEnd: { type: integer }
-        expiringSoon: { type: boolean, description: "endDate within noticePeriodDays" }
-        createdAt: { type: string }
-      required: [id, name, supplierId, category, startDate, endDate, noticePeriodDays, status, daysUntilEnd, expiringSoon, createdAt]
+        id:
+          type: integer
+        name:
+          type: string
+        supplierId:
+          type: integer
+        supplierName:
+          type:
+            - string
+            - 'null'
+        category:
+          type: string
+        description:
+          type:
+            - string
+            - 'null'
+        startDate:
+          type: string
+        endDate:
+          type: string
+        noticePeriodDays:
+          type: integer
+        annualValue:
+          type:
+            - number
+            - 'null'
+        status:
+          type: string
+          description: actief | verlopen | opgezegd
+        ownerId:
+          type:
+            - integer
+            - 'null'
+        ownerName:
+          type:
+            - string
+            - 'null'
+        daysUntilEnd:
+          type: integer
+        expiringSoon:
+          type: boolean
+          description: endDate within noticePeriodDays
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - supplierId
+        - category
+        - startDate
+        - endDate
+        - noticePeriodDays
+        - status
+        - daysUntilEnd
+        - expiringSoon
+        - createdAt
     ContractInput:
       type: object
       properties:
-        name: { type: string, minLength: 1 }
-        supplierId: { type: integer }
-        category: { type: string, minLength: 1 }
-        description: { type: ["string", "null"] }
-        startDate: { type: string }
-        endDate: { type: string }
-        noticePeriodDays: { type: ["integer", "null"] }
-        annualValue: { type: ["number", "null"] }
-      required: [name, supplierId, category, startDate, endDate]
+        name:
+          type: string
+          minLength: 1
+        supplierId:
+          type: integer
+        category:
+          type: string
+          minLength: 1
+        description:
+          type:
+            - string
+            - 'null'
+        startDate:
+          type: string
+        endDate:
+          type: string
+        noticePeriodDays:
+          type:
+            - integer
+            - 'null'
+        annualValue:
+          type:
+            - number
+            - 'null'
+      required:
+        - name
+        - supplierId
+        - category
+        - startDate
+        - endDate
     ContractUpdate:
       type: object
       properties:
-        name: { type: string }
-        status: { type: string }
-        endDate: { type: string }
-        noticePeriodDays: { type: integer }
-        annualValue: { type: ["number", "null"] }
-        description: { type: ["string", "null"] }
+        name:
+          type: string
+        status:
+          type: string
+        endDate:
+          type: string
+        noticePeriodDays:
+          type: integer
+        annualValue:
+          type:
+            - number
+            - 'null'
+        description:
+          type:
+            - string
+            - 'null'
     ShopProduct:
       type: object
       properties:
-        id: { type: integer }
-        name: { type: string }
-        description: { type: ["string", "null"] }
-        category: { type: string }
-        price: { type: number }
-        unit: { type: string }
-        stock: { type: integer }
-        minStock: { type: integer }
-        belowMinStock: { type: boolean }
-      required: [id, name, category, price, unit, stock, minStock, belowMinStock]
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type:
+            - string
+            - 'null'
+        category:
+          type: string
+        price:
+          type: number
+        unit:
+          type: string
+        stock:
+          type: integer
+        minStock:
+          type: integer
+        belowMinStock:
+          type: boolean
+      required:
+        - id
+        - name
+        - category
+        - price
+        - unit
+        - stock
+        - minStock
+        - belowMinStock
     ShopProductInput:
       type: object
       properties:
-        name: { type: string, minLength: 1 }
-        description: { type: ["string", "null"] }
-        category: { type: string, minLength: 1 }
-        price: { type: number }
-        unit: { type: ["string", "null"] }
-        stock: { type: ["integer", "null"] }
-        minStock: { type: ["integer", "null"] }
-      required: [name, category, price]
+        name:
+          type: string
+          minLength: 1
+        description:
+          type:
+            - string
+            - 'null'
+        category:
+          type: string
+          minLength: 1
+        price:
+          type: number
+        unit:
+          type:
+            - string
+            - 'null'
+        stock:
+          type:
+            - integer
+            - 'null'
+        minStock:
+          type:
+            - integer
+            - 'null'
+      required:
+        - name
+        - category
+        - price
     ShopProductUpdate:
       type: object
       properties:
-        name: { type: string }
-        description: { type: ["string", "null"] }
-        price: { type: number }
-        stock: { type: integer }
-        minStock: { type: integer }
+        name:
+          type: string
+        description:
+          type:
+            - string
+            - 'null'
+        price:
+          type: number
+        stock:
+          type: integer
+        minStock:
+          type: integer
     ShopOrderLine:
       type: object
       properties:
-        id: { type: integer }
-        productId: { type: integer }
-        productName: { type: ["string", "null"] }
-        quantity: { type: integer }
-        unitPrice: { type: number }
-      required: [id, productId, quantity, unitPrice]
+        id:
+          type: integer
+        productId:
+          type: integer
+        productName:
+          type:
+            - string
+            - 'null'
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+      required:
+        - id
+        - productId
+        - quantity
+        - unitPrice
     ShopOrder:
       type: object
       properties:
-        id: { type: integer }
-        number: { type: string }
-        requesterId: { type: integer }
-        requesterName: { type: ["string", "null"] }
-        department: { type: string }
-        status: { type: string, description: "ingediend | goedgekeurd | afgekeurd | besteld | geleverd" }
-        totalAmount: { type: number }
-        approverId: { type: ["integer", "null"] }
-        approverName: { type: ["string", "null"] }
-        decisionNote: { type: ["string", "null"] }
+        id:
+          type: integer
+        number:
+          type: string
+        requesterId:
+          type: integer
+        requesterName:
+          type:
+            - string
+            - 'null'
+        department:
+          type: string
+        status:
+          type: string
+          description: ingediend | goedgekeurd | afgekeurd | besteld | geleverd
+        totalAmount:
+          type: number
+        approverId:
+          type:
+            - integer
+            - 'null'
+        approverName:
+          type:
+            - string
+            - 'null'
+        decisionNote:
+          type:
+            - string
+            - 'null'
         lines:
           type: array
           items:
-            $ref: "#/components/schemas/ShopOrderLine"
-        createdAt: { type: string }
-        decidedAt: { type: ["string", "null"] }
-      required: [id, number, requesterId, department, status, totalAmount, lines, createdAt]
+            $ref: '#/components/schemas/ShopOrderLine'
+        createdAt:
+          type: string
+        decidedAt:
+          type:
+            - string
+            - 'null'
+      required:
+        - id
+        - number
+        - requesterId
+        - department
+        - status
+        - totalAmount
+        - lines
+        - createdAt
     ShopOrderInput:
       type: object
       properties:
@@ -1529,50 +2647,112 @@ components:
           items:
             type: object
             properties:
-              productId: { type: integer }
-              quantity: { type: integer, minimum: 1 }
-            required: [productId, quantity]
-      required: [lines]
+              productId:
+                type: integer
+              quantity:
+                type: integer
+                minimum: 1
+            required:
+              - productId
+              - quantity
+      required:
+        - lines
     ShopOrderUpdate:
       type: object
       properties:
-        status: { type: string, description: "goedgekeurd | afgekeurd | besteld | geleverd" }
-        decisionNote: { type: ["string", "null"] }
-      required: [status]
+        status:
+          type: string
+          description: goedgekeurd | afgekeurd | besteld | geleverd
+        decisionNote:
+          type:
+            - string
+            - 'null'
+      required:
+        - status
     BudgetStatus:
       type: object
       properties:
-        id: { type: integer }
-        department: { type: string }
-        year: { type: integer }
-        amount: { type: number }
-        spent: { type: number, description: "Sum of approved/ordered/delivered orders" }
-        pending: { type: number, description: "Sum of submitted (not yet decided) orders" }
-        remaining: { type: number }
-      required: [id, department, year, amount, spent, pending, remaining]
+        id:
+          type: integer
+        department:
+          type: string
+        year:
+          type: integer
+        amount:
+          type: number
+        spent:
+          type: number
+          description: Sum of approved/ordered/delivered orders
+        pending:
+          type: number
+          description: Sum of submitted (not yet decided) orders
+        remaining:
+          type: number
+      required:
+        - id
+        - department
+        - year
+        - amount
+        - spent
+        - pending
+        - remaining
     MeterReading:
       type: object
       properties:
-        id: { type: integer }
-        buildingId: { type: integer }
-        buildingName: { type: ["string", "null"] }
-        meterType: { type: string, description: "elektriciteit | gas | water" }
-        readingDate: { type: string }
-        value: { type: number }
-        unit: { type: string }
-        source: { type: string }
-        registeredById: { type: ["integer", "null"] }
-        registeredByName: { type: ["string", "null"] }
-      required: [id, buildingId, meterType, readingDate, value, unit, source]
+        id:
+          type: integer
+        buildingId:
+          type: integer
+        buildingName:
+          type:
+            - string
+            - 'null'
+        meterType:
+          type: string
+          description: elektriciteit | gas | water
+        readingDate:
+          type: string
+        value:
+          type: number
+        unit:
+          type: string
+        source:
+          type: string
+        registeredById:
+          type:
+            - integer
+            - 'null'
+        registeredByName:
+          type:
+            - string
+            - 'null'
+      required:
+        - id
+        - buildingId
+        - meterType
+        - readingDate
+        - value
+        - unit
+        - source
     MeterReadingInput:
       type: object
       properties:
-        buildingId: { type: integer }
-        meterType: { type: string }
-        readingDate: { type: string }
-        value: { type: number }
-        unit: { type: string }
-      required: [buildingId, meterType, readingDate, value, unit]
+        buildingId:
+          type: integer
+        meterType:
+          type: string
+        readingDate:
+          type: string
+        value:
+          type: number
+        unit:
+          type: string
+      required:
+        - buildingId
+        - meterType
+        - readingDate
+        - value
+        - unit
     MeterReadingImportInput:
       type: object
       properties:
@@ -1580,35 +2760,70 @@ components:
           type: array
           minItems: 1
           items:
-            $ref: "#/components/schemas/MeterReadingInput"
-      required: [rows]
+            $ref: '#/components/schemas/MeterReadingInput'
+      required:
+        - rows
     ImportResult:
       type: object
       properties:
-        imported: { type: integer }
-        skipped: { type: integer }
-        message: { type: string }
-      required: [imported, skipped, message]
+        imported:
+          type: integer
+        skipped:
+          type: integer
+        message:
+          type: string
+      required:
+        - imported
+        - skipped
+        - message
     WasteRegistration:
       type: object
       properties:
-        id: { type: integer }
-        buildingId: { type: integer }
-        buildingName: { type: ["string", "null"] }
-        registrationDate: { type: string }
-        category: { type: string, description: "restafval | papier | gft | plastic | glas | chemisch" }
-        weightKg: { type: number }
-        registeredById: { type: ["integer", "null"] }
-        registeredByName: { type: ["string", "null"] }
-      required: [id, buildingId, registrationDate, category, weightKg]
+        id:
+          type: integer
+        buildingId:
+          type: integer
+        buildingName:
+          type:
+            - string
+            - 'null'
+        registrationDate:
+          type: string
+        category:
+          type: string
+          description: restafval | papier | gft | plastic | glas | chemisch
+        weightKg:
+          type: number
+        registeredById:
+          type:
+            - integer
+            - 'null'
+        registeredByName:
+          type:
+            - string
+            - 'null'
+      required:
+        - id
+        - buildingId
+        - registrationDate
+        - category
+        - weightKg
     WasteRegistrationInput:
       type: object
       properties:
-        buildingId: { type: integer }
-        registrationDate: { type: string }
-        category: { type: string }
-        weightKg: { type: number }
-      required: [buildingId, registrationDate, category, weightKg]
+        buildingId:
+          type: integer
+        registrationDate:
+          type: string
+        category:
+          type: string
+        weightKg:
+          type: number
+      required:
+        - buildingId
+        - registrationDate
+        - category
+        - weightKg
     SustainabilityReport:
       type: object
       properties:
@@ -1618,26 +2833,365 @@ components:
           items:
             type: object
             properties:
-              month: { type: string, description: "YYYY-MM" }
-              meterType: { type: string }
-              usage: { type: number }
-              unit: { type: string }
-            required: [month, meterType, usage, unit]
+              month:
+                type: string
+                description: YYYY-MM
+              meterType:
+                type: string
+              usage:
+                type: number
+              unit:
+                type: string
+            required:
+              - month
+              - meterType
+              - usage
+              - unit
         wasteByCategory:
           type: array
           items:
             type: object
             properties:
-              category: { type: string }
-              totalKg: { type: number }
-            required: [category, totalKg]
+              category:
+                type: string
+              totalKg:
+                type: number
+            required:
+              - category
+              - totalKg
         wasteByMonth:
           type: array
           items:
             type: object
             properties:
-              month: { type: string }
-              category: { type: string }
-              totalKg: { type: number }
-            required: [month, category, totalKg]
-      required: [monthlyUsage, wasteByCategory, wasteByMonth]
+              month:
+                type: string
+              category:
+                type: string
+              totalKg:
+                type: number
+            required:
+              - month
+              - category
+              - totalKg
+      required:
+        - monthlyUsage
+        - wasteByCategory
+        - wasteByMonth
+    Bouwdeel:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+          description: dak | gevel | installaties | interieur | terrein | transport
+        buildingId:
+          type: integer
+        buildingName:
+          type:
+            - string
+            - 'null'
+        floorId:
+          type:
+            - integer
+            - 'null'
+        floorName:
+          type:
+            - string
+            - 'null'
+        roomId:
+          type:
+            - integer
+            - 'null'
+        roomName:
+          type:
+            - string
+            - 'null'
+        material:
+          type:
+            - string
+            - 'null'
+        installYear:
+          type: integer
+        expectedLifespanYears:
+          type: integer
+        replacementCost:
+          type: number
+        notes:
+          type:
+            - string
+            - 'null'
+        laatsteScore:
+          type:
+            - integer
+            - 'null'
+          description: Meest recente NEN 2767-conditiescore (1-6)
+        laatsteMetingDatum:
+          type:
+            - string
+            - 'null'
+        openTaken:
+          type: integer
+      required:
+        - id
+        - code
+        - name
+        - category
+        - buildingId
+        - installYear
+        - expectedLifespanYears
+        - replacementCost
+        - openTaken
+    BouwdeelInput:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+        name:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          minLength: 1
+        buildingId:
+          type: integer
+        floorId:
+          type:
+            - integer
+            - 'null'
+        roomId:
+          type:
+            - integer
+            - 'null'
+        material:
+          type:
+            - string
+            - 'null'
+        installYear:
+          type: integer
+        expectedLifespanYears:
+          type: integer
+        replacementCost:
+          type: number
+        notes:
+          type:
+            - string
+            - 'null'
+      required:
+        - code
+        - name
+        - category
+        - buildingId
+        - installYear
+        - expectedLifespanYears
+        - replacementCost
+    Gebrek:
+      type: object
+      properties:
+        description:
+          type: string
+        ernst:
+          type: string
+          description: licht | serieus | ernstig
+        omvang:
+          type:
+            - string
+            - 'null'
+        photoPath:
+          type:
+            - string
+            - 'null'
+          description: Object storage pad van de foto (/objects/...)
+      required:
+        - description
+        - ernst
+    Conditiemeting:
+      type: object
+      properties:
+        id:
+          type: integer
+        bouwdeelId:
+          type: integer
+        inspectorId:
+          type: integer
+        inspectorName:
+          type:
+            - string
+            - 'null'
+        score:
+          type: integer
+          description: 'NEN 2767: 1 (uitstekend) t/m 6 (zeer slecht)'
+        toelichting:
+          type:
+            - string
+            - 'null'
+        gebreken:
+          type: array
+          items:
+            $ref: '#/components/schemas/Gebrek'
+        measuredAt:
+          type: string
+      required:
+        - id
+        - bouwdeelId
+        - inspectorId
+        - score
+        - gebreken
+        - measuredAt
+    ConditiemetingInput:
+      type: object
+      properties:
+        score:
+          type: integer
+          minimum: 1
+          maximum: 6
+        toelichting:
+          type:
+            - string
+            - 'null'
+        gebreken:
+          type: array
+          items:
+            $ref: '#/components/schemas/Gebrek'
+      required:
+        - score
+    MjopTaak:
+      type: object
+      properties:
+        id:
+          type: integer
+        bouwdeelId:
+          type: integer
+        bouwdeelName:
+          type:
+            - string
+            - 'null'
+        bouwdeelCode:
+          type:
+            - string
+            - 'null'
+        buildingName:
+          type:
+            - string
+            - 'null'
+        title:
+          type: string
+        description:
+          type:
+            - string
+            - 'null'
+        taskType:
+          type: string
+          description: inspectie | onderhoud | vervanging | renovatie
+        plannedYear:
+          type: integer
+        estimatedCost:
+          type: number
+        status:
+          type: string
+          description: gepland | in_uitvoering | afgerond
+        ticketId:
+          type:
+            - integer
+            - 'null'
+        ticketNumber:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+      required:
+        - id
+        - bouwdeelId
+        - title
+        - taskType
+        - plannedYear
+        - estimatedCost
+        - status
+        - createdAt
+    MjopTaakInput:
+      type: object
+      properties:
+        bouwdeelId:
+          type: integer
+        title:
+          type: string
+          minLength: 1
+        description:
+          type:
+            - string
+            - 'null'
+        taskType:
+          type: string
+          minLength: 1
+        plannedYear:
+          type: integer
+        estimatedCost:
+          type: number
+      required:
+        - bouwdeelId
+        - title
+        - taskType
+        - plannedYear
+        - estimatedCost
+    MjopTaakUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type:
+            - string
+            - 'null'
+        taskType:
+          type: string
+        plannedYear:
+          type: integer
+        estimatedCost:
+          type: number
+        status:
+          type: string
+    JaarplanningEntry:
+      type: object
+      properties:
+        year:
+          type: integer
+        taskCount:
+          type: integer
+        totalCost:
+          type: number
+        byType:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountByKey'
+        byStatus:
+          type: array
+          items:
+            $ref: '#/components/schemas/CountByKey'
+      required:
+        - year
+        - taskCount
+        - totalCost
+        - byType
+        - byStatus
+    ErrorEnvelope:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+    UploadResult:
+      type: object
+      required:
+        - objectPath
+      properties:
+        objectPath:
+          type: string

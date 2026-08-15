@@ -1,1 +1,2 @@
 - [Orval emits Zod v4 API](orval-zod-v4.md) — codegen must rewrite generated import to `zod/v4` or typecheck fails with `zod.int()` errors.
+- [Object storage upload security](object-storage-upload-security.md) — Replit presigned PUT URLs can't bind MIME/size; route uploads through the API with magic-byte sniffing and a raw body limit.
