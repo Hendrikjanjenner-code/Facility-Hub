@@ -7,10 +7,13 @@ import {
   useListTicketCategories, 
   useListRooms, 
   useCreateTicket,
+  useSuggestKnowledgeArticles,
+  getSuggestKnowledgeArticlesQueryKey,
   TicketCategory,
-  Room
+  Room,
+  KnowledgeArticle
 } from "@workspace/api-client-react";
-import { Ticket, ArrowLeft, Loader2, Info } from "lucide-react";
+import { Ticket, ArrowLeft, Loader2, Info, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -46,6 +49,13 @@ export default function MeldingenNieuwPage() {
   const createTicket = useCreateTicket();
 
   const [selectedCategory, setSelectedCategory] = useState<TicketCategory | null>(null);
+  const [suggestionQuery, setSuggestionQuery] = useState("");
+  const [expandedSuggestion, setExpandedSuggestion] = useState<number | null>(null);
+
+  const { data: suggestions } = useSuggestKnowledgeArticles(
+    { q: suggestionQuery },
+    { query: { enabled: suggestionQuery.length >= 3, staleTime: 10_000, queryKey: getSuggestKnowledgeArticlesQueryKey({ q: suggestionQuery }) } },
+  );
 
   const form = useForm<z.infer<typeof baseSchema>>({
     resolver: zodResolver(baseSchema),
@@ -227,12 +237,55 @@ export default function MeldingenNieuwPage() {
                       <FormItem>
                         <FormLabel>Titel</FormLabel>
                         <FormControl>
-                          <Input placeholder="Korte en duidelijke omschrijving" {...field} />
+                          <Input
+                            placeholder="Korte en duidelijke omschrijving"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              setSuggestionQuery(e.target.value);
+                            }}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  {/* Knowledge base suggestions */}
+                  {suggestions && suggestions.length > 0 && (
+                    <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
+                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        <span>Mogelijk relevant uit de kennisbank</span>
+                      </div>
+                      <div className="space-y-2">
+                        {suggestions.map((s: KnowledgeArticle) => (
+                          <div key={s.id} className="rounded-md border bg-background p-2.5">
+                            <button
+                              type="button"
+                              className="w-full flex items-center justify-between text-left gap-2"
+                              onClick={() => setExpandedSuggestion(expandedSuggestion === s.id ? null : s.id)}
+                            >
+                              <span className="text-sm font-medium">{s.title}</span>
+                              {expandedSuggestion === s.id ? (
+                                <ChevronUp className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                              ) : (
+                                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                              )}
+                            </button>
+                            {expandedSuggestion === s.id && (
+                              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed border-t pt-1.5 whitespace-pre-wrap">
+                                {s.body}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Staat uw antwoord er niet bij? Dien dan hieronder uw melding in.
+                      </p>
+                    </div>
+                  )}
 
                   <FormField
                     control={form.control}

@@ -9,7 +9,8 @@ import {
   useGetCurrentUser
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Monitor, Calendar as CalendarIcon, CheckCircle2, Building2, MapPin } from "lucide-react";
+import { Monitor, Calendar as CalendarIcon, CheckCircle2, Building2, MapPin, Search, UserCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -27,6 +28,7 @@ export default function WerkplekkenPage() {
   const { data: user } = useGetCurrentUser();
   const [date, setDate] = useState<Date>(new Date());
   const [floorId, setFloorId] = useState<number | undefined>();
+  const [colleagueSearch, setColleagueSearch] = useState("");
 
   const dateStr = format(date, "yyyy-MM-dd");
   const { data: structure, isLoading: isStructureLoading } = useGetStructure();
@@ -69,12 +71,63 @@ export default function WerkplekkenPage() {
 
   const zones = Array.from(new Set(workplaces?.map(w => w.zone) || []));
 
+  // Colleague search: find workplaces where bookedByName matches the search
+  const collegaResults = colleagueSearch.trim().length >= 2
+    ? workplaces?.filter(w => w.bookedByName && w.bookedByName.toLowerCase().includes(colleagueSearch.toLowerCase()))
+    : undefined;
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Werkplekken</h1>
         <p className="text-muted-foreground">Boek een flexplek op kantoor.</p>
       </div>
+
+      {/* Collega zoeken */}
+      <div className="flex items-center gap-3 bg-card p-4 rounded-lg border shadow-sm">
+        <UserCheck className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            className="pl-8"
+            placeholder="Zoek collega op naam..."
+            value={colleagueSearch}
+            onChange={(e) => setColleagueSearch(e.target.value)}
+          />
+        </div>
+        {collegaResults !== undefined && (
+          <span className="text-sm text-muted-foreground">
+            {collegaResults.length === 0
+              ? "Geen werkplek gevonden"
+              : `${collegaResults.length} werkplek${collegaResults.length !== 1 ? "ken" : ""} gevonden`}
+          </span>
+        )}
+      </div>
+
+      {/* Colleague search results */}
+      {collegaResults !== undefined && collegaResults.length > 0 && (
+        <div className="space-y-2">
+          {collegaResults.map(wp => (
+            <div key={wp.id} className="flex items-center gap-4 bg-card border rounded-lg p-3">
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <span className="text-sm font-semibold text-primary">
+                  {wp.bookedByName?.charAt(0) ?? "?"}
+                </span>
+              </div>
+              <div>
+                <p className="text-sm font-medium">{wp.bookedByName}</p>
+                <p className="text-xs text-muted-foreground">
+                  {wp.name} · {wp.floorName} · {wp.zone}
+                </p>
+              </div>
+              <div className="ml-auto flex items-center gap-1.5 text-xs text-green-600">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Ingeboekt
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-4 bg-card p-4 rounded-lg border shadow-sm">
         <div className="flex-1 max-w-[280px]">

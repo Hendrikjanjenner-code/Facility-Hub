@@ -61,6 +61,20 @@ export const ticketCommentsTable = pgTable("ticket_comments", {
     .defaultNow(),
 });
 
+export const ticketSatisfactionTable = pgTable("ticket_satisfaction", {
+  id: serial("id").primaryKey(),
+  ticketId: integer("ticket_id")
+    .notNull()
+    .unique()
+    .references(() => ticketsTable.id),
+  score: integer("score").notNull(), // 1..5
+  comment: text("comment"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type TicketCategory = typeof ticketCategoriesTable.$inferSelect;
 export type Ticket = typeof ticketsTable.$inferSelect;
 export type TicketComment = typeof ticketCommentsTable.$inferSelect;
+export type TicketSatisfaction = typeof ticketSatisfactionTable.$inferSelect;

@@ -21,6 +21,8 @@ tags:
   - name: sustainability
   - name: mjop
   - name: Storage
+  - name: knowledge
+  - name: satisfaction
 paths:
   /healthz:
     get:
@@ -1392,6 +1394,127 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+  /knowledge-articles:
+    get:
+      operationId: listKnowledgeArticles
+      tags: [knowledge]
+      summary: List / search knowledge-base articles
+      parameters:
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Articles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/KnowledgeArticle"
+    post:
+      operationId: createKnowledgeArticle
+      tags: [knowledge]
+      summary: Create a knowledge-base article (manager/beheerder only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KnowledgeArticleInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnowledgeArticle"
+  /knowledge-articles/suggest:
+    get:
+      operationId: suggestKnowledgeArticles
+      tags: [knowledge]
+      summary: Quick search suggestions (max 5) for the melding form
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Suggestions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/KnowledgeArticle"
+  /tickets/{id}/satisfaction:
+    post:
+      operationId: submitTicketSatisfaction
+      tags: [satisfaction]
+      summary: Submit satisfaction score after ticket closure (reporter only, once)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketSatisfactionInput"
+      responses:
+        "201":
+          description: Submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketSatisfaction"
+        "409":
+          description: Already submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /tickets/{id}/satisfaction/mine:
+    get:
+      operationId: getMyTicketSatisfaction
+      tags: [satisfaction]
+      summary: Get existing satisfaction for a ticket (if already submitted)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Satisfaction or null
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketSatisfaction"
+        "404":
+          description: Not yet submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /satisfaction/report:
+    get:
+      operationId: getSatisfactionReport
+      tags: [satisfaction]
+      summary: Aggregate satisfaction report (facilitair_manager / beheerder only)
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SatisfactionReport"
 components:
   schemas:
     HealthStatus:
@@ -3195,3 +3318,65 @@ components:
       properties:
         objectPath:
           type: string
+    KnowledgeArticle:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        body: { type: string }
+        category: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        createdAt: { type: string }
+        updatedAt: { type: string }
+      required: [id, title, body, category, tags, createdAt, updatedAt]
+    KnowledgeArticleInput:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        body: { type: string, minLength: 1 }
+        category: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+      required: [title, body, category]
+    TicketSatisfaction:
+      type: object
+      properties:
+        id: { type: integer }
+        ticketId: { type: integer }
+        score: { type: integer, description: "1..5" }
+        comment: { type: ["string", "null"] }
+        createdAt: { type: string }
+      required: [id, ticketId, score, createdAt]
+    TicketSatisfactionInput:
+      type: object
+      properties:
+        score: { type: integer, minimum: 1, maximum: 5 }
+        comment: { type: ["string", "null"] }
+      required: [score]
+    SatisfactionReport:
+      type: object
+      properties:
+        totalResponses: { type: integer }
+        averageScore: { type: number }
+        byScore:
+          type: array
+          items:
+            $ref: "#/components/schemas/CountByKey"
+        recentResponses:
+          type: array
+          items:
+            $ref: "#/components/schemas/SatisfactionResponseItem"
+      required: [totalResponses, averageScore, byScore, recentResponses]
+    SatisfactionResponseItem:
+      type: object
+      properties:
+        ticketId: { type: integer }
+        ticketNumber: { type: string }
+        ticketTitle: { type: string }
+        score: { type: integer }
+        comment: { type: ["string", "null"] }
+        submittedAt: { type: string }
+      required: [ticketId, ticketNumber, ticketTitle, score, submittedAt]

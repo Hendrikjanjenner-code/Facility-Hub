@@ -2,7 +2,9 @@ import { useLocation } from "wouter";
 import { 
   useGetDashboardSummary, 
   useGetRecentActivity,
-  useGetCurrentUser
+  useGetCurrentUser,
+  useGetSatisfactionReport,
+  getGetSatisfactionReportQueryKey
 } from "@workspace/api-client-react";
 import { 
   BarChart, 
@@ -26,7 +28,8 @@ import {
   Monitor, 
   Building2, 
   Activity,
-  ArrowRight
+  ArrowRight,
+  Star
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -73,6 +76,10 @@ export default function DashboardPage() {
   const { data: user } = useGetCurrentUser();
   const { data: summary, isLoading: isSummaryLoading } = useGetDashboardSummary();
   const { data: activity, isLoading: isActivityLoading } = useGetRecentActivity();
+  const canSeeSatisfaction = !!user && ["facilitair_manager", "beheerder"].includes(user.role);
+  const { data: satisfactionReport } = useGetSatisfactionReport({
+    query: { enabled: canSeeSatisfaction, queryKey: getGetSatisfactionReportQueryKey() },
+  });
 
   if (isSummaryLoading || !user) {
     return (
@@ -240,8 +247,56 @@ export default function DashboardPage() {
           </>
         )}
 
+        {/* Satisfaction report for managers */}
+        {canSeeSatisfaction && satisfactionReport && satisfactionReport.totalResponses > 0 && (
+          <Card className="col-span-4 lg:col-span-3">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5 text-yellow-400" />
+                Klanttevredenheid
+              </CardTitle>
+              <CardDescription>
+                Gemiddeld {satisfactionReport.averageScore?.toFixed(1) ?? "—"}/5 ({satisfactionReport.totalResponses} beoordelingen)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {[5,4,3,2,1].map((score) => {
+                const entry = satisfactionReport.byScore?.find(b => b.key === String(score));
+                const count = entry?.count ?? 0;
+                const pct = satisfactionReport.totalResponses > 0
+                  ? Math.round((count / satisfactionReport.totalResponses) * 100)
+                  : 0;
+                return (
+                  <div key={score} className="flex items-center gap-3 text-sm">
+                    <div className="flex items-center gap-0.5 w-16 flex-shrink-0">
+                      {Array.from({length:score}).map((_,i) => (
+                        <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-full bg-yellow-400 rounded-full transition-all" style={{width: `${pct}%`}} />
+                    </div>
+                    <span className="w-8 text-right text-muted-foreground">{count}</span>
+                  </div>
+                );
+              })}
+              {satisfactionReport.recentResponses?.slice(0, 3).map((r) => (
+                <div key={r.ticketId} className="pt-2 border-t first:border-t-0">
+                  <div className="flex items-center gap-1 mb-0.5">
+                    {Array.from({length:r.score}).map((_,i) => (
+                      <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">{r.ticketTitle}</p>
+                  {r.comment && <p className="text-xs italic text-muted-foreground truncate">"{r.comment}"</p>}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Activity Feed for everyone */}
-        <Card className={cn("col-span-4", user.role === 'eindgebruiker' || user.role === 'cateraar' || user.role === 'receptie' || user.role === 'leverancier' ? 'lg:col-span-7' : 'lg:col-span-4')}>
+        <Card className={cn("col-span-4", user.role === 'eindgebruiker' || user.role === 'cateraar' || user.role === 'receptie' || user.role === 'leverancier' ? 'lg:col-span-7' : canSeeSatisfaction && satisfactionReport && satisfactionReport.totalResponses > 0 ? 'lg:col-span-4' : 'lg:col-span-4')}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />

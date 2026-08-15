@@ -11,7 +11,11 @@ import {
   getListUsersQueryKey,
   useGetCurrentUser,
   getGetTicketQueryKey,
-  getListTicketCommentsQueryKey
+  getListTicketCommentsQueryKey,
+  useSubmitTicketSatisfaction,
+  useGetMyTicketSatisfaction,
+  getGetMyTicketSatisfactionQueryKey,
+  type TicketSatisfaction,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
@@ -26,7 +30,7 @@ import {
   PcCase,
   CheckCircle2,
   Circle,
-  MoreVertical
+  Star,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -54,6 +58,15 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { getTicketStatusColor, getTicketStatusLabel, getPriorityColor, cn } from "@/lib/status-helpers";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
 const STATUS_FLOW = [
   'nieuw',
@@ -113,8 +126,19 @@ export default function MeldingDetailPage({ id }: { id: string }) {
   
   const createComment = useCreateTicketComment();
   const updateTicket = useUpdateTicket();
+  const submitSatisfaction = useSubmitTicketSatisfaction();
+  const { data: existingSatisfaction } = useGetMyTicketSatisfaction(ticketId, {
+    query: {
+      enabled: !!ticket && ticket.status === "gesloten" && ticket.reporterId === user?.id,
+      retry: false,
+      queryKey: getGetMyTicketSatisfactionQueryKey(ticketId),
+    },
+  });
 
   const [commentBody, setCommentBody] = useState("");
+  const [satisfactionDialogOpen, setSatisfactionDialogOpen] = useState(false);
+  const [satisfactionScore, setSatisfactionScore] = useState(0);
+  const [satisfactionComment, setSatisfactionComment] = useState("");
 
   const isPrivileged = user?.role !== 'eindgebruiker' && user?.role !== 'cateraar' && user?.role !== 'receptie';
 
@@ -162,6 +186,27 @@ export default function MeldingDetailPage({ id }: { id: string }) {
     });
   };
 
+  const handleSatisfactionSubmit = () => {
+    if (satisfactionScore < 1) return;
+    submitSatisfaction.mutate(
+      { id: ticketId, data: { score: satisfactionScore, comment: satisfactionComment || null } },
+      {
+        onSuccess: (data) => {
+          // Immediately populate the cache so the rating renders without a refresh
+          queryClient.setQueryData<TicketSatisfaction>(
+            getGetMyTicketSatisfactionQueryKey(ticketId),
+            data,
+          );
+          setSatisfactionDialogOpen(false);
+          toast({ title: "Beoordeling ingediend", description: "Bedankt voor uw feedback!" });
+        },
+        onError: () => {
+          toast({ variant: "destructive", title: "Fout", description: "Kon beoordeling niet opslaan." });
+        },
+      },
+    );
+  };
+
   const submitComment = () => {
     if (!commentBody.trim()) return;
     createComment.mutate({ id: ticketId, data: { body: commentBody } }, {
@@ -176,6 +221,66 @@ export default function MeldingDetailPage({ id }: { id: string }) {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
+      {/* Satisfaction rating dialog */}
+      <Dialog open={satisfactionDialogOpen} onOpenChange={setSatisfactionDialogOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Hoe tevreden bent u?</DialogTitle>
+            <DialogDescription>
+              Geef een beoordeling voor de afhandeling van deze melding. Uw feedback helpt ons verbeteren.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex justify-center gap-2 py-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setSatisfactionScore(star)}
+                  className="transition-transform hover:scale-110"
+                >
+                  <Star
+                    className={cn(
+                      "h-8 w-8 transition-colors",
+                      star <= satisfactionScore
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted-foreground",
+                    )}
+                  />
+                </button>
+              ))}
+            </div>
+            <div className="text-center text-sm text-muted-foreground">
+              {satisfactionScore === 0 && "Klik op een ster om te beoordelen"}
+              {satisfactionScore === 1 && "Zeer ontevreden"}
+              {satisfactionScore === 2 && "Ontevreden"}
+              {satisfactionScore === 3 && "Neutraal"}
+              {satisfactionScore === 4 && "Tevreden"}
+              {satisfactionScore === 5 && "Zeer tevreden"}
+            </div>
+            <div className="space-y-1.5">
+              <Label>Opmerking (optioneel)</Label>
+              <Textarea
+                value={satisfactionComment}
+                onChange={(e) => setSatisfactionComment(e.target.value)}
+                placeholder="Heeft u nog aanvullende opmerkingen?"
+                className="min-h-[80px]"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setSatisfactionDialogOpen(false)}>Overslaan</Button>
+            <Button
+              onClick={handleSatisfactionSubmit}
+              disabled={satisfactionScore < 1 || submitSatisfaction.isPending}
+            >
+              {submitSatisfaction.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Versturen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex flex-col sm:flex-row gap-4 sm:items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => setLocation("/meldingen")} className="flex-shrink-0">
@@ -193,6 +298,21 @@ export default function MeldingDetailPage({ id }: { id: string }) {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Satisfaction button for reporter of closed tickets */}
+          {ticket.status === "gesloten" && user?.id === ticket.reporterId && (
+            existingSatisfaction ? (
+              <div className="flex items-center gap-1 text-sm text-muted-foreground border rounded-md px-3 py-1.5">
+                {[1,2,3,4,5].map((s) => (
+                  <Star key={s} className={cn("h-3.5 w-3.5", s <= existingSatisfaction.score ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground")} />
+                ))}
+              </div>
+            ) : (
+              <Button variant="outline" size="sm" onClick={() => setSatisfactionDialogOpen(true)}>
+                <Star className="mr-2 h-4 w-4" />
+                Beoordelen
+              </Button>
+            )
+          )}
           {isPrivileged && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

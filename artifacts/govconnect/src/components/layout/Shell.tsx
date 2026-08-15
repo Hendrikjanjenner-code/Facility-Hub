@@ -26,7 +26,8 @@ import {
   FileText,
   ShoppingCart,
   Boxes,
-  Leaf
+  Leaf,
+  BookOpen
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -132,6 +133,12 @@ const navItems: NavItem[] = [
     href: "/mjop",
     icon: Wrench,
     roles: ["facilitair_manager", "beheerder"]
+  },
+  {
+    title: "Kennisbank",
+    href: "/kennisbank",
+    icon: BookOpen,
+    roles: ["eindgebruiker", "servicedesk", "facilitair_manager", "cateraar", "receptie", "beheerder", "leverancier"]
   }
 ];
 

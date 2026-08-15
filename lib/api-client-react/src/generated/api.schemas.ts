@@ -421,6 +421,15 @@ export interface DashboardSummary {
   roomCount: number;
 }
 
+export interface KnowledgeArticle {
+  id: number;
+  title: string;
+  body: string;
+  category: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
 export interface ActivityItem {
   id: string;
   kind: string;
@@ -909,6 +918,10 @@ category?: string;
 search?: string;
 };
 
+export type ListKnowledgeArticlesParams = {
+search?: string;
+category?: string;
+};
 export type ListContractsParams = {
 status?: string;
 expiringWithinDays?: number;
@@ -937,6 +950,16 @@ export type GetSustainabilityReportParams = {
 buildingId?: number;
 };
 
+export interface SatisfactionResponseItem {
+  ticketId: number;
+  ticketNumber: string;
+  ticketTitle: string;
+  score: number;
+  /** @nullable */
+  comment?: string | null;
+  submittedAt: string;
+}
+
 export type ListBouwdelenParams = {
 buildingId?: number;
 category?: string;
@@ -949,3 +972,42 @@ status?: string;
 bouwdeelId?: number;
 };
 
+export type SuggestKnowledgeArticlesParams = {
+q: string;
+};
+
+export interface KnowledgeArticleInput {
+  /** @minLength 1 */
+  title: string;
+  /** @minLength 1 */
+  body: string;
+  category: string;
+  tags?: string[];
+}
+
+export interface SatisfactionReport {
+  totalResponses: number;
+  averageScore: number;
+  byScore: CountByKey[];
+  recentResponses: SatisfactionResponseItem[];
+}
+
+export interface TicketSatisfaction {
+  id: number;
+  ticketId: number;
+  /** 1..5 */
+  score: number;
+  /** @nullable */
+  comment?: string | null;
+  createdAt: string;
+}
+
+export interface TicketSatisfactionInput {
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  score: number;
+  /** @nullable */
+  comment?: string | null;
+}

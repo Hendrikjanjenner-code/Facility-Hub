@@ -26,6 +26,19 @@ const RES_VIEW_ALL_ROLES = [
   "cateraar",
   "servicedesk",
 ];
+
+/**
+ * Roles that may see bookedByName on workplaces for colleague-search.
+ * Excludes external roles (leverancier) that should not discover staff presence.
+ */
+const COLLEAGUE_SEARCH_ROLES = [
+  "eindgebruiker",
+  "facilitair_manager",
+  "beheerder",
+  "receptie",
+  "cateraar",
+  "servicedesk",
+];
 import { notify, notifyRole } from "../lib/notify";
 
 const router: IRouter = Router();
@@ -481,7 +494,9 @@ router.get("/workplaces", async (req, res): Promise<void> => {
   }
   const dateGiven = typeof q.date === "string" && !!q.date;
   const viewer = req.currentUser!;
-  const seeNames = RES_VIEW_ALL_ROLES.includes(viewer.role);
+  // Internal staff may see bookedByName for colleague-search. External roles
+  // (leverancier) must not discover staff presence/location via this endpoint.
+  const seeColleagues = COLLEAGUE_SEARCH_ROLES.includes(viewer.role);
   res.json(
     workplaces.map((w) => ({
       id: w.wp.id,
@@ -496,7 +511,7 @@ router.get("/workplaces", async (req, res): Promise<void> => {
       zone: w.wp.zone,
       features: w.wp.features,
       available: dateGiven ? !bookedByWp.has(w.wp.id) : null,
-      bookedByName: seeNames ? (bookedByWp.get(w.wp.id) ?? null) : null,
+      bookedByName: seeColleagues ? (bookedByWp.get(w.wp.id) ?? null) : null,
     })),
   );
 });

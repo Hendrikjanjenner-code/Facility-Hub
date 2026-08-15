@@ -29,6 +29,7 @@ import DuurzaamheidPage from './pages/duurzaamheid/DuurzaamheidPage';
 import { Shell } from './components/layout/Shell';
 import MjopPage from './pages/mjop/MjopPage';
 import BouwdeelDetailPage from './pages/mjop/BouwdeelDetailPage';
+import KennisbankPage from './pages/kennisbank/KennisbankPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,8 @@ function Router() {
 
         <Route path="/mjop/bouwdelen/:id">{(params) => <ProtectedRoute component={BouwdeelDetailPage} id={params.id} />}</Route>
         <Route path="/mjop">{(params) => <ProtectedRoute component={MjopPage} />}</Route>
+
+        <Route path="/kennisbank">{(params) => <ProtectedRoute component={KennisbankPage} />}</Route>
 
         <Route component={NotFound} />
       </Switch>

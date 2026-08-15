@@ -13,8 +13,11 @@ import shopRouter from "./shop";
 import sustainabilityRouter from "./sustainability";
 import mjopRouter from "./mjop";
 import storageRouter from "./storage";
+import knowledgeRouter from "./knowledge";
+import satisfactionRouter from "./satisfaction";
 
 const router: IRouter = Router();
+
 router.use(healthRouter);
 router.use(authRouter);
 router.use(ticketsRouter);
@@ -29,5 +32,7 @@ router.use(shopRouter);
 router.use(sustainabilityRouter);
 router.use(mjopRouter);
 router.use(storageRouter);
+router.use(knowledgeRouter);
+router.use(satisfactionRouter);
 
 export default router;

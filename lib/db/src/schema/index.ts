@@ -9,3 +9,4 @@ export * from "./contracts";
 export * from "./shop";
 export * from "./sustainability";
 export * from "./mjop";
+export * from "./knowledge";

@@ -125,7 +125,6 @@ export const ListTicketsResponse = zod.array(ListTicketsResponseItem)
  */
 
 
-
 export const CreateTicketBody = zod.object({
   "title": zod.string().min(1),
   "description": zod.string(),
@@ -253,8 +252,6 @@ export const ListTicketCommentsResponse = zod.array(ListTicketCommentsResponseIt
 export const CreateTicketCommentParams = zod.object({
   "id": zod.coerce.number().int()
 })
-
-
 
 
 export const CreateTicketCommentBody = zod.object({
@@ -411,9 +408,6 @@ export const ListReservationsResponseItem = zod.object({
   "createdAt": zod.string()
 })
 export const ListReservationsResponse = zod.array(ListReservationsResponseItem)
-
-
-
 
 
 export const CreateReservationBody = zod.object({
@@ -594,9 +588,6 @@ export const ListVisitorsResponseItem = zod.object({
 export const ListVisitorsResponse = zod.array(ListVisitorsResponseItem)
 
 
-
-
-
 export const CreateVisitorBody = zod.object({
   "name": zod.string().min(1),
   "company": zod.string().nullish(),
@@ -673,10 +664,6 @@ export const ListAssetsResponseItem = zod.object({
   "openTicketCount": zod.int().nullish()
 })
 export const ListAssetsResponse = zod.array(ListAssetsResponseItem)
-
-
-
-
 
 
 export const CreateAssetBody = zod.object({
@@ -765,7 +752,13 @@ export const MarkAllNotificationsReadResponse = zod.object({
   "message": zod.string()
 })
 
-
+/**
+ * @summary List / search knowledge-base articles
+ */
+export const ListKnowledgeArticlesQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "category": zod.coerce.string().optional()
+})
 /**
  * @summary Role-aware dashboard summary counts
  */
@@ -823,10 +816,6 @@ export const ListSuppliersResponseItem = zod.object({
 export const ListSuppliersResponse = zod.array(ListSuppliersResponseItem)
 
 
-
-
-
-
 export const CreateSupplierBody = zod.object({
   "name": zod.string().min(1),
   "category": zod.string().min(1),
@@ -878,10 +867,6 @@ export const ListContractsResponseItem = zod.object({
   "createdAt": zod.string()
 })
 export const ListContractsResponse = zod.array(ListContractsResponseItem)
-
-
-
-
 
 
 export const CreateContractBody = zod.object({
@@ -974,10 +959,6 @@ export const ListShopProductsResponseItem = zod.object({
 export const ListShopProductsResponse = zod.array(ListShopProductsResponseItem)
 
 
-
-
-
-
 export const CreateShopProductBody = zod.object({
   "name": zod.string().min(1),
   "description": zod.string().nullish(),
@@ -1063,8 +1044,6 @@ export const ListShopOrdersResponse = zod.array(ListShopOrdersResponseItem)
 /**
  * @summary Place order from cart (starts approval flow)
  */
-
-
 
 
 export const CreateShopOrderBody = zod.object({
@@ -1194,7 +1173,6 @@ export const CreateMeterReadingResponse = zod.object({
  */
 
 
-
 export const ImportMeterReadingsBody = zod.object({
   "rows": zod.array(zod.object({
   "buildingId": zod.int(),
@@ -1273,6 +1251,13 @@ export const GetSustainabilityReportResponse = zod.object({
 }))
 })
 
+export const CreateKnowledgeArticleBody = zod.object({
+  "title": zod.string().min(1),
+  "body": zod.string().min(1),
+  "category": zod.string(),
+  "tags": zod.array(zod.string()).optional()
+})
+
 
 /**
  * @summary List bouwdelen with latest condition score
@@ -1309,9 +1294,6 @@ export const ListBouwdelenResponse = zod.array(ListBouwdelenResponseItem)
 /**
  * @summary Register a bouwdeel linked to the building structure
  */
-
-
-
 
 
 export const CreateBouwdeelBody = zod.object({
@@ -1411,7 +1393,6 @@ export const CreateConditiemetingParams = zod.object({
 export const createConditiemetingBodyScoreMax = 6;
 
 
-
 export const CreateConditiemetingBody = zod.object({
   "score": zod.int().min(1).max(createConditiemetingBodyScoreMax),
   "toelichting": zod.string().nullish(),
@@ -1468,10 +1449,6 @@ export const ListMjopTakenResponseItem = zod.object({
 export const ListMjopTakenResponse = zod.array(ListMjopTakenResponseItem)
 
 
-
-
-
-
 export const CreateMjopTaakBody = zod.object({
   "bouwdeelId": zod.int(),
   "title": zod.string().min(1),
@@ -1502,8 +1479,6 @@ export const CreateMjopTaakResponse = zod.object({
 export const UpdateMjopTaakParams = zod.object({
   "id": zod.coerce.number().int()
 })
-
-
 
 
 export const UpdateMjopTaakBody = zod.object({
@@ -1604,4 +1579,100 @@ export const UploadStorageObjectResponse = zod.object({
   "objectPath": zod.string()
 })
 
+/**
+ * @summary Quick search suggestions (max 5) for the melding form
+ */
+export const SuggestKnowledgeArticlesQueryParams = zod.object({
+  "q": zod.coerce.string()
+})
 
+export const submitTicketSatisfactionBodyScoreMax = 5;
+
+export const CreateKnowledgeArticleResponse = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "category": zod.string(),
+  "tags": zod.array(zod.string()),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+export const ListKnowledgeArticlesResponse = zod.array(ListKnowledgeArticlesResponseItem)
+
+/**
+ * @summary Aggregate satisfaction report (facilitair_manager / beheerder only)
+ */
+export const GetSatisfactionReportResponse = zod.object({
+  "totalResponses": zod.int(),
+  "averageScore": zod.number(),
+  "byScore": zod.array(zod.object({
+  "key": zod.string(),
+  "count": zod.int()
+})),
+  "recentResponses": zod.array(zod.object({
+  "ticketId": zod.int(),
+  "ticketNumber": zod.string(),
+  "ticketTitle": zod.string(),
+  "score": zod.int(),
+  "comment": zod.string().nullish(),
+  "submittedAt": zod.string()
+}))
+})
+
+export const SuggestKnowledgeArticlesResponseItem = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "category": zod.string(),
+  "tags": zod.array(zod.string()),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+export const SubmitTicketSatisfactionBody = zod.object({
+  "score": zod.int().min(1).max(submitTicketSatisfactionBodyScoreMax),
+  "comment": zod.string().nullish()
+})
+
+/**
+ * @summary Submit satisfaction score after ticket closure (reporter only, once)
+ */
+export const SubmitTicketSatisfactionParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+/**
+ * @summary Get existing satisfaction for a ticket (if already submitted)
+ */
+export const GetMyTicketSatisfactionParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const SuggestKnowledgeArticlesResponse = zod.array(SuggestKnowledgeArticlesResponseItem)
+
+export const SubmitTicketSatisfactionResponse = zod.object({
+  "id": zod.int(),
+  "ticketId": zod.int(),
+  "score": zod.int().describe('1..5'),
+  "comment": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+export const ListKnowledgeArticlesResponseItem = zod.object({
+  "id": zod.int(),
+  "title": zod.string(),
+  "body": zod.string(),
+  "category": zod.string(),
+  "tags": zod.array(zod.string()),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+export const GetMyTicketSatisfactionResponse = zod.object({
+  "id": zod.int(),
+  "ticketId": zod.int(),
+  "score": zod.int().describe('1..5'),
+  "comment": zod.string().nullish(),
+  "createdAt": zod.string()
+})

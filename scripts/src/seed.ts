@@ -11,6 +11,7 @@ import {
   ticketCategoriesTable,
   ticketsTable,
   ticketCommentsTable,
+  ticketSatisfactionTable,
   cateringItemsTable,
   reservationsTable,
   cateringOrderLinesTable,
@@ -28,6 +29,7 @@ import {
   bouwdelenTable,
   conditiemetingenTable,
   mjopTakenTable,
+  knowledgeArticlesTable,
 } from "@workspace/db";
 import { sql } from "drizzle-orm";
 import { scryptSync, randomBytes } from "node:crypto";
@@ -53,10 +55,10 @@ async function main() {
   await db.execute(sql`
     TRUNCATE TABLE mjop_taken, conditiemetingen, bouwdelen,
       notifications, catering_order_lines, reservations, catering_items,
-      ticket_comments, tickets, ticket_categories, assets, workplaces, rooms, floors,
+      ticket_satisfaction, ticket_comments, tickets, ticket_categories, assets, workplaces, rooms, floors,
       shop_order_lines, shop_orders, shop_products, budgets, contracts, suppliers,
       meter_readings, waste_registrations,
-      buildings, sites, organizations, visitors, users RESTART IDENTITY CASCADE
+      buildings, sites, organizations, visitors, users, knowledge_articles RESTART IDENTITY CASCADE
   `);
 
   // Users — one per role plus extras
@@ -463,6 +465,25 @@ async function main() {
     { bouwdeelId: bd("BD-DAK-002").id, title: "Dakinspectie Stadskantoor", description: "Tweejaarlijkse conditiemeting EPDM-dak.", taskType: "inspectie", plannedYear: jaar + 1, estimatedCost: 1500, status: "gepland" },
   ]);
 
+
+  // Knowledge articles
+  await db.insert(knowledgeArticlesTable).values([
+    { title: "Wat te doen bij een te warme of te koude werkplek?", body: "1. Controleer eerst of ramen en deuren gesloten zijn.\n2. Kijk of de thermostaat in de ruimte correct is ingesteld (ingestelde temperatuur: 20-22°C).\n3. Als het probleem aanhoudt, dien dan een melding in via 'Storing klimaat'.\n4. Bij spoedeisende situaties (>26°C of <16°C) geef dit aan in uw melding met prioriteit P1.", category: "klimaat", tags: ["temperatuur", "ventilatie", "klimaat", "warmte", "koude"] },
+    { title: "Hoe een ruimte reserveren met catering?", body: "1. Ga naar 'Reserveringen' in het menu.\n2. Klik op 'Nieuwe reservering'.\n3. Kies de gewenste ruimte, datum en tijdstip.\n4. Stel eventueel de opbouw- en schoonmaakbuffer in (standaard 15 minuten).\n5. Voeg cateringartikelen toe via de knop 'Toevoegen' in de cateringsectie.\n6. Klik op 'Reserveren' om te bevestigen.\n\nDe cateraar ontvangt automatisch een melding van uw bestelling.", category: "reserveringen", tags: ["reservering", "catering", "ruimte", "boeken"] },
+    { title: "Mijn wachtwoord vergeten \u2013 hoe resetten?", body: "Neem contact op met de servicedesk via een melding in het systeem (categorie 'Overig') of bel intern 4444. De servicedesk reset uw wachtwoord binnen één werkdag.", category: "algemeen", tags: ["wachtwoord", "login", "account", "reset"] },
+    { title: "Kapotte verlichting melden", body: "Defecte of flikkerende verlichting meldt u via 'Meldingen > Nieuwe melding' met categorie 'Verlichting'.\n\nVermeld:\n- Het aantal defecte armaturen\n- De exacte locatie (ruimtecode)\n- Of de verlichting volledig uit is of flikkert\n\nDe servicedesk handelt dit af binnen 24 uur (P3).", category: "technisch", tags: ["verlichting", "armatuur", "lamp", "storing", "flikkeren"] },
+    { title: "Werkplek boeken voor een dag", body: "1. Ga naar 'Werkplekken' in het menu.\n2. Kies de gewenste datum via de datumkiezer.\n3. Filter optioneel op verdieping.\n4. Klik op een beschikbare werkplek (groen bolletje = beschikbaar).\n5. De boeking wordt direct bevestigd.\n\nU kunt ook zoeken welke werkplek een collega heeft geboekt via de zoekbalk 'Zoek collega op naam'.", category: "reserveringen", tags: ["werkplek", "flexplek", "boeken", "collega", "boeking"] },
+    { title: "Sanitair storing of verstopte afvoer melden", body: "Sanitaire problemen zoals verstoppingen, lekkages of defecte kranen meldt u via categorie 'Sanitair'.\n\nBij een actieve lekkage met wateroverlast: markeer dit als P1 (veiligheid) en neem telefonisch contact op met de servicedesk (intern 4444) voor directe actie.", category: "sanitair", tags: ["sanitair", "lekkage", "verstopping", "toilet", "kraan", "water"] },
+    { title: "Hoe een bezoeker registreren?", body: "1. Ga naar 'Bezoekers' in het menu.\n2. Klik op 'Bezoeker registreren'.\n3. Vul de naam, het bedrijf en de verwachte aankomsttijd in.\n4. De receptie ontvangt automatisch een melding.\n5. Bij aankomst checkt de receptie de bezoeker in.\n\nBezoekers ontvangen bij registratie een digitale badgecode.", category: "algemeen", tags: ["bezoeker", "registratie", "badge", "receptie", "aanmelding"] },
+    { title: "Schoonmaakprobleem of vervuiling melden", body: "Bij gemorste vloeistoffen, vuilnis of andere vervuiling:\n1. Maak een melding aan via categorie 'Schoonmaak'.\n2. Geef het type vervuiling aan en de exacte locatie.\n3. Als er gevaar is voor uitglijden, vink dan 'Direct gevaar' aan \u2013 dit verhoogt de prioriteit.\n\nBij ernstige situaties (grote lekkage, glasscherven) bel intern 4444.", category: "schoonmaak", tags: ["schoonmaak", "vervuiling", "gemorst", "vuilnis", "glasscherven"] },
+  ]);
+
+  // Sample satisfaction scores for closed tickets
+  await db.insert(ticketSatisfactionTable).values([
+    { ticketId: ticket("GC-2026-1008").id, score: 5, comment: "Snel opgelost, prima communicatie!", createdAt: hoursAgo(150) },
+    { ticketId: ticket("GC-2026-1003").id, score: 4, comment: "Goed afgehandeld.", createdAt: hoursAgo(25) },
+  ]);
+
   console.log("Seed voltooid:", {
     users: users.length,
     rooms: rooms.length,
@@ -471,6 +492,7 @@ async function main() {
     reservations: reservations.length,
   });
 }
+
 
 main()
   .then(() => process.exit(0))
