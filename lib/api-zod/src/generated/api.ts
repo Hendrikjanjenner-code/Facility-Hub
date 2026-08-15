@@ -805,3 +805,472 @@ export const GetRecentActivityResponseItem = zod.object({
 export const GetRecentActivityResponse = zod.array(GetRecentActivityResponseItem)
 
 
+/**
+ * @summary List suppliers
+ */
+export const ListSuppliersResponseItem = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "category": zod.string(),
+  "contactName": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "kvkNumber": zod.string().nullish(),
+  "userId": zod.int().nullish(),
+  "userName": zod.string().nullish(),
+  "contractCount": zod.int()
+})
+export const ListSuppliersResponse = zod.array(ListSuppliersResponseItem)
+
+
+
+
+
+
+export const CreateSupplierBody = zod.object({
+  "name": zod.string().min(1),
+  "category": zod.string().min(1),
+  "contactName": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "kvkNumber": zod.string().nullish(),
+  "userId": zod.int().nullish()
+})
+
+export const CreateSupplierResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "category": zod.string(),
+  "contactName": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "kvkNumber": zod.string().nullish(),
+  "userId": zod.int().nullish(),
+  "userName": zod.string().nullish(),
+  "contractCount": zod.int()
+})
+
+
+/**
+ * @summary List contracts (leverancier sees only own contracts)
+ */
+export const ListContractsQueryParams = zod.object({
+  "status": zod.coerce.string().optional(),
+  "expiringWithinDays": zod.coerce.number().int().optional()
+})
+
+export const ListContractsResponseItem = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "supplierId": zod.int(),
+  "supplierName": zod.string().nullish(),
+  "category": zod.string(),
+  "description": zod.string().nullish(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "noticePeriodDays": zod.int(),
+  "annualValue": zod.number().nullish(),
+  "status": zod.string().describe('actief | verlopen | opgezegd'),
+  "ownerId": zod.int().nullish(),
+  "ownerName": zod.string().nullish(),
+  "daysUntilEnd": zod.int(),
+  "expiringSoon": zod.boolean().describe('endDate within noticePeriodDays'),
+  "createdAt": zod.string()
+})
+export const ListContractsResponse = zod.array(ListContractsResponseItem)
+
+
+
+
+
+
+export const CreateContractBody = zod.object({
+  "name": zod.string().min(1),
+  "supplierId": zod.int(),
+  "category": zod.string().min(1),
+  "description": zod.string().nullish(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "noticePeriodDays": zod.int().nullish(),
+  "annualValue": zod.number().nullish()
+})
+
+export const CreateContractResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "supplierId": zod.int(),
+  "supplierName": zod.string().nullish(),
+  "category": zod.string(),
+  "description": zod.string().nullish(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "noticePeriodDays": zod.int(),
+  "annualValue": zod.number().nullish(),
+  "status": zod.string().describe('actief | verlopen | opgezegd'),
+  "ownerId": zod.int().nullish(),
+  "ownerName": zod.string().nullish(),
+  "daysUntilEnd": zod.int(),
+  "expiringSoon": zod.boolean().describe('endDate within noticePeriodDays'),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Update contract status or details
+ */
+export const UpdateContractParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateContractBody = zod.object({
+  "name": zod.string().optional(),
+  "status": zod.string().optional(),
+  "endDate": zod.string().optional(),
+  "noticePeriodDays": zod.int().optional(),
+  "annualValue": zod.number().nullish(),
+  "description": zod.string().nullish()
+})
+
+export const UpdateContractResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "supplierId": zod.int(),
+  "supplierName": zod.string().nullish(),
+  "category": zod.string(),
+  "description": zod.string().nullish(),
+  "startDate": zod.string(),
+  "endDate": zod.string(),
+  "noticePeriodDays": zod.int(),
+  "annualValue": zod.number().nullish(),
+  "status": zod.string().describe('actief | verlopen | opgezegd'),
+  "ownerId": zod.int().nullish(),
+  "ownerName": zod.string().nullish(),
+  "daysUntilEnd": zod.int(),
+  "expiringSoon": zod.boolean().describe('endDate within noticePeriodDays'),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary List webshop products (incl. voorraadstatus)
+ */
+export const ListShopProductsQueryParams = zod.object({
+  "category": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional(),
+  "belowMinStock": zod.coerce.boolean().optional()
+})
+
+export const ListShopProductsResponseItem = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.string(),
+  "price": zod.number(),
+  "unit": zod.string(),
+  "stock": zod.int(),
+  "minStock": zod.int(),
+  "belowMinStock": zod.boolean()
+})
+export const ListShopProductsResponse = zod.array(ListShopProductsResponseItem)
+
+
+
+
+
+
+export const CreateShopProductBody = zod.object({
+  "name": zod.string().min(1),
+  "description": zod.string().nullish(),
+  "category": zod.string().min(1),
+  "price": zod.number(),
+  "unit": zod.string().nullish(),
+  "stock": zod.int().nullish(),
+  "minStock": zod.int().nullish()
+})
+
+export const CreateShopProductResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.string(),
+  "price": zod.number(),
+  "unit": zod.string(),
+  "stock": zod.int(),
+  "minStock": zod.int(),
+  "belowMinStock": zod.boolean()
+})
+
+
+/**
+ * @summary Update product (voorraad bijwerken, minimumvoorraad, prijs)
+ */
+export const UpdateShopProductParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateShopProductBody = zod.object({
+  "name": zod.string().optional(),
+  "description": zod.string().nullish(),
+  "price": zod.number().optional(),
+  "stock": zod.int().optional(),
+  "minStock": zod.int().optional()
+})
+
+export const UpdateShopProductResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "description": zod.string().nullish(),
+  "category": zod.string(),
+  "price": zod.number(),
+  "unit": zod.string(),
+  "stock": zod.int(),
+  "minStock": zod.int(),
+  "belowMinStock": zod.boolean()
+})
+
+
+/**
+ * @summary List orders (eindgebruiker sees own; manager sees all)
+ */
+export const ListShopOrdersQueryParams = zod.object({
+  "status": zod.coerce.string().optional()
+})
+
+export const ListShopOrdersResponseItem = zod.object({
+  "id": zod.int(),
+  "number": zod.string(),
+  "requesterId": zod.int(),
+  "requesterName": zod.string().nullish(),
+  "department": zod.string(),
+  "status": zod.string().describe('ingediend | goedgekeurd | afgekeurd | besteld | geleverd'),
+  "totalAmount": zod.number(),
+  "approverId": zod.int().nullish(),
+  "approverName": zod.string().nullish(),
+  "decisionNote": zod.string().nullish(),
+  "lines": zod.array(zod.object({
+  "id": zod.int(),
+  "productId": zod.int(),
+  "productName": zod.string().nullish(),
+  "quantity": zod.int(),
+  "unitPrice": zod.number()
+})),
+  "createdAt": zod.string(),
+  "decidedAt": zod.string().nullish()
+})
+export const ListShopOrdersResponse = zod.array(ListShopOrdersResponseItem)
+
+
+/**
+ * @summary Place order from cart (starts approval flow)
+ */
+
+
+
+
+export const CreateShopOrderBody = zod.object({
+  "lines": zod.array(zod.object({
+  "productId": zod.int(),
+  "quantity": zod.int().min(1)
+})).min(1)
+})
+
+export const CreateShopOrderResponse = zod.object({
+  "id": zod.int(),
+  "number": zod.string(),
+  "requesterId": zod.int(),
+  "requesterName": zod.string().nullish(),
+  "department": zod.string(),
+  "status": zod.string().describe('ingediend | goedgekeurd | afgekeurd | besteld | geleverd'),
+  "totalAmount": zod.number(),
+  "approverId": zod.int().nullish(),
+  "approverName": zod.string().nullish(),
+  "decisionNote": zod.string().nullish(),
+  "lines": zod.array(zod.object({
+  "id": zod.int(),
+  "productId": zod.int(),
+  "productName": zod.string().nullish(),
+  "quantity": zod.int(),
+  "unitPrice": zod.number()
+})),
+  "createdAt": zod.string(),
+  "decidedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Approve/reject order or update fulfilment status
+ */
+export const UpdateShopOrderParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateShopOrderBody = zod.object({
+  "status": zod.string().describe('goedgekeurd | afgekeurd | besteld | geleverd'),
+  "decisionNote": zod.string().nullish()
+})
+
+export const UpdateShopOrderResponse = zod.object({
+  "id": zod.int(),
+  "number": zod.string(),
+  "requesterId": zod.int(),
+  "requesterName": zod.string().nullish(),
+  "department": zod.string(),
+  "status": zod.string().describe('ingediend | goedgekeurd | afgekeurd | besteld | geleverd'),
+  "totalAmount": zod.number(),
+  "approverId": zod.int().nullish(),
+  "approverName": zod.string().nullish(),
+  "decisionNote": zod.string().nullish(),
+  "lines": zod.array(zod.object({
+  "id": zod.int(),
+  "productId": zod.int(),
+  "productName": zod.string().nullish(),
+  "quantity": zod.int(),
+  "unitPrice": zod.number()
+})),
+  "createdAt": zod.string(),
+  "decidedAt": zod.string().nullish()
+})
+
+
+/**
+ * @summary Department budgets with spent amounts (budgetbewaking)
+ */
+export const ListBudgetsResponseItem = zod.object({
+  "id": zod.int(),
+  "department": zod.string(),
+  "year": zod.int(),
+  "amount": zod.number(),
+  "spent": zod.number().describe('Sum of approved\/ordered\/delivered orders'),
+  "pending": zod.number().describe('Sum of submitted (not yet decided) orders'),
+  "remaining": zod.number()
+})
+export const ListBudgetsResponse = zod.array(ListBudgetsResponseItem)
+
+
+export const ListMeterReadingsQueryParams = zod.object({
+  "buildingId": zod.coerce.number().int().optional(),
+  "meterType": zod.coerce.string().optional()
+})
+
+export const ListMeterReadingsResponseItem = zod.object({
+  "id": zod.int(),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "meterType": zod.string().describe('elektriciteit | gas | water'),
+  "readingDate": zod.string(),
+  "value": zod.number(),
+  "unit": zod.string(),
+  "source": zod.string(),
+  "registeredById": zod.int().nullish(),
+  "registeredByName": zod.string().nullish()
+})
+export const ListMeterReadingsResponse = zod.array(ListMeterReadingsResponseItem)
+
+
+export const CreateMeterReadingBody = zod.object({
+  "buildingId": zod.int(),
+  "meterType": zod.string(),
+  "readingDate": zod.string(),
+  "value": zod.number(),
+  "unit": zod.string()
+})
+
+export const CreateMeterReadingResponse = zod.object({
+  "id": zod.int(),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "meterType": zod.string().describe('elektriciteit | gas | water'),
+  "readingDate": zod.string(),
+  "value": zod.number(),
+  "unit": zod.string(),
+  "source": zod.string(),
+  "registeredById": zod.int().nullish(),
+  "registeredByName": zod.string().nullish()
+})
+
+
+/**
+ * @summary Bulk import meter readings (parsed CSV rows)
+ */
+
+
+
+export const ImportMeterReadingsBody = zod.object({
+  "rows": zod.array(zod.object({
+  "buildingId": zod.int(),
+  "meterType": zod.string(),
+  "readingDate": zod.string(),
+  "value": zod.number(),
+  "unit": zod.string()
+})).min(1)
+})
+
+export const ImportMeterReadingsResponse = zod.object({
+  "imported": zod.int(),
+  "skipped": zod.int(),
+  "message": zod.string()
+})
+
+
+export const ListWasteRegistrationsQueryParams = zod.object({
+  "buildingId": zod.coerce.number().int().optional()
+})
+
+export const ListWasteRegistrationsResponseItem = zod.object({
+  "id": zod.int(),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "registrationDate": zod.string(),
+  "category": zod.string().describe('restafval | papier | gft | plastic | glas | chemisch'),
+  "weightKg": zod.number(),
+  "registeredById": zod.int().nullish(),
+  "registeredByName": zod.string().nullish()
+})
+export const ListWasteRegistrationsResponse = zod.array(ListWasteRegistrationsResponseItem)
+
+
+export const CreateWasteRegistrationBody = zod.object({
+  "buildingId": zod.int(),
+  "registrationDate": zod.string(),
+  "category": zod.string(),
+  "weightKg": zod.number()
+})
+
+export const CreateWasteRegistrationResponse = zod.object({
+  "id": zod.int(),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "registrationDate": zod.string(),
+  "category": zod.string().describe('restafval | papier | gft | plastic | glas | chemisch'),
+  "weightKg": zod.number(),
+  "registeredById": zod.int().nullish(),
+  "registeredByName": zod.string().nullish()
+})
+
+
+/**
+ * @summary Aggregated monthly usage per meter type and waste per category
+ */
+export const GetSustainabilityReportQueryParams = zod.object({
+  "buildingId": zod.coerce.number().int().optional()
+})
+
+export const GetSustainabilityReportResponse = zod.object({
+  "monthlyUsage": zod.array(zod.object({
+  "month": zod.string().describe('YYYY-MM'),
+  "meterType": zod.string(),
+  "usage": zod.number(),
+  "unit": zod.string()
+})).describe('Per month per meter type usage (difference between readings)'),
+  "wasteByCategory": zod.array(zod.object({
+  "category": zod.string(),
+  "totalKg": zod.number()
+})),
+  "wasteByMonth": zod.array(zod.object({
+  "month": zod.string(),
+  "category": zod.string(),
+  "totalKg": zod.number()
+}))
+})
+
+

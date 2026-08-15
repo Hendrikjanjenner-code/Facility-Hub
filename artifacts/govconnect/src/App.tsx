@@ -21,6 +21,10 @@ import RuimtesPage from './pages/ruimtes/RuimtesPage';
 import RuimteDetailPage from './pages/ruimtes/RuimteDetailPage';
 import AssetsPage from './pages/assets/AssetsPage';
 import AssetDetailPage from './pages/assets/AssetDetailPage';
+import ContractenPage from './pages/contracten/ContractenPage';
+import WebshopPage from './pages/webshop/WebshopPage';
+import VoorraadPage from './pages/voorraad/VoorraadPage';
+import DuurzaamheidPage from './pages/duurzaamheid/DuurzaamheidPage';
 
 import { Shell } from './components/layout/Shell';
 
@@ -86,6 +90,11 @@ function Router() {
         
         <Route path="/assets/:id">{(params) => <ProtectedRoute component={AssetDetailPage} id={params.id} />}</Route>
         <Route path="/assets">{(params) => <ProtectedRoute component={AssetsPage} />}</Route>
+
+        <Route path="/contracten">{(params) => <ProtectedRoute component={ContractenPage} />}</Route>
+        <Route path="/webshop">{(params) => <ProtectedRoute component={WebshopPage} />}</Route>
+        <Route path="/voorraad">{(params) => <ProtectedRoute component={VoorraadPage} />}</Route>
+        <Route path="/duurzaamheid">{(params) => <ProtectedRoute component={DuurzaamheidPage} />}</Route>
 
         <Route component={NotFound} />
       </Switch>

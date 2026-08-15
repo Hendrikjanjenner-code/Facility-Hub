@@ -8,6 +8,9 @@ import visitorsRouter from "./visitors";
 import assetsRouter from "./assets";
 import notificationsRouter from "./notifications";
 import dashboardRouter from "./dashboard";
+import contractsRouter from "./contracts";
+import shopRouter from "./shop";
+import sustainabilityRouter from "./sustainability";
 
 const router: IRouter = Router();
 
@@ -20,5 +23,8 @@ router.use(visitorsRouter);
 router.use(assetsRouter);
 router.use(notificationsRouter);
 router.use(dashboardRouter);
+router.use(contractsRouter);
+router.use(shopRouter);
+router.use(sustainabilityRouter);
 
 export default router;

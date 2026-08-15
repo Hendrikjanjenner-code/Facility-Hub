@@ -21,7 +21,11 @@ import {
   Bell,
   LogOut,
   User as UserIcon,
-  Check
+  Check,
+  FileText,
+  ShoppingCart,
+  Boxes,
+  Leaf
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -96,6 +100,30 @@ const navItems: NavItem[] = [
     title: "Assets",
     href: "/assets",
     icon: PcCase,
+    roles: ["servicedesk", "facilitair_manager", "beheerder"]
+  },
+  {
+    title: "Contracten",
+    href: "/contracten",
+    icon: FileText,
+    roles: ["facilitair_manager", "beheerder", "leverancier"]
+  },
+  {
+    title: "Webshop",
+    href: "/webshop",
+    icon: ShoppingCart,
+    roles: ["eindgebruiker", "servicedesk", "facilitair_manager", "cateraar", "receptie", "beheerder"]
+  },
+  {
+    title: "Voorraad",
+    href: "/voorraad",
+    icon: Boxes,
+    roles: ["servicedesk", "facilitair_manager", "beheerder"]
+  },
+  {
+    title: "Duurzaamheid",
+    href: "/duurzaamheid",
+    icon: Leaf,
     roles: ["servicedesk", "facilitair_manager", "beheerder"]
   }
 ];

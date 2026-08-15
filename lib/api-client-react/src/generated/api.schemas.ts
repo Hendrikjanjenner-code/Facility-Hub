@@ -432,6 +432,278 @@ export interface ActivityItem {
   timestamp: string;
 }
 
+export interface Supplier {
+  id: number;
+  name: string;
+  category: string;
+  /** @nullable */
+  contactName?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  kvkNumber?: string | null;
+  /** @nullable */
+  userId?: number | null;
+  /** @nullable */
+  userName?: string | null;
+  contractCount: number;
+}
+
+export interface SupplierInput {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  category: string;
+  /** @nullable */
+  contactName?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  kvkNumber?: string | null;
+  /** @nullable */
+  userId?: number | null;
+}
+
+export interface Contract {
+  id: number;
+  name: string;
+  supplierId: number;
+  /** @nullable */
+  supplierName?: string | null;
+  category: string;
+  /** @nullable */
+  description?: string | null;
+  startDate: string;
+  endDate: string;
+  noticePeriodDays: number;
+  /** @nullable */
+  annualValue?: number | null;
+  /** actief | verlopen | opgezegd */
+  status: string;
+  /** @nullable */
+  ownerId?: number | null;
+  /** @nullable */
+  ownerName?: string | null;
+  daysUntilEnd: number;
+  /** endDate within noticePeriodDays */
+  expiringSoon: boolean;
+  createdAt: string;
+}
+
+export interface ContractInput {
+  /** @minLength 1 */
+  name: string;
+  supplierId: number;
+  /** @minLength 1 */
+  category: string;
+  /** @nullable */
+  description?: string | null;
+  startDate: string;
+  endDate: string;
+  /** @nullable */
+  noticePeriodDays?: number | null;
+  /** @nullable */
+  annualValue?: number | null;
+}
+
+export interface ContractUpdate {
+  name?: string;
+  status?: string;
+  endDate?: string;
+  noticePeriodDays?: number;
+  /** @nullable */
+  annualValue?: number | null;
+  /** @nullable */
+  description?: string | null;
+}
+
+export interface ShopProduct {
+  id: number;
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  category: string;
+  price: number;
+  unit: string;
+  stock: number;
+  minStock: number;
+  belowMinStock: boolean;
+}
+
+export interface ShopProductInput {
+  /** @minLength 1 */
+  name: string;
+  /** @nullable */
+  description?: string | null;
+  /** @minLength 1 */
+  category: string;
+  price: number;
+  /** @nullable */
+  unit?: string | null;
+  /** @nullable */
+  stock?: number | null;
+  /** @nullable */
+  minStock?: number | null;
+}
+
+export interface ShopProductUpdate {
+  name?: string;
+  /** @nullable */
+  description?: string | null;
+  price?: number;
+  stock?: number;
+  minStock?: number;
+}
+
+export interface ShopOrderLine {
+  id: number;
+  productId: number;
+  /** @nullable */
+  productName?: string | null;
+  quantity: number;
+  unitPrice: number;
+}
+
+export interface ShopOrder {
+  id: number;
+  number: string;
+  requesterId: number;
+  /** @nullable */
+  requesterName?: string | null;
+  department: string;
+  /** ingediend | goedgekeurd | afgekeurd | besteld | geleverd */
+  status: string;
+  totalAmount: number;
+  /** @nullable */
+  approverId?: number | null;
+  /** @nullable */
+  approverName?: string | null;
+  /** @nullable */
+  decisionNote?: string | null;
+  lines: ShopOrderLine[];
+  createdAt: string;
+  /** @nullable */
+  decidedAt?: string | null;
+}
+
+export type ShopOrderInputLinesItem = {
+  productId: number;
+  /** @minimum 1 */
+  quantity: number;
+};
+
+export interface ShopOrderInput {
+  /** @minItems 1 */
+  lines: ShopOrderInputLinesItem[];
+}
+
+export interface ShopOrderUpdate {
+  /** goedgekeurd | afgekeurd | besteld | geleverd */
+  status: string;
+  /** @nullable */
+  decisionNote?: string | null;
+}
+
+export interface BudgetStatus {
+  id: number;
+  department: string;
+  year: number;
+  amount: number;
+  /** Sum of approved/ordered/delivered orders */
+  spent: number;
+  /** Sum of submitted (not yet decided) orders */
+  pending: number;
+  remaining: number;
+}
+
+export interface MeterReading {
+  id: number;
+  buildingId: number;
+  /** @nullable */
+  buildingName?: string | null;
+  /** elektriciteit | gas | water */
+  meterType: string;
+  readingDate: string;
+  value: number;
+  unit: string;
+  source: string;
+  /** @nullable */
+  registeredById?: number | null;
+  /** @nullable */
+  registeredByName?: string | null;
+}
+
+export interface MeterReadingInput {
+  buildingId: number;
+  meterType: string;
+  readingDate: string;
+  value: number;
+  unit: string;
+}
+
+export interface MeterReadingImportInput {
+  /** @minItems 1 */
+  rows: MeterReadingInput[];
+}
+
+export interface ImportResult {
+  imported: number;
+  skipped: number;
+  message: string;
+}
+
+export interface WasteRegistration {
+  id: number;
+  buildingId: number;
+  /** @nullable */
+  buildingName?: string | null;
+  registrationDate: string;
+  /** restafval | papier | gft | plastic | glas | chemisch */
+  category: string;
+  weightKg: number;
+  /** @nullable */
+  registeredById?: number | null;
+  /** @nullable */
+  registeredByName?: string | null;
+}
+
+export interface WasteRegistrationInput {
+  buildingId: number;
+  registrationDate: string;
+  category: string;
+  weightKg: number;
+}
+
+export type SustainabilityReportMonthlyUsageItem = {
+  /** YYYY-MM */
+  month: string;
+  meterType: string;
+  usage: number;
+  unit: string;
+};
+
+export type SustainabilityReportWasteByCategoryItem = {
+  category: string;
+  totalKg: number;
+};
+
+export type SustainabilityReportWasteByMonthItem = {
+  month: string;
+  category: string;
+  totalKg: number;
+};
+
+export interface SustainabilityReport {
+  /** Per month per meter type usage (difference between readings) */
+  monthlyUsage: SustainabilityReportMonthlyUsageItem[];
+  wasteByCategory: SustainabilityReportWasteByCategoryItem[];
+  wasteByMonth: SustainabilityReportWasteByMonthItem[];
+}
+
 export type ListTicketsParams = {
 status?: string;
 priority?: string;
@@ -478,5 +750,33 @@ export type ListAssetsParams = {
 roomId?: number;
 category?: string;
 search?: string;
+};
+
+export type ListContractsParams = {
+status?: string;
+expiringWithinDays?: number;
+};
+
+export type ListShopProductsParams = {
+category?: string;
+search?: string;
+belowMinStock?: boolean;
+};
+
+export type ListShopOrdersParams = {
+status?: string;
+};
+
+export type ListMeterReadingsParams = {
+buildingId?: number;
+meterType?: string;
+};
+
+export type ListWasteRegistrationsParams = {
+buildingId?: number;
+};
+
+export type GetSustainabilityReportParams = {
+buildingId?: number;
 };
 

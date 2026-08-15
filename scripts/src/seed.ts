@@ -17,6 +17,14 @@ import {
   visitorsTable,
   assetsTable,
   notificationsTable,
+  suppliersTable,
+  contractsTable,
+  shopProductsTable,
+  budgetsTable,
+  shopOrdersTable,
+  shopOrderLinesTable,
+  meterReadingsTable,
+  wasteRegistrationsTable,
 } from "@workspace/db";
 import { sql } from "drizzle-orm";
 import { scryptSync, randomBytes } from "node:crypto";
@@ -42,6 +50,8 @@ async function main() {
   await db.execute(sql`
     TRUNCATE TABLE notifications, catering_order_lines, reservations, catering_items,
       ticket_comments, tickets, ticket_categories, assets, workplaces, rooms, floors,
+      shop_order_lines, shop_orders, shop_products, budgets, contracts, suppliers,
+      meter_readings, waste_registrations,
       buildings, sites, organizations, visitors, users RESTART IDENTITY CASCADE
   `);
 
@@ -280,6 +290,113 @@ async function main() {
     { name: "Thijs Kramer", company: "Techniek Partners B.V.", email: "t.kramer@techniekpartners.nl", hostId: u("ruben").id, visitDate: today(1), expectedArrival: "10:00", badgeCode: "BZ-D2F9S7", status: "verwacht" },
     { name: "Els van Houten", company: "Provincie", email: "e.vanhouten@provincie.nl", hostId: u("fatima").id, visitDate: today(1), expectedArrival: "13:30", badgeCode: "BZ-M6B1V4", status: "verwacht" },
   ]);
+
+  // Leveranciers & contracten
+  const suppliers = await db
+    .insert(suppliersTable)
+    .values([
+      { name: "Techniek Partners B.V.", category: "techniek", contactName: "Kees Mulder", email: "info@techniekpartners.nl", phone: "010-1234567", kvkNumber: "24123456", userId: u("kees").id },
+      { name: "CleanCare Facilitair", category: "schoonmaak", contactName: "Miriam de Groot", email: "planning@cleancare.nl", phone: "010-2345678", kvkNumber: "24234567", userId: null },
+      { name: "GroenWerk Rijnstad", category: "groenvoorziening", contactName: "Bram Verhoef", email: "bram@groenwerk.nl", phone: "010-3456789", kvkNumber: "24345678", userId: null },
+      { name: "SecuriTop Beveiliging", category: "beveiliging", contactName: "Ilse Kuijpers", email: "contract@securitop.nl", phone: "010-4567890", kvkNumber: "24456789", userId: null },
+      { name: "Van Vliet Catering", category: "catering", contactName: "Joost van Vliet", email: "offerte@vanvlietcatering.nl", phone: "010-5678901", kvkNumber: "24567890", userId: null },
+    ])
+    .returning();
+  const sup = (name: string) => suppliers.find((s) => s.name.startsWith(name))!;
+
+  await db.insert(contractsTable).values([
+    { name: "Onderhoud klimaatinstallaties", supplierId: sup("Techniek").id, category: "techniek", description: "Preventief en correctief onderhoud aan alle klimaatinstallaties.", startDate: today(-700), endDate: today(45), noticePeriodDays: 90, annualValue: 48500, status: "actief", ownerId: u("fatima").id },
+    { name: "Schoonmaak kantoorpanden", supplierId: sup("CleanCare").id, category: "schoonmaak", description: "Dagelijkse schoonmaak Stadhuis en Stadskantoor.", startDate: today(-400), endDate: today(330), noticePeriodDays: 180, annualValue: 132000, status: "actief", ownerId: u("fatima").id },
+    { name: "Groenonderhoud buitenterreinen", supplierId: sup("GroenWerk").id, category: "groenvoorziening", description: "Onderhoud groen rondom alle vestigingen.", startDate: today(-250), endDate: today(480), noticePeriodDays: 90, annualValue: 27500, status: "actief", ownerId: u("ruben").id },
+    { name: "Beveiligingsdiensten avond/nacht", supplierId: sup("SecuriTop").id, category: "beveiliging", description: "Surveillance en alarmopvolging.", startDate: today(-900), endDate: today(70), noticePeriodDays: 120, annualValue: 89000, status: "actief", ownerId: u("ruben").id },
+    { name: "Banqueting raadsvergaderingen", supplierId: sup("Van Vliet").id, category: "catering", description: "Catering bij raads- en commissievergaderingen.", startDate: today(-1100), endDate: today(-30), noticePeriodDays: 60, annualValue: 18000, status: "verlopen", ownerId: u("fatima").id },
+    { name: "Liftonderhoud Stadhuis", supplierId: sup("Techniek").id, category: "techniek", description: "Jaarlijkse keuring en onderhoud liften.", startDate: today(-500), endDate: today(600), noticePeriodDays: 90, annualValue: 12400, status: "actief", ownerId: u("fatima").id },
+  ]);
+
+  // Webshop: producten, budgetten, bestellingen
+  const products = await db
+    .insert(shopProductsTable)
+    .values([
+      { name: "Kopieerpapier A4 (doos)", description: "5x500 vel, 80 grams", category: "kantoorartikelen", price: 24.95, unit: "doos", stock: 42, minStock: 20 },
+      { name: "Balpennen blauw (50 st.)", description: "Doos met 50 stuks", category: "kantoorartikelen", price: 17.5, unit: "doos", stock: 8, minStock: 10 },
+      { name: "Whiteboardmarkers (set)", description: "Set van 4 kleuren", category: "kantoorartikelen", price: 6.75, unit: "set", stock: 31, minStock: 15 },
+      { name: "USB-C dockingstation", description: "Dual monitor, 100W PD", category: "ict", price: 189.0, unit: "stuk", stock: 6, minStock: 4 },
+      { name: "Draadloze muis", description: "Ergonomisch, stil klikgeluid", category: "ict", price: 34.5, unit: "stuk", stock: 14, minStock: 8 },
+      { name: "Headset met microfoon", description: "Voor videobellen, USB", category: "ict", price: 59.95, unit: "stuk", stock: 3, minStock: 6 },
+      { name: "Bureaustoel ergonomisch", description: "NEN-EN 1335 gecertificeerd", category: "meubilair", price: 425.0, unit: "stuk", stock: 5, minStock: 2 },
+      { name: "Monitorarm enkel", description: "Gasveer, VESA 75/100", category: "meubilair", price: 89.0, unit: "stuk", stock: 12, minStock: 5 },
+      { name: "Koffiebekers composteerbaar (1000 st.)", description: "180 ml, PLA-coating", category: "facilitair", price: 42.0, unit: "doos", stock: 18, minStock: 10 },
+      { name: "Handzeep navulling (6L)", description: "Dermatologisch getest", category: "facilitair", price: 28.5, unit: "can", stock: 9, minStock: 12 },
+    ])
+    .returning();
+  const prod = (name: string) => products.find((p) => p.name.startsWith(name))!;
+
+  await db.insert(budgetsTable).values([
+    { department: "Burgerzaken", year: 2026, amount: 7500 },
+    { department: "Ruimtelijke Ordening", year: 2026, amount: 6000 },
+    { department: "Financiën", year: 2026, amount: 5000 },
+    { department: "Facilitair Bedrijf", year: 2026, amount: 15000 },
+    { department: "Receptie", year: 2026, amount: 2500 },
+    { department: "Catering", year: 2026, amount: 4000 },
+  ]);
+
+  const orders = await db
+    .insert(shopOrdersTable)
+    .values([
+      { number: "WS-2026-1001", requesterId: u("emma").id, department: "Burgerzaken", status: "geleverd", totalAmount: 124.75, approverId: u("fatima").id, decidedAt: hoursAgo(300), createdAt: hoursAgo(340) },
+      { number: "WS-2026-1002", requesterId: u("daan").id, department: "Financiën", status: "goedgekeurd", totalAmount: 378.0, approverId: u("fatima").id, decidedAt: hoursAgo(20), createdAt: hoursAgo(30) },
+      { number: "WS-2026-1003", requesterId: u("noor").id, department: "Ruimtelijke Ordening", status: "ingediend", totalAmount: 484.95, createdAt: hoursAgo(4) },
+      { number: "WS-2026-1004", requesterId: u("linda").id, department: "Receptie", status: "afgekeurd", totalAmount: 850.0, approverId: u("fatima").id, decisionNote: "Boven budget; graag eerst afstemmen met inkoop.", decidedAt: hoursAgo(70), createdAt: hoursAgo(90) },
+      { number: "WS-2026-1005", requesterId: u("emma").id, department: "Burgerzaken", status: "ingediend", totalAmount: 119.9, createdAt: hoursAgo(1) },
+    ])
+    .returning();
+  await db.insert(shopOrderLinesTable).values([
+    { orderId: orders[0]!.id, productId: prod("Kopieerpapier").id, quantity: 5, unitPrice: 24.95 },
+    { orderId: orders[1]!.id, productId: prod("USB-C").id, quantity: 2, unitPrice: 189.0 },
+    { orderId: orders[2]!.id, productId: prod("Bureaustoel").id, quantity: 1, unitPrice: 425.0 },
+    { orderId: orders[2]!.id, productId: prod("Draadloze muis").id, quantity: 1, unitPrice: 34.5 },
+    { orderId: orders[3]!.id, productId: prod("Bureaustoel").id, quantity: 2, unitPrice: 425.0 },
+    { orderId: orders[4]!.id, productId: prod("Headset").id, quantity: 2, unitPrice: 59.95 },
+  ]);
+
+  // Duurzaamheid: meterstanden (cumulatief, maandelijks) en afvalregistraties
+  const meterRows: {
+    buildingId: number; meterType: string; readingDate: string; value: number; unit: string; source: string; registeredById: number;
+  }[] = [];
+  const buildingsForMeters = [
+    { b: stadhuis!, elek: 184000, gas: 42100, water: 6100, elekStep: [5200, 4900, 4600, 4300, 4100, 4400], gasStep: [900, 720, 480, 260, 140, 90], waterStep: [120, 115, 130, 125, 140, 135] },
+    { b: stadskantoor!, elek: 121500, gas: 28800, water: 4200, elekStep: [3600, 3400, 3200, 3000, 2900, 3100], gasStep: [640, 500, 330, 180, 90, 60], waterStep: [95, 90, 100, 98, 108, 104] },
+  ];
+  for (const cfg of buildingsForMeters) {
+    let e = cfg.elek, g = cfg.gas, w = cfg.water;
+    for (let m = 0; m < 7; m++) {
+      const d = new Date(2026, 1 + m, 1); // feb..aug 2026
+      const dateStr = d.toLocaleDateString("sv-SE");
+      meterRows.push({ buildingId: cfg.b.id, meterType: "elektriciteit", readingDate: dateStr, value: e, unit: "kWh", source: m < 5 ? "csv_import" : "handmatig", registeredById: u("ruben").id });
+      meterRows.push({ buildingId: cfg.b.id, meterType: "gas", readingDate: dateStr, value: g, unit: "m3", source: m < 5 ? "csv_import" : "handmatig", registeredById: u("ruben").id });
+      meterRows.push({ buildingId: cfg.b.id, meterType: "water", readingDate: dateStr, value: w, unit: "m3", source: "handmatig", registeredById: u("fatima").id });
+      if (m < 6) { e += cfg.elekStep[m]!; g += cfg.gasStep[m]!; w += cfg.waterStep[m]!; }
+    }
+  }
+  await db.insert(meterReadingsTable).values(meterRows);
+
+  const wasteRows: { buildingId: number; registrationDate: string; category: string; weightKg: number; registeredById: number }[] = [];
+  const wasteCfg: [string, number[]][] = [
+    ["restafval", [520, 480, 510, 495, 530, 505]],
+    ["papier", [310, 290, 305, 280, 300, 295]],
+    ["gft", [140, 150, 160, 175, 180, 170]],
+    ["plastic", [95, 100, 92, 105, 110, 98]],
+    ["glas", [40, 35, 45, 38, 42, 44]],
+  ];
+  for (let m = 0; m < 6; m++) {
+    const d = new Date(2026, 2 + m, 15); // mrt..aug 2026
+    const dateStr = d.toLocaleDateString("sv-SE");
+    for (const [category, weights] of wasteCfg) {
+      wasteRows.push({ buildingId: stadhuis!.id, registrationDate: dateStr, category, weightKg: weights[m]!, registeredById: u("fatima").id });
+      wasteRows.push({ buildingId: stadskantoor!.id, registrationDate: dateStr, category, weightKg: Math.round(weights[m]! * 0.7), registeredById: u("fatima").id });
+    }
+  }
+  await db.insert(wasteRegistrationsTable).values(wasteRows);
 
   // Notifications
   await db.insert(notificationsTable).values([

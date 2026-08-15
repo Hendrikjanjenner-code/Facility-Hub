@@ -17,6 +17,9 @@ tags:
   - name: assets
   - name: notifications
   - name: dashboard
+  - name: contracts
+  - name: shop
+  - name: sustainability
 paths:
   /healthz:
     get:
@@ -639,6 +642,346 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/ActivityItem"
+  /suppliers:
+    get:
+      operationId: listSuppliers
+      tags: [contracts]
+      summary: List suppliers
+      responses:
+        "200":
+          description: Suppliers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Supplier"
+    post:
+      operationId: createSupplier
+      tags: [contracts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SupplierInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Supplier"
+  /contracts:
+    get:
+      operationId: listContracts
+      tags: [contracts]
+      summary: List contracts (leverancier sees only own contracts)
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: expiringWithinDays
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Contracts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contract"
+    post:
+      operationId: createContract
+      tags: [contracts]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+  /contracts/{id}:
+    patch:
+      operationId: updateContract
+      tags: [contracts]
+      summary: Update contract status or details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContractUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+  /shop/products:
+    get:
+      operationId: listShopProducts
+      tags: [shop]
+      summary: List webshop products (incl. voorraadstatus)
+      parameters:
+        - name: category
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: belowMinStock
+          in: query
+          schema: { type: boolean }
+      responses:
+        "200":
+          description: Products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShopProduct"
+    post:
+      operationId: createShopProduct
+      tags: [shop]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopProductInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopProduct"
+  /shop/products/{id}:
+    patch:
+      operationId: updateShopProduct
+      tags: [shop]
+      summary: Update product (voorraad bijwerken, minimumvoorraad, prijs)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopProductUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopProduct"
+  /shop/orders:
+    get:
+      operationId: listShopOrders
+      tags: [shop]
+      summary: List orders (eindgebruiker sees own; manager sees all)
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShopOrder"
+    post:
+      operationId: createShopOrder
+      tags: [shop]
+      summary: Place order from cart (starts approval flow)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopOrderInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopOrder"
+        "409":
+          description: Insufficient stock
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /shop/orders/{id}:
+    patch:
+      operationId: updateShopOrder
+      tags: [shop]
+      summary: Approve/reject order or update fulfilment status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShopOrderUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShopOrder"
+        "409":
+          description: Insufficient stock
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /budgets:
+    get:
+      operationId: listBudgets
+      tags: [shop]
+      summary: Department budgets with spent amounts (budgetbewaking)
+      responses:
+        "200":
+          description: Budgets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BudgetStatus"
+  /meter-readings:
+    get:
+      operationId: listMeterReadings
+      tags: [sustainability]
+      parameters:
+        - name: buildingId
+          in: query
+          schema: { type: integer }
+        - name: meterType
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: Meter readings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MeterReading"
+    post:
+      operationId: createMeterReading
+      tags: [sustainability]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeterReadingInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeterReading"
+  /meter-readings/import:
+    post:
+      operationId: importMeterReadings
+      tags: [sustainability]
+      summary: Bulk import meter readings (parsed CSV rows)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeterReadingImportInput"
+      responses:
+        "201":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportResult"
+  /waste-registrations:
+    get:
+      operationId: listWasteRegistrations
+      tags: [sustainability]
+      parameters:
+        - name: buildingId
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Waste registrations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WasteRegistration"
+    post:
+      operationId: createWasteRegistration
+      tags: [sustainability]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WasteRegistrationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WasteRegistration"
+  /sustainability/report:
+    get:
+      operationId: getSustainabilityReport
+      tags: [sustainability]
+      summary: Aggregated monthly usage per meter type and waste per category
+      parameters:
+        - name: buildingId
+          in: query
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SustainabilityReport"
 components:
   schemas:
     HealthStatus:
@@ -1050,3 +1393,251 @@ components:
         linkPath: { type: ["string", "null"] }
         timestamp: { type: string }
       required: [id, kind, title, timestamp]
+    Supplier:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        category: { type: string }
+        contactName: { type: ["string", "null"] }
+        email: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        kvkNumber: { type: ["string", "null"] }
+        userId: { type: ["integer", "null"] }
+        userName: { type: ["string", "null"] }
+        contractCount: { type: integer }
+      required: [id, name, category, contractCount]
+    SupplierInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        category: { type: string, minLength: 1 }
+        contactName: { type: ["string", "null"] }
+        email: { type: ["string", "null"] }
+        phone: { type: ["string", "null"] }
+        kvkNumber: { type: ["string", "null"] }
+        userId: { type: ["integer", "null"] }
+      required: [name, category]
+    Contract:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        supplierId: { type: integer }
+        supplierName: { type: ["string", "null"] }
+        category: { type: string }
+        description: { type: ["string", "null"] }
+        startDate: { type: string }
+        endDate: { type: string }
+        noticePeriodDays: { type: integer }
+        annualValue: { type: ["number", "null"] }
+        status: { type: string, description: "actief | verlopen | opgezegd" }
+        ownerId: { type: ["integer", "null"] }
+        ownerName: { type: ["string", "null"] }
+        daysUntilEnd: { type: integer }
+        expiringSoon: { type: boolean, description: "endDate within noticePeriodDays" }
+        createdAt: { type: string }
+      required: [id, name, supplierId, category, startDate, endDate, noticePeriodDays, status, daysUntilEnd, expiringSoon, createdAt]
+    ContractInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        supplierId: { type: integer }
+        category: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+        startDate: { type: string }
+        endDate: { type: string }
+        noticePeriodDays: { type: ["integer", "null"] }
+        annualValue: { type: ["number", "null"] }
+      required: [name, supplierId, category, startDate, endDate]
+    ContractUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        status: { type: string }
+        endDate: { type: string }
+        noticePeriodDays: { type: integer }
+        annualValue: { type: ["number", "null"] }
+        description: { type: ["string", "null"] }
+    ShopProduct:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        description: { type: ["string", "null"] }
+        category: { type: string }
+        price: { type: number }
+        unit: { type: string }
+        stock: { type: integer }
+        minStock: { type: integer }
+        belowMinStock: { type: boolean }
+      required: [id, name, category, price, unit, stock, minStock, belowMinStock]
+    ShopProductInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1 }
+        description: { type: ["string", "null"] }
+        category: { type: string, minLength: 1 }
+        price: { type: number }
+        unit: { type: ["string", "null"] }
+        stock: { type: ["integer", "null"] }
+        minStock: { type: ["integer", "null"] }
+      required: [name, category, price]
+    ShopProductUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: ["string", "null"] }
+        price: { type: number }
+        stock: { type: integer }
+        minStock: { type: integer }
+    ShopOrderLine:
+      type: object
+      properties:
+        id: { type: integer }
+        productId: { type: integer }
+        productName: { type: ["string", "null"] }
+        quantity: { type: integer }
+        unitPrice: { type: number }
+      required: [id, productId, quantity, unitPrice]
+    ShopOrder:
+      type: object
+      properties:
+        id: { type: integer }
+        number: { type: string }
+        requesterId: { type: integer }
+        requesterName: { type: ["string", "null"] }
+        department: { type: string }
+        status: { type: string, description: "ingediend | goedgekeurd | afgekeurd | besteld | geleverd" }
+        totalAmount: { type: number }
+        approverId: { type: ["integer", "null"] }
+        approverName: { type: ["string", "null"] }
+        decisionNote: { type: ["string", "null"] }
+        lines:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShopOrderLine"
+        createdAt: { type: string }
+        decidedAt: { type: ["string", "null"] }
+      required: [id, number, requesterId, department, status, totalAmount, lines, createdAt]
+    ShopOrderInput:
+      type: object
+      properties:
+        lines:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              productId: { type: integer }
+              quantity: { type: integer, minimum: 1 }
+            required: [productId, quantity]
+      required: [lines]
+    ShopOrderUpdate:
+      type: object
+      properties:
+        status: { type: string, description: "goedgekeurd | afgekeurd | besteld | geleverd" }
+        decisionNote: { type: ["string", "null"] }
+      required: [status]
+    BudgetStatus:
+      type: object
+      properties:
+        id: { type: integer }
+        department: { type: string }
+        year: { type: integer }
+        amount: { type: number }
+        spent: { type: number, description: "Sum of approved/ordered/delivered orders" }
+        pending: { type: number, description: "Sum of submitted (not yet decided) orders" }
+        remaining: { type: number }
+      required: [id, department, year, amount, spent, pending, remaining]
+    MeterReading:
+      type: object
+      properties:
+        id: { type: integer }
+        buildingId: { type: integer }
+        buildingName: { type: ["string", "null"] }
+        meterType: { type: string, description: "elektriciteit | gas | water" }
+        readingDate: { type: string }
+        value: { type: number }
+        unit: { type: string }
+        source: { type: string }
+        registeredById: { type: ["integer", "null"] }
+        registeredByName: { type: ["string", "null"] }
+      required: [id, buildingId, meterType, readingDate, value, unit, source]
+    MeterReadingInput:
+      type: object
+      properties:
+        buildingId: { type: integer }
+        meterType: { type: string }
+        readingDate: { type: string }
+        value: { type: number }
+        unit: { type: string }
+      required: [buildingId, meterType, readingDate, value, unit]
+    MeterReadingImportInput:
+      type: object
+      properties:
+        rows:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/MeterReadingInput"
+      required: [rows]
+    ImportResult:
+      type: object
+      properties:
+        imported: { type: integer }
+        skipped: { type: integer }
+        message: { type: string }
+      required: [imported, skipped, message]
+    WasteRegistration:
+      type: object
+      properties:
+        id: { type: integer }
+        buildingId: { type: integer }
+        buildingName: { type: ["string", "null"] }
+        registrationDate: { type: string }
+        category: { type: string, description: "restafval | papier | gft | plastic | glas | chemisch" }
+        weightKg: { type: number }
+        registeredById: { type: ["integer", "null"] }
+        registeredByName: { type: ["string", "null"] }
+      required: [id, buildingId, registrationDate, category, weightKg]
+    WasteRegistrationInput:
+      type: object
+      properties:
+        buildingId: { type: integer }
+        registrationDate: { type: string }
+        category: { type: string }
+        weightKg: { type: number }
+      required: [buildingId, registrationDate, category, weightKg]
+    SustainabilityReport:
+      type: object
+      properties:
+        monthlyUsage:
+          type: array
+          description: Per month per meter type usage (difference between readings)
+          items:
+            type: object
+            properties:
+              month: { type: string, description: "YYYY-MM" }
+              meterType: { type: string }
+              usage: { type: number }
+              unit: { type: string }
+            required: [month, meterType, usage, unit]
+        wasteByCategory:
+          type: array
+          items:
+            type: object
+            properties:
+              category: { type: string }
+              totalKg: { type: number }
+            required: [category, totalKg]
+        wasteByMonth:
+          type: array
+          items:
+            type: object
+            properties:
+              month: { type: string }
+              category: { type: string }
+              totalKg: { type: number }
+            required: [month, category, totalKg]
+      required: [monthlyUsage, wasteByCategory, wasteByMonth]
