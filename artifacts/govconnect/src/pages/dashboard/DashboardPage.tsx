@@ -1,0 +1,295 @@
+import { useLocation } from "wouter";
+import { 
+  useGetDashboardSummary, 
+  useGetRecentActivity,
+  useGetCurrentUser
+} from "@workspace/api-client-react";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip as RechartsTooltip, 
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from "recharts";
+import { formatDistanceToNow } from "date-fns";
+import { nl } from "date-fns/locale";
+import { 
+  Ticket, 
+  AlertTriangle, 
+  CalendarDays, 
+  Users, 
+  Monitor, 
+  Building2, 
+  Activity,
+  ArrowRight
+} from "lucide-react";
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+
+const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+
+function StatCard({ 
+  title, 
+  value, 
+  icon: Icon, 
+  description, 
+  danger = false 
+}: { 
+  title: string, 
+  value: number | string, 
+  icon: any, 
+  description?: string,
+  danger?: boolean
+}) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        <Icon className={`h-4 w-4 ${danger ? 'text-destructive' : 'text-muted-foreground'}`} />
+      </CardHeader>
+      <CardContent>
+        <div className={`text-2xl font-bold ${danger && Number(value) > 0 ? 'text-destructive' : ''}`}>
+          {value}
+        </div>
+        {description && (
+          <p className="text-xs text-muted-foreground mt-1">
+            {description}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function DashboardPage() {
+  const [, setLocation] = useLocation();
+  const { data: user } = useGetCurrentUser();
+  const { data: summary, isLoading: isSummaryLoading } = useGetDashboardSummary();
+  const { data: activity, isLoading: isActivityLoading } = useGetRecentActivity();
+
+  if (isSummaryLoading || !user) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold tracking-tight">Overzicht</h1>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1,2,3,4].map(i => <Skeleton key={i} className="h-32 rounded-xl" />)}
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Skeleton className="col-span-4 h-[400px] rounded-xl" />
+          <Skeleton className="col-span-3 h-[400px] rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!summary) return null;
+
+  return (
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Welkom terug, {user.name.split(' ')[0]}</h1>
+          <p className="text-muted-foreground">Hier is uw facilitaire overzicht voor vandaag.</p>
+        </div>
+        
+        {user.role === 'eindgebruiker' && (
+          <div className="flex gap-2">
+            <Button onClick={() => setLocation("/meldingen/nieuw")}>
+              <Ticket className="mr-2 h-4 w-4" />
+              Nieuwe melding
+            </Button>
+          </div>
+        )}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Render cards based on role context. Backend populates irrelevant ones with 0, but we can also filter conditionally */}
+        
+        {(user.role === 'eindgebruiker' || user.role === 'servicedesk' || user.role === 'facilitair_manager' || user.role === 'beheerder') && (
+          <StatCard 
+            title={user.role === 'eindgebruiker' ? "Mijn open meldingen" : "Open meldingen"} 
+            value={user.role === 'eindgebruiker' ? summary.myOpenTickets : summary.openTickets} 
+            icon={Ticket} 
+            description="Momenteel in behandeling" 
+          />
+        )}
+
+        {(user.role === 'servicedesk' || user.role === 'facilitair_manager' || user.role === 'beheerder') && (
+          <StatCard 
+            title="SLA in gevaar" 
+            value={summary.slaAtRisk} 
+            icon={AlertTriangle} 
+            danger={true}
+            description="Binnen 4 uur of verlopen" 
+          />
+        )}
+
+        {(user.role !== 'servicedesk' && user.role !== 'leverancier') && (
+          <StatCard 
+            title={user.role === 'eindgebruiker' ? "Mijn reserveringen" : "Reserveringen vandaag"} 
+            value={user.role === 'eindgebruiker' ? summary.myReservationsToday : summary.reservationsToday} 
+            icon={CalendarDays} 
+            description="Ruimtes & catering" 
+          />
+        )}
+
+        {(user.role === 'eindgebruiker' || user.role === 'facilitair_manager' || user.role === 'beheerder') && (
+          <StatCard 
+            title="Werkplekboekingen" 
+            value={summary.workplaceBookingsToday} 
+            icon={Monitor} 
+            description="Voor vandaag" 
+          />
+        )}
+
+        {(user.role === 'receptie' || user.role === 'facilitair_manager' || user.role === 'beheerder') && (
+          <StatCard 
+            title="Bezoekers" 
+            value={`${summary.visitorsPresent} / ${summary.visitorsExpectedToday}`} 
+            icon={Users} 
+            description="Aanwezig / Verwacht" 
+          />
+        )}
+        
+        {(user.role === 'beheerder') && (
+          <StatCard 
+            title="Totaal assets" 
+            value={summary.assetCount} 
+            icon={Building2} 
+            description="Geregistreerd in systeem" 
+          />
+        )}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        {(user.role === 'servicedesk' || user.role === 'facilitair_manager' || user.role === 'beheerder') && (
+          <>
+            <Card className="col-span-4">
+              <CardHeader>
+                <CardTitle>Meldingen per status</CardTitle>
+                <CardDescription>Overzicht van alle actieve meldingen</CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={summary.ticketsByStatus} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                      <XAxis 
+                        dataKey="key" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} 
+                        tickFormatter={(value) => value.replace('_', ' ')}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} 
+                      />
+                      <RechartsTooltip 
+                        cursor={{ fill: 'var(--muted)', opacity: 0.2 }}
+                        contentStyle={{ borderRadius: '8px', border: '1px solid var(--border)' }}
+                      />
+                      <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="col-span-3">
+              <CardHeader>
+                <CardTitle>Prioriteitsverdeling</CardTitle>
+                <CardDescription>Openstaande meldingen</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={summary.ticketsByPriority}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={2}
+                        dataKey="count"
+                        nameKey="key"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        labelLine={false}
+                      >
+                        {summary.ticketsByPriority.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <RechartsTooltip 
+                        contentStyle={{ borderRadius: '8px', border: '1px solid var(--border)' }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
+
+        {/* Activity Feed for everyone */}
+        <Card className={cn("col-span-4", user.role === 'eindgebruiker' || user.role === 'cateraar' || user.role === 'receptie' || user.role === 'leverancier' ? 'lg:col-span-7' : 'lg:col-span-4')}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Recente activiteit
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isActivityLoading ? (
+              <div className="space-y-4">
+                {[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
+              </div>
+            ) : !activity?.length ? (
+              <div className="text-center py-8 text-muted-foreground">Geen recente activiteit</div>
+            ) : (
+              <div className="space-y-6">
+                {activity.map((item) => (
+                  <div key={item.id} className="flex items-start justify-between gap-4 group">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium leading-none">{item.title}</p>
+                      {item.subtitle && (
+                        <p className="text-sm text-muted-foreground">{item.subtitle}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: nl })}
+                      </p>
+                    </div>
+                    {item.linkPath && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setLocation(item.linkPath!)}
+                      >
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// Simple internal cn helper for the dashboard
+function cn(...classes: (string | undefined | null | false)[]) {
+  return classes.filter(Boolean).join(" ");
+}

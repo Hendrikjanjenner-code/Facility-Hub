@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "GovConnect 2.0"
+description = "Modulair facilitair management platform (Nederlandse SaaS-webapp) met rolgebaseerde dashboards, servicedesk-tickets met SLA, ruimte- en werkplekreserveringen, bezoekersregistratie en asset-/ruimtebeheer."
+version = "1.0.0"
+id = "artifacts/govconnect"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22384
+
+[services.development]
+run = "pnpm --filter @workspace/govconnect run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/govconnect", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/govconnect/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22384"
+BASE_PATH = "/"

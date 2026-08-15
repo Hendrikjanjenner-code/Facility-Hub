@@ -1,0 +1,1 @@
+- [Orval emits Zod v4 API](orval-zod-v4.md) — codegen must rewrite generated import to `zod/v4` or typecheck fails with `zod.int()` errors.
