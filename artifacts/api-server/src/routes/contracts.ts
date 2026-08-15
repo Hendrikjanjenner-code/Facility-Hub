@@ -187,28 +187,54 @@ router.patch(
 );
 
 /**
- * Einddatum-notificaties: bij elke login/lijst-opvraging door een manager checken we
+ * Einddatum-notificaties: dagelijks (en bij elke lijst-opvraging door een manager) checken we
  * of er actieve contracten binnen de opzegtermijn vallen en maken we (eenmalig per
- * contract) een notificatie aan voor de contracteigenaar.
+ * contract per drempelwaarde) een notificatie aan voor de contracteigenaar.
+ *
+ * Escalatieniveaus:
+ *  1. Regulier: contract valt binnen de opzegtermijn (noticePeriodDays), einddatum nog niet verstreken
+ *  2. Kritiek:  contract eindigt over 0–14 dagen
+ *
+ * Idempotentie wordt gegarandeerd via een stabiele referenceKey per contract/drempel
+ * gecombineerd met een unieke database-index op (user_id, reference_key), zodat
+ * gelijktijdige runs of herhaalde dagelijkse runs nooit dubbele meldingen aanmaken.
  */
 export async function ensureContractExpiryNotifications(): Promise<void> {
   const rows = await contractBaseQuery().where(eq(contractsTable.status, "actief"));
-  const expiring = rows.map(serializeContract).filter((c) => c.expiringSoon);
-  for (const c of expiring) {
+  const contracts = rows.map(serializeContract);
+
+  for (const c of contracts) {
     if (!c.ownerId) continue;
-    const title = `Contract loopt af: ${c.name}`;
-    const [existing] = await db
-      .select({ id: notificationsTable.id })
-      .from(notificationsTable)
-      .where(and(eq(notificationsTable.title, title), eq(notificationsTable.userId, c.ownerId)));
-    if (existing) continue;
-    await db.insert(notificationsTable).values({
-      userId: c.ownerId,
-      title,
-      body: `${c.name} (${c.supplierName ?? "onbekende leverancier"}) eindigt op ${c.endDate} — nog ${c.daysUntilEnd} dagen, binnen de opzegtermijn van ${c.noticePeriodDays} dagen.`,
-      kind: "contract",
-      linkPath: "/contracten",
-    });
+
+    // Niveau 1: binnen opzegtermijn én nog niet verlopen
+    if (c.expiringSoon && c.daysUntilEnd >= 0) {
+      await db
+        .insert(notificationsTable)
+        .values({
+          userId: c.ownerId,
+          title: `Contract loopt af: ${c.name}`,
+          body: `${c.name} (${c.supplierName ?? "onbekende leverancier"}) eindigt op ${c.endDate} — nog ${c.daysUntilEnd} dag(en), binnen de opzegtermijn van ${c.noticePeriodDays} dagen.`,
+          kind: "contract",
+          linkPath: "/contracten",
+          referenceKey: `contract:${c.id}:expiring`,
+        })
+        .onConflictDoNothing();
+    }
+
+    // Niveau 2 (escalatie): nog 0–14 dagen
+    if (c.daysUntilEnd >= 0 && c.daysUntilEnd <= 14) {
+      await db
+        .insert(notificationsTable)
+        .values({
+          userId: c.ownerId,
+          title: `Urgent: contract eindigt binnenkort — ${c.name}`,
+          body: `Let op: ${c.name} (${c.supplierName ?? "onbekende leverancier"}) eindigt op ${c.endDate}. Er zijn nog maar ${c.daysUntilEnd} dag(en) over. Actie vereist!`,
+          kind: "contract_urgent",
+          linkPath: "/contracten",
+          referenceKey: `contract:${c.id}:urgent`,
+        })
+        .onConflictDoNothing();
+    }
   }
 }
 
