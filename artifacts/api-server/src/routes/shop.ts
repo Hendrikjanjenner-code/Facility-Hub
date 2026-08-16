@@ -245,37 +245,45 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
   }
   total = Math.round(total * 100) / 100;
 
-  // Budgetcontrole: bereken resterend budget voor de afdeling.
   const department = user.department ?? "Onbekend";
   const currentYear = new Date().getFullYear();
-  const [budgetRow] = await db
-    .select()
-    .from(budgetsTable)
-    .where(and(eq(budgetsTable.department, department), eq(budgetsTable.year, currentYear)));
 
-  let budgetExceeded = false;
-  if (budgetRow) {
-    // Filter op hetzelfde jaar als het gevonden budget om historische boekjaren uit te sluiten.
-    const yearStart = new Date(`${currentYear}-01-01T00:00:00Z`);
-    const yearEnd = new Date(`${currentYear + 1}-01-01T00:00:00Z`);
-    const committed = await db
-      .select({ total: sql<number>`coalesce(sum(${shopOrdersTable.totalAmount}), 0)` })
-      .from(shopOrdersTable)
-      .where(
-        and(
-          eq(shopOrdersTable.department, department),
-          inArray(shopOrdersTable.status, SPENT_STATUSES),
-          sql`${shopOrdersTable.createdAt} >= ${yearStart.toISOString()}`,
-          sql`${shopOrdersTable.createdAt} < ${yearEnd.toISOString()}`,
-        ),
-      );
-    const spent = committed[0]?.total ?? 0;
-    const remaining = Math.round((budgetRow.amount - spent) * 100) / 100;
-    if (total > remaining) budgetExceeded = true;
-  }
-
-  // Ordernummer wordt afgeleid van het serial id (race-vrij); insert met tijdelijk uniek nummer.
+  // Budgetcontrole + order-insert in één transactie om race conditions te voorkomen.
+  // De budgetrij wordt vergrendeld (SELECT FOR UPDATE) zodat gelijktijdige aanvragen
+  // voor dezelfde afdeling/jaar serialiseren: de tweede request wacht op de eerste
+  // voordat hij de gecommitteerde + openstaande som herberekent.
   const order = await db.transaction(async (tx) => {
+    // Lock the budget row for this department/year for the duration of the transaction.
+    const [budgetRow] = await tx
+      .select()
+      .from(budgetsTable)
+      .where(and(eq(budgetsTable.department, department), eq(budgetsTable.year, currentYear)))
+      .for("update");
+
+    let budgetExceeded = false;
+    if (budgetRow) {
+      // Filter op hetzelfde jaar als het gevonden budget om historische boekjaren uit te sluiten.
+      const yearStart = new Date(`${currentYear}-01-01T00:00:00Z`);
+      const yearEnd = new Date(`${currentYear + 1}-01-01T00:00:00Z`);
+      // Tel zowel goedgekeurde/bestelde/geleverde als openstaande (ingediend) bestellingen mee
+      // zodat gelijktijdige aanvragen het budget niet samen kunnen overschrijden.
+      const RESERVED_STATUSES = [...SPENT_STATUSES, "ingediend"];
+      const committed = await tx
+        .select({ total: sql<number>`coalesce(sum(${shopOrdersTable.totalAmount}), 0)` })
+        .from(shopOrdersTable)
+        .where(
+          and(
+            eq(shopOrdersTable.department, department),
+            inArray(shopOrdersTable.status, RESERVED_STATUSES),
+            sql`${shopOrdersTable.createdAt} >= ${yearStart.toISOString()}`,
+            sql`${shopOrdersTable.createdAt} < ${yearEnd.toISOString()}`,
+          ),
+        );
+      const spent = committed[0]?.total ?? 0;
+      const remaining = Math.round((budgetRow.amount - spent) * 100) / 100;
+      if (total > remaining) budgetExceeded = true;
+    }
+
     const [created] = await tx
       .insert(shopOrdersTable)
       .values({
