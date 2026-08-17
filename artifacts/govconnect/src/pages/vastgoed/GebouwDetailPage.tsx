@@ -33,6 +33,8 @@ import {
   Users,
   Maximize2,
   RefreshCw,
+  Search,
+  X,
 } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -48,7 +50,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-
 const API_BASE = "/api";
 
 interface PendingUpload {
@@ -590,6 +591,7 @@ function Vlekkenplan({
 }) {
   const [, setLocation] = useLocation();
   const [editRoom, setEditRoom] = useState<FloorPlanRoom | null>(null);
+  const [filterQuery, setFilterQuery] = useState("");
   const { data: plan, isLoading } = useGetFloorPlan(floorId, {
     query: { queryKey: getGetFloorPlanQueryKey(floorId) },
   });
@@ -613,16 +615,55 @@ function Vlekkenplan({
     };
   }, [plan, colorBy]);
 
+  const normalizedQuery = filterQuery.trim().toLowerCase();
+  const roomMatches = (r: FloorPlanRoom) => {
+    if (!normalizedQuery) return true;
+    return (
+      (r.department ?? "").toLowerCase().includes(normalizedQuery) ||
+      (r.functionType ?? "").toLowerCase().includes(normalizedQuery) ||
+      r.name.toLowerCase().includes(normalizedQuery) ||
+      r.code.toLowerCase().includes(normalizedQuery)
+    );
+  };
+
   if (isLoading) return <Skeleton className="h-48 w-full" />;
   if (!plan || plan.rooms.length === 0)
     return <p className="text-sm text-muted-foreground py-6 text-center">Geen ruimtes op deze verdieping.</p>;
 
   const totalArea = plan.rooms.reduce((s, r) => s + (r.areaM2 ?? 0), 0) || 1;
-
   const keyOf = (r: FloorPlanRoom) => (colorBy === "department" ? r.department : r.functionType) ?? "Onbekend";
+  const matchCount = normalizedQuery ? plan.rooms.filter(roomMatches).length : null;
 
   return (
     <div className="space-y-4">
+      {/* Zoek-/filterbalk */}
+      <div className="relative">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <Input
+          value={filterQuery}
+          onChange={(e) => setFilterQuery(e.target.value)}
+          placeholder="Zoek op afdeling, functie of ruimtenaam…"
+          className="pl-8 pr-8"
+          data-testid="vlekkenplan-filter"
+        />
+        {filterQuery && (
+          <button
+            onClick={() => setFilterQuery("")}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            aria-label="Filter wissen"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+      {matchCount !== null && (
+        <p className="text-xs text-muted-foreground -mt-2">
+          {matchCount === 0
+            ? "Geen ruimtes gevonden voor deze zoekopdracht."
+            : `${matchCount} van ${plan.rooms.length} ruimte${plan.rooms.length !== 1 ? "s" : ""} gemarkeerd`}
+        </p>
+      )}
+
       <Dialog open={!!editRoom} onOpenChange={(open) => { if (!open) setEditRoom(null); }}>
         <div
           className="flex flex-wrap gap-2 rounded-lg border bg-muted/30 p-3 min-h-[180px]"
@@ -630,16 +671,19 @@ function Vlekkenplan({
         >
           {plan.rooms.map((r) => {
             const share = (r.areaM2 ?? 0) / totalArea;
+            const matched = roomMatches(r);
             const tileButton = (
               <button
                 onClick={() => { if (canManage) setEditRoom(r); }}
                 className={cn(
-                  "rounded-md border-2 p-2 text-left transition-transform hover:scale-[1.02] hover:shadow-md min-w-[90px] cursor-pointer",
+                  "rounded-md border-2 p-2 text-left transition-all hover:scale-[1.02] hover:shadow-md min-w-[90px] cursor-pointer",
                   colorMap.get(keyOf(r)),
+                  !matched && "opacity-20 saturate-0 pointer-events-none",
                 )}
                 style={{ flexGrow: Math.max(1, Math.round(share * 100)), flexBasis: `${Math.max(8, share * 100)}%` }}
                 title={canManage ? `${r.name} — klik om afdeling/functie te wijzigen` : `${r.name} (${r.code}) — klik voor details`}
                 data-testid={`vlek-${r.code}`}
+                tabIndex={matched ? 0 : -1}
               >
                 <div className="text-xs font-semibold truncate">{r.name}</div>
                 <div className="text-[10px] font-mono opacity-70">{r.code}</div>
@@ -661,36 +705,38 @@ function Vlekkenplan({
                 <PopoverTrigger asChild style={{ flexGrow: Math.max(1, Math.round(share * 100)), flexBasis: `${Math.max(8, share * 100)}%` }}>
                   {tileButton}
                 </PopoverTrigger>
-                <PopoverContent className="w-72" align="start" side="top">
-                  <div className="space-y-3">
-                    <div>
-                      <div className="font-semibold text-sm">{r.name}</div>
-                      <div className="text-xs font-mono text-muted-foreground">{r.code}</div>
+                {matched && (
+                  <PopoverContent className="w-72" align="start" side="top">
+                    <div className="space-y-3">
+                      <div>
+                        <div className="font-semibold text-sm">{r.name}</div>
+                        <div className="text-xs font-mono text-muted-foreground">{r.code}</div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                        <div className="text-muted-foreground">Afdeling</div>
+                        <div className="font-medium">{r.department ?? "–"}</div>
+                        <div className="text-muted-foreground">Functie</div>
+                        <div className="font-medium">{r.functionType ?? "–"}</div>
+                        <div className="text-muted-foreground flex items-center gap-1"><Maximize2 className="h-3 w-3" /> Oppervlakte</div>
+                        <div className="font-medium">{r.areaM2 != null ? `${r.areaM2} m²` : "–"}</div>
+                        {r.capacity != null && (
+                          <>
+                            <div className="text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> Bezetting</div>
+                            <div className="font-medium">{r.capacity} personen</div>
+                          </>
+                        )}
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setLocation(`/ruimtes/${r.id}`)}
+                      >
+                        Ga naar ruimtepagina <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                      </Button>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                      <div className="text-muted-foreground">Afdeling</div>
-                      <div className="font-medium">{r.department ?? "–"}</div>
-                      <div className="text-muted-foreground">Functie</div>
-                      <div className="font-medium">{r.functionType ?? "–"}</div>
-                      <div className="text-muted-foreground flex items-center gap-1"><Maximize2 className="h-3 w-3" /> Oppervlakte</div>
-                      <div className="font-medium">{r.areaM2 != null ? `${r.areaM2} m²` : "–"}</div>
-                      {r.capacity != null && (
-                        <>
-                          <div className="text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> Bezetting</div>
-                          <div className="font-medium">{r.capacity} personen</div>
-                        </>
-                      )}
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => setLocation(`/ruimtes/${r.id}`)}
-                    >
-                      Ga naar ruimtepagina <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
-                    </Button>
-                  </div>
-                </PopoverContent>
+                  </PopoverContent>
+                )}
               </Popover>
             );
           })}
