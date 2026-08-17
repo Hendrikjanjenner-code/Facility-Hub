@@ -6,7 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface KeyIssueDueUpdate {
+export interface UpdateKeyIssueDueBody {
   /** @nullable */
   dueAt?: Date | null;
 }

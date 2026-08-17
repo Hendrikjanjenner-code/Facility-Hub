@@ -370,8 +370,8 @@ export const ListRoomDossierHistoryResponseItem = zod.object({
   "isUndo": zod.boolean(),
   "changes": zod.array(zod.object({
   "field": zod.string(),
-  "from": zod.union([zod.string(),zod.number(),zod.null()]).optional(),
-  "to": zod.union([zod.string(),zod.number(),zod.null()]).optional()
+  "from": zod.union([zod.string(),zod.number(),zod.boolean(),zod.null()]).optional(),
+  "to": zod.union([zod.string(),zod.number(),zod.boolean(),zod.null()]).optional()
 }))
 })
 export const ListRoomDossierHistoryResponse = zod.array(ListRoomDossierHistoryResponseItem)
@@ -469,6 +469,7 @@ export const UpdateRoomDossierBody = zod.object({
   "areaBvoM2": zod.number().min(updateRoomDossierBodyAreaBvoM2Min).nullish(),
   "department": zod.string().nullish(),
   "capacity": zod.int().min(updateRoomDossierBodyCapacityMin).nullish(),
+  "bookable": zod.boolean().optional(),
   "updatedAt": zod.string()
 })
 
@@ -541,8 +542,8 @@ export const ListFloorDossierHistoryResponseItem = zod.object({
   "isUndo": zod.boolean(),
   "changes": zod.array(zod.object({
   "field": zod.string(),
-  "from": zod.union([zod.string(),zod.number(),zod.null()]).optional(),
-  "to": zod.union([zod.string(),zod.number(),zod.null()]).optional()
+  "from": zod.union([zod.string(),zod.number(),zod.boolean(),zod.null()]).optional(),
+  "to": zod.union([zod.string(),zod.number(),zod.boolean(),zod.null()]).optional()
 }))
 })
 export const ListFloorDossierHistoryResponse = zod.array(ListFloorDossierHistoryResponseItem)

@@ -8,25 +8,17 @@
 
 export interface KeyIssueRecord {
   id: number;
-
   keyId: number;
-
   holderId: number;
   /** @nullable */
-
   holderName?: string | null;
   /** @nullable */
-
   issuedByName?: string | null;
-
   issuedAt: string;
   /** @nullable */
-
-  returnedAt?: string | null;
-  /** @nullable */
-
   dueAt?: string | null;
   /** @nullable */
-
+  returnedAt?: string | null;
+  /** @nullable */
   note?: string | null;
 }

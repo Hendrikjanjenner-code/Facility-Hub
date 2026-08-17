@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { db, usersTable } from "@workspace/db";
 import { eq, asc } from "drizzle-orm";
 import { LoginBody } from "@workspace/api-zod";
@@ -28,7 +29,27 @@ const ROLE_LABELS: Record<string, string> = {
   leverancier: "Leverancier",
 };
 
-router.post("/auth/login", async (req, res): Promise<void> => {
+// Rate limit login attempts to slow down password brute-force attacks.
+// Keyed per IP + submitted email so one attacker can't hammer a single
+// account, while legitimate users behind a shared IP are less affected.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const email =
+      typeof req.body?.email === "string"
+        ? req.body.email.toLowerCase().trim()
+        : "";
+    return `${ipKeyGenerator(req.ip ?? "")}|${email}`;
+  },
+  // Only successful logins reset goodwill; count failures only.
+  skipSuccessfulRequests: true,
+  message: { message: "Te veel inlogpogingen. Probeer het later opnieuw." },
+});
+
+router.post("/auth/login", loginLimiter, async (req, res): Promise<void> => {
   const parsed = LoginBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });

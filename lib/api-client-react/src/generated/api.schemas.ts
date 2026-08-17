@@ -391,6 +391,8 @@ export interface KeyIssueRecord {
   issuedByName?: string | null;
   issuedAt: string;
   /** @nullable */
+  dueAt?: string | null;
+  /** @nullable */
   returnedAt?: string | null;
   /** @nullable */
   note?: string | null;
@@ -474,7 +476,14 @@ export interface KeyDoorInput {
 export interface KeyIssueInput {
   holderId: number;
   /** @nullable */
+  dueAt?: string | null;
+  /** @nullable */
   note?: string | null;
+}
+
+export interface UpdateKeyIssueDueBody {
+  /** @nullable */
+  dueAt?: string | null;
 }
 
 export interface KeyLossInput {
@@ -1056,6 +1065,26 @@ export interface MeterReading {
   registeredByName?: string | null;
 }
 
+export interface MeterReadingAuditEntry {
+  id: number;
+  meterReadingId: number;
+  /** correctie | verwijderd */
+  action: string;
+  /** @nullable */
+  changedById?: number | null;
+  /** @nullable */
+  changedByName?: string | null;
+  changedAt: string;
+  /** @nullable */
+  oldReadingDate?: string | null;
+  /** @nullable */
+  newReadingDate?: string | null;
+  /** @nullable */
+  oldValue?: number | null;
+  /** @nullable */
+  newValue?: number | null;
+}
+
 export interface MeterReadingInput {
   buildingId: number;
   meterType: string;
@@ -1103,6 +1132,7 @@ export interface WasteRegistrationUpdate {
   /** @minimum 0 */
   weightKg?: number;
 }
+
 export interface WasteRegistrationInput {
   buildingId: number;
   registrationDate: string;
@@ -1399,15 +1429,6 @@ export interface TicketSatisfactionInput {
   /** @nullable */
   comment?: string | null;
 }
-export interface SatisfactionResponseItem {
-  ticketId: number;
-  ticketNumber: string;
-  ticketTitle: string;
-  score: number;
-  /** @nullable */
-  comment?: string | null;
-  submittedAt: string;
-}
 
 export interface SatisfactionByCategory {
   categoryId: number;
@@ -1418,21 +1439,25 @@ export interface SatisfactionByCategory {
   responseRate: number;
 }
 
+export interface SatisfactionResponseItem {
+  ticketId: number;
+  ticketNumber: string;
+  ticketTitle: string;
+  score: number;
+  /** @nullable */
+  comment?: string | null;
+  submittedAt: string;
+}
+
 export interface SatisfactionReport {
   totalResponses: number;
-
   averageScore: number;
-
   closedTickets: number;
   /** Percentage of closed tickets with a satisfaction score (0-100) */
-
   responseRate: number;
-
   byScore: CountByKey[];
-
-  recentResponses: SatisfactionResponseItem[];
-
   byCategory: SatisfactionByCategory[];
+  recentResponses: SatisfactionResponseItem[];
 }
 
 export interface KnowledgeArticleUpdate {
@@ -1564,3 +1589,4 @@ export type SuggestKnowledgeArticlesParams = {
 q?: string;
 ticketCategoryId?: number;
 };
+

@@ -1,6 +1,6 @@
 - [Orval emits Zod v4 API](orval-zod-v4.md) — codegen must rewrite generated import to `zod/v4` or typecheck fails with `zod.int()` errors.
 - [Object storage upload security](object-storage-upload-security.md) — Replit presigned PUT URLs can't bind MIME/size; route uploads through the API with magic-byte sniffing and a raw body limit.
-- [Merge corruption in route files](merge-corruption-routes.md) — task rebases mangle api-server route handlers; typecheck after every rebase and restore from last semantically clean git version.
+- [Merge corruption in route files](merge-corruption-routes.md) — task rebases mangle api-server route handlers, openapi.yaml (dup paths/renamed schemas), and tests; typecheck+test after every rebase, restore from last clean git version.
 - [cors string origin gotcha](cors-package-gotcha.md) — `cors({origin: "url"})` sends the header to every origin; use array form + startup validation rejecting `*`.
 - [Express router guard scoping](express-router-guard-scoping.md) — a bare `router.use(requireRole)` leaks into later-mounted routers; always scope guards to path prefixes.
 - [Email outbox reviewer requirements](email-outbox-reviewer.md) — reviewer enforces: no hard retry cap, optimistic lastAttemptAt-match concurrency, hourly queue interval, startup migration, lifecycle cleanup on renewal/deactivation/deletion.

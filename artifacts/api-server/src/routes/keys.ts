@@ -19,14 +19,8 @@ import {
   CreateKeyDoorBody,
   IssueKeyBody,
   ReportKeyLossBody,
+  UpdateKeyIssueDueBody,
 } from "@workspace/api-zod";
-import { z } from "zod/v4";
-
-// Local schema: the generated api-zod package lost this contract in a spec
-// regeneration; validate the body here until the OpenAPI spec is restored.
-const UpdateKeyIssueDueBody = z.object({
-  dueAt: z.string().nullable().optional(),
-});
 import { requireAuth, requireRole } from "../lib/auth";
 import { notify } from "../lib/notify";
 

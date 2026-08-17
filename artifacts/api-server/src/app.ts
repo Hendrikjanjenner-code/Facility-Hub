@@ -8,6 +8,10 @@ import { resolveAllowedOrigin } from "./lib/corsOrigin";
 
 const app: Express = express();
 
+// The app runs behind Replit's reverse proxy; trust the first hop so
+// req.ip reflects the real client IP (used by the login rate limiter).
+app.set("trust proxy", 1);
+
 app.use(
   pinoHttp({
     logger,

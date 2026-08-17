@@ -827,7 +827,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KeyIssueDueUpdate'
+              $ref: '#/components/schemas/UpdateKeyIssueDueBody'
       responses:
         '200':
           description: Bijgewerkt
@@ -3098,6 +3098,8 @@ components:
             - integer
             - 'null'
           minimum: 0
+        bookable:
+          type: boolean
         updatedAt:
           type: string
       required:
@@ -3133,11 +3135,13 @@ components:
           oneOf:
             - type: string
             - type: number
+            - type: boolean
             - type: 'null'
         to:
           oneOf:
             - type: string
             - type: number
+            - type: boolean
             - type: 'null'
     FloorDossierHistoryEntry:
       type: object
@@ -3491,7 +3495,7 @@ components:
           type:
             - string
             - 'null'
-    KeyIssueDueUpdate:
+    UpdateKeyIssueDueBody:
       type: object
       properties:
         dueAt:
