@@ -140,6 +140,16 @@ export default function MeldingDetailPage({ id }: { id: string }) {
   const [satisfactionScore, setSatisfactionScore] = useState(0);
   const [satisfactionComment, setSatisfactionComment] = useState("");
 
+  // Auto-open satisfaction dialog when arriving via ?beoordelen=1 link
+  useEffect(() => {
+    if (!ticket || ticket.status !== "gesloten" || ticket.reporterId !== user?.id) return;
+    if (existingSatisfaction) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("beoordelen") === "1") {
+      setSatisfactionDialogOpen(true);
+    }
+  }, [ticket, user, existingSatisfaction]);
+
   const isPrivileged = user?.role !== 'eindgebruiker' && user?.role !== 'cateraar' && user?.role !== 'receptie';
 
   if (isLoading) {

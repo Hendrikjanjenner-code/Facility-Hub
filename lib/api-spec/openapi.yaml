@@ -4677,6 +4677,8 @@ components:
       properties:
         totalResponses: { type: integer }
         averageScore: { type: number }
+        closedTickets: { type: integer }
+        responseRate: { type: integer, description: "Percentage of closed tickets with a satisfaction score (0-100)" }
         byScore:
           type: array
           items:
@@ -4685,7 +4687,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/SatisfactionResponseItem"
-      required: [totalResponses, averageScore, byScore, recentResponses]
+      required: [totalResponses, averageScore, closedTickets, responseRate, byScore, recentResponses]
     SatisfactionResponseItem:
       type: object
       properties:

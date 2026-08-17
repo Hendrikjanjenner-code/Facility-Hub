@@ -11,6 +11,9 @@ import type { SatisfactionResponseItem } from './satisfactionResponseItem';
 export interface SatisfactionReport {
   totalResponses: number;
   averageScore: number;
+  closedTickets: number;
+  /** Percentage of closed tickets with a satisfaction score (0-100) */
+  responseRate: number;
   byScore: CountByKey[];
   recentResponses: SatisfactionResponseItem[];
 }

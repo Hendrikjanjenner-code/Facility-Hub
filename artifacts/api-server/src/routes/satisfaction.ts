@@ -110,6 +110,11 @@ router.get("/satisfaction/report", async (req, res): Promise<void> => {
     return;
   }
 
+  const [closedRow] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(ticketsTable)
+    .where(eq(ticketsTable.status, "gesloten"));
+
   const [totalRow] = await db
     .select({ count: sql<number>`count(*)::int`, avg: sql<number>`round(avg(score)::numeric, 2)` })
     .from(ticketSatisfactionTable);
@@ -131,9 +136,16 @@ router.get("/satisfaction/report", async (req, res): Promise<void> => {
     .orderBy(desc(ticketSatisfactionTable.createdAt))
     .limit(20);
 
+  const closedTickets = closedRow?.count ?? 0;
+  const totalResponses = totalRow?.count ?? 0;
+  const responseRate =
+    closedTickets > 0 ? Math.round((totalResponses / closedTickets) * 100) : 0;
+
   res.json({
-    totalResponses: totalRow?.count ?? 0,
+    totalResponses,
     averageScore: Number(totalRow?.avg ?? 0),
+    closedTickets,
+    responseRate,
     byScore,
     recentResponses: recent.map((r) => ({
       ticketId: r.sat.ticketId,

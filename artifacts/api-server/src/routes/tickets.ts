@@ -166,13 +166,16 @@ router.get("/tickets/:id", async (req, res): Promise<void> => {
     res.status(403).json({ message: "Geen toegang tot deze melding" });
     return;
   }
-  const [ticket] = await fetchTickets(eq(ticketsTable.id, id));
+  const [ticket] = await db
+    .select()
+    .from(ticketsTable)
+    .where(eq(ticketsTable.id, id));
   res.json(ticket);
 });
 
 router.post("/tickets", async (req, res): Promise<void> => {
-  const parsed = CreateTicketBody.safeParse(req.body);
-  if (!parsed.success) {
+  const parsed = CreateTicketCommentBody.safeParse(req.body);
+  if (Number.isNaN(id) || !parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
   }
@@ -243,7 +246,7 @@ router.post("/tickets", async (req, res): Promise<void> => {
     `/meldingen/${created!.id}`,
   );
 
-  const [full] = await fetchTickets(eq(ticketsTable.id, created!.id));
+  const [full] = await fetchTickets(eq(ticketsTable.id, id));
   res.status(201).json(full);
 });
 
@@ -258,7 +261,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 router.patch("/tickets/:id", async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  const parsed = UpdateTicketBody.safeParse(req.body);
+  const parsed = CreateTicketCommentBody.safeParse(req.body);
   if (Number.isNaN(id) || !parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
@@ -341,6 +344,17 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
       `Status gewijzigd naar "${STATUS_LABELS[data.status] ?? data.status}".`,
       "ticket",
       `/meldingen/${id}`,
+    );
+  }
+
+  // Send satisfaction request when ticket is closed
+  if (data.status === "gesloten" && existing.status !== "gesloten") {
+    await notify(
+      existing.reporterId,
+      `Hoe tevreden bent u? – ${existing.number}`,
+      `Melding "${existing.title}" is gesloten. Laat uw beoordeling achter.`,
+      "satisfaction",
+      `/meldingen/${id}?beoordelen=1`,
     );
   }
   if (

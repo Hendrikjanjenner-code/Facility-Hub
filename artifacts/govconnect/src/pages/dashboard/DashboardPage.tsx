@@ -248,7 +248,7 @@ export default function DashboardPage() {
         )}
 
         {/* Satisfaction report for managers */}
-        {canSeeSatisfaction && satisfactionReport && satisfactionReport.totalResponses > 0 && (
+        {canSeeSatisfaction && satisfactionReport && (satisfactionReport.closedTickets ?? 0) > 0 && (
           <Card className="col-span-4 lg:col-span-3">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -256,10 +256,19 @@ export default function DashboardPage() {
                 Klanttevredenheid
               </CardTitle>
               <CardDescription>
-                Gemiddeld {satisfactionReport.averageScore?.toFixed(1) ?? "—"}/5 ({satisfactionReport.totalResponses} beoordelingen)
+                {satisfactionReport.totalResponses > 0
+                  ? <>Gemiddeld {satisfactionReport.averageScore?.toFixed(1) ?? "—"}/5 &mdash; </>
+                  : null}
+                {satisfactionReport.totalResponses} van de {satisfactionReport.closedTickets} gesloten meldingen beoordeeld
+                {" "}({satisfactionReport.responseRate ?? 0}% responsrate)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              {satisfactionReport.totalResponses === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  Nog geen beoordelingen ontvangen.
+                </p>
+              ) : null}
               {[5,4,3,2,1].map((score) => {
                 const entry = satisfactionReport.byScore?.find(b => b.key === String(score));
                 const count = entry?.count ?? 0;
