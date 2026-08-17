@@ -33,6 +33,7 @@ import { Shell } from './components/layout/Shell';
 import MjopPage from './pages/mjop/MjopPage';
 import BouwdeelDetailPage from './pages/mjop/BouwdeelDetailPage';
 import KennisbankPage from './pages/kennisbank/KennisbankPage';
+import CateringPage from './pages/catering/CateringPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -109,6 +110,7 @@ function Router() {
         <Route path="/mjop">{(params) => <ProtectedRoute component={MjopPage} />}</Route>
 
         <Route path="/kennisbank">{(params) => <ProtectedRoute component={KennisbankPage} />}</Route>
+        <Route path="/catering">{(params) => <ProtectedRoute component={CateringPage} />}</Route>
 
         <Route component={NotFound} />
       </Switch>

@@ -907,6 +907,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CateringItem'
+  /catering/daily-summary:
+    get:
+      operationId: getCateringDailySummary
+      tags:
+        - reservations
+      summary: Dagelijks cateringoverzicht voor de cateraar
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            description: Datum in YYYY-MM-DD formaat (standaard vandaag)
+      responses:
+        '200':
+          description: Dagelijks cateringoverzicht
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CateringDailySummary'
+        '403':
+          description: Geen toegang
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /visitors:
     get:
       operationId: listVisitors
@@ -2964,6 +2990,72 @@ components:
         - name
         - price
         - category
+    CateringDailySummary:
+      type: object
+      properties:
+        date:
+          type: string
+        reservations:
+          type: array
+          items:
+            $ref: '#/components/schemas/CateringDailyReservation'
+        totals:
+          type: array
+          items:
+            $ref: '#/components/schemas/CateringProductTotal'
+      required:
+        - date
+        - reservations
+        - totals
+    CateringDailyReservation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        roomName:
+          type:
+            - string
+            - 'null'
+        buildingName:
+          type:
+            - string
+            - 'null'
+        startTime:
+          type: string
+        endTime:
+          type: string
+        attendees:
+          type:
+            - integer
+            - 'null'
+        status:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CateringOrderLine'
+      required:
+        - id
+        - title
+        - startTime
+        - endTime
+        - status
+        - items
+    CateringProductTotal:
+      type: object
+      properties:
+        cateringItemId:
+          type: integer
+        itemName:
+          type: string
+        totalQuantity:
+          type: integer
+      required:
+        - cateringItemId
+        - itemName
+        - totalQuantity
     Workplace:
       type: object
       properties:

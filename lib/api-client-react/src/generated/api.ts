@@ -31,6 +31,7 @@ import type {
   BuildingDetail,
   BuildingDocument,
   BuildingDocumentInput,
+  CateringDailySummary,
   CateringItem,
   Conditiemeting,
   ConditiemetingInput,
@@ -41,6 +42,7 @@ import type {
   DemoAccount,
   ErrorEnvelope,
   FloorPlan,
+  GetCateringDailySummaryParams,
   GetSustainabilityReportParams,
   HealthStatus,
   ImportResult,
@@ -74,7 +76,6 @@ import type {
   MeterReading,
   MeterReadingImportInput,
   MeterReadingInput,
-  MeterReadingUpdateInput,
   MjopTaak,
   MjopTaakInput,
   MjopTaakUpdate,
@@ -2961,6 +2962,90 @@ export function useListCateringItems<TData = Awaited<ReturnType<typeof listCater
 
 
 
+export const getGetCateringDailySummaryUrl = (params?: GetCateringDailySummaryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/catering/daily-summary?${stringifiedParams}` : `/api/catering/daily-summary`
+}
+
+/**
+ * @summary Dagelijks cateringoverzicht voor de cateraar
+ */
+export const getCateringDailySummary = async (params?: GetCateringDailySummaryParams, options?: Parameters<typeof customFetch>[1]): Promise<CateringDailySummary> => {
+
+  return customFetch<CateringDailySummary>(getGetCateringDailySummaryUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCateringDailySummaryQueryKey = (params?: GetCateringDailySummaryParams,) => {
+    return [
+    `/api/catering/daily-summary`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetCateringDailySummaryQueryOptions = <TData = Awaited<ReturnType<typeof getCateringDailySummary>>, TError = ErrorType<ApiMessage>>(params?: GetCateringDailySummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCateringDailySummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCateringDailySummaryQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCateringDailySummary>>> = ({ signal }) => getCateringDailySummary(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCateringDailySummary>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCateringDailySummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getCateringDailySummary>>>
+export type GetCateringDailySummaryQueryError = ErrorType<ApiMessage>
+
+
+/**
+ * @summary Dagelijks cateringoverzicht voor de cateraar
+ */
+
+export function useGetCateringDailySummary<TData = Awaited<ReturnType<typeof getCateringDailySummary>>, TError = ErrorType<ApiMessage>>(
+ params?: GetCateringDailySummaryParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCateringDailySummary>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCateringDailySummaryQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getListVisitorsUrl = (params?: ListVisitorsParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -4854,149 +4939,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getCreateMeterReadingMutationOptions(options));
     }
 
-export const getUpdateMeterReadingUrl = (id: number,) => {
-
-
-
-
-  return `/api/meter-readings/${id}`
-}
-
-/**
- * @summary Correct a meter reading (value and/or date)
- */
-export const updateMeterReading = async (id: number,
-    meterReadingUpdateInput: MeterReadingUpdateInput, options?: Parameters<typeof customFetch>[1]): Promise<MeterReading> => {
-
-  return customFetch<MeterReading>(getUpdateMeterReadingUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(meterReadingUpdateInput)
-  }
-);}
-
-
-
-
-
-export const getUpdateMeterReadingMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMeterReading>>, TError,{id: number;data: BodyType<MeterReadingUpdateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateMeterReading>>, TError,{id: number;data: BodyType<MeterReadingUpdateInput>}, TContext> => {
-
-const mutationKey = ['updateMeterReading'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMeterReading>>, {id: number;data: BodyType<MeterReadingUpdateInput>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  updateMeterReading(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateMeterReadingMutationResult = NonNullable<Awaited<ReturnType<typeof updateMeterReading>>>
-    export type UpdateMeterReadingMutationBody = BodyType<MeterReadingUpdateInput>
-    export type UpdateMeterReadingMutationError = ErrorType<void>
-
-    /**
- * @summary Correct a meter reading (value and/or date)
- */
-export const useUpdateMeterReading = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMeterReading>>, TError,{id: number;data: BodyType<MeterReadingUpdateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateMeterReading>>,
-        TError,
-        {id: number;data: BodyType<MeterReadingUpdateInput>},
-        TContext
-      > => {
-      return useMutation(getUpdateMeterReadingMutationOptions(options));
-    }
-
-export const getDeleteMeterReadingUrl = (id: number,) => {
-
-
-
-
-  return `/api/meter-readings/${id}`
-}
-
-/**
- * @summary Delete a meter reading
- */
-export const deleteMeterReading = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
-
-  return customFetch<void>(getDeleteMeterReadingUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-
-export const getDeleteMeterReadingMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMeterReading>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteMeterReading>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteMeterReading'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteMeterReading>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteMeterReading(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteMeterReadingMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMeterReading>>>
-
-    export type DeleteMeterReadingMutationError = ErrorType<void>
-
-    /**
- * @summary Delete a meter reading
- */
-export const useDeleteMeterReading = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMeterReading>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteMeterReading>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteMeterReadingMutationOptions(options));
-    }
-
 export const getImportMeterReadingsUrl = () => {
 
 
@@ -6413,7 +6355,7 @@ export const useCreateKnowledgeArticle = <TError = ErrorType<unknown>,
       return useMutation(getCreateKnowledgeArticleMutationOptions(options));
     }
 
-export const getSuggestKnowledgeArticlesUrl = (params?: SuggestKnowledgeArticlesParams,) => {
+export const getSuggestKnowledgeArticlesUrl = (params: SuggestKnowledgeArticlesParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -6431,7 +6373,7 @@ export const getSuggestKnowledgeArticlesUrl = (params?: SuggestKnowledgeArticles
 /**
  * @summary Quick search suggestions (max 5) for the melding form
  */
-export const suggestKnowledgeArticles = async (params?: SuggestKnowledgeArticlesParams, options?: Parameters<typeof customFetch>[1]): Promise<KnowledgeArticle[]> => {
+export const suggestKnowledgeArticles = async (params: SuggestKnowledgeArticlesParams, options?: Parameters<typeof customFetch>[1]): Promise<KnowledgeArticle[]> => {
 
   return customFetch<KnowledgeArticle[]>(getSuggestKnowledgeArticlesUrl(params),
   {
@@ -6453,7 +6395,7 @@ export const getSuggestKnowledgeArticlesQueryKey = (params?: SuggestKnowledgeArt
     }
 
 
-export const getSuggestKnowledgeArticlesQueryOptions = <TData = Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError = ErrorType<unknown>>(params?: SuggestKnowledgeArticlesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getSuggestKnowledgeArticlesQueryOptions = <TData = Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError = ErrorType<unknown>>(params: SuggestKnowledgeArticlesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -6480,7 +6422,7 @@ export type SuggestKnowledgeArticlesQueryError = ErrorType<unknown>
  */
 
 export function useSuggestKnowledgeArticles<TData = Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError = ErrorType<unknown>>(
- params?: SuggestKnowledgeArticlesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params: SuggestKnowledgeArticlesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

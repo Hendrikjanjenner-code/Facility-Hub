@@ -121,11 +121,11 @@ router.get("/rooms/:id", async (req, res): Promise<void> => {
     res.status(404).json({ message: "Ruimte niet gevonden" });
     return;
   }
-  res.json(serializeRoom(false, row));
+  res.json(serializeRoom(!TICKET_MANAGER_ROLES.includes(req.currentUser!.role), row));
 });
 
 router.patch(
-  "/rooms/:id",
+  "/rooms/:id/dossier",
   requireRole(...VASTGOED_MANAGE_ROLES),
   async (req, res): Promise<void> => {
     const id = Number(req.params.id);

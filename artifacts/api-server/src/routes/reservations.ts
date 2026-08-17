@@ -524,4 +524,121 @@ router.get("/catering-items", async (_req, res): Promise<void> => {
   res.json(items);
 });
 
+const CATERING_ROLES = ["cateraar", "facilitair_manager", "beheerder"];
+
+router.get("/catering/daily-summary", async (req, res): Promise<void> => {
+  const viewer = req.currentUser!;
+  if (!CATERING_ROLES.includes(viewer.role)) {
+    res.status(403).json({ message: "Geen toegang" });
+    return;
+  }
+
+  // Default to today if no date given
+  const dateParam = typeof req.query.date === "string" && DATE_RE.test(req.query.date)
+    ? req.query.date
+    : new Date().toISOString().slice(0, 10);
+
+  // Fetch all reservations for the given date that have catering orders
+  const reservations = await db
+    .select()
+    .from(reservationsTable)
+    .where(eq(reservationsTable.date, dateParam))
+    .orderBy(reservationsTable.startTime);
+
+  if (!reservations.length) {
+    res.json({ date: dateParam, reservations: [], totals: [] });
+    return;
+  }
+
+  const reservationIds = reservations.map((r) => r.id);
+
+  // Fetch all catering order lines for these reservations
+  const allLines = await db
+    .select({
+      line: cateringOrderLinesTable,
+      itemName: cateringItemsTable.name,
+    })
+    .from(cateringOrderLinesTable)
+    .leftJoin(
+      cateringItemsTable,
+      eq(cateringOrderLinesTable.cateringItemId, cateringItemsTable.id),
+    );
+
+  // Filter lines belonging to our reservations
+  const linesByResId = new Map<number, typeof allLines>();
+  for (const entry of allLines) {
+    if (!reservationIds.includes(entry.line.reservationId)) continue;
+    const bucket = linesByResId.get(entry.line.reservationId) ?? [];
+    bucket.push(entry);
+    linesByResId.set(entry.line.reservationId, bucket);
+  }
+
+  // Only keep reservations that have at least one catering order line
+  const cateringReservations = reservations.filter(
+    (r) => (linesByResId.get(r.id) ?? []).length > 0,
+  );
+
+  // Fetch room/building info
+  const [rooms, floors, buildings] = await Promise.all([
+    db.select().from(roomsTable),
+    db.select().from(floorsTable),
+    db.select().from(buildingsTable),
+  ]);
+  const roomById = new Map(rooms.map((r) => [r.id, r]));
+  const floorById = new Map(floors.map((f) => [f.id, f]));
+  const buildingById = new Map(buildings.map((b) => [b.id, b]));
+
+  function buildingNameFor(floorId: number | undefined | null): string | null {
+    if (floorId == null) return null;
+    const floor = floorById.get(floorId);
+    if (!floor) return null;
+    return buildingById.get(floor.buildingId)?.name ?? null;
+  }
+
+  const summaryReservations = cateringReservations.map((r) => {
+    const room = r.roomId != null ? roomById.get(r.roomId) : undefined;
+    const lines = linesByResId.get(r.id) ?? [];
+    return {
+      id: r.id,
+      title: r.title,
+      roomName: room?.name ?? null,
+      buildingName: buildingNameFor(room?.floorId),
+      startTime: r.startTime,
+      endTime: r.endTime,
+      attendees: r.attendees,
+      status: r.status,
+      items: lines.map((l) => ({
+        id: l.line.id,
+        cateringItemId: l.line.cateringItemId,
+        itemName: l.itemName,
+        quantity: l.line.quantity,
+        unitPrice: l.line.unitPrice,
+      })),
+    };
+  });
+
+  // Aggregate totals per product — exclude cancelled reservations so the
+  // caterer does not prepare food for orders that will not be fulfilled.
+  const totalMap = new Map<number, { itemName: string; totalQuantity: number }>();
+  for (const res of summaryReservations) {
+    if (res.status === "geannuleerd") continue;
+    for (const item of res.items) {
+      const existing = totalMap.get(item.cateringItemId);
+      if (existing) {
+        existing.totalQuantity += item.quantity;
+      } else {
+        totalMap.set(item.cateringItemId, {
+          itemName: item.itemName ?? `Item ${item.cateringItemId}`,
+          totalQuantity: item.quantity,
+        });
+      }
+    }
+  }
+  const totals = Array.from(totalMap.entries())
+    .map(([cateringItemId, data]) => ({ cateringItemId, ...data }))
+    .sort((a, b) => b.totalQuantity - a.totalQuantity);
+
+  res.json({ date: dateParam, reservations: summaryReservations, totals });
+});
+
 export default router;

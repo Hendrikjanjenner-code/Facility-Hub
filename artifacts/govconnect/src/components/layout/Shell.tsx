@@ -28,7 +28,8 @@ import {
   ShoppingCart,
   Boxes,
   Leaf,
-  BookOpen
+  BookOpen,
+  UtensilsCrossed
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -140,6 +141,12 @@ const navItems: NavItem[] = [
     href: "/mjop",
     icon: Wrench,
     roles: ["facilitair_manager", "beheerder"]
+  },
+  {
+    title: "Catering",
+    href: "/catering",
+    icon: UtensilsCrossed,
+    roles: ["cateraar", "facilitair_manager", "beheerder"]
   },
   {
     title: "Kennisbank",

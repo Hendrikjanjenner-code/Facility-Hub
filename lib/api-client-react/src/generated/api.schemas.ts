@@ -524,6 +524,20 @@ export interface CateringItem {
   category: string;
 }
 
+export interface CateringDailyReservation {
+  id: number;
+  title: string;
+  /** @nullable */
+  roomName?: string | null;
+  /** @nullable */
+  buildingName?: string | null;
+  startTime: string;
+  endTime: string;
+  /** @nullable */
+  attendees?: number | null;
+  status: string;
+  items: CateringOrderLine[];
+}
 export interface Workplace {
   id: number;
   name: string;
@@ -885,6 +899,12 @@ export interface BudgetPolicyUpdate {
   overBudgetPolicy: BudgetPolicyUpdateOverBudgetPolicy;
 }
 
+export interface CateringProductTotal {
+  cateringItemId: number;
+  itemName: string;
+  totalQuantity: number;
+}
+
 export interface MeterReading {
   id: number;
   buildingId: number;
@@ -1232,6 +1252,12 @@ floorId?: number;
 date?: string;
 };
 
+export type GetCateringDailySummaryParams = {
+/**
+ * Datum in YYYY-MM-DD formaat (standaard vandaag)
+ */
+date?: string;
+};
 export type ListVisitorsParams = {
 date?: string;
 status?: string;
@@ -1301,3 +1327,9 @@ q?: string;
 ticketCategoryId?: number;
 };
 
+
+export interface CateringDailySummary {
+  date: string;
+  reservations: CateringDailyReservation[];
+  totals: CateringProductTotal[];
+}

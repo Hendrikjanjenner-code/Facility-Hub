@@ -52,7 +52,6 @@ router.get("/shop/products", async (req, res): Promise<void> => {
     const cond = or(ilike(shopProductsTable.name, s), ilike(shopProductsTable.description, s));
     if (cond) conditions.push(cond);
   }
-  conditions.push(eq(shopProductsTable.active, 1));
   const rows = await db
     .select()
     .from(shopProductsTable)
@@ -94,7 +93,10 @@ router.patch(
   requireRole(...MANAGER_ROLES, "servicedesk"),
   async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
+  if (Number.isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
   const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
@@ -212,7 +214,6 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
   }
   const user = req.currentUser!;
 
-  // Aggregeer dubbele productregels zodat de voorraadcheck op de totale vraag gebeurt.
   const qtyByProduct = new Map<number, number>();
   for (const line of parsed.data.lines) {
     qtyByProduct.set(line.productId, (qtyByProduct.get(line.productId) ?? 0) + line.quantity);
@@ -221,36 +222,27 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
   const products = await db
     .select()
     .from(shopProductsTable)
-    .where(and(inArray(shopProductsTable.id, productIds), eq(shopProductsTable.active, 1)));
-
+    .where(inArray(shopProductsTable.id, productIds));
   const byId = new Map(products.map((p) => [p.id, p]));
+  let total = 0;
   for (const [productId, quantity] of qtyByProduct) {
     const p = byId.get(productId);
     if (!p) {
-      res.status(404).json({ message: `Product ${productId} niet gevonden` });
+      res.status(400).json({ message: `Onbekend product (${productId})` });
       return;
     }
     if (p.stock < quantity) {
       res.status(409).json({ message: `Onvoldoende voorraad voor ${p.name}: nog ${p.stock} ${p.unit} beschikbaar.` });
       return;
     }
-  }
-
-  let total = 0;
-  for (const [productId, quantity] of qtyByProduct) {
-    total += byId.get(productId)!.price * quantity;
+    total += p.price * quantity;
   }
   total = Math.round(total * 100) / 100;
 
   const department = user.department ?? "Onbekend";
   const currentYear = new Date().getFullYear();
 
-  // Budgetcontrole + order-insert in één transactie om race conditions te voorkomen.
-  // De budgetrij wordt vergrendeld (SELECT FOR UPDATE) zodat gelijktijdige aanvragen
-  // voor dezelfde afdeling/jaar serialiseren: de tweede request wacht op de eerste
-  // voordat hij de gecommitteerde + openstaande som herberekent.
   const order = await db.transaction(async (tx) => {
-    // Lock the budget row for this department/year for the duration of the transaction.
     const [budgetRow] = await tx
       .select()
       .from(budgetsTable)
@@ -259,11 +251,8 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
 
     let budgetExceeded = false;
     if (budgetRow) {
-      // Filter op hetzelfde jaar als het gevonden budget om historische boekjaren uit te sluiten.
       const yearStart = new Date(`${currentYear}-01-01T00:00:00Z`);
       const yearEnd = new Date(`${currentYear + 1}-01-01T00:00:00Z`);
-      // Tel zowel goedgekeurde/bestelde/geleverde als openstaande (ingediend) bestellingen mee
-      // zodat gelijktijdige aanvragen het budget niet samen kunnen overschrijden.
       const RESERVED_STATUSES = [...SPENT_STATUSES, "ingediend"];
       const committed = await tx
         .select({ total: sql<number>`coalesce(sum(${shopOrdersTable.totalAmount}), 0)` })
@@ -307,7 +296,6 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
     return numbered!;
   });
 
-  // Goedkeuringsflow: notificeer facilitair managers over de nieuwe aanvraag.
   const managers = await db
     .select({ id: usersTable.id })
     .from(usersTable)
@@ -337,7 +325,10 @@ router.patch(
   requireRole(...MANAGER_ROLES),
   async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
+  if (Number.isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
   const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
@@ -358,7 +349,6 @@ router.patch(
     const lowStockProducts: (typeof shopProductsTable.$inferSelect)[] = [];
     try {
       await db.transaction(async (tx) => {
-        // Statusovergang alleen vanuit de verwachte huidige status (race-vrij).
         const [transitioned] = await tx
           .update(shopOrdersTable)
           .set({
@@ -377,7 +367,6 @@ router.patch(
           throw Object.assign(new Error("Bestelling is intussen al gewijzigd. Ververs de pagina."), { status: 409 });
         }
 
-        // Bij goedkeuring: voorraad conditioneel afboeken; bij tekort rolt alles terug.
         if (next === "goedgekeurd") {
           const lines = await tx
             .select()
@@ -425,36 +414,6 @@ router.patch(
   },
 );
 
-function serializeBudget(
-  b: typeof budgetsTable.$inferSelect,
-  orders: { department: string; status: string; total: number; createdAt: Date }[],
-) {
-  const yearStart = new Date(`${b.year}-01-01T00:00:00Z`);
-  const yearEnd = new Date(`${b.year + 1}-01-01T00:00:00Z`);
-  const deptOrders = orders.filter(
-    (o) =>
-      o.department === b.department &&
-      o.createdAt >= yearStart &&
-      o.createdAt < yearEnd,
-  );
-  const spent = deptOrders
-    .filter((o) => SPENT_STATUSES.includes(o.status))
-    .reduce((s, o) => s + o.total, 0);
-  const pending = deptOrders
-    .filter((o) => o.status === "ingediend")
-    .reduce((s, o) => s + o.total, 0);
-  return {
-    id: b.id,
-    department: b.department,
-    year: b.year,
-    amount: b.amount,
-    overBudgetPolicy: b.overBudgetPolicy as "markeren" | "blokkeren",
-    spent: Math.round(spent * 100) / 100,
-    pending: Math.round(pending * 100) / 100,
-    remaining: Math.round((b.amount - spent) * 100) / 100,
-  };
-}
-
 router.get("/budgets", async (_req, res): Promise<void> => {
   const budgets = await db.select().from(budgetsTable).orderBy(budgetsTable.department);
   const orders = await db
@@ -464,21 +423,55 @@ router.get("/budgets", async (_req, res): Promise<void> => {
       total: shopOrdersTable.totalAmount,
       createdAt: shopOrdersTable.createdAt,
     })
-    .from(shopOrdersTable);
-  res.json(budgets.map((b) => serializeBudget(b, orders)));
+    .from(shopOrdersTable)
+    .where(eq(shopOrdersTable.department, updated.department));
+  res.json(
+    budgets.map((b) => {
+  const yearStart = new Date(`${updated.year}-01-01T00:00:00Z`);
+  const yearEnd = new Date(`${updated.year + 1}-01-01T00:00:00Z`);
+  const deptOrders = orders.filter(
+    (o) => o.createdAt >= yearStart && o.createdAt < yearEnd,
+  );
+  const spent = deptOrders
+    .filter((o) => SPENT_STATUSES.includes(o.status))
+    .reduce((s, o) => s + o.total, 0);
+  const pending = deptOrders
+    .filter((o) => o.status === "ingediend")
+    .reduce((s, o) => s + o.total, 0);
+      return {
+        id: b.id,
+        department: b.department,
+        year: b.year,
+        amount: b.amount,
+        overBudgetPolicy: (b.overBudgetPolicy ?? "blokkeren") as "markeren" | "blokkeren",
+        spent: Math.round(spent * 100) / 100,
+        pending: Math.round(pending * 100) / 100,
+        remaining: Math.round((b.amount - spent) * 100) / 100,
+      };
+    }),
+  );
 });
 
 router.patch("/budgets/:id", async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
+  if (Number.isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
   const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
-  if (!parsed.success) { res.status(400).json({ message: "Ongeldige invoer" }); return; }
+  if (!parsed.success) {
+    res.status(400).json({ message: "Ongeldige invoer" });
+    return;
+  }
   const [updated] = await db
     .update(budgetsTable)
     .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
     .where(eq(budgetsTable.id, id))
     .returning();
-  if (!updated) { res.status(404).json({ message: "Budget niet gevonden" }); return; }
+  if (!updated) {
+    res.status(404).json({ message: "Budget niet gevonden" });
+    return;
+  }
   const orders = await db
     .select({
       department: shopOrdersTable.department,
@@ -486,8 +479,29 @@ router.patch("/budgets/:id", async (req, res): Promise<void> => {
       total: shopOrdersTable.totalAmount,
       createdAt: shopOrdersTable.createdAt,
     })
-    .from(shopOrdersTable);
-  res.json(serializeBudget(updated, orders));
+    .from(shopOrdersTable)
+    .where(eq(shopOrdersTable.department, updated.department));
+  const yearStart = new Date(`${updated.year}-01-01T00:00:00Z`);
+  const yearEnd = new Date(`${updated.year + 1}-01-01T00:00:00Z`);
+  const deptOrders = orders.filter(
+    (o) => o.createdAt >= yearStart && o.createdAt < yearEnd,
+  );
+  const spent = deptOrders
+    .filter((o) => SPENT_STATUSES.includes(o.status))
+    .reduce((s, o) => s + o.total, 0);
+  const pending = deptOrders
+    .filter((o) => o.status === "ingediend")
+    .reduce((s, o) => s + o.total, 0);
+  res.json({
+    id: updated.id,
+    department: updated.department,
+    year: updated.year,
+    amount: updated.amount,
+    overBudgetPolicy: (updated.overBudgetPolicy ?? "blokkeren") as "markeren" | "blokkeren",
+    spent: Math.round(spent * 100) / 100,
+    pending: Math.round(pending * 100) / 100,
+    remaining: Math.round((updated.amount - spent) * 100) / 100,
+  });
 });
 
 export default router;
