@@ -174,6 +174,9 @@ router.get("/shop/products", async (req, res): Promise<void> => {
     const cond = or(ilike(shopProductsTable.name, s), ilike(shopProductsTable.description, s));
     if (cond) conditions.push(cond);
   }
+  if (typeof q.category === "string" && q.category) {
+    conditions.push(eq(shopProductsTable.category, q.category));
+  }
   const includeInactive =
     MANAGER_ROLES.includes(req.currentUser!.role) && q.includeInactive === "true";
   if (!includeInactive) conditions.push(eq(shopProductsTable.active, 1));
@@ -480,9 +483,47 @@ router.patch(
     }
 
     const isDecision = next === "goedgekeurd" || next === "afgekeurd";
+
     const lowStockProducts: (typeof shopProductsTable.$inferSelect)[] = [];
     try {
       await db.transaction(async (tx) => {
+        // Budget-blocking check inside the transaction with row lock to prevent races
+        if (next === "goedgekeurd") {
+          const orderYear = order.createdAt.getFullYear();
+          const yearStart = new Date(`${orderYear}-01-01T00:00:00Z`);
+          const yearEnd = new Date(`${orderYear + 1}-01-01T00:00:00Z`);
+          const [budgetRow] = await tx
+            .select()
+            .from(budgetsTable)
+            .where(and(eq(budgetsTable.department, order.department), eq(budgetsTable.year, orderYear)))
+            .for("update");
+          if (budgetRow && (budgetRow as any).overBudgetPolicy === "blokkeren") {
+            const RESERVED_STATUSES = [...SPENT_STATUSES, "ingediend"];
+            const [committed] = await tx
+              .select({ total: sql<number>`coalesce(sum(${shopOrdersTable.totalAmount}), 0)` })
+              .from(shopOrdersTable)
+              .where(
+                and(
+                  eq(shopOrdersTable.department, order.department),
+                  inArray(shopOrdersTable.status, RESERVED_STATUSES),
+                  sql`${shopOrdersTable.createdAt} >= ${yearStart.toISOString()}`,
+                  sql`${shopOrdersTable.createdAt} < ${yearEnd.toISOString()}`,
+                  sql`${shopOrdersTable.id} != ${order.id}`,
+                ),
+              );
+            const spent = committed?.total ?? 0;
+            const remaining = Math.round((budgetRow.amount - spent) * 100) / 100;
+            if (order.totalAmount > remaining) {
+              throw Object.assign(
+                new Error(
+                  `Bestelling overschrijdt het resterende budget (€ ${remaining.toFixed(2)}) voor ${order.department}. Goedkeuring geblokkeerd.`,
+                ),
+                { status: 400, budgetBlocked: true },
+              );
+            }
+          }
+        }
+
         const [transitioned] = await tx
           .update(shopOrdersTable)
           .set({
@@ -533,6 +574,10 @@ router.patch(
     } catch (err: any) {
       if (err?.status === 409) {
         res.status(409).json({ message: err.message });
+        return;
+      }
+      if (err?.status === 400) {
+        res.status(400).json({ message: err.message, ...(err.budgetBlocked ? { budgetBlocked: true } : {}) });
         return;
       }
       throw err;

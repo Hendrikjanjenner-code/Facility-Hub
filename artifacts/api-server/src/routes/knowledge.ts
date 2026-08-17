@@ -109,6 +109,48 @@ router.get("/knowledge-articles", async (req, res): Promise<void> => {
   res.json(filtered.map(serialize));
 });
 
+// Update article (managers only)
+router.patch("/knowledge-articles/:id", async (req, res): Promise<void> => {
+  const user = req.currentUser!;
+  if (!MANAGER_ROLES.includes(user.role)) {
+    res.status(403).json({ message: "Geen toegang" });
+    return;
+  }
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
+  const { title, body, category, tags, ticketCategoryIds } = req.body as {
+    title?: string;
+    body?: string;
+    category?: string;
+    tags?: string[];
+    ticketCategoryIds?: number[];
+  };
+  const updates: Partial<typeof knowledgeArticlesTable.$inferInsert> = {};
+  if (title !== undefined) updates.title = title.trim();
+  if (body !== undefined) updates.body = body.trim();
+  if (category !== undefined) updates.category = category.trim();
+  if (tags !== undefined) updates.tags = Array.isArray(tags) ? tags : [];
+  if (ticketCategoryIds !== undefined) updates.ticketCategoryIds = Array.isArray(ticketCategoryIds) ? ticketCategoryIds : [];
+
+  if (Object.keys(updates).length === 0) {
+    res.status(400).json({ message: "Geen velden om bij te werken" });
+    return;
+  }
+  const [updated] = await db
+    .update(knowledgeArticlesTable)
+    .set(updates)
+    .where(eq(knowledgeArticlesTable.id, id))
+    .returning();
+  if (!updated) {
+    res.status(404).json({ message: "Artikel niet gevonden" });
+    return;
+  }
+  res.json(serialize(updated));
+});
+
 // Create article (managers only)
 router.post("/knowledge-articles", async (req, res): Promise<void> => {
   const user = req.currentUser!;

@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { useListKnowledgeArticles, useCreateKnowledgeArticle, useGetCurrentUser, useListTicketCategories, getListKnowledgeArticlesQueryKey, KnowledgeArticle } from "@workspace/api-client-react";
+import { useListKnowledgeArticles, useCreateKnowledgeArticle, useUpdateKnowledgeArticle, useGetCurrentUser, useListTicketCategories, getListKnowledgeArticlesQueryKey, KnowledgeArticle } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Search, Plus, Tag, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { BookOpen, Search, Plus, Tag, ChevronDown, ChevronUp, Loader2, Pencil } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -23,7 +23,15 @@ import { cn } from "@/lib/utils";
 
 const CATEGORIES = ["algemeen", "klimaat", "schoonmaak", "technisch", "sanitair", "veiligheid", "reserveringen", "catering"];
 
-function ArticleCard({ article }: { article: KnowledgeArticle }) {
+function ArticleCard({
+  article,
+  canEdit,
+  onEdit,
+}: {
+  article: KnowledgeArticle;
+  canEdit: boolean;
+  onEdit: (article: KnowledgeArticle) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -50,9 +58,22 @@ function ArticleCard({ article }: { article: KnowledgeArticle }) {
               ))}
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="flex-shrink-0 h-7 w-7" onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}>
-            {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </Button>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {canEdit && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={(e) => { e.stopPropagation(); onEdit(article); }}
+                title="Bewerken"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}>
+              {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </Button>
+          </div>
         </div>
       </CardHeader>
       {expanded && (
@@ -66,16 +87,31 @@ function ArticleCard({ article }: { article: KnowledgeArticle }) {
   );
 }
 
-function NewArticleDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) {
+function ArticleFormDialog({
+  open,
+  onOpenChange,
+  article,
+}: {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  article?: KnowledgeArticle;
+}) {
+  const isEdit = !!article;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const create = useCreateKnowledgeArticle();
+  const update = useUpdateKnowledgeArticle();
   const { data: ticketCategories } = useListTicketCategories();
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [category, setCategory] = useState("algemeen");
-  const [tagsInput, setTagsInput] = useState("");
-  const [selectedTicketCategoryIds, setSelectedTicketCategoryIds] = useState<number[]>([]);
+
+  const [title, setTitle] = useState(article?.title ?? "");
+  const [body, setBody] = useState(article?.body ?? "");
+  const [category, setCategory] = useState(article?.category ?? "algemeen");
+  const [tagsInput, setTagsInput] = useState(article?.tags.join(", ") ?? "");
+  const [selectedTicketCategoryIds, setSelectedTicketCategoryIds] = useState<number[]>(
+    article?.ticketCategoryIds ?? [],
+  );
+
+  const isPending = create.isPending || update.isPending;
 
   const toggleTicketCategory = (id: number) => {
     setSelectedTicketCategoryIds((prev) =>
@@ -86,25 +122,40 @@ function NewArticleDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
   const handleSubmit = () => {
     if (!title.trim() || !body.trim()) return;
     const tags = tagsInput.split(",").map((t) => t.trim()).filter(Boolean);
-    create.mutate(
-      { data: { title: title.trim(), body: body.trim(), category, tags, ticketCategoryIds: selectedTicketCategoryIds } },
-      {
-        onSuccess: () => {
-          toast({ title: "Artikel aangemaakt" });
-          queryClient.invalidateQueries({ queryKey: ["/api/knowledge-articles"] });
-          onOpenChange(false);
-          setTitle(""); setBody(""); setTagsInput(""); setSelectedTicketCategoryIds([]);
+    const payload = { title: title.trim(), body: body.trim(), category, tags, ticketCategoryIds: selectedTicketCategoryIds };
+
+    if (isEdit && article) {
+      update.mutate(
+        { id: article.id, data: payload },
+        {
+          onSuccess: () => {
+            toast({ title: "Artikel bijgewerkt" });
+            queryClient.invalidateQueries({ queryKey: ["/api/knowledge-articles"] });
+            onOpenChange(false);
+          },
+          onError: () => toast({ variant: "destructive", title: "Fout", description: "Kon artikel niet bijwerken." }),
         },
-        onError: () => toast({ variant: "destructive", title: "Fout", description: "Kon artikel niet aanmaken." }),
-      },
-    );
+      );
+    } else {
+      create.mutate(
+        { data: payload },
+        {
+          onSuccess: () => {
+            toast({ title: "Artikel aangemaakt" });
+            queryClient.invalidateQueries({ queryKey: ["/api/knowledge-articles"] });
+            onOpenChange(false);
+          },
+          onError: () => toast({ variant: "destructive", title: "Fout", description: "Kon artikel niet aanmaken." }),
+        },
+      );
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nieuw kennisbankartikel</DialogTitle>
+          <DialogTitle>{isEdit ? "Artikel bewerken" : "Nieuw kennisbankartikel"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
@@ -158,8 +209,8 @@ function NewArticleDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Annuleren</Button>
-          <Button onClick={handleSubmit} disabled={create.isPending || !title.trim() || !body.trim()}>
-            {create.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleSubmit} disabled={isPending || !title.trim() || !body.trim()}>
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Opslaan
           </Button>
         </DialogFooter>
@@ -173,6 +224,7 @@ export default function KennisbankPage() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [newDialogOpen, setNewDialogOpen] = useState(false);
+  const [editArticle, setEditArticle] = useState<KnowledgeArticle | null>(null);
 
   const params = { search: search || undefined, category: selectedCategory || undefined };
   const { data: articles, isLoading } = useListKnowledgeArticles(
@@ -246,13 +298,25 @@ export default function KennisbankPage() {
       ) : (
         <div className="space-y-3">
           {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
+            <ArticleCard
+              key={article.id}
+              article={article}
+              canEdit={canCreate}
+              onEdit={setEditArticle}
+            />
           ))}
         </div>
       )}
 
       {newDialogOpen && (
-        <NewArticleDialog open={newDialogOpen} onOpenChange={setNewDialogOpen} />
+        <ArticleFormDialog open={newDialogOpen} onOpenChange={setNewDialogOpen} />
+      )}
+      {editArticle && (
+        <ArticleFormDialog
+          open={!!editArticle}
+          onOpenChange={(o) => { if (!o) setEditArticle(null); }}
+          article={editArticle}
+        />
       )}
     </div>
   );

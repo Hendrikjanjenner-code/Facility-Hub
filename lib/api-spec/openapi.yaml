@@ -2284,6 +2284,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/KnowledgeArticle"
+  /knowledge-articles/{id}:
+    patch:
+      operationId: updateKnowledgeArticle
+      tags: [knowledge]
+      summary: Update a knowledge-base article (manager/beheerder only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KnowledgeArticleUpdate"
+      responses:
+        "200":
+          description: Updated article
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnowledgeArticle"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
   /knowledge-articles/suggest:
     get:
       operationId: suggestKnowledgeArticles
@@ -4957,6 +4992,18 @@ components:
           type: array
           items: { type: integer }
       required: [title, body, category]
+    KnowledgeArticleUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        body: { type: string, minLength: 1 }
+        category: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        ticketCategoryIds:
+          type: array
+          items: { type: integer }
     TicketSatisfaction:
       type: object
       properties:

@@ -1356,6 +1356,15 @@ export interface KnowledgeArticleInput {
   ticketCategoryIds?: number[];
 }
 
+export interface KnowledgeArticleUpdate {
+  /** @minLength 1 */
+  title?: string;
+  /** @minLength 1 */
+  body?: string;
+  category?: string;
+  tags?: string[];
+  ticketCategoryIds?: number[];
+}
 export interface TicketSatisfaction {
   id: number;
   ticketId: number;
@@ -1519,4 +1528,3 @@ export type SuggestKnowledgeArticlesParams = {
 q?: string;
 ticketCategoryId?: number;
 };
-
