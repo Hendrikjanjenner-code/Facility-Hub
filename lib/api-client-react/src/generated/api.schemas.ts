@@ -243,8 +243,6 @@ export interface FloorPlanRoom {
   functionType: string;
   areaM2: number;
   /** @nullable */
-  areaVvoM2?: number | null;
-  /** @nullable */
   department?: string | null;
   /** @nullable */
   capacity?: number | null;
@@ -854,6 +852,13 @@ export interface ShopOrderUpdate {
  * Whether orders that exceed the budget are blocked (409) or just marked
  */
 export type BudgetStatusOverBudgetPolicy = typeof BudgetStatusOverBudgetPolicy[keyof typeof BudgetStatusOverBudgetPolicy];
+
+
+export const BudgetStatusOverBudgetPolicy = {
+  markeren: 'markeren',
+  blokkeren: 'blokkeren',
+} as const;
+
 export interface BudgetStatus {
   id: number;
   department: string;
@@ -869,6 +874,17 @@ export interface BudgetStatus {
 }
 
 export type BudgetPolicyUpdateOverBudgetPolicy = typeof BudgetPolicyUpdateOverBudgetPolicy[keyof typeof BudgetPolicyUpdateOverBudgetPolicy];
+
+
+export const BudgetPolicyUpdateOverBudgetPolicy = {
+  markeren: 'markeren',
+  blokkeren: 'blokkeren',
+} as const;
+
+export interface BudgetPolicyUpdate {
+  overBudgetPolicy: BudgetPolicyUpdateOverBudgetPolicy;
+}
+
 export interface MeterReading {
   id: number;
   buildingId: number;
@@ -892,6 +908,12 @@ export interface MeterReadingInput {
   readingDate: string;
   value: number;
   unit: string;
+}
+
+export interface MeterReadingUpdateInput {
+  readingDate?: string;
+  /** @minimum 0 */
+  value?: number;
 }
 
 export interface MeterReadingImportInput {
@@ -1279,17 +1301,3 @@ q?: string;
 ticketCategoryId?: number;
 };
 
-
-export const BudgetStatusOverBudgetPolicy = {
-  markeren: 'markeren',
-  blokkeren: 'blokkeren',
-} as const;
-
-export const BudgetPolicyUpdateOverBudgetPolicy = {
-  markeren: 'markeren',
-  blokkeren: 'blokkeren',
-} as const;
-
-export interface BudgetPolicyUpdate {
-  overBudgetPolicy: BudgetPolicyUpdateOverBudgetPolicy;
-}

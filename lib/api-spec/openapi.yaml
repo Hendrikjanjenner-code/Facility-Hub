@@ -1442,6 +1442,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MeterReading'
+  /meter-readings/{id}:
+    patch:
+      operationId: updateMeterReading
+      tags:
+        - sustainability
+      summary: Correct a meter reading (value and/or date)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MeterReadingUpdateInput'
+      responses:
+        '200':
+          description: Updated reading
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeterReading'
+        '404':
+          description: Not found
+    delete:
+      operationId: deleteMeterReading
+      tags:
+        - sustainability
+      summary: Delete a meter reading
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
   /meter-readings/import:
     post:
       operationId: importMeterReadings
@@ -3705,6 +3748,14 @@ components:
         - readingDate
         - value
         - unit
+    MeterReadingUpdateInput:
+      type: object
+      properties:
+        readingDate:
+          type: string
+        value:
+          type: number
+          minimum: 0
     MeterReadingImportInput:
       type: object
       properties:

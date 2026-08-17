@@ -125,6 +125,7 @@ export const ListTicketsResponse = zod.array(ListTicketsResponseItem)
  */
 
 
+
 export const CreateTicketBody = zod.object({
   "title": zod.string().min(1),
   "description": zod.string(),
@@ -254,6 +255,8 @@ export const CreateTicketCommentParams = zod.object({
 })
 
 
+
+
 export const CreateTicketCommentBody = zod.object({
   "body": zod.string().min(1)
 })
@@ -367,6 +370,7 @@ export const updateRoomDossierBodyAreaBvoM2Min = 0;
 export const updateRoomDossierBodyCapacityMin = 0;
 
 
+
 export const UpdateRoomDossierBody = zod.object({
   "functionType": zod.string().min(1).optional(),
   "floorFinish": zod.string().nullish(),
@@ -419,7 +423,6 @@ export const GetFloorPlanResponse = zod.object({
   "code": zod.string(),
   "functionType": zod.string(),
   "areaM2": zod.number(),
-  "areaVvoM2": zod.number().nullish(),
   "department": zod.string().nullish(),
   "capacity": zod.int().nullish(),
   "bookable": zod.boolean().optional()
@@ -480,7 +483,9 @@ export const CreateBuildingDocumentParams = zod.object({
 })
 
 
+
 export const createBuildingDocumentBodySizeBytesMin = 0;
+
 
 
 export const CreateBuildingDocumentBody = zod.object({
@@ -546,6 +551,7 @@ export const ListKeysResponse = zod.array(ListKeysResponseItem)
 
 
 export const createKeyBodyReplacementCostMin = 0;
+
 
 
 export const CreateKeyBody = zod.object({
@@ -638,6 +644,7 @@ export const UpdateKeyParams = zod.object({
 export const updateKeyBodyReplacementCostMin = 0;
 
 
+
 export const UpdateKeyBody = zod.object({
   "description": zod.string().min(1).optional(),
   "buildingId": zod.int().nullish(),
@@ -668,6 +675,8 @@ export const UpdateKeyResponse = zod.object({
 export const CreateKeyDoorParams = zod.object({
   "id": zod.coerce.number().int()
 })
+
+
 
 
 export const CreateKeyDoorBody = zod.object({
@@ -817,6 +826,7 @@ export const ReportKeyLossParams = zod.object({
 export const reportKeyLossBodyChargeAmountMin = 0;
 
 
+
 export const ReportKeyLossBody = zod.object({
   "chargeAmount": zod.number().min(reportKeyLossBodyChargeAmountMin).nullish(),
   "note": zod.string().nullish()
@@ -941,6 +951,9 @@ export const ListReservationsResponseItem = zod.object({
   "createdAt": zod.string()
 })
 export const ListReservationsResponse = zod.array(ListReservationsResponseItem)
+
+
+
 
 
 export const CreateReservationBody = zod.object({
@@ -1121,6 +1134,9 @@ export const ListVisitorsResponseItem = zod.object({
 export const ListVisitorsResponse = zod.array(ListVisitorsResponseItem)
 
 
+
+
+
 export const CreateVisitorBody = zod.object({
   "name": zod.string().min(1),
   "company": zod.string().nullish(),
@@ -1197,6 +1213,10 @@ export const ListAssetsResponseItem = zod.object({
   "openTicketCount": zod.int().nullish()
 })
 export const ListAssetsResponse = zod.array(ListAssetsResponseItem)
+
+
+
+
 
 
 export const CreateAssetBody = zod.object({
@@ -1343,6 +1363,10 @@ export const ListSuppliersResponseItem = zod.object({
 export const ListSuppliersResponse = zod.array(ListSuppliersResponseItem)
 
 
+
+
+
+
 export const CreateSupplierBody = zod.object({
   "name": zod.string().min(1),
   "category": zod.string().min(1),
@@ -1394,6 +1418,10 @@ export const ListContractsResponseItem = zod.object({
   "createdAt": zod.string()
 })
 export const ListContractsResponse = zod.array(ListContractsResponseItem)
+
+
+
+
 
 
 export const CreateContractBody = zod.object({
@@ -1486,6 +1514,10 @@ export const ListShopProductsResponseItem = zod.object({
 export const ListShopProductsResponse = zod.array(ListShopProductsResponseItem)
 
 
+
+
+
+
 export const CreateShopProductBody = zod.object({
   "name": zod.string().min(1),
   "description": zod.string().nullish(),
@@ -1574,6 +1606,8 @@ export const ListShopOrdersResponse = zod.array(ListShopOrdersResponseItem)
  */
 
 
+
+
 export const CreateShopOrderBody = zod.object({
   "lines": zod.array(zod.object({
   "productId": zod.int(),
@@ -1656,12 +1690,30 @@ export const ListBudgetsResponseItem = zod.object({
 })
 export const ListBudgetsResponse = zod.array(ListBudgetsResponseItem)
 
+
 /**
  * @summary Update over-budget policy for a department budget
  */
 export const UpdateBudgetPolicyParams = zod.object({
   "id": zod.coerce.number().int()
 })
+
+export const UpdateBudgetPolicyBody = zod.object({
+  "overBudgetPolicy": zod.enum(['markeren', 'blokkeren'])
+})
+
+export const UpdateBudgetPolicyResponse = zod.object({
+  "id": zod.int(),
+  "department": zod.string(),
+  "year": zod.int(),
+  "amount": zod.number(),
+  "spent": zod.number().describe('Sum of approved\/ordered\/delivered orders'),
+  "pending": zod.number().describe('Sum of submitted (not yet decided) orders'),
+  "remaining": zod.number(),
+  "overBudgetPolicy": zod.enum(['markeren', 'blokkeren']).describe('Whether orders that exceed the budget are blocked (409) or just marked')
+})
+
+
 export const ListMeterReadingsQueryParams = zod.object({
   "buildingId": zod.coerce.number().int().optional(),
   "meterType": zod.coerce.string().optional()
@@ -1705,8 +1757,49 @@ export const CreateMeterReadingResponse = zod.object({
 
 
 /**
+ * @summary Correct a meter reading (value and/or date)
+ */
+export const UpdateMeterReadingParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateMeterReadingBodyValueMin = 0;
+
+
+
+export const UpdateMeterReadingBody = zod.object({
+  "readingDate": zod.string().optional(),
+  "value": zod.number().min(updateMeterReadingBodyValueMin).optional()
+})
+
+export const UpdateMeterReadingResponse = zod.object({
+  "id": zod.int(),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "meterType": zod.string().describe('elektriciteit | gas | water'),
+  "readingDate": zod.string(),
+  "value": zod.number(),
+  "unit": zod.string(),
+  "source": zod.string(),
+  "registeredById": zod.int().nullish(),
+  "registeredByName": zod.string().nullish()
+})
+
+
+/**
+ * @summary Delete a meter reading
+ */
+export const DeleteMeterReadingParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteMeterReadingResponse = zod.void()
+
+
+/**
  * @summary Bulk import meter readings (parsed CSV rows)
  */
+
 
 
 export const ImportMeterReadingsBody = zod.object({
@@ -1827,6 +1920,9 @@ export const ListBouwdelenResponse = zod.array(ListBouwdelenResponseItem)
  */
 
 
+
+
+
 export const CreateBouwdeelBody = zod.object({
   "code": zod.string().min(1),
   "name": zod.string().min(1),
@@ -1924,6 +2020,7 @@ export const CreateConditiemetingParams = zod.object({
 export const createConditiemetingBodyScoreMax = 6;
 
 
+
 export const CreateConditiemetingBody = zod.object({
   "score": zod.int().min(1).max(createConditiemetingBodyScoreMax),
   "toelichting": zod.string().nullish(),
@@ -1980,6 +2077,10 @@ export const ListMjopTakenResponseItem = zod.object({
 export const ListMjopTakenResponse = zod.array(ListMjopTakenResponseItem)
 
 
+
+
+
+
 export const CreateMjopTaakBody = zod.object({
   "bouwdeelId": zod.int(),
   "title": zod.string().min(1),
@@ -2010,6 +2111,8 @@ export const CreateMjopTaakResponse = zod.object({
 export const UpdateMjopTaakParams = zod.object({
   "id": zod.coerce.number().int()
 })
+
+
 
 
 export const UpdateMjopTaakBody = zod.object({
@@ -2137,6 +2240,8 @@ export const ListKnowledgeArticlesResponse = zod.array(ListKnowledgeArticlesResp
  */
 
 
+
+
 export const CreateKnowledgeArticleBody = zod.object({
   "title": zod.string().min(1),
   "body": zod.string().min(1),
@@ -2186,6 +2291,7 @@ export const SubmitTicketSatisfactionParams = zod.object({
 })
 
 export const submitTicketSatisfactionBodyScoreMax = 5;
+
 
 
 export const SubmitTicketSatisfactionBody = zod.object({
@@ -2239,17 +2345,3 @@ export const GetSatisfactionReportResponse = zod.object({
 })
 
 
-export const UpdateBudgetPolicyResponse = zod.object({
-  "id": zod.int(),
-  "department": zod.string(),
-  "year": zod.int(),
-  "amount": zod.number(),
-  "spent": zod.number().describe('Sum of approved\/ordered\/delivered orders'),
-  "pending": zod.number().describe('Sum of submitted (not yet decided) orders'),
-  "remaining": zod.number(),
-  "overBudgetPolicy": zod.enum(['markeren', 'blokkeren']).describe('Whether orders that exceed the budget are blocked (409) or just marked')
-})
-
-export const UpdateBudgetPolicyBody = zod.object({
-  "overBudgetPolicy": zod.enum(['markeren', 'blokkeren'])
-})

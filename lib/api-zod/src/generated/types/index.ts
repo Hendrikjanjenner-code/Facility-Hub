@@ -75,6 +75,7 @@ export * from './loginInput';
 export * from './meterReading';
 export * from './meterReadingImportInput';
 export * from './meterReadingInput';
+export * from './meterReadingUpdateInput';
 export * from './mjopTaak';
 export * from './mjopTaakInput';
 export * from './mjopTaakUpdate';

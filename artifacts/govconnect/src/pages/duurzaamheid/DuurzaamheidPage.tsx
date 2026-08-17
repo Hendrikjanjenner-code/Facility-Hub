@@ -6,13 +6,16 @@ import {
   useGetStructure,
   useListMeterReadings,
   useCreateMeterReading,
+  useUpdateMeterReading,
+  useDeleteMeterReading,
   useImportMeterReadings,
   useListWasteRegistrations,
   useCreateWasteRegistration,
   useGetSustainabilityReport,
+  type MeterReading,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet, Download, Filter, X } from "lucide-react";
+import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet, Download, Filter, X, Pencil } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip,
   Legend, CartesianGrid, PieChart, Pie, Cell,
@@ -27,6 +30,10 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form";
@@ -47,6 +54,11 @@ const TYPE_COLORS: Record<string, string> = { elektriciteit: "#eab308", gas: "#f
 const meterSchema = z.object({
   buildingId: z.number({ message: "Kies een gebouw" }),
   meterType: z.string().min(1, "Kies een metertype"),
+  readingDate: z.string().min(10, "Datum is verplicht"),
+  value: z.coerce.number().min(0, "Meterstand is verplicht"),
+});
+
+const correctSchema = z.object({
   readingDate: z.string().min(10, "Datum is verplicht"),
   value: z.coerce.number().min(0, "Meterstand is verplicht"),
 });
@@ -86,6 +98,8 @@ export default function DuurzaamheidPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [meterDialogOpen, setMeterDialogOpen] = useState(false);
   const [wasteDialogOpen, setWasteDialogOpen] = useState(false);
+  const [editReading, setEditReading] = useState<MeterReading | null>(null);
+  const [deleteReading, setDeleteReading] = useState<MeterReading | null>(null);
 
   // Filter state for the rapportage tab
   const [filterBuildingId, setFilterBuildingId] = useState<string>("");
@@ -115,6 +129,8 @@ export default function DuurzaamheidPage() {
   );
 
   const createReading = useCreateMeterReading();
+  const updateReading = useUpdateMeterReading();
+  const doDeleteReading = useDeleteMeterReading();
   const importReadings = useImportMeterReadings();
   const createWaste = useCreateWasteRegistration();
 
@@ -126,11 +142,43 @@ export default function DuurzaamheidPage() {
     resolver: zodResolver(wasteSchema),
     defaultValues: { category: "", registrationDate: new Date().toLocaleDateString("sv-SE") },
   });
+  const correctForm = useForm<z.input<typeof correctSchema>, any, z.output<typeof correctSchema>>({
+    resolver: zodResolver(correctSchema),
+  });
 
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/meter-readings"] });
     queryClient.invalidateQueries({ queryKey: ["/api/waste-registrations"] });
     queryClient.invalidateQueries({ queryKey: ["/api/sustainability/report"] });
+  };
+
+  const openEditDialog = (r: MeterReading) => {
+    setEditReading(r);
+    correctForm.reset({ readingDate: r.readingDate, value: r.value });
+  };
+
+  const onSubmitCorrect = (values: z.output<typeof correctSchema>) => {
+    if (!editReading) return;
+    updateReading.mutate({ id: editReading.id, data: values }, {
+      onSuccess: () => {
+        toast({ title: "Meterstand gecorrigeerd" });
+        setEditReading(null);
+        invalidate();
+      },
+      onError: () => toast({ title: "Correctie mislukt", variant: "destructive" }),
+    });
+  };
+
+  const onConfirmDelete = () => {
+    if (!deleteReading) return;
+    doDeleteReading.mutate({ id: deleteReading.id }, {
+      onSuccess: () => {
+        toast({ title: "Meterstand verwijderd" });
+        setDeleteReading(null);
+        invalidate();
+      },
+      onError: () => toast({ title: "Verwijderen mislukt", variant: "destructive" }),
+    });
   };
 
   const onSubmitMeter = (values: z.output<typeof meterSchema>) => {
@@ -399,12 +447,7 @@ export default function DuurzaamheidPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2"><Gauge className="h-4 w-4 text-primary" />Maandelijks verbruik</CardTitle>
-                <CardDescription>
-                  Elektriciteit (kWh), gas en water (m³)
-                  {filterBuildingId
-                    ? ` — ${buildings.find((b) => b.id === Number(filterBuildingId))?.name ?? "geselecteerd gebouw"}`
-                    : " — alle gebouwen"}
-                </CardDescription>
+                <CardDescription>Elektriciteit (kWh), gas en water (m³) — alle gebouwen</CardDescription>
               </CardHeader>
               <CardContent className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
@@ -532,6 +575,7 @@ export default function DuurzaamheidPage() {
                     <TableHead className="text-right">Stand</TableHead>
                     <TableHead>Bron</TableHead>
                     <TableHead>Geregistreerd door</TableHead>
+                    <TableHead className="w-20" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -545,6 +589,16 @@ export default function DuurzaamheidPage() {
                         <Badge variant="secondary" className="text-xs">{r.source === "csv_import" ? "CSV-import" : "Handmatig"}</Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{r.registeredByName ?? "—"}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 justify-end">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(r)} title="Corrigeren">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteReading(r)} title="Verwijderen">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -638,6 +692,62 @@ export default function DuurzaamheidPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Edit/correct dialog */}
+      <Dialog open={!!editReading} onOpenChange={(open) => { if (!open) setEditReading(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Meterstand corrigeren</DialogTitle>
+            <DialogDescription>
+              {editReading ? `${editReading.buildingName} — ${editReading.meterType}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...correctForm}>
+            <form onSubmit={correctForm.handleSubmit(onSubmitCorrect)} className="space-y-4">
+              <FormField control={correctForm.control} name="readingDate" render={({ field }) => (
+                <FormItem><FormLabel>Datum</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={correctForm.control} name="value" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Meterstand ({editReading?.unit})</FormLabel>
+                  <FormControl><Input type="number" step="0.01" {...field} value={(field.value as any) ?? ""} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setEditReading(null)}>Annuleren</Button>
+                <Button type="submit" disabled={updateReading.isPending}>
+                  {updateReading.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Opslaan
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteReading} onOpenChange={(open) => { if (!open) setDeleteReading(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Meterstand verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteReading
+                ? `Stand van ${deleteReading.value.toLocaleString("nl-NL")} ${deleteReading.unit} op ${deleteReading.readingDate} voor ${deleteReading.buildingName} wordt permanent verwijderd. Verbruiksberekeningen worden direct herberekend.`
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={onConfirmDelete}
+              disabled={doDeleteReading.isPending}
+            >
+              {doDeleteReading.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
