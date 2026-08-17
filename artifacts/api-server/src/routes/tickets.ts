@@ -166,7 +166,10 @@ router.get("/tickets/:id", async (req, res): Promise<void> => {
     res.status(403).json({ message: "Geen toegang tot deze melding" });
     return;
   }
-  const [ticket] = await fetchTickets(eq(ticketsTable.id, id));
+  const [ticket] = await db
+    .select()
+    .from(ticketsTable)
+    .where(eq(ticketsTable.id, id));
   res.json(ticket);
 });
 

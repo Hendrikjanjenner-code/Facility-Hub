@@ -59,7 +59,7 @@ function serializeRoom(redactCounts: boolean, r: {
     facilities: r.room.facilities,
     assetCount: redactCounts ? 0 : (r.assetCount ?? 0),
     openTicketCount: redactCounts ? 0 : (r.openTicketCount ?? 0),
-    updatedAt: r.room.updatedAt.toISOString(),
+    updatedAt: (r.room as any).updatedAt ? (r.room as any).updatedAt.toISOString() : null,
   };
 }
 
@@ -363,7 +363,7 @@ router.get("/floors/:id/plan", async (req, res): Promise<void> => {
       department: r.department,
       capacity: r.capacity,
       bookable: r.bookable,
-      updatedAt: r.updatedAt.toISOString(),
+      updatedAt: (r as any).updatedAt ? (r as any).updatedAt.toISOString() : null,
     })),
   });
 });
@@ -552,8 +552,9 @@ router.delete(
       return;
     }
 
+    // Controleer of het document bestaat.
     const [existing] = await db
-      .select()
+      .select({ id: buildingDocumentsTable.id, objectPath: buildingDocumentsTable.objectPath })
       .from(buildingDocumentsTable)
       .where(eq(buildingDocumentsTable.id, id));
     if (!existing) {

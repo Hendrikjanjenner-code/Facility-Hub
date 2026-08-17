@@ -23,14 +23,11 @@ import { requireAuth, requireRole } from "../lib/auth";
 const router: IRouter = Router();
 router.use(requireAuth);
 const internalRoles = ["eindgebruiker", "servicedesk", "facilitair_manager", "cateraar", "receptie", "beheerder"];
-// Leverancier can only access their own scoped order endpoints; the full catalog/products/threshold
-// are restricted to internal roles to prevent cross-supplier data leakage.
 router.use("/shop/products", requireRole(...internalRoles));
 router.use("/shop/approval-threshold", requireRole(...internalRoles));
 router.use("/shop/orders", requireRole(...internalRoles, "leverancier"));
 router.use("/shop", requireRole(...internalRoles, "leverancier"));
 router.use("/budgets", requireRole("facilitair_manager", "beheerder"));
-
 const MANAGER_ROLES = ["facilitair_manager", "beheerder"];
 const SPENT_STATUSES = ["goedgekeurd", "besteld", "geleverd"];
 
@@ -169,7 +166,7 @@ router.post(
         unit: d.unit ?? "stuk",
         stock: d.stock ?? 0,
         minStock: d.minStock ?? 0,
-        ...((d as any).supplierId != null ? { supplierId: (d as any).supplierId } : {}),
+        ...(d.supplierId != null ? { supplierId: d.supplierId } : {}),
       } as any)
       .returning();
     res.status(201).json(serializeProduct(created!));
@@ -344,6 +341,7 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
     throw err;
   });
 
+
   if (!order) return;
 
   if (autoApprove) {
@@ -451,7 +449,12 @@ router.patch(
         // Bij goedkeuring: voorraad conditioneel afboeken; bij tekort rolt alles terug.
         if (next === "goedgekeurd") {
           const lines = await tx.select().from(shopOrderLinesTable).where(eq(shopOrderLinesTable.orderId, id));
-          for (const line of lines) {
+
+            const [decremented] = await tx
+              .update(shopProductsTable)
+              .set({ stock: sql`${shopProductsTable.stock} - ${line.quantity}` })
+              .where(and(eq(shopProductsTable.id, line.productId), gte(shopProductsTable.stock, line.quantity)))
+              .returning();
     const [updated] = await db
       .update(budgetsTable)
       .set({ overBudgetPolicy: parsed.data.overBudgetPolicy as string })
@@ -647,3 +650,7 @@ router.patch(
 );
 
 export default router;
+
+              const [prod] = await tx.select().from(shopProductsTable).where(eq(shopProductsTable.id, line.productId));
+
+            const [after] = await tx.select().from(shopProductsTable).where(eq(shopProductsTable.id, line.productId));

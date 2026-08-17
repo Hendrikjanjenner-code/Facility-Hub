@@ -11,10 +11,9 @@ import {
   CreateMeterReadingBody,
   ImportMeterReadingsBody,
   CreateWasteRegistrationBody,
-  UpdateMeterReadingBody,
+  CreateMeterReadingBody as UpdateMeterReadingBody,
 } from "@workspace/api-zod";
 import { requireAuth, requireRole } from "../lib/auth";
-
 const router: IRouter = Router();
 router.use(requireAuth);
 const SUSTAIN_ROLES = ["facilitair_manager", "beheerder", "servicedesk"] as const;
@@ -59,36 +58,32 @@ function serializeReading(r: {
 router.get("/meter-readings", async (req, res): Promise<void> => {
   const conditions: SQL[] = [];
   if (typeof req.query.buildingId === "string" && req.query.buildingId)
-    conditions.push(eq(meterReadingsTable.buildingId, Number(req.query.buildingId)));
-  if (typeof req.query.meterType === "string" && req.query.meterType)
-    conditions.push(eq(meterReadingsTable.meterType, req.query.meterType));
-  const rows = await readingBaseQuery()
+    conditions.push(eq(wasteRegistrationsTable.buildingId, Number(req.query.buildingId)));
+  const rows = await wasteBaseQuery()
     .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(desc(meterReadingsTable.readingDate));
-  res.json(rows.map(serializeReading));
+    .orderBy(desc(wasteRegistrationsTable.registrationDate));
+  res.json(rows.map(serializeWaste));
 });
 
-router.post("/meter-readings", async (req, res): Promise<void> => {
-  const parsed = CreateMeterReadingBody.safeParse(req.body);
-  if (!parsed.success || !METER_TYPES.includes(parsed.data.meterType)) {
+router.post("/waste-registrations", async (req, res): Promise<void> => {
+  const parsed = CreateWasteRegistrationBody.safeParse(req.body);
+  if (!parsed.success || !WASTE_CATEGORIES.includes(parsed.data.category)) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
   }
   const d = parsed.data;
   const [created] = await db
-    .insert(meterReadingsTable)
+    .insert(wasteRegistrationsTable)
     .values({
       buildingId: d.buildingId,
-      meterType: d.meterType,
-      readingDate: d.readingDate,
-      value: d.value,
-      unit: d.unit,
-      source: "handmatig",
+      registrationDate: d.registrationDate,
+      category: d.category,
+      weightKg: d.weightKg,
       registeredById: req.currentUser!.id,
     })
     .returning();
-  const [row] = await readingBaseQuery().where(eq(meterReadingsTable.id, created!.id));
-  res.status(201).json(serializeReading(row!));
+  const [row] = await wasteBaseQuery().where(eq(wasteRegistrationsTable.id, created!.id));
+  res.status(201).json(serializeWaste(row!));
 });
 
 router.post("/meter-readings/import", async (req, res): Promise<void> => {
@@ -126,29 +121,16 @@ router.post("/meter-readings/import", async (req, res): Promise<void> => {
 // Task #16: correctie van een meterstand
 router.patch("/meter-readings/:id", requireRole(...SUSTAIN_ROLES), async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    res.status(400).json({ message: "Ongeldig id" });
-    return;
-  }
-  const parsed = UpdateMeterReadingBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ message: "Ongeldige invoer" });
-    return;
-  }
+
+  const body = req.body as { readingDate?: unknown; value?: unknown };
   const updates: Partial<typeof meterReadingsTable.$inferInsert> = {};
-  if (parsed.data.readingDate !== undefined) {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed.data.readingDate)) {
-      res.status(400).json({ message: "Ongeldige datum" });
-      return;
-    }
-    updates.readingDate = parsed.data.readingDate;
-  }
-  if (parsed.data.value !== undefined) {
-    if (!(parsed.data.value >= 0) || !isFinite(parsed.data.value)) {
-      res.status(400).json({ message: "Ongeldige meterstand" });
-      return;
-    }
-    updates.value = parsed.data.value;
+  if (typeof body.readingDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.readingDate))
+    updates.readingDate = body.readingDate;
+  const v = Number(body.value);
+  if (!Number.isNaN(v) && v >= 0) updates.value = v;
+  if (Object.keys(updates).length === 0) {
+    res.status(400).json({ message: "Geen geldige velden opgegeven" });
+    return;
   }
   const [updatedRow] = await db
     .update(meterReadingsTable)
@@ -159,17 +141,16 @@ router.patch("/meter-readings/:id", requireRole(...SUSTAIN_ROLES), async (req, r
     res.status(404).json({ message: "Meterstand niet gevonden" });
     return;
   }
-  const [row] = await readingBaseQuery().where(eq(meterReadingsTable.id, updatedRow.id));
+  const [row] = await readingBaseQuery().where(eq(meterReadingsTable.id, id));
   res.json(serializeReading(row!));
 });
 
 // Task #16: verwijderen van een meterstand
 router.delete("/meter-readings/:id", requireRole(...SUSTAIN_ROLES), async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    res.status(400).json({ message: "Ongeldig id" });
-    return;
-  }
+
+  const body = req.body as { readingDate?: unknown; value?: unknown };
+
   const [deleted] = await db
     .delete(meterReadingsTable)
     .where(eq(meterReadingsTable.id, id))
@@ -304,10 +285,10 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
       const usage = cur.value - prev.value;
       if (usage < 0) continue;
       const month = cur.readingDate.slice(0, 7);
-      const key = `${month}|${cur.meterType}`;
-      const entry = usageByMonth.get(key) ?? { usage: 0, unit: cur.unit };
+      const usageKey = `${month}|${cur.meterType}`;
+      const entry = usageByMonth.get(usageKey) ?? { usage: 0, unit: cur.unit };
       entry.usage += usage;
-      usageByMonth.set(key, entry);
+      usageByMonth.set(usageKey, entry);
     }
   }
   const monthlyUsage = Array.from(usageByMonth.entries())

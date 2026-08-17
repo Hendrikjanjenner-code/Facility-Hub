@@ -9,12 +9,12 @@ import {
   contractDocumentsTable,
   supplierReviewsTable,
 } from "@workspace/db";
-import { eq, and, sql, desc, type SQL } from "drizzle-orm";
+import { eq, and, or, sql, desc, type SQL } from "drizzle-orm";
 import { CreateSupplierBody, CreateContractBody, UpdateContractBody } from "@workspace/api-zod";
 import { requireAuth, requireRole } from "../lib/auth";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 import { isObjectPathReferenced } from "../lib/storageRefs";
-
+import { sendContractExpiryEmail } from "../lib/email";
 const router: IRouter = Router();
 router.use(requireAuth);
 // Contractenkluis & leveranciersregister: facilitair beheer; leverancier ziet alleen eigen contracten.
@@ -72,11 +72,12 @@ router.get("/suppliers", async (_req, res): Promise<void> => {
     .select({
       supplier: suppliersTable,
       userName: usersTable.name,
-      contractCount: sql<number>`(select count(*)::int from ${contractsTable} where ${contractsTable.supplierId} = ${suppliersTable.id})`,
+      contractCount: sql<number>`cast(count(${contractsTable.id}) as int)`,
     })
     .from(suppliersTable)
     .leftJoin(usersTable, eq(suppliersTable.userId, usersTable.id))
-    .orderBy(suppliersTable.name);
+    .leftJoin(contractsTable, eq(contractsTable.supplierId, suppliersTable.id))
+    .groupBy(suppliersTable.id, usersTable.name);
   res.json(
     rows.map((r) => ({
       ...r.supplier,
@@ -95,15 +96,7 @@ router.post("/suppliers", async (req, res): Promise<void> => {
   const d = parsed.data;
   const [created] = await db
     .insert(suppliersTable)
-    .values({
-      name: d.name,
-      category: d.category,
-      contactName: d.contactName ?? null,
-      email: d.email ?? null,
-      phone: d.phone ?? null,
-      kvkNumber: d.kvkNumber ?? null,
-      userId: d.userId ?? null,
-    })
+    .values(d)
     .returning();
   res.status(201).json({ ...created!, userName: null, contractCount: 0 });
 });
@@ -119,7 +112,7 @@ router.get("/suppliers/:id/reviews", async (req, res): Promise<void> => {
     .from(supplierReviewsTable)
     .leftJoin(usersTable, eq(supplierReviewsTable.reviewerId, usersTable.id))
     .where(eq(supplierReviewsTable.supplierId, supplierId))
-    .orderBy(desc(supplierReviewsTable.year));
+    .orderBy(desc(supplierReviewsTable.createdAt));
 
   const reviews = rows.map((r) => ({
     id: r.review.id,
@@ -158,13 +151,7 @@ router.post(
 
     const [created] = await db
       .insert(supplierReviewsTable)
-      .values({
-        supplierId,
-        reviewerId: req.currentUser!.id,
-        year,
-        score,
-        comment: typeof comment === "string" ? comment : null,
-      })
+      .values({ supplierId, reviewerId: req.currentUser!.id, year, score, comment: comment as string | undefined })
       .returning();
 
     res.status(201).json(created!);
@@ -175,7 +162,7 @@ router.post(
 
 router.get("/contracts", async (req, res): Promise<void> => {
   const conditions: SQL[] = [];
-  const user = req.currentUser!;
+    const user = req.currentUser!;
   if (user.role !== "leverancier") {
     await ensureContractExpiryNotifications();
   }
@@ -185,9 +172,7 @@ router.get("/contracts", async (req, res): Promise<void> => {
   }
   if (typeof req.query.status === "string" && req.query.status)
     conditions.push(eq(contractsTable.status, req.query.status));
-  const rows = await contractBaseQuery()
-    .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(contractsTable.endDate);
+  const rows = await contractBaseQuery().where(conditions.length ? and(...conditions) : undefined);
   let result = rows.map(serializeContract);
   const within = Number(req.query.expiringWithinDays);
   if (!Number.isNaN(within) && req.query.expiringWithinDays !== undefined) {
@@ -209,24 +194,18 @@ router.post(
     const [created] = await db
       .insert(contractsTable)
       .values({
-        name: d.name,
-        supplierId: d.supplierId ?? null,
-        category: d.category,
-        description: d.description ?? null,
-        startDate: d.startDate,
-        endDate: d.endDate,
-        noticePeriodDays: d.noticePeriodDays ?? 30,
-        annualValue: d.annualValue ?? null,
-        status: (d as any).status ?? "actief",
-        ownerId: (d as any).ownerId ?? null,
+        ...d,
+        description: d.description ?? undefined,
+        noticePeriodDays: d.noticePeriodDays ?? undefined,
+        annualValue: d.annualValue ?? undefined,
       })
       .returning();
     const [row] = await contractBaseQuery().where(eq(contractsTable.id, created!.id));
-    res.status(201).json(serializeContract(row!));
+    res.json(serializeContract(row!));
   },
 );
 
-router.patch(
+router.delete(
   "/contracts/:id",
   requireRole(...MANAGER_ROLES),
   async (req, res): Promise<void> => {
@@ -316,7 +295,7 @@ router.get(
 
     const user = req.currentUser!;
 
-    // Leverancier: only show documents for contracts linked to their own supplier
+    // Leverancier may only download documents for contracts linked to their own supplier
     if (user.role === "leverancier") {
       const [supplierRow] = await db
         .select({ id: suppliersTable.id })
@@ -332,7 +311,7 @@ router.get(
       }
     } else {
       const [contract] = await db
-        .select({ id: contractsTable.id })
+        .select({ supplierId: contractsTable.supplierId })
         .from(contractsTable)
         .where(eq(contractsTable.id, contractId));
       if (!contract) { res.status(404).json({ message: "Contract niet gevonden" }); return; }
@@ -376,10 +355,10 @@ router.post(
       return;
     }
 
-    const [contract] = await db
-      .select({ id: contractsTable.id })
-      .from(contractsTable)
-      .where(eq(contractsTable.id, contractId));
+      const [contract] = await db
+        .select({ supplierId: contractsTable.supplierId })
+        .from(contractsTable)
+        .where(eq(contractsTable.id, contractId));
     if (!contract) { res.status(404).json({ message: "Contract niet gevonden" }); return; }
 
     const [created] = await db
@@ -509,9 +488,9 @@ export async function ensureContractExpiryNotifications(): Promise<void> {
         .onConflictDoNothing();
     }
 
-    // Niveau 2 (escalatie): nog 0–14 dagen
+    // Niveau 2 (escalatie): nog 0–14 dagen — ook e-mail bij eerste melding
     if (c.daysUntilEnd >= 0 && c.daysUntilEnd <= 14) {
-      await db
+      const inserted = await db
         .insert(notificationsTable)
         .values({
           userId: c.ownerId,
@@ -521,7 +500,30 @@ export async function ensureContractExpiryNotifications(): Promise<void> {
           linkPath: "/contracten",
           referenceKey: `contract:${c.id}:urgent`,
         })
-        .onConflictDoNothing();
+        .onConflictDoNothing()
+        .returning({ id: notificationsTable.id });
+
+      // Stuur e-mail alleen als de notificatie nu nieuw is aangemaakt (idempotent).
+      if (inserted.length > 0) {
+        const [owner] = await db
+          .select({ email: usersTable.email, name: usersTable.name })
+          .from(usersTable)
+          .where(eq(usersTable.id, c.ownerId));
+
+        if (owner) {
+          const appUrl =
+            process.env["APP_URL"] ?? "https://govconnect.nl";
+          await sendContractExpiryEmail({
+            toEmail: owner.email,
+            toName: owner.name,
+            contractName: c.name,
+            endDate: c.endDate,
+            supplierName: c.supplierName ?? "onbekende leverancier",
+            daysUntilEnd: c.daysUntilEnd,
+            contractsUrl: `${appUrl}/contracten`,
+          });
+        }
+      }
     }
   }
 }
