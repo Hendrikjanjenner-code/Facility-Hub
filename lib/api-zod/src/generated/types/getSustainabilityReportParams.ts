@@ -8,4 +8,12 @@
 
 export type GetSustainabilityReportParams = {
 buildingId?: number;
+/**
+ * Start date (YYYY-MM-DD), inclusive
+ */
+dateFrom?: string;
+/**
+ * End date (YYYY-MM-DD), inclusive
+ */
+dateTo?: string;
 };

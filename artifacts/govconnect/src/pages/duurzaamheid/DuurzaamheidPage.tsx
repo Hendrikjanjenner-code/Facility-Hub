@@ -12,7 +12,7 @@ import {
   useGetSustainabilityReport,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet, Download } from "lucide-react";
+import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet, Download, Filter, X } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip,
   Legend, CartesianGrid, PieChart, Pie, Cell,
@@ -66,12 +66,31 @@ function parseCsv(text: string): { headers: string[]; rows: string[][] } {
   return { headers, rows: lines.slice(1).map((l) => l.split(sep).map((c) => c.trim())) };
 }
 
+/** Build a filename that reflects the active filters. */
+function buildExportFilename(buildingName: string | undefined, dateFrom: string, dateTo: string): string {
+  const parts = ["duurzaamheid"];
+  if (buildingName) parts.push(buildingName.toLowerCase().replace(/\s+/g, "_"));
+  if (dateFrom || dateTo) {
+    const from = dateFrom || "begin";
+    const to = dateTo || "nu";
+    parts.push(`${from}_${to}`);
+  } else {
+    parts.push(new Date().toLocaleDateString("sv-SE"));
+  }
+  return `${parts.join("_")}.csv`;
+}
+
 export default function DuurzaamheidPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [meterDialogOpen, setMeterDialogOpen] = useState(false);
   const [wasteDialogOpen, setWasteDialogOpen] = useState(false);
+
+  // Filter state for the rapportage tab
+  const [filterBuildingId, setFilterBuildingId] = useState<string>("");
+  const [filterDateFrom, setFilterDateFrom] = useState<string>("");
+  const [filterDateTo, setFilterDateTo] = useState<string>("");
 
   const { data: structure } = useGetStructure();
   const buildings = useMemo(
@@ -81,7 +100,20 @@ export default function DuurzaamheidPage() {
 
   const { data: readings } = useListMeterReadings();
   const { data: waste } = useListWasteRegistrations();
-  const { data: report } = useGetSustainabilityReport();
+
+  // Build query params for the report — only send defined values
+  const reportParams = useMemo(() => {
+    const p: Record<string, string | number> = {};
+    if (filterBuildingId) p.buildingId = Number(filterBuildingId);
+    if (filterDateFrom) p.dateFrom = filterDateFrom;
+    if (filterDateTo) p.dateTo = filterDateTo;
+    return p;
+  }, [filterBuildingId, filterDateFrom, filterDateTo]);
+
+  const { data: report } = useGetSustainabilityReport(
+    Object.keys(reportParams).length ? reportParams : undefined,
+  );
+
   const createReading = useCreateMeterReading();
   const importReadings = useImportMeterReadings();
   const createWaste = useCreateWasteRegistration();
@@ -199,13 +231,24 @@ export default function DuurzaamheidPage() {
       rows.push(`${w.category};${w.totalKg.toString().replace(".", ",")}`);
     }
 
+    const activeBuildingName = buildings.find((b) => b.id === Number(filterBuildingId))?.name;
+    const filename = buildExportFilename(activeBuildingName, filterDateFrom, filterDateTo);
+
     const blob = new Blob([rows.join("\r\n")], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `duurzaamheidsrapportage_${new Date().toLocaleDateString("sv-SE")}.csv`;
+    a.download = filename;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const hasActiveFilters = filterBuildingId || filterDateFrom || filterDateTo;
+
+  const clearFilters = () => {
+    setFilterBuildingId("");
+    setFilterDateFrom("");
+    setFilterDateTo("");
   };
 
   // Chart data: pivot monthlyUsage naar per-maand rijen per type
@@ -261,17 +304,107 @@ export default function DuurzaamheidPage() {
         </TabsList>
 
         <TabsContent value="rapportage" className="space-y-6 pt-4">
-          <div className="flex justify-end">
-            <Button variant="outline" onClick={exportCsv} disabled={!report}>
-              <Download className="mr-2 h-4 w-4" />
-              Exporteer CSV
-            </Button>
-          </div>
+          {/* Filter bar */}
+          <Card>
+            <CardContent className="pt-4 pb-4">
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground shrink-0">
+                  <Filter className="h-4 w-4" />
+                  Filteren op
+                </div>
+
+                {/* Building filter */}
+                <div className="min-w-[180px] flex-1">
+                  <label className="text-xs text-muted-foreground mb-1 block">Gebouw</label>
+                  <Select
+                    value={filterBuildingId || "__all__"}
+                    onValueChange={(v) => setFilterBuildingId(v === "__all__" ? "" : v)}
+                  >
+                    <SelectTrigger className="h-8 text-sm">
+                      <SelectValue placeholder="Alle gebouwen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__all__">Alle gebouwen</SelectItem>
+                      {buildings.map((b) => (
+                        <SelectItem key={b.id} value={b.id.toString()}>{b.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Date from */}
+                <div className="min-w-[140px]">
+                  <label className="text-xs text-muted-foreground mb-1 block">Van</label>
+                  <Input
+                    type="date"
+                    className="h-8 text-sm"
+                    value={filterDateFrom}
+                    onChange={(e) => setFilterDateFrom(e.target.value)}
+                  />
+                </div>
+
+                {/* Date to */}
+                <div className="min-w-[140px]">
+                  <label className="text-xs text-muted-foreground mb-1 block">Tot en met</label>
+                  <Input
+                    type="date"
+                    className="h-8 text-sm"
+                    value={filterDateTo}
+                    onChange={(e) => setFilterDateTo(e.target.value)}
+                  />
+                </div>
+
+                {/* Clear + Export buttons */}
+                <div className="flex items-end gap-2 ml-auto">
+                  {hasActiveFilters && (
+                    <Button variant="ghost" size="sm" onClick={clearFilters} className="h-8 px-2 text-xs">
+                      <X className="h-3 w-3 mr-1" />
+                      Filters wissen
+                    </Button>
+                  )}
+                  <Button variant="outline" size="sm" className="h-8" onClick={exportCsv} disabled={!report}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Exporteer CSV
+                  </Button>
+                </div>
+              </div>
+
+              {/* Active filter badges */}
+              {hasActiveFilters && (
+                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t">
+                  {filterBuildingId && (
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      Gebouw: {buildings.find((b) => b.id === Number(filterBuildingId))?.name ?? filterBuildingId}
+                      <button onClick={() => setFilterBuildingId("")} className="ml-1 hover:text-foreground"><X className="h-3 w-3" /></button>
+                    </Badge>
+                  )}
+                  {filterDateFrom && (
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      Van: {filterDateFrom}
+                      <button onClick={() => setFilterDateFrom("")} className="ml-1 hover:text-foreground"><X className="h-3 w-3" /></button>
+                    </Badge>
+                  )}
+                  {filterDateTo && (
+                    <Badge variant="secondary" className="text-xs gap-1">
+                      T/m: {filterDateTo}
+                      <button onClick={() => setFilterDateTo("")} className="ml-1 hover:text-foreground"><X className="h-3 w-3" /></button>
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2"><Gauge className="h-4 w-4 text-primary" />Maandelijks verbruik</CardTitle>
-                <CardDescription>Elektriciteit (kWh), gas en water (m³) — alle gebouwen</CardDescription>
+                <CardDescription>
+                  Elektriciteit (kWh), gas en water (m³)
+                  {filterBuildingId
+                    ? ` — ${buildings.find((b) => b.id === Number(filterBuildingId))?.name ?? "geselecteerd gebouw"}`
+                    : " — alle gebouwen"}
+                </CardDescription>
               </CardHeader>
               <CardContent className="h-72">
                 <ResponsiveContainer width="100%" height="100%">

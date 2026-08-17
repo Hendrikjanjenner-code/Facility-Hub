@@ -1766,7 +1766,9 @@ export const CreateWasteRegistrationResponse = zod.object({
  * @summary Aggregated monthly usage per meter type and waste per category
  */
 export const GetSustainabilityReportQueryParams = zod.object({
-  "buildingId": zod.coerce.number().int().optional()
+  "buildingId": zod.coerce.number().int().optional(),
+  "dateFrom": zod.coerce.string().optional().describe('Start date (YYYY-MM-DD), inclusive'),
+  "dateTo": zod.coerce.string().optional().describe('End date (YYYY-MM-DD), inclusive')
 })
 
 export const GetSustainabilityReportResponse = zod.object({

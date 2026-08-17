@@ -52,6 +52,8 @@ router.get("/shop/products", async (req, res): Promise<void> => {
     const cond = or(ilike(shopProductsTable.name, s), ilike(shopProductsTable.description, s));
     if (cond) conditions.push(cond);
   }
+  // Toon alleen actieve producten aan eindgebruikers en managers.
+  conditions.push(eq(shopProductsTable.active, 1));
   const rows = await db
     .select()
     .from(shopProductsTable)
@@ -72,6 +74,8 @@ router.post(
       return;
     }
     const d = parsed.data;
+
+    const set: Partial<typeof shopProductsTable.$inferInsert> = {};
     const [created] = await db
       .insert(shopProductsTable)
       .values({
@@ -103,6 +107,8 @@ router.patch(
       return;
     }
     const d = parsed.data;
+
+    const set: Partial<typeof shopProductsTable.$inferInsert> = {};
   const [updated] = await db
     .update(budgetsTable)
     .set({ overBudgetPolicy: parsed.data.overBudgetPolicy as string })
@@ -333,7 +339,15 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
       })),
     );
     return numbered!;
+  }).catch((err: any) => {
+    if (err?.status === 409) {
+      res.status(409).json({ message: err.message });
+      return null;
+    }
+    throw err;
   });
+
+  if (!order) return;
 
   // Goedkeuringsflow: notificeer facilitair managers over de nieuwe aanvraag.
   const managers = await db
@@ -351,6 +365,36 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
   }
 
     const [result] = await loadOrders(eq(shopOrdersTable.id, id));
+
+function serializeBudget(
+  b: typeof budgetsTable.$inferSelect,
+  orders: { department: string; status: string; total: number; createdAt: Date }[],
+) {
+  const yearStart = new Date(`${b.year}-01-01T00:00:00Z`);
+  const yearEnd = new Date(`${b.year + 1}-01-01T00:00:00Z`);
+  const deptOrders = orders.filter(
+    (o) =>
+      o.department === b.department &&
+      o.createdAt >= yearStart &&
+      o.createdAt < yearEnd,
+  );
+  const spent = deptOrders
+    .filter((o) => SPENT_STATUSES.includes(o.status))
+    .reduce((s, o) => s + o.total, 0);
+  const pending = deptOrders
+    .filter((o) => o.status === "ingediend")
+    .reduce((s, o) => s + o.total, 0);
+  return {
+    id: b.id,
+    department: b.department,
+    year: b.year,
+    amount: b.amount,
+    overBudgetPolicy: b.overBudgetPolicy as "markeren" | "blokkeren",
+    spent: Math.round(spent * 100) / 100,
+    pending: Math.round(pending * 100) / 100,
+    remaining: Math.round((b.amount - spent) * 100) / 100,
+  };
+}
   res.status(201).json(result);
 });
 
@@ -452,14 +496,36 @@ router.patch(
     }
 
     const [result] = await loadOrders(eq(shopOrdersTable.id, id));
-    res.json(result);
-  },
-);
 
-router.patch(
-  "/budgets/:id",
-  requireRole(...MANAGER_ROLES),
-  async (req, res): Promise<void> => {
+function serializeBudget(
+  b: typeof budgetsTable.$inferSelect,
+  orders: { department: string; status: string; total: number; createdAt: Date }[],
+) {
+  const yearStart = new Date(`${b.year}-01-01T00:00:00Z`);
+  const yearEnd = new Date(`${b.year + 1}-01-01T00:00:00Z`);
+  const deptOrders = orders.filter(
+    (o) =>
+      o.department === b.department &&
+      o.createdAt >= yearStart &&
+      o.createdAt < yearEnd,
+  );
+  const spent = deptOrders
+    .filter((o) => SPENT_STATUSES.includes(o.status))
+    .reduce((s, o) => s + o.total, 0);
+  const pending = deptOrders
+    .filter((o) => o.status === "ingediend")
+    .reduce((s, o) => s + o.total, 0);
+  return {
+    id: b.id,
+    department: b.department,
+    year: b.year,
+    amount: b.amount,
+    overBudgetPolicy: b.overBudgetPolicy as "markeren" | "blokkeren",
+    spent: Math.round(spent * 100) / 100,
+    pending: Math.round(pending * 100) / 100,
+    remaining: Math.round((b.amount - spent) * 100) / 100,
+  };
+}
   const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     res.status(400).json({ message: "Ongeldig id" });
@@ -475,14 +541,6 @@ router.patch(
     .set({ overBudgetPolicy: parsed.data.overBudgetPolicy as string })
     .where(eq(budgetsTable.id, id))
     .returning();
-    if (!updated) {
-      res.status(404).json({ message: "Budget niet gevonden" });
-      return;
-    }
-
-    // Bereken spent/pending/remaining voor de volledige BudgetStatus-respons.
-      const yearStart = new Date(`${b.year}-01-01T00:00:00Z`);
-      const yearEnd = new Date(`${b.year + 1}-01-01T00:00:00Z`);
   const orders = await db
     .select({
       department: shopOrdersTable.department,
@@ -497,18 +555,6 @@ router.patch(
         gte(shopOrdersTable.createdAt, new Date(`${currentYear}-01-01T00:00:00Z`)),
       ),
     );
-      const deptOrders = orders.filter(
-        (o) =>
-          o.department === b.department &&
-          o.createdAt >= yearStart &&
-          o.createdAt < yearEnd,
-      );
-      const spent = deptOrders
-        .filter((o) => SPENT_STATUSES.includes(o.status))
-        .reduce((s, o) => s + o.total, 0);
-      const pending = deptOrders
-        .filter((o) => o.status === "ingediend")
-        .reduce((s, o) => s + o.total, 0);
 
     res.json({
       id: updated.id,
@@ -538,35 +584,4 @@ router.get("/budgets", async (_req, res): Promise<void> => {
         gte(shopOrdersTable.createdAt, new Date(`${currentYear}-01-01T00:00:00Z`)),
       ),
     );
-  res.json(
-    budgets.map((b) => {
-      // Filter orders op dezelfde jaargrenzen als de budgetcheck bij indienen.
-      const yearStart = new Date(`${b.year}-01-01T00:00:00Z`);
-      const yearEnd = new Date(`${b.year + 1}-01-01T00:00:00Z`);
-      const deptOrders = orders.filter(
-        (o) =>
-          o.department === b.department &&
-          o.createdAt >= yearStart &&
-          o.createdAt < yearEnd,
-      );
-      const spent = deptOrders
-        .filter((o) => SPENT_STATUSES.includes(o.status))
-        .reduce((s, o) => s + o.total, 0);
-      const pending = deptOrders
-        .filter((o) => o.status === "ingediend")
-        .reduce((s, o) => s + o.total, 0);
-      return {
-        id: b.id,
-        department: b.department,
-        year: b.year,
-        amount: b.amount,
-        overBudgetPolicy: b.overBudgetPolicy as "markeren" | "blokkeren",
-        spent: Math.round(spent * 100) / 100,
-        pending: Math.round(pending * 100) / 100,
-        remaining: Math.round((b.amount - spent) * 100) / 100,
-      };
-    }),
-  );
-});
-
 export default router;

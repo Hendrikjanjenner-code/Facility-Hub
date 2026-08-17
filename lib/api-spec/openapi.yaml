@@ -1508,6 +1508,16 @@ paths:
           in: query
           schema:
             type: integer
+        - name: dateFrom
+          in: query
+          description: Start date (YYYY-MM-DD), inclusive
+          schema:
+            type: string
+        - name: dateTo
+          in: query
+          description: End date (YYYY-MM-DD), inclusive
+          schema:
+            type: string
       responses:
         '200':
           description: Report

@@ -6,7 +6,7 @@ import {
   buildingsTable,
   usersTable,
 } from "@workspace/db";
-import { eq, and, desc, type SQL } from "drizzle-orm";
+import { eq, and, desc, gte, lte, lt, type SQL } from "drizzle-orm";
 import {
   CreateMeterReadingBody,
   ImportMeterReadingsBody,
@@ -187,11 +187,24 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
     typeof req.query.buildingId === "string" && req.query.buildingId
       ? Number(req.query.buildingId)
       : null;
+  const dateFrom =
+    typeof req.query.dateFrom === "string" && /^\d{4}-\d{2}-\d{2}$/.test(req.query.dateFrom)
+      ? req.query.dateFrom
+      : null;
+  const dateTo =
+    typeof req.query.dateTo === "string" && /^\d{4}-\d{2}-\d{2}$/.test(req.query.dateTo)
+      ? req.query.dateTo
+      : null;
+
+  const readingConditions: SQL[] = [];
+  if (buildingId) readingConditions.push(eq(meterReadingsTable.buildingId, buildingId));
+  if (dateFrom) readingConditions.push(gte(meterReadingsTable.readingDate, dateFrom));
+  if (dateTo) readingConditions.push(lte(meterReadingsTable.readingDate, dateTo));
 
   const readings = await db
     .select()
     .from(meterReadingsTable)
-    .where(buildingId ? eq(meterReadingsTable.buildingId, buildingId) : undefined)
+    .where(readingConditions.length ? and(...readingConditions) : undefined)
     .orderBy(meterReadingsTable.readingDate);
 
   // Verbruik = verschil tussen opeenvolgende cumulatieve standen per gebouw+type.
@@ -201,6 +214,29 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
     const key = `${r.buildingId}|${r.meterType}`;
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key)!.push(r);
+  }
+
+  // Als dateFrom is ingesteld: haal per serie de laatste meterstand vóór dateFrom op als
+  // baseline, zodat de eerste verbruiksdelta binnen de periode niet verloren gaat.
+  if (dateFrom) {
+    for (const [key, series] of grouped.entries()) {
+      const [bIdStr, mType] = key.split("|");
+      const bIdNum = Number(bIdStr);
+      const baselineWhere: SQL[] = [
+        eq(meterReadingsTable.buildingId, bIdNum),
+        eq(meterReadingsTable.meterType, mType!),
+        lt(meterReadingsTable.readingDate, dateFrom),
+      ];
+      const [baseline] = await db
+        .select()
+        .from(meterReadingsTable)
+        .where(and(...baselineWhere))
+        .orderBy(desc(meterReadingsTable.readingDate))
+        .limit(1);
+      if (baseline) {
+        series.unshift(baseline);
+      }
+    }
   }
   for (const series of grouped.values()) {
     for (let i = 1; i < series.length; i++) {
@@ -222,10 +258,15 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
     })
     .sort((a, b) => a.month.localeCompare(b.month));
 
+  const wasteConditions: SQL[] = [];
+  if (buildingId) wasteConditions.push(eq(wasteRegistrationsTable.buildingId, buildingId));
+  if (dateFrom) wasteConditions.push(gte(wasteRegistrationsTable.registrationDate, dateFrom));
+  if (dateTo) wasteConditions.push(lte(wasteRegistrationsTable.registrationDate, dateTo));
+
   const waste = await db
     .select()
     .from(wasteRegistrationsTable)
-    .where(buildingId ? eq(wasteRegistrationsTable.buildingId, buildingId) : undefined);
+    .where(wasteConditions.length ? and(...wasteConditions) : undefined);
 
   const byCategory = new Map<string, number>();
   const byMonthCat = new Map<string, number>();
