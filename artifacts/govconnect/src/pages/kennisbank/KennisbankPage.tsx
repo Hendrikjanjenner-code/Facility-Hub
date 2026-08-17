@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useListKnowledgeArticles, useCreateKnowledgeArticle, useUpdateKnowledgeArticle, useGetCurrentUser, useListTicketCategories, getListKnowledgeArticlesQueryKey, KnowledgeArticle } from "@workspace/api-client-react";
+import { useListKnowledgeArticles, useCreateKnowledgeArticle, useUpdateKnowledgeArticle, useGetCurrentUser, useListTicketCategories, getListKnowledgeArticlesQueryKey, KnowledgeArticle, TicketCategory } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Search, Plus, Tag, ChevronDown, ChevronUp, Loader2, Pencil } from "lucide-react";
+import { BookOpen, Search, Plus, Tag, ChevronDown, ChevronUp, Loader2, Pencil, Bell } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,12 +27,18 @@ function ArticleCard({
   article,
   canEdit,
   onEdit,
+  ticketCategories,
 }: {
   article: KnowledgeArticle;
   canEdit: boolean;
   onEdit: (article: KnowledgeArticle) => void;
+  ticketCategories: TicketCategory[];
 }) {
   const [expanded, setExpanded] = useState(false);
+
+  const linkedCategories = ticketCategories.filter((tc) =>
+    article.ticketCategoryIds.includes(tc.id),
+  );
 
   return (
     <Card
@@ -56,6 +62,26 @@ function ArticleCard({
                   {tag}
                 </span>
               ))}
+            </div>
+            <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+              {linkedCategories.length > 0 ? (
+                <>
+                  <Bell className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                  {linkedCategories.map((tc) => (
+                    <Badge
+                      key={tc.id}
+                      variant="outline"
+                      className="text-[10px] h-4 px-1.5 border-blue-200 text-blue-700 bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:bg-blue-950"
+                    >
+                      {tc.name}
+                    </Badge>
+                  ))}
+                </>
+              ) : (
+                <span className="text-[10px] text-muted-foreground/60 italic">
+                  Geen meldingscategorieën gekoppeld
+                </span>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
@@ -231,6 +257,7 @@ export default function KennisbankPage() {
     params,
     { query: { staleTime: 30_000, queryKey: getListKnowledgeArticlesQueryKey(params) } },
   );
+  const { data: ticketCategories = [] } = useListTicketCategories();
 
   const canCreate = !!user && ["facilitair_manager", "beheerder", "servicedesk"].includes(user.role);
 
@@ -303,6 +330,7 @@ export default function KennisbankPage() {
               article={article}
               canEdit={canCreate}
               onEdit={setEditArticle}
+              ticketCategories={ticketCategories}
             />
           ))}
         </div>
