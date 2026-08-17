@@ -339,4 +339,9 @@
   .print-header {
     display: block !important;
   }
+
+  /* Print-only content (e.g. print-date data) — show only during print */
+  .print-only {
+    display: block !important;
+  }
 }

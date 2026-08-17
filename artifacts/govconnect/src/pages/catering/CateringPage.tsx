@@ -56,18 +56,36 @@ type DailySummary = {
   totals: { cateringItemId: number; itemName: string; totalQuantity: number }[];
 };
 
+async function fetchDailySummary(dateStr: string): Promise<DailySummary> {
+  const res = await fetch(`/api/catering/daily-summary?date=${dateStr}`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Ophalen mislukt");
+  return res.json();
+}
+
 export default function CateringPage() {
   const [date, setDate] = useState<Date>(new Date());
+  const [printDate, setPrintDate] = useState<Date>(new Date());
+
   const dateStr = format(date, "yyyy-MM-dd");
+  const printDateStr = format(printDate, "yyyy-MM-dd");
+
   const queryClient = useQueryClient();
 
   const { data: summary, isLoading } = useQuery({
     queryKey: ["catering-daily-summary", dateStr],
-    queryFn: async () => {
-      const res = await fetch(`/api/catering/daily-summary?date=${dateStr}`, { credentials: "include" });
-      if (!res.ok) throw new Error("Ophalen mislukt");
-      return res.json() as Promise<DailySummary>;
-    },
+    queryFn: () => fetchDailySummary(dateStr),
+  });
+
+  const {
+    data: printSummary,
+    isFetching: isPrintFetching,
+    isError: isPrintError,
+  } = useQuery({
+    queryKey: ["catering-daily-summary", printDateStr],
+    queryFn: () => fetchDailySummary(printDateStr),
+    staleTime: 60_000,
   });
 
   const { mutate: toggleDelivered, isPending: isToggling } = useMutation({
@@ -98,6 +116,9 @@ export default function CateringPage() {
 
   const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
   const formattedDate = format(date, "EEEE d MMMM yyyy", { locale: nl });
+  const formattedPrintDate = format(printDate, "EEEE d MMMM yyyy", { locale: nl });
+
+  const activePrintSummary = printSummary ?? null;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -107,9 +128,95 @@ export default function CateringPage() {
           <UtensilsCrossed className="h-5 w-5" />
           <h1 className="text-2xl font-bold">Catering — daglijst</h1>
         </div>
-        <p className="text-sm capitalize">{formattedDate}</p>
+        <p className="text-sm capitalize">{formattedPrintDate}</p>
         <hr className="mt-3 mb-0 border-gray-400" />
       </div>
+
+      {/* Print-only content for the selected print date */}
+      {activePrintSummary && activePrintSummary.reservations.length > 0 && (
+        <div className="print-only hidden">
+          {/* Totals */}
+          <div className="mb-4">
+            <h2 className="text-base font-semibold mb-2">Totalen voor de dag</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {activePrintSummary.totals.map((total) => (
+                <div
+                  key={total.cateringItemId}
+                  className="flex items-center justify-between p-2 border rounded"
+                >
+                  <span className="text-sm font-medium">{total.itemName}</span>
+                  <span className="font-bold ml-2">{total.totalQuantity}×</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Reservations */}
+          <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">
+            {activePrintSummary.reservations.length} reservering
+            {activePrintSummary.reservations.length !== 1 ? "en" : ""} met catering
+          </h2>
+          <div className="space-y-3">
+            {activePrintSummary.reservations.map((reservation) => (
+              <div
+                key={reservation.id}
+                className="border-l-4 border-l-gray-800 pl-3 py-1"
+                style={{ opacity: reservation.status === "geannuleerd" ? 0.6 : 1 }}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="w-40 flex-shrink-0">
+                    <div className="font-bold tabular-nums text-sm">
+                      {reservation.startTime} – {reservation.endTime}
+                    </div>
+                    {reservation.roomName && (
+                      <div className="text-xs text-gray-600">{reservation.roomName}</div>
+                    )}
+                    {reservation.buildingName && (
+                      <div className="text-xs text-gray-500">{reservation.buildingName}</div>
+                    )}
+                    {reservation.attendees != null && (
+                      <div className="text-xs text-gray-500">{reservation.attendees} personen</div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-semibold text-sm">{reservation.title}</span>
+                      <span className="text-xs border rounded px-1">
+                        {STATUS_LABELS[reservation.status] ?? reservation.status}
+                      </span>
+                      {reservation.cateringDeliveredAt && (
+                        <span className="text-xs border rounded px-1 border-green-600 text-green-700">
+                          Geleverd
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {reservation.items.map((item) => (
+                        <span
+                          key={item.id}
+                          className="text-sm bg-gray-100 rounded px-2 py-0.5"
+                        >
+                          <strong>{item.quantity}×</strong>{" "}
+                          {item.itemName ?? `Item ${item.cateringItemId}`}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {activePrintSummary && activePrintSummary.reservations.length === 0 && (
+        <div className="print-only hidden">
+          <p className="text-sm text-gray-600">
+            Geen cateringbestellingen voor{" "}
+            <span className="font-medium">{formattedPrintDate}</span>.
+          </p>
+        </div>
+      )}
 
       {/* Header */}
       <div className="print-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -123,8 +230,8 @@ export default function CateringPage() {
           </p>
         </div>
 
-        {/* Date navigator + print button */}
-        <div className="flex items-center gap-2">
+        {/* Date navigator + print controls */}
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="icon" onClick={handlePrevDay}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -140,14 +247,51 @@ export default function CateringPage() {
               Vandaag
             </Button>
           )}
+
+          {/* Print date picker + print button */}
+          <div
+            className={cn(
+              "flex items-center gap-1.5 border rounded-md px-2 py-1 bg-card",
+              isPrintError && "border-red-400"
+            )}
+          >
+            <Printer
+              className={cn(
+                "h-4 w-4 flex-shrink-0",
+                isPrintError ? "text-red-400" : "text-muted-foreground"
+              )}
+            />
+            <input
+              type="date"
+              value={printDateStr}
+              onChange={(e) => {
+                if (e.target.value) {
+                  const [y, m, d] = e.target.value
+                    .split("-")
+                    .map(Number) as [number, number, number];
+                  setPrintDate(new Date(y, m - 1, d));
+                }
+              }}
+              className="text-sm bg-transparent border-none outline-none cursor-pointer"
+              aria-label="Afdrukkdatum kiezen"
+              title="Kies de datum voor de afdruk"
+            />
+          </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => window.print()}
-            title="Afdrukken"
+            disabled={isPrintFetching || isPrintError}
+            title={
+              isPrintError
+                ? "Ophalen mislukt — probeer opnieuw"
+                : isPrintFetching
+                ? "Gegevens worden geladen…"
+                : `Afdrukken voor ${formattedPrintDate}`
+            }
           >
             <Printer className="h-4 w-4 mr-1.5" />
-            Afdrukken
+            {isPrintFetching ? "Laden…" : "Afdrukken"}
           </Button>
         </div>
       </div>
@@ -221,10 +365,12 @@ export default function CateringPage() {
                       <div className="flex flex-col sm:flex-row sm:items-start gap-3">
                         {/* Time + room info */}
                         <div className="flex-shrink-0 sm:w-48">
-                          <div className={cn(
-                            "flex items-center gap-1.5 text-base font-bold tabular-nums",
-                            delivered && "text-green-700 dark:text-green-400"
-                          )}>
+                          <div
+                            className={cn(
+                              "flex items-center gap-1.5 text-base font-bold tabular-nums",
+                              delivered && "text-green-700 dark:text-green-400"
+                            )}
+                          >
                             <Clock className="h-4 w-4 text-primary flex-shrink-0" />
                             <span className={cn(delivered && "line-through decoration-green-500/60")}>
                               {reservation.startTime} – {reservation.endTime}
@@ -254,10 +400,12 @@ export default function CateringPage() {
                         {/* Title + status + items */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
-                            <h3 className={cn(
-                              "font-semibold text-sm leading-tight",
-                              delivered && "line-through text-muted-foreground decoration-green-500/60"
-                            )}>
+                            <h3
+                              className={cn(
+                                "font-semibold text-sm leading-tight",
+                                delivered && "line-through text-muted-foreground decoration-green-500/60"
+                              )}
+                            >
                               {reservation.title}
                             </h3>
                             <Badge

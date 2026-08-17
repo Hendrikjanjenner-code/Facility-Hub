@@ -10,7 +10,6 @@ import {
   buildingsTable,
   assetsTable,
   mjopTakenTable,
-  mjopTaakGeschiedenisTable,
   notificationsTable,
   type Ticket,
 } from "@workspace/db";
