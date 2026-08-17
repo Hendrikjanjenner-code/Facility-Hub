@@ -328,6 +328,7 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
         .for("update");
 
       let budgetExceeded = false;
+      let overAmount = 0;
       if (budgetRow) {
         const yearStart = new Date(`${currentYear}-01-01T00:00:00Z`);
         const yearEnd = new Date(`${currentYear + 1}-01-01T00:00:00Z`);
@@ -348,6 +349,7 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
 
         if (total > remaining) {
           budgetExceeded = true;
+          overAmount = Math.round((total - remaining) * 100) / 100;
           if (budgetRow.overBudgetPolicy === "blokkeren") {
             throw Object.assign(
               new Error(
@@ -408,7 +410,7 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
           unitPrice: byId.get(productId)!.price,
         })),
       );
-      return numbered!;
+      return { order: numbered!, overAmount };
     })
     .catch((err: any) => {
       if (err?.status === 400 || err?.status === 409) {
@@ -419,6 +421,8 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
     });
 
   if (!order) return;
+
+  const { order: createdOrder, overAmount: budgetOverAmount } = order;
 
   if (autoApprove) {
     await db.insert(notificationsTable).values({
@@ -436,15 +440,28 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
     for (const m of managers) {
       await db.insert(notificationsTable).values({
         userId: m.id,
-        title: `Bestelling ter goedkeuring: ${order.number}`,
+        title: `Bestelling ter goedkeuring: ${createdOrder.number}`,
         body: `${user.name} (${user.department ?? "-"}) heeft een bestelling ingediend van € ${total.toFixed(2)}.`,
         kind: "webshop",
         linkPath: "/webshop",
       });
     }
+
+    // Extra warning when combined pending orders exceed the department budget
+    if (createdOrder.budgetExceeded === 1) {
+      for (const m of managers) {
+        await db.insert(notificationsTable).values({
+          userId: m.id,
+          title: `Budget overschreden: ${department}`,
+          body: `De openstaande aanvragen voor ${department} overschrijden het beschikbare budget met € ${budgetOverAmount.toFixed(2)}. Beoordeel de bestellingen in de webshop.`,
+          kind: "webshop",
+          linkPath: "/webshop",
+        });
+      }
+    }
   }
 
-    const [result] = await loadOrders(eq(shopOrdersTable.id, order!.id));
+    const [result] = await loadOrders(eq(shopOrdersTable.id, createdOrder.id));
   res.status(201).json(result);
 });
 
