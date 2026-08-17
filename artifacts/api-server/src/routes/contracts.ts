@@ -149,6 +149,16 @@ router.post(
       return;
     }
 
+    // Check for existing review for same supplier + year
+    const [existing] = await db
+      .select({ id: supplierReviewsTable.id })
+      .from(supplierReviewsTable)
+      .where(and(eq(supplierReviewsTable.supplierId, supplierId), eq(supplierReviewsTable.year, year)));
+    if (existing) {
+      res.status(409).json({ message: `Er bestaat al een beoordeling voor ${year}. Verwijder de bestaande beoordeling eerst.` });
+      return;
+    }
+
     const [created] = await db
       .insert(supplierReviewsTable)
       .values({ supplierId, reviewerId: req.currentUser!.id, year, score, comment: comment as string | undefined })

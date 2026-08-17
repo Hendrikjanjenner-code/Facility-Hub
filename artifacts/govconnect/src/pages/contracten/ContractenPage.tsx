@@ -310,6 +310,7 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   const { data, isLoading } = useListSupplierReviews(supplierId, {
     query: { queryKey: getListSupplierReviewsQueryKey(supplierId) },
@@ -322,6 +323,7 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
   });
 
   const onSubmit = (values: z.infer<typeof reviewSchema>) => {
+    setReviewError(null);
     createReview.mutate(
       { id: supplierId, data: { year: values.year, score: values.score, comment: values.comment || null } },
       {
@@ -331,7 +333,10 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
           form.reset();
           queryClient.invalidateQueries({ queryKey: getListSupplierReviewsQueryKey(supplierId) });
         },
-        onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+        onError: (err: any) => {
+          const msg = err?.message ?? "Opslaan mislukt";
+          setReviewError(msg);
+        },
       },
     );
   };
@@ -349,7 +354,7 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
           )}
         </div>
         {isManager && (
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setReviewError(null); form.reset(); } }}>
             <DialogTrigger asChild>
               <Button size="sm" variant="ghost" className="h-6 px-2 text-xs">
                 <Plus className="h-3 w-3 mr-1" />Beoordelen
@@ -362,6 +367,9 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  {reviewError && (
+                    <p className="text-sm text-destructive bg-destructive/10 rounded px-3 py-2">{reviewError}</p>
+                  )}
                   <div className="grid grid-cols-2 gap-4">
                     <FormField control={form.control} name="year" render={({ field }) => (
                       <FormItem>
