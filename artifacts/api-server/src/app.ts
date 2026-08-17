@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { resolveAllowedOrigin } from "./lib/corsOrigin";
 
 const app: Express = express();
 
@@ -26,7 +27,15 @@ app.use(
     },
   }),
 );
-app.use(cors());
+// Restrict CORS to an explicitly configured origin. resolveAllowedOrigin
+// rejects wildcards and invalid values at startup; when ALLOWED_ORIGIN is
+// unset, CORS is disabled entirely (same-origin via the Replit proxy).
+app.use(
+  cors({
+    origin: resolveAllowedOrigin(process.env.ALLOWED_ORIGIN),
+    credentials: true,
+  }),
+);
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
   throw new Error("SESSION_SECRET is not set; refusing to start with forgeable session cookies");

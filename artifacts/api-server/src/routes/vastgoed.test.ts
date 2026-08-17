@@ -144,7 +144,7 @@ describe("PATCH /rooms/:id/dossier — optimistic locking", () => {
 
     const res = await request(app)
       .patch(`/rooms/${roomId}/dossier`)
-      .send({ department: "Finance", updatedAt: staleTs });
+      .send({ department: "Finance", updatedAt });
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({

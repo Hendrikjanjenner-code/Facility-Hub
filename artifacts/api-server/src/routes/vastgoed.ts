@@ -304,7 +304,7 @@ router.post(
 
       const changes = entry.changes as DossierChange[];
       const skippedFields: string[] = [];
-      const updates: Partial<Record<DossierField, string | number | null>> = {};
+      const updates: Partial<Record<DossierField, string | number | boolean | null>> = {};
       for (const c of changes) {
         if (changedLater.has(c.field)) {
           skippedFields.push(c.field);

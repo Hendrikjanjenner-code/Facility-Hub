@@ -174,8 +174,8 @@ router.get("/tickets/:id", async (req, res): Promise<void> => {
 });
 
 router.post("/tickets", async (req, res): Promise<void> => {
-  const parsed = CreateTicketCommentBody.safeParse(req.body);
-  if (Number.isNaN(id) || !parsed.success) {
+  const parsed = CreateTicketBody.safeParse(req.body);
+  if (!parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
   }
@@ -246,7 +246,7 @@ router.post("/tickets", async (req, res): Promise<void> => {
     `/meldingen/${created!.id}`,
   );
 
-  const [full] = await fetchTickets(eq(ticketsTable.id, id));
+  const [full] = await fetchTickets(eq(ticketsTable.id, created!.id));
   res.status(201).json(full);
 });
 
@@ -261,7 +261,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 router.patch("/tickets/:id", async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  const parsed = CreateTicketCommentBody.safeParse(req.body);
+  const parsed = UpdateTicketBody.safeParse(req.body);
   if (Number.isNaN(id) || !parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
