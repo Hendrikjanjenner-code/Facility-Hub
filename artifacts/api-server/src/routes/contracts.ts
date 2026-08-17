@@ -483,7 +483,7 @@ export async function ensureContractExpiryNotifications(): Promise<void> {
           body: `${c.name} (${c.supplierName ?? "onbekende leverancier"}) eindigt op ${c.endDate} — nog ${c.daysUntilEnd} dag(en), binnen de opzegtermijn van ${c.noticePeriodDays} dagen.`,
           kind: "contract",
           linkPath: "/contracten",
-          referenceKey: `contract:${c.id}:expiring`,
+          referenceKey: `contract:${c.id}:expiring:${c.endDate}`,
         })
         .onConflictDoNothing();
     }
@@ -498,7 +498,7 @@ export async function ensureContractExpiryNotifications(): Promise<void> {
           body: `Let op: ${c.name} (${c.supplierName ?? "onbekende leverancier"}) eindigt op ${c.endDate}. Er zijn nog maar ${c.daysUntilEnd} dag(en) over. Actie vereist!`,
           kind: "contract_urgent",
           linkPath: "/contracten",
-          referenceKey: `contract:${c.id}:urgent`,
+          referenceKey: `contract:${c.id}:urgent:${c.endDate}`,
         })
         .onConflictDoNothing()
         .returning({ id: notificationsTable.id });
