@@ -954,6 +954,177 @@ router.get("/mjop/scenarios/:id/begroting", async (req, res): Promise<void> => {
 });
 
 /**
+ * Geprioriteerd onderhoudsadvies voor een scenario.
+ * Berekent per bouwdeel een urgentieniveau en advies op basis van:
+ *  - conditiescore (NEN 2767)
+ *  - resterende levensduur
+ *  - scenario-type (noodzakelijk / hoog)
+ *
+ * Urgentieniveaus:
+ *  kritiek  — einde levensduur al voorbij, of score ≥ 5
+ *  hoog     — binnen 3 jaar einde levensduur, of score ≥ 4
+ *  gemiddeld— binnen 5 jaar einde levensduur, of score ≥ 3 (scenario "hoog")
+ *  laag     — 80% levensduur bereikt maar nog geen directe noodzaak (alleen scenario "hoog")
+ *
+ * Resultaat gesorteerd op urgentie (kritiek eerst) en daarna op doeljaar.
+ */
+router.get("/mjop/scenarios/:id/advies", async (req, res): Promise<void> => {
+  const scenarioId = Number(req.params.id);
+  if (Number.isNaN(scenarioId)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
+  const [scenario] = await db
+    .select()
+    .from(mjopScenariosTable)
+    .where(eq(mjopScenariosTable.id, scenarioId));
+  if (!scenario) {
+    res.status(404).json({ message: "Scenario niet gevonden" });
+    return;
+  }
+
+  const bdWhere = scenario.buildingId
+    ? eq(bouwdelenTable.buildingId, scenario.buildingId)
+    : undefined;
+  const bouwdelen = await db
+    .select({ b: bouwdelenTable, buildingName: buildingsTable.name })
+    .from(bouwdelenTable)
+    .leftJoin(buildingsTable, eq(bouwdelenTable.buildingId, buildingsTable.id))
+    .where(bdWhere);
+
+  const scores = await db
+    .select({
+      bouwdeelId: conditiemetingenTable.bouwdeelId,
+      score: conditiemetingenTable.score,
+    })
+    .from(conditiemetingenTable)
+    .where(
+      sql`measured_at = (
+        select max(c2.measured_at) from ${conditiemetingenTable} c2
+        where c2.bouwdeel_id = ${conditiemetingenTable.bouwdeelId}
+      )`,
+    );
+  const scoreMap = new Map(scores.map((s) => [s.bouwdeelId, s.score]));
+
+  const currentYear = new Date().getFullYear();
+
+  type AdviesItem = {
+    bouwdeelId: number;
+    bouwdeelCode: string;
+    bouwdeelName: string;
+    buildingName: string | null;
+    latestScore: number | null;
+    installYear: number;
+    expectedLifespanYears: number;
+    endOfLife: number;
+    replacementCost: number;
+    urgencyLevel: "kritiek" | "hoog" | "gemiddeld" | "laag";
+    advies: string;
+    targetYear: number | null;
+    reason: string;
+  };
+
+  const URGENCY_ORDER = { kritiek: 0, hoog: 1, gemiddeld: 2, laag: 3 };
+  const items: AdviesItem[] = [];
+
+  for (const { b, buildingName } of bouwdelen) {
+    const endOfLife = b.installYear + b.expectedLifespanYears;
+    const latestScore = scoreMap.get(b.id) ?? null;
+    const yearsLeft = endOfLife - currentYear;
+
+    let urgencyLevel: AdviesItem["urgencyLevel"] | null = null;
+    let advies = "";
+    let targetYear: number | null = null;
+    let reason = "";
+
+    if (scenario.type === "noodzakelijk") {
+      if (endOfLife < currentYear || (latestScore !== null && latestScore >= 5)) {
+        urgencyLevel = "kritiek";
+        if (latestScore !== null && latestScore >= 5 && endOfLife >= currentYear) {
+          targetYear = Math.max(currentYear, endOfLife - 3);
+          reason = `Slechte conditie (NEN 2767 score ${latestScore})`;
+        } else {
+          targetYear = currentYear;
+          reason =
+            endOfLife < currentYear
+              ? `Einde levensduur overschreden (${endOfLife})`
+              : `Slechte conditie (NEN 2767 score ${latestScore})`;
+        }
+        advies = `Vervangen in ${targetYear}`;
+      } else if (yearsLeft <= 3 || (latestScore !== null && latestScore >= 4)) {
+        urgencyLevel = "hoog";
+        targetYear = endOfLife;
+        reason =
+          yearsLeft <= 3
+            ? `Einde levensduur over ${yearsLeft} jaar (${endOfLife})`
+            : `Conditie matig-slecht (NEN 2767 score ${latestScore})`;
+        advies = `Vervanging gepland ${endOfLife}`;
+      }
+      // noodzakelijk: geen advies bij lagere urgentie
+    } else {
+      // scenario "hoog"
+      const hoogJaar = b.installYear + Math.round(b.expectedLifespanYears * 0.8);
+      if (endOfLife < currentYear || (latestScore !== null && latestScore >= 5)) {
+        urgencyLevel = "kritiek";
+        targetYear = currentYear;
+        reason =
+          endOfLife < currentYear
+            ? `Einde levensduur overschreden (${endOfLife})`
+            : `Slechte conditie (NEN 2767 score ${latestScore})`;
+        advies = `Vervangen in ${targetYear}`;
+      } else if (yearsLeft <= 3 || (latestScore !== null && latestScore >= 4)) {
+        urgencyLevel = "hoog";
+        targetYear = endOfLife;
+        reason =
+          yearsLeft <= 3
+            ? `Einde levensduur over ${yearsLeft} jaar`
+            : `Conditie matig-slecht (NEN 2767 score ${latestScore})`;
+        advies = `Vervanging gepland ${endOfLife}`;
+      } else if (yearsLeft <= 5 || (latestScore !== null && latestScore >= 3)) {
+        urgencyLevel = "gemiddeld";
+        targetYear = endOfLife;
+        reason =
+          latestScore !== null && latestScore >= 3
+            ? `Conditie matig (NEN 2767 score ${latestScore}), preventief onderhoud aanbevolen`
+            : `Einde levensduur over ${yearsLeft} jaar`;
+        advies = "Preventief onderhoud aanbevolen";
+      } else if (hoogJaar <= currentYear + 5) {
+        urgencyLevel = "laag";
+        targetYear = Math.max(currentYear, hoogJaar);
+        reason = `80% levensduur bereikt in ${hoogJaar} (instandhouding hoog niveau)`;
+        advies = `Inspectie aanbevolen in ${targetYear}`;
+      }
+    }
+
+    if (urgencyLevel) {
+      items.push({
+        bouwdeelId: b.id,
+        bouwdeelCode: b.code,
+        bouwdeelName: b.name,
+        buildingName,
+        latestScore,
+        installYear: b.installYear,
+        expectedLifespanYears: b.expectedLifespanYears,
+        endOfLife,
+        replacementCost: b.replacementCost,
+        urgencyLevel,
+        advies,
+        targetYear,
+        reason,
+      });
+    }
+  }
+
+  items.sort((a, b) => {
+    const uDiff = URGENCY_ORDER[a.urgencyLevel] - URGENCY_ORDER[b.urgencyLevel];
+    if (uDiff !== 0) return uDiff;
+    return (a.targetYear ?? 9999) - (b.targetYear ?? 9999);
+  });
+
+  res.json(items);
+});
+
+/**
  * Genereer jaarplan voor een scenario.
  * Maakt mjop_taken aan voor het opgegeven jaar op basis van de begrotingsberekening.
  * Slaat bouwdelen over die al een taak hebben voor dat jaar vanuit dit scenario.

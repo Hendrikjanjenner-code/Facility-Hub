@@ -32,6 +32,9 @@ import {
   CheckCircle2,
   Circle,
   CalendarDays,
+  AlertTriangle,
+  ShieldAlert,
+  Info,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -252,6 +255,36 @@ function useDeleteScenario() {
       if (!r.ok) throw new Error("Verwijderen mislukt");
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/mjop/scenarios"] }),
+  });
+}
+
+type AdviesItem = {
+  bouwdeelId: number;
+  bouwdeelCode: string;
+  bouwdeelName: string;
+  buildingName: string | null;
+  latestScore: number | null;
+  installYear: number;
+  expectedLifespanYears: number;
+  endOfLife: number;
+  replacementCost: number;
+  urgencyLevel: "kritiek" | "hoog" | "gemiddeld" | "laag";
+  advies: string;
+  targetYear: number | null;
+  reason: string;
+};
+
+function useAdvies(scenarioId: number | null) {
+  return useQuery<AdviesItem[]>({
+    queryKey: ["/api/mjop/scenarios/advies", scenarioId],
+    queryFn: async () => {
+      const r = await fetch(`${API_BASE}/mjop/scenarios/${scenarioId}/advies`, {
+        credentials: "include",
+      });
+      if (!r.ok) throw new Error("Advies laden mislukt");
+      return r.json() as Promise<AdviesItem[]>;
+    },
+    enabled: scenarioId !== null,
   });
 }
 
@@ -1108,6 +1141,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
   const viewId = selectedId ?? activeScenario?.id ?? null;
 
   const { data: begroting, isLoading: begrotingLoading } = useBegroting(viewId);
+  const { data: advies, isLoading: adviesLoading } = useAdvies(viewId);
   const viewScenario = scenarios?.find((s) => s.id === viewId);
 
   const maxCost = Math.max(...(begroting?.map((e) => e.totalCost) ?? [1]), 1);
@@ -1294,6 +1328,88 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
                     ))}
                   </div>
                 )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Onderhoudsadvies */}
+      {viewScenario && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              Onderhoudsadvies — {viewScenario.name}
+              {advies && advies.length > 0 && (
+                <Badge variant="secondary" className="ml-auto text-xs">
+                  {advies.length} {advies.length === 1 ? "aanbeveling" : "aanbevelingen"}
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {adviesLoading ? (
+              <Skeleton className="h-48 w-full" />
+            ) : !advies?.length ? (
+              <div className="text-center py-10 text-muted-foreground">
+                <CheckCircle2 className="h-10 w-10 mx-auto mb-3 opacity-40 text-green-500" />
+                <p className="text-sm">
+                  {viewScenario.type === "noodzakelijk"
+                    ? "Geen bouwdelen vereisen op dit moment noodzakelijk onderhoud of vervanging."
+                    : "Geen bouwdelen vereisen momenteel een actie volgens dit scenario."}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {(["kritiek", "hoog", "gemiddeld", "laag"] as const).map((level) => {
+                  const groep = advies.filter((a) => a.urgencyLevel === level);
+                  if (!groep.length) return null;
+                  const labelMap = {
+                    kritiek: { label: "Kritiek", icon: <ShieldAlert className="h-3.5 w-3.5" />, cls: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800" },
+                    hoog: { label: "Hoog", icon: <AlertTriangle className="h-3.5 w-3.5" />, cls: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800" },
+                    gemiddeld: { label: "Gemiddeld", icon: <Info className="h-3.5 w-3.5" />, cls: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800" },
+                    laag: { label: "Laag", icon: <Circle className="h-3.5 w-3.5" />, cls: "bg-muted text-muted-foreground border-border" },
+                  };
+                  const { label, icon, cls } = labelMap[level];
+                  return (
+                    <div key={level} className="space-y-1.5">
+                      <div className={cn("flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-md border w-fit", cls)}>
+                        {icon}
+                        {label} ({groep.length})
+                      </div>
+                      {groep.map((item) => (
+                        <div
+                          key={item.bouwdeelId}
+                          className="flex items-start justify-between gap-3 rounded-lg border bg-card px-3 py-2.5 text-sm"
+                        >
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-mono text-xs text-muted-foreground">{item.bouwdeelCode}</span>
+                              <span className="font-medium truncate">{item.bouwdeelName}</span>
+                              {item.buildingName && (
+                                <span className="text-xs text-muted-foreground">({item.buildingName})</span>
+                              )}
+                              {item.latestScore !== null && (
+                                <Badge
+                                  variant="secondary"
+                                  className={cn("text-xs border-transparent px-1.5 py-0", scoreColor(item.latestScore))}
+                                >
+                                  Score {item.latestScore}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5">{item.reason}</p>
+                          </div>
+                          <div className="shrink-0 text-right space-y-0.5">
+                            <p className="text-xs font-semibold whitespace-nowrap">{item.advies}</p>
+                            <p className="text-xs text-muted-foreground">{euro(item.replacementCost)}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>
