@@ -6,7 +6,7 @@ import {
   usersTable,
   notificationsTable,
 } from "@workspace/db";
-import { eq, and, sql, type SQL } from "drizzle-orm";
+import { eq, and, or, sql, type SQL } from "drizzle-orm";
 import { CreateSupplierBody, CreateContractBody, UpdateContractBody } from "@workspace/api-zod";
 import { requireAuth, requireRole } from "../lib/auth";
 
@@ -150,6 +150,22 @@ router.post(
   },
 );
 
+/**
+ * Markeer bestaande verloopmeldingen van een contract als gelezen zodat ze
+ * niet meer als actief verschijnen nadat het contract verlengd of beëindigd is.
+ */
+async function dismissContractExpiryNotifications(contractId: number): Promise<void> {
+  await db
+    .update(notificationsTable)
+    .set({ read: true })
+    .where(
+      or(
+        eq(notificationsTable.referenceKey, `contract:${contractId}:expiring`),
+        eq(notificationsTable.referenceKey, `contract:${contractId}:urgent`),
+      ),
+    );
+}
+
 router.patch(
   "/contracts/:id",
   requireRole("facilitair_manager", "beheerder"),
@@ -181,6 +197,17 @@ router.patch(
       res.status(404).json({ message: "Contract niet gevonden" });
       return;
     }
+
+    // Verwijder verouderde verloopmeldingen wanneer:
+    //  - de einddatum is gewijzigd (verlenging), of
+    //  - de status is gewijzigd naar een niet-actieve toestand
+    const nonActiveStatuses = ["beëindigd", "opgezegd", "geannuleerd", "verlopen"];
+    const statusBecameInactive =
+      d.status !== undefined && nonActiveStatuses.includes(d.status);
+    if (d.endDate !== undefined || statusBecameInactive) {
+      await dismissContractExpiryNotifications(id);
+    }
+
     const [row] = await contractBaseQuery().where(eq(contractsTable.id, id));
     res.json(serializeContract(row!));
   },

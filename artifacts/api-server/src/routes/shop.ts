@@ -50,12 +50,10 @@ function serializeProduct(p: typeof shopProductsTable.$inferSelect) {
     const cond = or(ilike(shopProductsTable.name, s), ilike(shopProductsTable.description, s));
     if (cond) conditions.push(cond);
   }
-  // Toon alleen actieve producten aan eindgebruikers en managers.
-  conditions.push(eq(shopProductsTable.active, 1));
   const rows = await db
     .select()
     .from(shopProductsTable)
-    .where(and(...conditions))
+    .where(conditions.length ? and(...conditions) : undefined)
     .orderBy(shopProductsTable.name);
   let result = rows.map(serializeProduct);
   if (q.belowMinStock === "true") result = result.filter((p) => p.belowMinStock);
@@ -66,14 +64,12 @@ router.post(
   "/shop/products",
   requireRole(...MANAGER_ROLES),
   async (req, res): Promise<void> => {
-  const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
     }
     const d = parsed.data;
-
-    const set: Partial<typeof shopProductsTable.$inferInsert> = {};
     const [created] = await db
       .insert(shopProductsTable)
       .values({
@@ -94,24 +90,22 @@ router.patch(
   "/shop/products/:id",
   requireRole(...MANAGER_ROLES, "servicedesk"),
   async (req, res): Promise<void> => {
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    res.status(400).json({ message: "Ongeldig id" });
-    return;
-  }
-  const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
     }
     const d = parsed.data;
-
-    const set: Partial<typeof shopProductsTable.$inferInsert> = {};
-  const [updated] = await db
-    .update(budgetsTable)
-    .set({ overBudgetPolicy: parsed.data.overBudgetPolicy as string })
-    .where(eq(budgetsTable.id, id))
-    .returning();
+    const [updated] = await db
+      .update(budgetsTable)
+      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
+      .where(eq(budgetsTable.id, id))
+      .returning();
     if (!updated) {
       res.status(404).json({ message: "Product niet gevonden" });
       return;
@@ -215,7 +209,7 @@ router.get("/shop/orders", async (req, res): Promise<void> => {
 });
 
 router.post("/shop/orders", async (req, res): Promise<void> => {
-  const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
@@ -234,51 +228,11 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
     .select()
     .from(shopProductsTable)
     .where(and(inArray(shopProductsTable.id, productIds), eq(shopProductsTable.active, 1)));
-
   const byId = new Map(products.map((p) => [p.id, p]));
-  for (const [productId, quantity] of qtyByProduct) {
     const p = byId.get(productId);
-    if (!p) {
-      res.status(404).json({ message: `Product ${productId} niet gevonden` });
-      return;
-    }
-    if (p.stock < quantity) {
-      res.status(409).json({ message: `Onvoldoende voorraad voor ${p.name}: nog ${p.stock} ${p.unit} beschikbaar.` });
-      return;
-    }
-  }
-
   let total = 0;
-  for (const [productId, quantity] of qtyByProduct) {
-    total += byId.get(productId)!.price * quantity;
-  }
-  total = Math.round(total * 100) / 100;
-
   const department = user.department ?? "Onbekend";
   const currentYear = new Date().getFullYear();
-
-  const [budgets, orders] = await Promise.all([
-    db.select().from(budgetsTable).orderBy(budgetsTable.department),
-    db
-      .select({
-        department: shopOrdersTable.department,
-        status: shopOrdersTable.status,
-        total: shopOrdersTable.totalAmount,
-        createdAt: shopOrdersTable.createdAt,
-      })
-      .from(shopOrdersTable)
-      .where(
-        and(
-          inArray(shopOrdersTable.status, [...SPENT_STATUSES, "ingediend"]),
-          gte(shopOrdersTable.createdAt, new Date(`${currentYear}-01-01T00:00:00Z`)),
-        ),
-      ),
-  ]);
-
-  // Budgetcontrole + order-insert in één transactie om race conditions te voorkomen.
-  // De budgetrij wordt vergrendeld (SELECT FOR UPDATE) zodat gelijktijdige aanvragen
-  // voor dezelfde afdeling/jaar serialiseren: de tweede request wacht op de eerste
-  // voordat hij de gecommitteerde + openstaande som herberekent.
   const order = await db.transaction(async (tx) => {
     const [budgetRow] = await tx
       .select()
@@ -306,6 +260,7 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
       const remaining = Math.round((budgetRow.amount - spent) * 100) / 100;
       if (total > remaining) {
         budgetExceeded = true;
+        // Blokkeer de bestelling als het beleid dat vereist.
         if (budgetRow.overBudgetPolicy === "blokkeren") {
           throw Object.assign(
             new Error(`Bestelling overschrijdt het afdelingsbudget. Resterend: € ${remaining.toFixed(2)}, bestelling: € ${total.toFixed(2)}.`),
@@ -365,6 +320,9 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
   }
 
     const [result] = await loadOrders(eq(shopOrdersTable.id, id));
+    res.json(result!);
+  },
+);
 
 function serializeBudget(
   b: typeof budgetsTable.$inferSelect,
@@ -395,9 +353,17 @@ function serializeBudget(
     remaining: Math.round((b.amount - spent) * 100) / 100,
   };
 }
-  res.status(201).json(result);
-});
 
+async function loadBudgetOrders() {
+  return db
+    .select({
+      department: shopOrdersTable.department,
+      status: shopOrdersTable.status,
+      total: shopOrdersTable.totalAmount,
+      createdAt: shopOrdersTable.createdAt,
+    })
+    .from(shopOrdersTable);
+}
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   ingediend: ["goedgekeurd", "afgekeurd"],
   goedgekeurd: ["besteld"],
@@ -408,12 +374,12 @@ router.patch(
   "/shop/orders/:id",
   requireRole(...MANAGER_ROLES),
   async (req, res): Promise<void> => {
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    res.status(400).json({ message: "Ongeldig id" });
-    return;
-  }
-  const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
@@ -459,11 +425,11 @@ router.patch(
             .from(shopOrderLinesTable)
             .where(eq(shopOrderLinesTable.orderId, id));
           for (const line of lines) {
-  const [updated] = await db
-    .update(budgetsTable)
-    .set({ overBudgetPolicy: parsed.data.overBudgetPolicy as string })
-    .where(eq(budgetsTable.id, id))
-    .returning();
+    const [updated] = await db
+      .update(budgetsTable)
+      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
+      .where(eq(budgetsTable.id, id))
+      .returning();
             if (!updated) {
               throw Object.assign(new Error("Onvoldoende voorraad om deze bestelling goed te keuren."), { status: 409 });
             }
@@ -496,6 +462,9 @@ router.patch(
     }
 
     const [result] = await loadOrders(eq(shopOrdersTable.id, id));
+    res.json(result!);
+  },
+);
 
 function serializeBudget(
   b: typeof budgetsTable.$inferSelect,
@@ -526,62 +495,34 @@ function serializeBudget(
     remaining: Math.round((b.amount - spent) * 100) / 100,
   };
 }
-  const id = Number(req.params.id);
-  if (Number.isNaN(id)) {
-    res.status(400).json({ message: "Ongeldig id" });
-    return;
-  }
-  const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ message: "Ongeldige invoer" });
-    return;
-  }
-  const [updated] = await db
-    .update(budgetsTable)
-    .set({ overBudgetPolicy: parsed.data.overBudgetPolicy as string })
-    .where(eq(budgetsTable.id, id))
-    .returning();
-  const orders = await db
+
+async function loadBudgetOrders() {
+  return db
     .select({
       department: shopOrdersTable.department,
       status: shopOrdersTable.status,
       total: shopOrdersTable.totalAmount,
       createdAt: shopOrdersTable.createdAt,
     })
-    .from(shopOrdersTable)
-    .where(
-      and(
-        inArray(shopOrdersTable.status, [...SPENT_STATUSES, "ingediend"]),
-        gte(shopOrdersTable.createdAt, new Date(`${currentYear}-01-01T00:00:00Z`)),
-      ),
-    );
-
-    res.json({
-      id: updated.id,
-      department: updated.department,
-      year: updated.year,
-      amount: updated.amount,
-      overBudgetPolicy: updated.overBudgetPolicy as "markeren" | "blokkeren",
-      spent,
-      pending,
-      remaining: Math.round((updated.amount - spent) * 100) / 100,
-    });
-  },
-);
-
-router.get("/budgets", async (_req, res): Promise<void> => {
-  const orders = await db
-    .select({
-      department: shopOrdersTable.department,
-      status: shopOrdersTable.status,
-      total: shopOrdersTable.totalAmount,
-      createdAt: shopOrdersTable.createdAt,
-    })
-    .from(shopOrdersTable)
-    .where(
-      and(
-        inArray(shopOrdersTable.status, [...SPENT_STATUSES, "ingediend"]),
-        gte(shopOrdersTable.createdAt, new Date(`${currentYear}-01-01T00:00:00Z`)),
-      ),
-    );
+    .from(shopOrdersTable);
+}
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ message: "Ongeldige invoer" });
+      return;
+    }
+    const [updated] = await db
+      .update(budgetsTable)
+      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
+      .where(eq(budgetsTable.id, id))
+      .returning();
+    const orders = await loadBudgetOrders();
+    const orders = await loadBudgetOrders();
 export default router;
+
+  const budgets = await db.select().from(budgetsTable).orderBy(budgetsTable.department);
