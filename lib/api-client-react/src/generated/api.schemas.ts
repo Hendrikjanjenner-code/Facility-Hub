@@ -1052,6 +1052,25 @@ export interface MeterReading {
   registeredByName?: string | null;
 }
 
+export interface MeterReadingAuditEntry {
+  id: number;
+  meterReadingId: number;
+  /** correctie | verwijderd */
+  action: string;
+  /** @nullable */
+  changedById?: number | null;
+  /** @nullable */
+  changedByName?: string | null;
+  changedAt: string;
+  /** @nullable */
+  oldReadingDate?: string | null;
+  /** @nullable */
+  newReadingDate?: string | null;
+  /** @nullable */
+  oldValue?: number | null;
+  /** @nullable */
+  newValue?: number | null;
+}
 export interface MeterReadingInput {
   buildingId: number;
   meterType: string;
@@ -1547,4 +1566,3 @@ export type SuggestKnowledgeArticlesParams = {
 q?: string;
 ticketCategoryId?: number;
 };
-

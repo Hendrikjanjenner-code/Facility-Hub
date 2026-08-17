@@ -2109,12 +2109,12 @@ export const DeleteMeterReadingParams = zod.object({
 
 export const DeleteMeterReadingResponse = zod.void()
 
-
 /**
- * @summary Bulk import meter readings (parsed CSV rows)
+ * @summary Mutatiehistorie van een meterstand (correcties en verwijderingen)
  */
-
-
+export const GetMeterReadingAuditLogParams = zod.object({
+  "id": zod.coerce.number().int()
+})
 export const ImportMeterReadingsBody = zod.object({
   "rows": zod.array(zod.object({
   "buildingId": zod.int(),
@@ -2775,7 +2775,18 @@ export const GetSatisfactionReportResponse = zod.object({
 }))
 })
 
-
+export const GetMeterReadingAuditLogResponseItem = zod.object({
+  "id": zod.int(),
+  "meterReadingId": zod.int(),
+  "action": zod.string().describe('correctie | verwijderd'),
+  "changedById": zod.int().nullish(),
+  "changedByName": zod.string().nullish(),
+  "changedAt": zod.coerce.date(),
+  "oldReadingDate": zod.string().nullish(),
+  "newReadingDate": zod.string().nullish(),
+  "oldValue": zod.number().nullish(),
+  "newValue": zod.number().nullish()
+})
 export const UpdateKeyIssueDueBody = zod.object({
   "dueAt": zod.string().nullish()
 })
@@ -2827,5 +2838,7 @@ export const UpdateKeyIssueDueResponse = zod.object({
   "createdAt": zod.string()
 }))
 })
+
+export const GetMeterReadingAuditLogResponse = zod.array(GetMeterReadingAuditLogResponseItem)
 
 export const DeleteSiteResponse = zod.void()

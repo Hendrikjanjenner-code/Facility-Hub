@@ -86,6 +86,7 @@ export * from './listWasteRegistrationsParams';
 export * from './listWorkplacesParams';
 export * from './loginInput';
 export * from './meterReading';
+export * from './meterReadingAuditEntry';
 export * from './meterReadingImportInput';
 export * from './meterReadingInput';
 export * from './meterReadingUpdateInput';

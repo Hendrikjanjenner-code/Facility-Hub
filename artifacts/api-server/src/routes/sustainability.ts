@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import {
   db,
   meterReadingsTable,
+  meterReadingAuditLogTable,
   wasteRegistrationsTable,
   buildingsTable,
   usersTable,
@@ -23,6 +24,8 @@ router.use("/sustainability", requireRole(...SUSTAIN_ROLES));
 
 const METER_TYPES = ["elektriciteit", "gas", "water"];
 const WASTE_CATEGORIES = ["restafval", "papier", "gft", "plastic", "glas", "chemisch"];
+
+// ─── Meter readings ──────────────────────────────────────────────────────────
 
 function readingBaseQuery() {
   return db
@@ -75,7 +78,7 @@ router.post("/meter-readings", async (req, res): Promise<void> => {
   }
   const d = parsed.data;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(d.readingDate) || !(d.value >= 0)) {
-    res.status(400).json({ message: "Ongeldige datum of waarde" });
+    res.status(400).json({ message: "Ongeldige datum of meterstand" });
     return;
   }
   const [created] = await db
@@ -86,7 +89,7 @@ router.post("/meter-readings", async (req, res): Promise<void> => {
       readingDate: d.readingDate,
       value: d.value,
       unit: d.unit,
-      source: (d as any).source ?? "handmatig",
+      source: "handmatig",
       registeredById: req.currentUser!.id,
     })
     .returning();
@@ -103,25 +106,37 @@ router.post("/meter-readings/import", async (req, res): Promise<void> => {
   const validRows = parsed.data.rows.filter(
     (r) => METER_TYPES.includes(r.meterType) && /^\d{4}-\d{2}-\d{2}$/.test(r.readingDate) && r.value >= 0,
   );
-  if (!validRows.length) { res.status(400).json({ message: "Geen geldige meterstanden" }); return; }
+  const skipped = parsed.data.rows.length - validRows.length;
+  if (!validRows.length) {
+    res.status(400).json({ message: "Geen geldige meterstanden" });
+    return;
+  }
   const inserted = await db
     .insert(meterReadingsTable)
-    .values(validRows.map((r) => ({
-      buildingId: r.buildingId,
-      meterType: r.meterType,
-      readingDate: r.readingDate,
-      value: r.value,
-      unit: r.unit,
-      source: "import",
-      registeredById: req.currentUser!.id,
-    })))
+    .values(
+      validRows.map((r) => ({
+        buildingId: r.buildingId,
+        meterType: r.meterType,
+        readingDate: r.readingDate,
+        value: r.value,
+        unit: r.unit,
+        source: "csv_import",
+        registeredById: req.currentUser!.id,
+      })),
+    )
     .returning();
-  res.status(201).json({ imported: inserted.length });
+  res.status(201).json({
+    imported: inserted.length,
+    skipped,
+    message: `${inserted.length} meterstanden geïmporteerd, ${skipped} rijen overgeslagen.`,
+  });
 });
 
+// Correctie van een meterstand — audit log en update in één transactie
 router.patch("/meter-readings/:id", async (req, res): Promise<void> => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
+
   const updates: Partial<typeof meterReadingsTable.$inferInsert> = {};
   const b = req.body ?? {};
   if (b.readingDate !== undefined) {
@@ -136,20 +151,103 @@ router.patch("/meter-readings/:id", async (req, res): Promise<void> => {
     }
     updates.value = b.value;
   }
-  if (!Object.keys(updates).length) { res.status(400).json({ message: "Geen velden om bij te werken" }); return; }
-  const [updated] = await db.update(meterReadingsTable).set(updates).where(eq(meterReadingsTable.id, id)).returning();
+  if (!Object.keys(updates).length) {
+    res.status(400).json({ message: "Geen velden om bij te werken" }); return;
+  }
+
+  const updated = await db.transaction(async (tx) => {
+    const [existing] = await tx
+      .select()
+      .from(meterReadingsTable)
+      .where(eq(meterReadingsTable.id, id))
+      .for("update");
+    if (!existing) return null;
+
+    const [updatedRow] = await tx
+      .update(meterReadingsTable)
+      .set(updates)
+      .where(eq(meterReadingsTable.id, id))
+      .returning();
+
+    await tx.insert(meterReadingAuditLogTable).values({
+      meterReadingId: id,
+      action: "correctie",
+      changedById: req.currentUser!.id,
+      oldReadingDate: existing.readingDate,
+      newReadingDate: updates.readingDate ?? existing.readingDate,
+      oldValue: existing.value,
+      newValue: updates.value ?? existing.value,
+    });
+
+    return updatedRow ?? null;
+  });
+
   if (!updated) { res.status(404).json({ message: "Meterstand niet gevonden" }); return; }
   const [row] = await readingBaseQuery().where(eq(meterReadingsTable.id, id));
   res.json(serializeReading(row!));
 });
 
+// Verwijderen van een meterstand — audit log en delete in één transactie
 router.delete("/meter-readings/:id", async (req, res): Promise<void> => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
-  const [deleted] = await db.delete(meterReadingsTable).where(eq(meterReadingsTable.id, id)).returning();
-  if (!deleted) { res.status(404).json({ message: "Meterstand niet gevonden" }); return; }
+
+  const found = await db.transaction(async (tx) => {
+    const [existing] = await tx
+      .select()
+      .from(meterReadingsTable)
+      .where(eq(meterReadingsTable.id, id))
+      .for("update");
+    if (!existing) return false;
+
+    await tx.insert(meterReadingAuditLogTable).values({
+      meterReadingId: id,
+      action: "verwijderd",
+      changedById: req.currentUser!.id,
+      oldReadingDate: existing.readingDate,
+      oldValue: existing.value,
+    });
+
+    await tx.delete(meterReadingsTable).where(eq(meterReadingsTable.id, id));
+    return true;
+  });
+
+  if (!found) { res.status(404).json({ message: "Meterstand niet gevonden" }); return; }
   res.status(204).end();
 });
+
+// Audithistorie van een meterstand
+router.get("/meter-readings/:id/audit-log", async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
+
+  const entries = await db
+    .select({
+      log: meterReadingAuditLogTable,
+      changedByName: usersTable.name,
+    })
+    .from(meterReadingAuditLogTable)
+    .leftJoin(usersTable, eq(meterReadingAuditLogTable.changedById, usersTable.id))
+    .where(eq(meterReadingAuditLogTable.meterReadingId, id))
+    .orderBy(desc(meterReadingAuditLogTable.changedAt));
+
+  res.json(
+    entries.map((e) => ({
+      id: e.log.id,
+      meterReadingId: e.log.meterReadingId,
+      action: e.log.action,
+      changedById: e.log.changedById,
+      changedByName: e.changedByName,
+      changedAt: e.log.changedAt,
+      oldReadingDate: e.log.oldReadingDate,
+      newReadingDate: e.log.newReadingDate,
+      oldValue: e.log.oldValue,
+      newValue: e.log.newValue,
+    })),
+  );
+});
+
+// ─── Waste registrations ─────────────────────────────────────────────────────
 
 function wasteBaseQuery() {
   return db
@@ -210,6 +308,8 @@ router.post("/waste-registrations", async (req, res): Promise<void> => {
   const [wasteRow] = await wasteBaseQuery().where(eq(wasteRegistrationsTable.id, created!.id));
   res.status(201).json(serializeWaste(wasteRow!));
 });
+
+// ─── Sustainability report ────────────────────────────────────────────────────
 
 router.get("/sustainability/report", async (req, res): Promise<void> => {
   const buildingId =

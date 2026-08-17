@@ -1835,6 +1835,33 @@ paths:
           description: Deleted
         '404':
           description: Not found
+  /meter-readings/{id}/audit-log:
+    get:
+      operationId: getMeterReadingAuditLog
+      tags:
+        - sustainability
+      summary: Mutatiehistorie van een meterstand (correcties en verwijderingen)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MeterReadingAuditEntry'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /meter-readings/import:
     post:
       operationId: importMeterReadings
@@ -4543,6 +4570,44 @@ components:
         - value
         - unit
         - source
+    MeterReadingAuditEntry:
+      type: object
+      required: [id, meterReadingId, action, changedAt]
+      properties:
+        id:
+          type: integer
+        meterReadingId:
+          type: integer
+        action:
+          type: string
+          description: correctie | verwijderd
+        changedById:
+          type:
+            - integer
+            - 'null'
+        changedByName:
+          type:
+            - string
+            - 'null'
+        changedAt:
+          type: string
+          format: date-time
+        oldReadingDate:
+          type:
+            - string
+            - 'null'
+        newReadingDate:
+          type:
+            - string
+            - 'null'
+        oldValue:
+          type:
+            - number
+            - 'null'
+        newValue:
+          type:
+            - number
+            - 'null'
     MeterReadingInput:
       type: object
       properties:

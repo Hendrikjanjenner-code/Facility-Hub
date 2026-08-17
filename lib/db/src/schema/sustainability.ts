@@ -10,6 +10,19 @@ import {
 import { buildingsTable } from "./vastgoed";
 import { usersTable } from "./users";
 
+// Audit log for meter reading corrections and deletions
+export const meterReadingAuditLogTable = pgTable("meter_reading_audit_log", {
+  id: serial("id").primaryKey(),
+  meterReadingId: integer("meter_reading_id").notNull(), // not FK — reading may be deleted
+  action: text("action").notNull(), // "correctie" | "verwijderd"
+  changedById: integer("changed_by_id").references(() => usersTable.id),
+  changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
+  oldReadingDate: date("old_reading_date", { mode: "string" }),
+  newReadingDate: date("new_reading_date", { mode: "string" }),
+  oldValue: real("old_value"),
+  newValue: real("new_value"),
+});
+
 export const meterReadingsTable = pgTable("meter_readings", {
   id: serial("id").primaryKey(),
   buildingId: integer("building_id")

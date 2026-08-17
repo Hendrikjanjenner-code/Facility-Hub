@@ -83,6 +83,7 @@ import type {
   ListWorkplacesParams,
   LoginInput,
   MeterReading,
+  MeterReadingAuditEntry,
   MeterReadingImportInput,
   MeterReadingInput,
   MeterReadingUpdateInput,
@@ -5081,6 +5082,11 @@ export const useDeleteMeterReading = <TError = ErrorType<void>,
       return useMutation(getDeleteMeterReadingMutationOptions(options));
     }
 
+export const getGetMeterReadingAuditLogUrl = (id: number,) => {
+
+
+  return `/api/meter-readings/${id}/audit-log`
+}
 export const getImportMeterReadingsUrl = () => {
 
 
@@ -6557,6 +6563,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UpdateKnowledgeArticleMutationBody = BodyType<KnowledgeArticleUpdate>
     export type UpdateKnowledgeArticleMutationError = ErrorType<ApiMessage>
 
+export type GetMeterReadingAuditLogQueryError = ErrorType<ApiMessage>
+
     export type DeleteSiteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSite>>>
 
 export const getDeleteKnowledgeArticleUrl = (id: number) => `/api/knowledge-articles/${id}`
@@ -6833,6 +6841,20 @@ export function useGetSatisfactionReport<TData = Awaited<ReturnType<typeof getSa
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export const getGetMeterReadingAuditLogQueryOptions = <TData = Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError = ErrorType<ApiMessage>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMeterReadingAuditLogQueryKey(id);
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeterReadingAuditLog>>> = ({ signal }) => getMeterReadingAuditLog(id, { signal, ...requestOptions });
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError, TData> & { queryKey: QueryKey }
+}
+
     export type DeleteSiteMutationError = ErrorType<ApiMessage>
 
 
@@ -6875,6 +6897,20 @@ export const deleteKnowledgeArticle = async (id: number, options?: Parameters<ty
     method: 'DELETE',
   });
 }
+
+/**
+ * @summary Mutatiehistorie van een meterstand (correcties en verwijderingen)
+ */
+export const getMeterReadingAuditLog = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<MeterReadingAuditEntry[]> => {
+
+  return customFetch<MeterReadingAuditEntry[]>(getGetMeterReadingAuditLogUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
 
 /**
  * @summary Verwijder een locatie inclusief alle gebouwen, documenten en storage-bestanden
@@ -6924,3 +6960,27 @@ export const useDeleteSite = <TError = ErrorType<ApiMessage>,
       > => {
       return useMutation(getDeleteSiteMutationOptions(options));
     }
+
+export type GetMeterReadingAuditLogQueryResult = NonNullable<Awaited<ReturnType<typeof getMeterReadingAuditLog>>>
+
+export const getGetMeterReadingAuditLogQueryKey = (id: number,) => {
+    return [
+    `/api/meter-readings/${id}/audit-log`
+    ] as const;
+    }
+
+/**
+ * @summary Mutatiehistorie van een meterstand (correcties en verwijderingen)
+ */
+
+export function useGetMeterReadingAuditLog<TData = Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError = ErrorType<ApiMessage>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMeterReadingAuditLogQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}

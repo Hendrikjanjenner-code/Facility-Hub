@@ -12,13 +12,15 @@ import {
   useListWasteRegistrations,
   useCreateWasteRegistration,
   useGetSustainabilityReport,
+  useGetMeterReadingAuditLog,
   useGetUserPreference,
   usePutUserPreference,
   useDeleteUserPreference,
   type MeterReading,
+  type MeterReadingAuditEntry,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet, Download, Filter, X, Pencil } from "lucide-react";
+import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet, Download, Filter, X, Pencil, History } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip,
   Legend, CartesianGrid, PieChart, Pie, Cell,
@@ -110,6 +112,7 @@ export default function DuurzaamheidPage() {
   const [wasteDialogOpen, setWasteDialogOpen] = useState(false);
   const [editReading, setEditReading] = useState<MeterReading | null>(null);
   const [deleteReading, setDeleteReading] = useState<MeterReading | null>(null);
+  const [auditReading, setAuditReading] = useState<MeterReading | null>(null);
 
   // Filter state for the rapportage tab — persisted server-side via /api/user-preferences
   const FILTER_KEY = "duurzaamheid_report_filters";
@@ -246,6 +249,11 @@ export default function DuurzaamheidPage() {
 
   const { data: report } = useGetSustainabilityReport(
     Object.keys(reportParams).length ? reportParams : undefined,
+  );
+
+  // id=0 keeps hook unconditional; dialog is only shown when auditReading is set
+  const { data: auditLog, isFetching: auditFetching } = useGetMeterReadingAuditLog(
+    auditReading?.id ?? 0,
   );
 
   const createReading = useCreateMeterReading();
@@ -777,6 +785,9 @@ export default function DuurzaamheidPage() {
                       <TableCell className="text-muted-foreground">{r.registeredByName ?? "—"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 justify-end">
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => setAuditReading(r)} title="Mutatiehistorie">
+                            <History className="h-3.5 w-3.5" />
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(r)} title="Corrigeren">
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
@@ -908,6 +919,68 @@ export default function DuurzaamheidPage() {
               </DialogFooter>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Audit history dialog */}
+      <Dialog open={!!auditReading} onOpenChange={(open) => { if (!open) setAuditReading(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="h-4 w-4" />
+              Mutatiehistorie
+            </DialogTitle>
+            <DialogDescription>
+              {auditReading
+                ? `${auditReading.buildingName} — ${auditReading.meterType} — stand ${auditReading.value.toLocaleString("nl-NL")} ${auditReading.unit} op ${auditReading.readingDate}`
+                : ""}
+            </DialogDescription>
+          </DialogHeader>
+          {auditFetching ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : !auditLog?.length ? (
+            <p className="text-sm text-muted-foreground text-center py-6">Geen mutaties geregistreerd voor deze meterstand.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tijdstip</TableHead>
+                  <TableHead>Actie</TableHead>
+                  <TableHead>Door</TableHead>
+                  <TableHead>Oud</TableHead>
+                  <TableHead>Nieuw</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {auditLog.map((entry: MeterReadingAuditEntry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(entry.changedAt).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={entry.action === "verwijderd" ? "destructive" : "secondary"} className="capitalize text-xs">
+                        {entry.action}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-sm">{entry.changedByName ?? "—"}</TableCell>
+                    <TableCell className="text-xs font-mono">
+                      {entry.oldValue != null ? `${entry.oldValue.toLocaleString("nl-NL")}` : "—"}
+                      {entry.oldReadingDate ? <span className="text-muted-foreground ml-1">({entry.oldReadingDate})</span> : null}
+                    </TableCell>
+                    <TableCell className="text-xs font-mono">
+                      {entry.newValue != null ? `${entry.newValue.toLocaleString("nl-NL")}` : "—"}
+                      {entry.newReadingDate ? <span className="text-muted-foreground ml-1">({entry.newReadingDate})</span> : null}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setAuditReading(null)}>Sluiten</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
