@@ -90,6 +90,13 @@ function getQuarterRange(year: number, q: 1 | 2 | 3 | 4): { from: string; to: st
   return { from: `${year}-${starts[q - 1]}`, to: `${year}-${ends[q - 1]}` };
 }
 
+/** Return the date range for the current calendar quarter. */
+function getCurrentQuarterRange(): { from: string; to: string } {
+  const now = new Date();
+  const year = now.getFullYear();
+  const q = (Math.floor(now.getMonth() / 3) + 1) as 1 | 2 | 3 | 4;
+  return getQuarterRange(year, q);
+}
 /** Build a filename that reflects the active filters. */
 function buildExportFilename(buildingName: string | undefined, dateFrom: string, dateTo: string): string {
   const parts = ["duurzaamheid"];
@@ -114,11 +121,13 @@ export default function DuurzaamheidPage() {
   const [deleteReading, setDeleteReading] = useState<MeterReading | null>(null);
   const [auditReading, setAuditReading] = useState<MeterReading | null>(null);
 
-  // Filter state for the rapportage tab — persisted server-side via /api/user-preferences
+  // Filter state for the rapportage tab — persisted server-side via /api/user-preferences.
+  // Date filters default to the current quarter so the page is immediately useful on first open.
   const FILTER_KEY = "duurzaamheid_report_filters";
+  const _defaultQuarter = getCurrentQuarterRange();
   const [filterBuildingId, setFilterBuildingIdRaw] = useState<string>("");
-  const [filterDateFrom, setFilterDateFromRaw] = useState<string>("");
-  const [filterDateTo, setFilterDateToRaw] = useState<string>("");
+  const [filterDateFrom, setFilterDateFromRaw] = useState<string>(_defaultQuarter.from);
+  const [filterDateTo, setFilterDateToRaw] = useState<string>(_defaultQuarter.to);
 
   // initialisedFromServer: true after the first server response is applied.
   // userHasUnsavedChanges: true while the debounce is pending (local changes not yet saved).
@@ -141,9 +150,11 @@ export default function DuurzaamheidPage() {
   /** Apply a raw preference JSON string (or null) to local filter state. */
   const applyPrefValue = (value: string | null) => {
     if (!value) {
+      // No stored preference — default to the current quarter so the page is immediately useful.
+      const q = getCurrentQuarterRange();
       setFilterBuildingIdRaw("");
-      setFilterDateFromRaw("");
-      setFilterDateToRaw("");
+      setFilterDateFromRaw(q.from);
+      setFilterDateToRaw(q.to);
       return;
     }
     try {
