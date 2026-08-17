@@ -9,6 +9,7 @@ import {
   useReturnKey,
   useReportKeyLoss,
   useUpdateKey,
+  useUpdateKeyIssueDue,
   useCreateKeyDoor,
   useDeleteKeyDoor,
   useListUsers,
@@ -30,6 +31,7 @@ import {
   Lock,
   Unlock,
   Clock,
+  CalendarClock,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -63,6 +65,7 @@ export default function SleutelDetailPage({ id }: { id: string }) {
   const returnKey = useReturnKey();
   const reportLoss = useReportKeyLoss();
   const updateKey = useUpdateKey();
+  const updateIssueDue = useUpdateKeyIssueDue();
   const createDoor = useCreateKeyDoor();
   const deleteDoor = useDeleteKeyDoor();
 
@@ -74,6 +77,9 @@ export default function SleutelDetailPage({ id }: { id: string }) {
   const [lossOpen, setLossOpen] = useState(false);
   const [lossCharge, setLossCharge] = useState<string>("");
   const [lossNote, setLossNote] = useState("");
+
+  const [dueDateOpen, setDueDateOpen] = useState(false);
+  const [dueDateValue, setDueDateValue] = useState<string>("");
 
   const [doorOpen, setDoorOpen] = useState(false);
   const [doorDescription, setDoorDescription] = useState("");
@@ -293,6 +299,64 @@ export default function SleutelDetailPage({ id }: { id: string }) {
                   {overdue && <Badge variant="secondary" className="bg-orange-100 text-orange-700 text-[10px]">te laat</Badge>}
                 </span>
               )}
+              <Dialog open={dueDateOpen} onOpenChange={setDueDateOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-auto h-7 text-xs"
+                    data-testid="button-edit-due-date"
+                    onClick={() => setDueDateValue(key.dueAt ? key.dueAt.substring(0, 10) : "")}
+                  >
+                    <CalendarClock className="h-3.5 w-3.5 mr-1" />
+                    Inleverdatum aanpassen
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Inleverdatum aanpassen</DialogTitle>
+                    <DialogDescription>
+                      Pas de inleverdatum voor <span className="font-semibold">{key.currentHolderName}</span> aan. Laat leeg om de datum te verwijderen.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="edit-due-date">Inleverdatum</Label>
+                    <Input
+                      id="edit-due-date"
+                      type="date"
+                      value={dueDateValue}
+                      onChange={(e) => setDueDateValue(e.target.value)}
+                      data-testid="input-edit-due-date"
+                    />
+                    <p className="text-xs text-muted-foreground">Leeg laten om de inleverdatum te verwijderen.</p>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setDueDateOpen(false)}>Annuleren</Button>
+                    <Button
+                      disabled={updateIssueDue.isPending}
+                      onClick={() =>
+                        updateIssueDue.mutate(
+                          {
+                            id: keyId,
+                            data: { dueAt: dueDateValue ? new Date(dueDateValue).toISOString() : null },
+                          },
+                          {
+                            onSuccess: () => {
+                              invalidate();
+                              toast({ title: "Inleverdatum bijgewerkt" });
+                              setDueDateOpen(false);
+                            },
+                            onError,
+                          },
+                        )
+                      }
+                      data-testid="button-bevestig-due-date"
+                    >
+                      Opslaan
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         );

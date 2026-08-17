@@ -774,6 +774,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+  /keys/{id}/issue-due:
+    patch:
+      operationId: updateKeyIssueDue
+      tags:
+        - keys
+      summary: Pas de inleverdatum van de openstaande uitgifte aan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyIssueDueUpdate'
+      responses:
+        '200':
+          description: Bijgewerkt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDetail'
+        '404':
+          description: Sleutel niet gevonden of geen openstaande uitgifte
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+        '409':
+          description: Sleutel is niet uitgegeven
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /keys/{id}/loss:
     post:
       operationId: reportKeyLoss
@@ -3278,6 +3315,14 @@ components:
           type:
             - string
             - 'null'
+    KeyIssueDueUpdate:
+      type: object
+      properties:
+        dueAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
     KeyLossInput:
       type: object
       properties:

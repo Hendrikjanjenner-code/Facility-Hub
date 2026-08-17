@@ -19,6 +19,7 @@ import {
   CreateKeyDoorBody,
   IssueKeyBody,
   ReportKeyLossBody,
+  UpdateKeyIssueDueBody,
 } from "@workspace/api-zod";
 import { requireAuth, requireRole } from "../lib/auth";
 import { notify } from "../lib/notify";
@@ -413,6 +414,39 @@ router.post("/keys/:id/issue", async (req, res): Promise<void> => {
     "key",
   );
   res.status(201).json(await keyDetail(id));
+});
+
+router.patch("/keys/:id/issue-due", async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
+  const parsed = UpdateKeyIssueDueBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ message: "Ongeldige invoer" });
+    return;
+  }
+  const [key] = await db.select().from(keysTable).where(eq(keysTable.id, id));
+  if (!key) {
+    res.status(404).json({ message: "Sleutel niet gevonden" });
+    return;
+  }
+  if (key.status !== "uitgegeven") {
+    res.status(409).json({ message: "Deze sleutel is niet uitgegeven" });
+    return;
+  }
+  const newDueAt = parsed.data.dueAt ? new Date(parsed.data.dueAt) : null;
+  const updated = await db
+    .update(keyIssuesTable)
+    .set({ dueAt: newDueAt })
+    .where(and(eq(keyIssuesTable.keyId, id), isNull(keyIssuesTable.returnedAt)))
+    .returning({ id: keyIssuesTable.id });
+  if (updated.length === 0) {
+    res.status(404).json({ message: "Geen openstaande uitgifte gevonden" });
+    return;
+  }
+  res.json(await keyDetail(id));
 });
 
 router.post("/keys/:id/return", async (req, res): Promise<void> => {

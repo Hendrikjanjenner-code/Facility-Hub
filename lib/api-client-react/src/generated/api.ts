@@ -57,6 +57,7 @@ import type {
   KeyDoorInput,
   KeyInput,
   KeyIssueInput,
+  KeyIssueDueUpdate,
   KeyLossInput,
   KeySummary,
   KeyUpdate,
@@ -2532,6 +2533,67 @@ export const useReturnKey = <TError = ErrorType<ApiMessage>,
         TContext
       > => {
       return useMutation(getReturnKeyMutationOptions(options));
+    }
+
+export const getUpdateKeyIssueDueUrl = (id: number,) => {
+
+
+  return `/api/keys/${id}/issue-due`
+}
+
+/**
+ * @summary Pas de inleverdatum van de openstaande uitgifte aan
+ */
+export const updateKeyIssueDue = async (id: number,
+    keyIssueDueUpdate: KeyIssueDueUpdate, options?: Parameters<typeof customFetch>[1]): Promise<KeyDetail> => {
+
+  return customFetch<KeyDetail>(getUpdateKeyIssueDueUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(keyIssueDueUpdate)
+  }
+);}
+
+
+export const getUpdateKeyIssueDueMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKeyIssueDue>>, TError,{id: number;data: BodyType<KeyIssueDueUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateKeyIssueDue>>, TError,{id: number;data: BodyType<KeyIssueDueUpdate>}, TContext> => {
+
+const mutationKey = ['updateKeyIssueDue'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateKeyIssueDue>>, {id: number;data: BodyType<KeyIssueDueUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateKeyIssueDue(id,data,requestOptions)
+        }
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateKeyIssueDueMutationResult = NonNullable<Awaited<ReturnType<typeof updateKeyIssueDue>>>
+    export type UpdateKeyIssueDueMutationBody = BodyType<KeyIssueDueUpdate>
+    export type UpdateKeyIssueDueMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Pas de inleverdatum van de openstaande uitgifte aan
+ */
+export const useUpdateKeyIssueDue = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKeyIssueDue>>, TError,{id: number;data: BodyType<KeyIssueDueUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateKeyIssueDue>>,
+        TError,
+        {id: number;data: BodyType<KeyIssueDueUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateKeyIssueDueMutationOptions(options));
     }
 
 export const getReportKeyLossUrl = (id: number,) => {

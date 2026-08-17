@@ -469,6 +469,10 @@ export interface KeyIssueInput {
   note?: string | null;
 }
 
+export interface KeyIssueDueUpdate {
+  /** @nullable */
+  dueAt?: string | null;
+}
 export interface KeyLossInput {
   /**
      * @minimum 0
