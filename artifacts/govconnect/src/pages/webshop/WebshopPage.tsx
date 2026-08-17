@@ -498,16 +498,32 @@ export default function WebshopPage() {
                             )}
                             {isManager && (
                               <TableCell className="text-right space-x-1 whitespace-nowrap">
-                                {o.status === "ingediend" && (
-                                  <>
-                                    <Button size="sm" variant="outline" className="text-green-700" disabled={updateOrder.isPending} onClick={() => decideOrder(o.id, "goedgekeurd")}>
-                                      <CheckCircle2 className="mr-1 h-3.5 w-3.5" />Goedkeuren
-                                    </Button>
-                                    <Button size="sm" variant="outline" className="text-destructive" disabled={updateOrder.isPending} onClick={() => setRejectOrderId(o.id)}>
-                                      <XCircle className="mr-1 h-3.5 w-3.5" />Afkeuren
-                                    </Button>
-                                  </>
-                                )}
+                                {o.status === "ingediend" && (() => {
+                                  const isBlocked = o.budgetExceeded && (deptBudget as any)?.overBudgetPolicy === "blokkeren";
+                                  return (
+                                    <div className="inline-flex flex-col items-end gap-1">
+                                      <div className="space-x-1">
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className={cn("text-green-700", isBlocked && "opacity-60")}
+                                          disabled={updateOrder.isPending}
+                                          onClick={() => decideOrder(o.id, "goedgekeurd")}
+                                        >
+                                          <CheckCircle2 className="mr-1 h-3.5 w-3.5" />Goedkeuren
+                                        </Button>
+                                        <Button size="sm" variant="outline" className="text-destructive" disabled={updateOrder.isPending} onClick={() => setRejectOrderId(o.id)}>
+                                          <XCircle className="mr-1 h-3.5 w-3.5" />Afkeuren
+                                        </Button>
+                                      </div>
+                                      {isBlocked && (
+                                        <p className="text-xs text-destructive flex items-center gap-1">
+                                          <ShieldAlert className="h-3 w-3" />Goedkeuring geblokkeerd door budgetbeleid
+                                        </p>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                                 {o.status === "goedgekeurd" && (
                                   <div className="flex gap-1 justify-end">
                                     <Button size="sm" variant="outline" disabled={updateOrder.isPending} onClick={() => decideOrder(o.id, "besteld")}>Markeer besteld</Button>
