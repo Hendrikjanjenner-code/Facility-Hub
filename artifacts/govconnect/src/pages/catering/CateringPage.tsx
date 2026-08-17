@@ -11,6 +11,7 @@ import {
   MapPin,
   Users,
   Package,
+  Printer,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -61,8 +62,18 @@ export default function CateringPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      {/* Print-only header — hidden on screen, shown when printing */}
+      <div className="print-header hidden">
+        <div className="flex items-center gap-2 mb-1">
+          <UtensilsCrossed className="h-5 w-5" />
+          <h1 className="text-2xl font-bold">Catering — daglijst</h1>
+        </div>
+        <p className="text-sm capitalize">{formattedDate}</p>
+        <hr className="mt-3 mb-0 border-gray-400" />
+      </div>
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="print-hidden flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <UtensilsCrossed className="h-7 w-7 text-primary" />
@@ -73,7 +84,7 @@ export default function CateringPage() {
           </p>
         </div>
 
-        {/* Date navigator */}
+        {/* Date navigator + print button */}
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" onClick={handlePrevDay}>
             <ChevronLeft className="h-4 w-4" />
@@ -90,17 +101,26 @@ export default function CateringPage() {
               Vandaag
             </Button>
           )}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.print()}
+            title="Afdrukken"
+          >
+            <Printer className="h-4 w-4 mr-1.5" />
+            Afdrukken
+          </Button>
         </div>
       </div>
 
       {isLoading ? (
-        <div className="space-y-4">
+        <div className="print-hidden space-y-4">
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-48 w-full" />
           <Skeleton className="h-48 w-full" />
         </div>
       ) : !summary || summary.reservations.length === 0 ? (
-        <Card>
+        <Card className="print-hidden">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <UtensilsCrossed className="h-12 w-12 text-muted-foreground/40 mb-4" />
             <h3 className="text-lg font-semibold mb-1">Geen cateringbestellingen</h3>
@@ -148,7 +168,7 @@ export default function CateringPage() {
                 <Card
                   key={reservation.id}
                   className={cn(
-                    "border-l-4 transition-colors",
+                    "catering-card border-l-4 transition-colors",
                     reservation.status === "geannuleerd"
                       ? "border-l-red-400 opacity-60"
                       : "border-l-primary"

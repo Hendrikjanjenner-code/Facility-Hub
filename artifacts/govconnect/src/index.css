@@ -267,3 +267,76 @@
     inset: -1px;
   }
 }
+
+@media print {
+  /* Hide chrome — sidebar, top header, print button */
+  aside,
+  header,
+  .print-hidden {
+    display: none !important;
+  }
+
+  /* Full-width content without sidebar gap */
+  body,
+  main,
+  .flex-1 {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Reset page layout */
+  .container {
+    max-width: 100% !important;
+    padding: 1.5rem !important;
+  }
+
+  /* A4 page setup */
+  @page {
+    size: A4 portrait;
+    margin: 1.5cm 1.5cm 2cm;
+  }
+
+  /* Force black-and-white text */
+  * {
+    color: #000 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Keep borders visible */
+  .border,
+  [class*="border-"] {
+    border-color: #bbb !important;
+  }
+
+  /* Coloured left border on reservation cards — keep it visible as a line */
+  .border-l-4 {
+    border-left-color: #555 !important;
+  }
+
+  /* Remove animations */
+  .animate-in {
+    animation: none !important;
+  }
+
+  /* Badges — outline only */
+  .badge,
+  [class*="Badge"] {
+    border: 1px solid #555 !important;
+    background: transparent !important;
+  }
+
+  /* Prevent cards from breaking across pages */
+  .catering-card {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Print header — show only during print */
+  .print-header {
+    display: block !important;
+  }
+}
