@@ -29,6 +29,7 @@ import {
   History,
   Lock,
   Unlock,
+  Clock,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -42,6 +43,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { KEY_STATUS_STYLES } from "./SleutelbeheerPage";
+import { cn } from "@/lib/utils";
 
 const euro = (n: number) => `€ ${n.toLocaleString("nl-NL", { minimumFractionDigits: 2 })}`;
 
@@ -66,6 +68,7 @@ export default function SleutelDetailPage({ id }: { id: string }) {
 
   const [issueOpen, setIssueOpen] = useState(false);
   const [issueHolderId, setIssueHolderId] = useState<string>("");
+  const [issueDueAt, setIssueDueAt] = useState<string>("");
   const [issueNote, setIssueNote] = useState("");
 
   const [lossOpen, setLossOpen] = useState(false);
@@ -137,6 +140,16 @@ export default function SleutelDetailPage({ id }: { id: string }) {
                       </Select>
                     </div>
                     <div className="space-y-1.5">
+                      <Label htmlFor="i-due">Inleverdatum (optioneel)</Label>
+                      <Input
+                        id="i-due"
+                        type="date"
+                        value={issueDueAt}
+                        onChange={(e) => setIssueDueAt(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">Bijv. voor bezoekerspassen of tijdelijke sleutels.</p>
+                    </div>
+                    <div className="space-y-1.5">
                       <Label htmlFor="i-note">Notitie (optioneel)</Label>
                       <Input id="i-note" value={issueNote} onChange={(e) => setIssueNote(e.target.value)} />
                     </div>
@@ -147,9 +160,16 @@ export default function SleutelDetailPage({ id }: { id: string }) {
                       disabled={!issueHolderId || issueKey.isPending}
                       onClick={() =>
                         issueKey.mutate(
-                          { id: keyId, data: { holderId: Number(issueHolderId), note: issueNote || undefined } },
                           {
-                            onSuccess: () => { invalidate(); toast({ title: "Sleutel uitgegeven" }); setIssueOpen(false); setIssueHolderId(""); setIssueNote(""); },
+                            id: keyId,
+                            data: {
+                              holderId: Number(issueHolderId),
+                              dueAt: issueDueAt ? new Date(issueDueAt).toISOString() : undefined,
+                              note: issueNote || undefined,
+                            },
+                          },
+                          {
+                            onSuccess: () => { invalidate(); toast({ title: "Sleutel uitgegeven" }); setIssueOpen(false); setIssueHolderId(""); setIssueDueAt(""); setIssueNote(""); },
                             onError,
                           },
                         )
@@ -258,15 +278,25 @@ export default function SleutelDetailPage({ id }: { id: string }) {
         </div>
       </div>
 
-      {key.status === "uitgegeven" && key.currentHolderName && (
-        <Card className="border-blue-200 bg-blue-50/50">
-          <CardContent className="pt-6 text-sm flex items-center gap-2">
-            <UserCheck className="h-4 w-4 text-blue-700" />
-            Uitgegeven aan <span className="font-semibold">{key.currentHolderName}</span>
-            {key.issuedAt && <> sinds {format(new Date(key.issuedAt), "d MMMM yyyy", { locale: nl })}</>}
-          </CardContent>
-        </Card>
-      )}
+      {key.status === "uitgegeven" && key.currentHolderName && (() => {
+        const overdue = key.dueAt && new Date(key.dueAt) < new Date();
+        return (
+          <Card className={cn("border-blue-200 bg-blue-50/50", overdue && "border-orange-300 bg-orange-50")}>
+            <CardContent className="pt-6 text-sm flex flex-wrap items-center gap-2">
+              {overdue ? <Clock className="h-4 w-4 text-orange-600" /> : <UserCheck className="h-4 w-4 text-blue-700" />}
+              Uitgegeven aan <span className="font-semibold">{key.currentHolderName}</span>
+              {key.issuedAt && <> sinds {format(new Date(key.issuedAt), "d MMMM yyyy", { locale: nl })}</>}
+              {key.dueAt && (
+                <span className={cn("flex items-center gap-1", overdue ? "text-orange-700 font-semibold" : "text-muted-foreground")}>
+                  {overdue ? "• Inleverdatum verstreken:" : "• Inleveren voor:"}
+                  {" "}{format(new Date(key.dueAt), "d MMMM yyyy", { locale: nl })}
+                  {overdue && <Badge variant="secondary" className="bg-orange-100 text-orange-700 text-[10px]">te laat</Badge>}
+                </span>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
@@ -384,6 +414,15 @@ export default function SleutelDetailPage({ id }: { id: string }) {
                       {format(new Date(i.issuedAt), "d MMM yyyy", { locale: nl })}
                       {i.returnedAt && <> – {format(new Date(i.returnedAt), "d MMM yyyy", { locale: nl })}</>}
                       {i.issuedByName && <> • uitgegeven door {i.issuedByName}</>}
+                      {i.dueAt && (() => {
+                        const od = !i.returnedAt && new Date(i.dueAt) < new Date();
+                        return (
+                          <span className={cn("ml-1", od ? "text-orange-600 font-medium" : "")}>
+                            {" "}• inleveren voor {format(new Date(i.dueAt), "d MMM yyyy", { locale: nl })}
+                            {od && " ⚠ te laat"}
+                          </span>
+                        );
+                      })()}
                     </div>
                     {i.note && <div className="text-xs text-muted-foreground italic mt-0.5">{i.note}</div>}
                   </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -7,7 +7,7 @@ import {
   useGetStructure,
   getListKeysQueryKey,
 } from "@workspace/api-client-react";
-import { KeyRound, CreditCard, Plus, Search } from "lucide-react";
+import { KeyRound, CreditCard, Plus, Search, Clock } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,11 @@ export const KEY_STATUS_STYLES: Record<string, string> = {
   vermist: "bg-red-100 text-red-800",
   geblokkeerd: "bg-slate-200 text-slate-700",
 };
+
+function isOverdue(dueAt: string | null | undefined): boolean {
+  if (!dueAt) return false;
+  return new Date(dueAt) < new Date();
+}
 
 function NieuweSleutelDialog() {
   const { toast } = useToast();
@@ -130,18 +135,18 @@ export default function SleutelbeheerPage() {
   const [, setLocation] = useLocation();
   const [statusFilter, setStatusFilter] = useState<string>("alle");
   const [typeFilter, setTypeFilter] = useState<string>("alle");
+  const [overdueFilter, setOverdueFilter] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { data: keys, isLoading } = useListKeys(
-    {
-      ...(statusFilter !== "alle" ? { status: statusFilter } : {}),
-      ...(typeFilter !== "alle" ? { type: typeFilter } : {}),
-    },
-    { query: { queryKey: getListKeysQueryKey({
-      ...(statusFilter !== "alle" ? { status: statusFilter } : {}),
-      ...(typeFilter !== "alle" ? { type: typeFilter } : {}),
-    }) } },
-  );
+  const queryParams = {
+    ...(statusFilter !== "alle" ? { status: statusFilter } : {}),
+    ...(typeFilter !== "alle" ? { type: typeFilter } : {}),
+    ...(overdueFilter ? { overdue: true } : {}),
+  };
+
+  const { data: keys, isLoading } = useListKeys(queryParams, {
+    query: { queryKey: getListKeysQueryKey(queryParams) },
+  });
 
   const filtered = (keys ?? []).filter((k) => {
     if (!search) return true;
@@ -156,7 +161,7 @@ export default function SleutelbeheerPage() {
   const counts = {
     totaal: keys?.length ?? 0,
     uitgegeven: keys?.filter((k) => k.status === "uitgegeven").length ?? 0,
-    vermist: keys?.filter((k) => k.status === "vermist").length ?? 0,
+    telaat: keys?.filter((k) => isOverdue(k.dueAt)).length ?? 0,
   };
 
   return (
@@ -172,7 +177,15 @@ export default function SleutelbeheerPage() {
       <div className="grid grid-cols-3 gap-4">
         <Card><CardContent className="pt-6"><div className="text-2xl font-bold">{counts.totaal}</div><div className="text-xs text-muted-foreground">In register</div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="text-2xl font-bold">{counts.uitgegeven}</div><div className="text-xs text-muted-foreground">Uitgegeven</div></CardContent></Card>
-        <Card><CardContent className="pt-6"><div className={cn("text-2xl font-bold", counts.vermist > 0 && "text-red-600")}>{counts.vermist}</div><div className="text-xs text-muted-foreground">Vermist</div></CardContent></Card>
+        <Card
+          className={cn("cursor-pointer transition-colors", overdueFilter && "ring-2 ring-orange-400")}
+          onClick={() => setOverdueFilter((v) => !v)}
+        >
+          <CardContent className="pt-6">
+            <div className={cn("text-2xl font-bold", counts.telaat > 0 && "text-orange-600")}>{counts.telaat}</div>
+            <div className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> Te laat ingeleverd</div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="flex flex-wrap gap-3 items-center">
@@ -198,6 +211,12 @@ export default function SleutelbeheerPage() {
             <SelectItem value="geblokkeerd">Geblokkeerd</SelectItem>
           </SelectContent>
         </Select>
+        {overdueFilter && (
+          <Badge variant="secondary" className="bg-orange-100 text-orange-800 gap-1">
+            <Clock className="h-3 w-3" /> Te laat
+            <button onClick={() => setOverdueFilter(false)} className="ml-1 text-orange-600 hover:text-orange-800">×</button>
+          </Badge>
+        )}
       </div>
 
       <Card>
@@ -218,30 +237,48 @@ export default function SleutelbeheerPage() {
                 <TableHead>Deuren</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Huidige houder</TableHead>
+                <TableHead>Inleveren voor</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Geen sleutels gevonden.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center text-muted-foreground py-8">Geen sleutels gevonden.</TableCell></TableRow>
               ) : (
-                filtered.map((k) => (
-                  <TableRow key={k.id} className="cursor-pointer" onClick={() => setLocation(`/sleutelbeheer/${k.id}`)} data-testid={`row-key-${k.code}`}>
-                    <TableCell className="font-mono font-medium">{k.code}</TableCell>
-                    <TableCell>
-                      <span className="flex items-center gap-1.5 capitalize">
-                        {k.type === "pas" ? <CreditCard className="h-4 w-4 text-muted-foreground" /> : <KeyRound className="h-4 w-4 text-muted-foreground" />}
-                        {k.type}
-                      </span>
-                    </TableCell>
-                    <TableCell className="max-w-[240px] truncate">{k.description}</TableCell>
-                    <TableCell>{k.buildingName ?? "-"}</TableCell>
-                    <TableCell>{k.doorCount}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className={KEY_STATUS_STYLES[k.status] ?? ""}>{k.status}</Badge>
-                    </TableCell>
-                    <TableCell>{k.currentHolderName ?? "-"}</TableCell>
-                  </TableRow>
-                ))
+                filtered.map((k) => {
+                  const overdue = isOverdue(k.dueAt);
+                  return (
+                    <TableRow
+                      key={k.id}
+                      className={cn("cursor-pointer", overdue && "bg-orange-50 hover:bg-orange-100")}
+                      onClick={() => setLocation(`/sleutelbeheer/${k.id}`)}
+                      data-testid={`row-key-${k.code}`}
+                    >
+                      <TableCell className="font-mono font-medium">{k.code}</TableCell>
+                      <TableCell>
+                        <span className="flex items-center gap-1.5 capitalize">
+                          {k.type === "pas" ? <CreditCard className="h-4 w-4 text-muted-foreground" /> : <KeyRound className="h-4 w-4 text-muted-foreground" />}
+                          {k.type}
+                        </span>
+                      </TableCell>
+                      <TableCell className="max-w-[240px] truncate">{k.description}</TableCell>
+                      <TableCell>{k.buildingName ?? "-"}</TableCell>
+                      <TableCell>{k.doorCount}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className={KEY_STATUS_STYLES[k.status] ?? ""}>{k.status}</Badge>
+                      </TableCell>
+                      <TableCell>{k.currentHolderName ?? "-"}</TableCell>
+                      <TableCell>
+                        {k.dueAt ? (
+                          <span className={cn("flex items-center gap-1 text-sm", overdue ? "text-orange-600 font-medium" : "text-muted-foreground")}>
+                            {overdue && <Clock className="h-3.5 w-3.5" />}
+                            {new Date(k.dueAt).toLocaleDateString("nl-NL")}
+                            {overdue && <Badge variant="secondary" className="bg-orange-100 text-orange-700 text-[10px] ml-1">te laat</Badge>}
+                          </span>
+                        ) : "-"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
             </TableBody>
           </Table>

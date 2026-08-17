@@ -3,6 +3,7 @@ import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
 import { ensureContractExpiryNotifications } from "./routes/contracts";
 import { cleanupOrphanedDocumentUploads } from "./lib/orphanCleanup";
+import { checkOverdueKeys } from "./routes/keys";
 
 const rawPort = process.env["PORT"];
 
@@ -38,6 +39,15 @@ async function runOrphanCleanup() {
   }
 }
 
+async function runOverdueKeysCheck() {
+  try {
+    const notified = await checkOverdueKeys();
+    if (notified > 0) logger.info({ notified }, "Dagelijkse sleutelherinnering verstuurd");
+  } catch (err) {
+    logger.error({ err }, "Fout bij dagelijkse sleutelherinnering");
+  }
+}
+
 // Idempotente startup-migratie: voeg updated_at toe aan rooms als die ontbreekt.
 // Nodig voor bestaande databases die vóór dit schema-veld zijn aangemaakt.
 try {
@@ -63,4 +73,8 @@ app.listen(port, (err) => {
   // Opruimen van wees-uploads: direct bij start en daarna elke 24 uur.
   void runOrphanCleanup();
   setInterval(() => void runOrphanCleanup(), MS_PER_DAY);
+
+  // Dagelijkse check voor te late sleuteluitgiftes met inleverdatum.
+  void runOverdueKeysCheck();
+  setInterval(() => void runOverdueKeysCheck(), MS_PER_DAY);
 });

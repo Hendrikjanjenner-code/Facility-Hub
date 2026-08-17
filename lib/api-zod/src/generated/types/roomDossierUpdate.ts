@@ -30,5 +30,6 @@ export interface RoomDossierUpdate {
      * @nullable
      */
   capacity?: number | null;
+  /** ISO-tijdstempel voor optimistic locking */
   updatedAt: string;
 }

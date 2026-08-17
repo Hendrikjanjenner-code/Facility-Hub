@@ -51,6 +51,8 @@ export const keyIssuesTable = pgTable("key_issues", {
   issuedAt: timestamp("issued_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
+  dueAt: timestamp("due_at", { withTimezone: true }),
+  lastNotifiedAt: timestamp("last_notified_at", { withTimezone: true }),
   returnedAt: timestamp("returned_at", { withTimezone: true }),
   note: text("note"),
 }, (t) => [

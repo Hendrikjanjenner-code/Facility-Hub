@@ -6,6 +6,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface SendOrderToSupplierInput {
-  supplierId: number;
-}
+export type RoomDossierHistoryEntryChangesItem = { [key: string]: unknown };

@@ -13,10 +13,6 @@ export interface ApiMessage {
   message: string;
 }
 
-export interface SendOrderToSupplierInput {
-  supplierId: number;
-}
-
 export interface LoginInput {
   email: string;
   password: string;
@@ -212,7 +208,8 @@ export interface Room {
   assetCount?: number | null;
   /** @nullable */
   openTicketCount?: number | null;
-  updatedAt: string;
+  /** @nullable */
+  updatedAt?: string | null;
 }
 
 export interface RoomDossierUpdate {
@@ -239,14 +236,11 @@ export interface RoomDossierUpdate {
      * @nullable
      */
   capacity?: number | null;
+  /** ISO-tijdstempel voor optimistic locking */
   updatedAt: string;
 }
 
-export interface RoomDossierChange {
-  field: string;
-  from?: string | number | null;
-  to?: string | number | null;
-}
+export type RoomDossierHistoryEntryChangesItem = { [key: string]: unknown };
 
 export interface RoomDossierHistoryEntry {
   id: number;
@@ -255,7 +249,7 @@ export interface RoomDossierHistoryEntry {
   changedByName?: string | null;
   changedAt: string;
   isUndo: boolean;
-  changes: RoomDossierChange[];
+  changes: RoomDossierHistoryEntryChangesItem[];
 }
 
 export interface FloorPlanRoom {
@@ -264,14 +258,17 @@ export interface FloorPlanRoom {
   code: string;
   functionType: string;
   areaM2: number;
-  updatedAt: string;
   /** @nullable */
   areaVvoM2?: number | null;
+  /** @nullable */
+  areaBvoM2?: number | null;
   /** @nullable */
   department?: string | null;
   /** @nullable */
   capacity?: number | null;
   bookable?: boolean;
+  /** @nullable */
+  updatedAt?: string | null;
 }
 
 export interface FloorPlan {
@@ -348,6 +345,8 @@ export interface KeySummary {
   currentHolderName?: string | null;
   /** @nullable */
   issuedAt?: string | null;
+  /** @nullable */
+  dueAt?: string | null;
   createdAt: string;
 }
 
@@ -370,6 +369,8 @@ export interface KeyIssueRecord {
   /** @nullable */
   issuedByName?: string | null;
   issuedAt: string;
+  /** @nullable */
+  dueAt?: string | null;
   /** @nullable */
   returnedAt?: string | null;
   /** @nullable */
@@ -453,6 +454,8 @@ export interface KeyDoorInput {
 
 export interface KeyIssueInput {
   holderId: number;
+  /** @nullable */
+  dueAt?: string | null;
   /** @nullable */
   note?: string | null;
 }
@@ -1412,6 +1415,7 @@ minCapacity?: number;
 export type ListKeysParams = {
 status?: string;
 type?: string;
+overdue?: boolean;
 };
 
 export type ListReservationsParams = {
@@ -1456,6 +1460,10 @@ search?: string;
 export type ListContractsParams = {
 status?: string;
 expiringWithinDays?: number;
+};
+
+export type SendOrderToSupplierBody = {
+  supplierId: number;
 };
 
 export type ListShopProductsParams = {

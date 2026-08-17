@@ -11,7 +11,7 @@ import {
   ticketsTable,
   ticketCategoriesTable,
 } from "@workspace/db";
-import { eq, and, isNull, desc, sql, type SQL } from "drizzle-orm";
+import { eq, and, isNull, desc, sql, lt, inArray, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
   CreateKeyBody,
@@ -70,6 +70,7 @@ async function keySummary(id: number) {
     currentHolderId: openIssue?.issue.holderId ?? null,
     currentHolderName: openIssue?.holderName ?? null,
     issuedAt: openIssue?.issue.issuedAt.toISOString() ?? null,
+    dueAt: openIssue?.issue.dueAt?.toISOString() ?? null,
     createdAt: row.key.createdAt.toISOString(),
   };
 }
@@ -126,6 +127,7 @@ async function keyDetail(id: number) {
       holderName: i.holderName,
       issuedByName: i.issuedByName,
       issuedAt: i.issue.issuedAt.toISOString(),
+      dueAt: i.issue.dueAt?.toISOString() ?? null,
       returnedAt: i.issue.returnedAt?.toISOString() ?? null,
       note: i.issue.note,
     })),
@@ -144,11 +146,16 @@ async function keyDetail(id: number) {
 }
 
 router.get("/keys", async (req, res): Promise<void> => {
+  const overdueOnly = req.query.overdue === "true";
   const conditions: SQL[] = [];
   if (typeof req.query.status === "string" && req.query.status)
     conditions.push(eq(keysTable.status, req.query.status));
   if (typeof req.query.type === "string" && req.query.type)
     conditions.push(eq(keysTable.type, req.query.type));
+  if (overdueOnly)
+    conditions.push(
+      sql`EXISTS (SELECT 1 FROM key_issues ki WHERE ki.key_id = ${keysTable.id} AND ki.returned_at IS NULL AND ki.due_at IS NOT NULL AND ki.due_at < NOW())`,
+    );
 
   const rows = await db
     .select({
@@ -158,6 +165,7 @@ router.get("/keys", async (req, res): Promise<void> => {
       currentHolderId: sql<number | null>`(select ki.holder_id from key_issues ki where ki.key_id = ${keysTable.id} and ki.returned_at is null limit 1)`,
       currentHolderName: sql<string | null>`(select u.name from key_issues ki join users u on u.id = ki.holder_id where ki.key_id = ${keysTable.id} and ki.returned_at is null limit 1)`,
       issuedAt: sql<string | null>`(select to_char(ki.issued_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') from key_issues ki where ki.key_id = ${keysTable.id} and ki.returned_at is null limit 1)`,
+      dueAt: sql<string | null>`(select to_char(ki.due_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') from key_issues ki where ki.key_id = ${keysTable.id} and ki.returned_at is null limit 1)`,
     })
     .from(keysTable)
     .leftJoin(buildingsTable, eq(keysTable.buildingId, buildingsTable.id))
@@ -178,6 +186,7 @@ router.get("/keys", async (req, res): Promise<void> => {
       currentHolderId: r.currentHolderId,
       currentHolderName: r.currentHolderName,
       issuedAt: r.issuedAt,
+      dueAt: r.dueAt,
       createdAt: r.key.createdAt.toISOString(),
     })),
   );
@@ -388,6 +397,7 @@ router.post("/keys/:id/issue", async (req, res): Promise<void> => {
       keyId: id,
       holderId: holder.id,
       issuedById: req.currentUser!.id,
+      dueAt: parsed.data.dueAt ? new Date(parsed.data.dueAt) : null,
       note: parsed.data.note ?? null,
     });
     return true;
@@ -566,6 +576,106 @@ router.post("/keys/:id/loss", async (req, res): Promise<void> => {
     );
   }
   res.status(201).json(await keyDetail(id));
+});
+
+/**
+ * Controleert alle te late uitgiftes en verstuurt herinneringen.
+ * Atomisch: de UPDATE claimt eligible rijen in één DB-roundtrip zodat
+ * gelijktijdige aanroepen nooit dezelfde uitgifte dubbel verwerken.
+ * Cooldown: 23 uur per uitgifte via last_notified_at.
+ */
+export async function checkOverdueKeys(): Promise<number> {
+  const now = new Date();
+  const cooldownCutoff = new Date(now.getTime() - 23 * 60 * 60 * 1000);
+
+  // Atomisch claimen: UPDATE met WHERE en RETURNING zodat elke rij slechts
+  // door één worker tegelijk wordt verwerkt.
+  const claimed = await db
+    .update(keyIssuesTable)
+    .set({ lastNotifiedAt: now })
+    .where(
+      and(
+        isNull(keyIssuesTable.returnedAt),
+        sql`${keyIssuesTable.dueAt} IS NOT NULL`,
+        lt(keyIssuesTable.dueAt, now),
+        sql`(${keyIssuesTable.lastNotifiedAt} IS NULL OR ${keyIssuesTable.lastNotifiedAt} < ${cooldownCutoff})`,
+      ),
+    )
+    .returning({
+      issueId: keyIssuesTable.id,
+      holderId: keyIssuesTable.holderId,
+      dueAt: keyIssuesTable.dueAt,
+      keyId: keyIssuesTable.keyId,
+    });
+
+  if (claimed.length === 0) return 0;
+
+  // Laad sleutel- en houdergegevens voor de geclaimed rijen.
+  const keyIds = [...new Set(claimed.map((c) => c.keyId))];
+  const holderIds = [...new Set(claimed.map((c) => c.holderId).filter((id): id is number => id !== null))];
+
+  const [keyRows, holderRows, receptionUsers] = await Promise.all([
+    db.select().from(keysTable).where(inArray(keysTable.id, keyIds)),
+    holderIds.length
+      ? db.select({ id: usersTable.id, name: usersTable.name }).from(usersTable).where(inArray(usersTable.id, holderIds))
+      : Promise.resolve([]),
+    db.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.role, "receptie")),
+  ]);
+
+  const keyById = new Map(keyRows.map((k) => [k.id, k]));
+  const holderById = new Map(holderRows.map((h) => [h.id, h]));
+
+  let notifiedCount = 0;
+  for (const row of claimed) {
+    const key = keyById.get(row.keyId);
+    if (!key) continue;
+    const label = `${key.type === "pas" ? "Pas" : "Sleutel"} ${key.code} (${key.description})`;
+    const link = `/sleutelbeheer/${key.id}`;
+    const dueStr = row.dueAt!.toLocaleDateString("nl-NL");
+    const holderName = row.holderId ? holderById.get(row.holderId)?.name ?? null : null;
+
+    try {
+      if (row.holderId) {
+        await notify(
+          row.holderId,
+          "Inleverdatum verstreken",
+          `${label} had uiterlijk ${dueStr} ingeleverd moeten worden.`,
+          "key",
+          link,
+        );
+      }
+      for (const u of receptionUsers) {
+        await notify(
+          u.id,
+          "Te laat: inleverdatum verstreken",
+          `${label} is niet op tijd ingeleverd${holderName ? ` door ${holderName}` : ""}.`,
+          "key",
+          link,
+        );
+      }
+      notifiedCount++;
+    } catch (err) {
+      // Reset lastNotifiedAt so this row is retried in the next check cycle
+      // rather than being suppressed for 23 hours.
+      console.error(`[checkOverdueKeys] notificatie mislukt voor uitgifte ${row.issueId}:`, err);
+      await db
+        .update(keyIssuesTable)
+        .set({ lastNotifiedAt: null })
+        .where(eq(keyIssuesTable.id, row.issueId))
+        .catch((resetErr) => {
+          console.error(`[checkOverdueKeys] reset lastNotifiedAt mislukt voor uitgifte ${row.issueId}:`, resetErr);
+        });
+    }
+  }
+
+  return notifiedCount;
+}
+
+// POST /keys/check-overdue – manuele trigger (bv. voor tests of noodgevallen).
+// De dagelijkse check draait automatisch via de server-side interval in index.ts.
+router.post("/keys/check-overdue", requireRole("receptie", "facilitair_manager", "beheerder"), async (_req, res): Promise<void> => {
+  const notified = await checkOverdueKeys();
+  res.json({ notified });
 });
 
 export default router;

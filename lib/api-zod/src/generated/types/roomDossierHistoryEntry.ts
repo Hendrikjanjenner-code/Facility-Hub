@@ -5,14 +5,14 @@
  * GovConnect 2.0 API
  * OpenAPI spec version: 0.1.0
  */
-import type { RoomDossierChange } from './roomDossierChange';
+import type { RoomDossierHistoryEntryChangesItem } from './roomDossierHistoryEntryChangesItem';
 
 export interface RoomDossierHistoryEntry {
   id: number;
   roomId: number;
   /** @nullable */
   changedByName?: string | null;
-  changedAt: Date;
+  changedAt: string;
   isUndo: boolean;
-  changes: RoomDossierChange[];
+  changes: RoomDossierHistoryEntryChangesItem[];
 }

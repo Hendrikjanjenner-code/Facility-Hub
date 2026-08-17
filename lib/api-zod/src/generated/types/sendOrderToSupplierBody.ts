@@ -6,8 +6,6 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface RoomDossierChange {
-  field: string;
-  from?: string | number | null;
-  to?: string | number | null;
-}
+export type SendOrderToSupplierBody = {
+  supplierId: number;
+};

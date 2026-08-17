@@ -11,37 +11,11 @@ import {
   useUpdateRoomDossier,
   useGetCurrentUser,
   getGetRoomQueryKey,
+  useListRoomDossierHistory,
+  getListRoomDossierHistoryQueryKey,
+  useUndoRoomDossierChange,
   type Room
 } from "@workspace/api-client-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-
-type DossierHistoryEntry = {
-  id: number;
-  changedByName: string | null;
-  changedAt: string;
-  isUndo: boolean;
-  changes: Array<{ field: string; from: unknown; to: unknown }>;
-};
-
-const getListRoomDossierHistoryQueryKey = (roomId: number) => [`/api/rooms/${roomId}/dossier-history`];
-
-function useListRoomDossierHistory(roomId: number, _opts?: unknown) {
-  return useQuery<DossierHistoryEntry[]>({
-    queryKey: getListRoomDossierHistoryQueryKey(roomId),
-    queryFn: () => fetch(`/api/rooms/${roomId}/dossier-history`, { credentials: "include" }).then((r) => r.json()),
-    enabled: roomId > 0,
-  });
-}
-
-function useUndoRoomDossierChange() {
-  return useMutation({
-    mutationFn: ({ roomId, entryId }: { roomId: number; entryId: number }) =>
-      fetch(`/api/rooms/${roomId}/dossier-history/${entryId}/undo`, {
-        method: "POST",
-        credentials: "include",
-      }).then(async (r) => { if (!r.ok) throw await r.json(); return r.json(); }),
-  });
-}
 import { 
   ArrowLeft, 
   MapPin, 
@@ -92,7 +66,7 @@ function DossierEditDialog({ room }: { room: Room }) {
           areaBvoM2: areaBvo === "" ? null : Number(areaBvo),
           department: department === "" ? null : department,
           functionType: functionType || undefined,
-          updatedAt: new Date().toISOString(),
+          updatedAt: room.updatedAt ?? "",
         },
       },
       {
@@ -409,7 +383,7 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
 
   const doUndo = () => {
     undo.mutate(
-      { roomId, entryId: history![0]!.id },
+      { id: roomId },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetRoomQueryKey(roomId) });
@@ -444,7 +418,7 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
           <p className="text-sm text-muted-foreground">Nog geen wijzigingen geregistreerd.</p>
         ) : (
           <div className="space-y-4">
-            {history.map((entry: DossierHistoryEntry) => (
+            {history.map((entry) => (
               <div key={entry.id} className="text-sm border rounded-lg p-3 bg-muted/30">
                 <div className="flex items-center justify-between gap-2 mb-1.5">
                   <span className="font-medium">{entry.changedByName ?? "Onbekend"}</span>
@@ -458,10 +432,10 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
                   </div>
                 </div>
                 <ul className="space-y-0.5 text-muted-foreground">
-                  {entry.changes.map((c: { field: string; from: unknown; to: unknown }, i) => (
+                  {(entry.changes as { field: string; from: string | number | null; to: string | number | null }[]).map((c, i) => (
                     <li key={i}>
                       <span className="text-foreground">{FIELD_LABELS[c.field] ?? c.field}</span>
-                      : {formatValue(c.from as string | number | null)} → {formatValue(c.to as string | number | null)}
+                      : {formatValue(c.from)} → {formatValue(c.to)}
                     </li>
                   ))}
                 </ul>

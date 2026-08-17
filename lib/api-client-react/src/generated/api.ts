@@ -95,7 +95,7 @@ import type {
   RoomDossierHistoryEntry,
   RoomDossierUpdate,
   SatisfactionReport,
-  SendOrderToSupplierInput,
+  SendOrderToSupplierBody,
   ShopOrder,
   ShopOrderInput,
   ShopOrderUpdate,
@@ -1271,78 +1271,6 @@ export function useGetRoom<TData = Awaited<ReturnType<typeof getRoom>>, TError =
 
 
 
-export const getUpdateRoomDossierUrl = (id: number,) => {
-
-
-
-
-  return `/api/rooms/${id}/dossier`
-}
-
-/**
- * @summary Werk het ruimtedossier bij (facilitair_manager / beheerder)
- */
-export const updateRoomDossier = async (id: number,
-    roomDossierUpdate: RoomDossierUpdate, options?: Parameters<typeof customFetch>[1]): Promise<Room> => {
-
-  return customFetch<Room>(getUpdateRoomDossierUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(roomDossierUpdate)
-  }
-);}
-
-
-
-
-
-export const getUpdateRoomDossierMutationOptions = <TError = ErrorType<ApiMessage | Room>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRoomDossier>>, TError,{id: number;data: BodyType<RoomDossierUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateRoomDossier>>, TError,{id: number;data: BodyType<RoomDossierUpdate>}, TContext> => {
-
-const mutationKey = ['updateRoomDossier'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRoomDossier>>, {id: number;data: BodyType<RoomDossierUpdate>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  updateRoomDossier(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateRoomDossierMutationResult = NonNullable<Awaited<ReturnType<typeof updateRoomDossier>>>
-    export type UpdateRoomDossierMutationBody = BodyType<RoomDossierUpdate>
-    export type UpdateRoomDossierMutationError = ErrorType<ApiMessage | Room>
-
-    /**
- * @summary Werk het ruimtedossier bij (facilitair_manager / beheerder)
- */
-export const useUpdateRoomDossier = <TError = ErrorType<ApiMessage | Room>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRoomDossier>>, TError,{id: number;data: BodyType<RoomDossierUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateRoomDossier>>,
-        TError,
-        {id: number;data: BodyType<RoomDossierUpdate>},
-        TContext
-      > => {
-      return useMutation(getUpdateRoomDossierMutationOptions(options));
-    }
-
 export const getListRoomDossierHistoryUrl = (id: number,) => {
 
 
@@ -1352,7 +1280,7 @@ export const getListRoomDossierHistoryUrl = (id: number,) => {
 }
 
 /**
- * @summary Wijzigingshistorie van het ruimtedossier (facilitair_manager / beheerder)
+ * @summary Wijzigingsgeschiedenis van het ruimtedossier
  */
 export const listRoomDossierHistory = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<RoomDossierHistoryEntry[]> => {
 
@@ -1376,7 +1304,7 @@ export const getListRoomDossierHistoryQueryKey = (id: number,) => {
     }
 
 
-export const getListRoomDossierHistoryQueryOptions = <TData = Awaited<ReturnType<typeof listRoomDossierHistory>>, TError = ErrorType<ApiMessage>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRoomDossierHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListRoomDossierHistoryQueryOptions = <TData = Awaited<ReturnType<typeof listRoomDossierHistory>>, TError = ErrorType<unknown>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRoomDossierHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1395,14 +1323,14 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListRoomDossierHistoryQueryResult = NonNullable<Awaited<ReturnType<typeof listRoomDossierHistory>>>
-export type ListRoomDossierHistoryQueryError = ErrorType<ApiMessage>
+export type ListRoomDossierHistoryQueryError = ErrorType<unknown>
 
 
 /**
- * @summary Wijzigingshistorie van het ruimtedossier (facilitair_manager / beheerder)
+ * @summary Wijzigingsgeschiedenis van het ruimtedossier
  */
 
-export function useListRoomDossierHistory<TData = Awaited<ReturnType<typeof listRoomDossierHistory>>, TError = ErrorType<ApiMessage>>(
+export function useListRoomDossierHistory<TData = Awaited<ReturnType<typeof listRoomDossierHistory>>, TError = ErrorType<unknown>>(
  id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listRoomDossierHistory>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
@@ -1429,7 +1357,7 @@ export const getUndoRoomDossierChangeUrl = (id: number,) => {
 }
 
 /**
- * @summary Maak de laatste dossierwijziging ongedaan (facilitair_manager / beheerder)
+ * @summary Maak de laatste dossierwijziging ongedaan
  */
 export const undoRoomDossierChange = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<Room> => {
 
@@ -1478,7 +1406,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UndoRoomDossierChangeMutationError = ErrorType<ApiMessage>
 
     /**
- * @summary Maak de laatste dossierwijziging ongedaan (facilitair_manager / beheerder)
+ * @summary Maak de laatste dossierwijziging ongedaan
  */
 export const useUndoRoomDossierChange = <TError = ErrorType<ApiMessage>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof undoRoomDossierChange>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -1489,6 +1417,78 @@ export const useUndoRoomDossierChange = <TError = ErrorType<ApiMessage>,
         TContext
       > => {
       return useMutation(getUndoRoomDossierChangeMutationOptions(options));
+    }
+
+export const getUpdateRoomDossierUrl = (id: number,) => {
+
+
+
+
+  return `/api/rooms/${id}/dossier`
+}
+
+/**
+ * @summary Werk het ruimtedossier bij (facilitair_manager / beheerder)
+ */
+export const updateRoomDossier = async (id: number,
+    roomDossierUpdate: RoomDossierUpdate, options?: Parameters<typeof customFetch>[1]): Promise<Room> => {
+
+  return customFetch<Room>(getUpdateRoomDossierUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(roomDossierUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateRoomDossierMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRoomDossier>>, TError,{id: number;data: BodyType<RoomDossierUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateRoomDossier>>, TError,{id: number;data: BodyType<RoomDossierUpdate>}, TContext> => {
+
+const mutationKey = ['updateRoomDossier'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateRoomDossier>>, {id: number;data: BodyType<RoomDossierUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateRoomDossier(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateRoomDossierMutationResult = NonNullable<Awaited<ReturnType<typeof updateRoomDossier>>>
+    export type UpdateRoomDossierMutationBody = BodyType<RoomDossierUpdate>
+    export type UpdateRoomDossierMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Werk het ruimtedossier bij (facilitair_manager / beheerder)
+ */
+export const useUpdateRoomDossier = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRoomDossier>>, TError,{id: number;data: BodyType<RoomDossierUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateRoomDossier>>,
+        TError,
+        {id: number;data: BodyType<RoomDossierUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateRoomDossierMutationOptions(options));
     }
 
 export const getGetFloorPlanUrl = (id: number,) => {
@@ -4890,14 +4890,14 @@ export const getSendOrderToSupplierUrl = (id: number,) => {
  * @summary Mark order as sent to supplier (sets supplierStatus=verstuurd)
  */
 export const sendOrderToSupplier = async (id: number,
-    sendOrderToSupplierInput: SendOrderToSupplierInput, options?: Parameters<typeof customFetch>[1]): Promise<ShopOrder> => {
+    sendOrderToSupplierBody: SendOrderToSupplierBody, options?: Parameters<typeof customFetch>[1]): Promise<ShopOrder> => {
 
   return customFetch<ShopOrder>(getSendOrderToSupplierUrl(id),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(sendOrderToSupplierInput)
+    body: JSON.stringify(sendOrderToSupplierBody)
   }
 );}
 
@@ -4906,8 +4906,8 @@ export const sendOrderToSupplier = async (id: number,
 
 
 export const getSendOrderToSupplierMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendOrderToSupplier>>, TError,{id: number;data: BodyType<SendOrderToSupplierInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof sendOrderToSupplier>>, TError,{id: number;data: BodyType<SendOrderToSupplierInput>}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendOrderToSupplier>>, TError,{id: number;data: BodyType<SendOrderToSupplierBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendOrderToSupplier>>, TError,{id: number;data: BodyType<SendOrderToSupplierBody>}, TContext> => {
 
 const mutationKey = ['sendOrderToSupplier'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -4919,7 +4919,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendOrderToSupplier>>, {id: number;data: BodyType<SendOrderToSupplierInput>}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendOrderToSupplier>>, {id: number;data: BodyType<SendOrderToSupplierBody>}> = (props) => {
           const {id,data} = props ?? {};
 
           return  sendOrderToSupplier(id,data,requestOptions)
@@ -4933,18 +4933,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type SendOrderToSupplierMutationResult = NonNullable<Awaited<ReturnType<typeof sendOrderToSupplier>>>
-    export type SendOrderToSupplierMutationBody = BodyType<SendOrderToSupplierInput>
+    export type SendOrderToSupplierMutationBody = BodyType<SendOrderToSupplierBody>
     export type SendOrderToSupplierMutationError = ErrorType<unknown>
 
     /**
  * @summary Mark order as sent to supplier (sets supplierStatus=verstuurd)
  */
 export const useSendOrderToSupplier = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendOrderToSupplier>>, TError,{id: number;data: BodyType<SendOrderToSupplierInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendOrderToSupplier>>, TError,{id: number;data: BodyType<SendOrderToSupplierBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof sendOrderToSupplier>>,
         TError,
-        {id: number;data: BodyType<SendOrderToSupplierInput>},
+        {id: number;data: BodyType<SendOrderToSupplierBody>},
         TContext
       > => {
       return useMutation(getSendOrderToSupplierMutationOptions(options));

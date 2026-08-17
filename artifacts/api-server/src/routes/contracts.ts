@@ -205,7 +205,7 @@ router.post(
   },
 );
 
-router.delete(
+router.patch(
   "/contracts/:id",
   requireRole(...MANAGER_ROLES),
   async (req, res): Promise<void> => {
