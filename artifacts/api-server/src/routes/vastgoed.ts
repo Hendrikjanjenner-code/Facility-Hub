@@ -212,17 +212,9 @@ router.patch(
       return { status: 200 as const };
     });
     if (outcome.status === 404) { res.status(404).json({ message: "Ruimte niet gevonden" }); return; }
-    if (outcome.status === 409) {
-      const currentRow = await selectRoomRow(outcome.conflictId);
-      res.status(409).json({
-        message: "De ruimte is ondertussen gewijzigd door een andere gebruiker. Vernieuw de pagina en probeer opnieuw.",
-        current: currentRow ? serializeRoom(false, currentRow) : null,
-      });
-      return;
-    }
     const row = await selectRoomRow(id);
     if (!row) { res.status(404).json({ message: "Ruimte niet gevonden" }); return; }
-    res.status(200).json(serializeRoom(false, row));
+    res.status(outcome.status).json(serializeRoom(false, row));
   },
 );
 

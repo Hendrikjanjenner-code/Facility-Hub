@@ -56,6 +56,7 @@ import type {
   KeyDoor,
   KeyDoorInput,
   KeyInput,
+  KeyIssueDueUpdate,
   KeyIssueInput,
   KeyLossInput,
   KeySummary,
@@ -82,6 +83,7 @@ import type {
   ListWorkplacesParams,
   LoginInput,
   MeterReading,
+  MeterReadingAuditEntry,
   MeterReadingImportInput,
   MeterReadingInput,
   MeterReadingUpdateInput,
@@ -127,6 +129,7 @@ import type {
   VisitorUpdate,
   WasteRegistration,
   WasteRegistrationInput,
+  WasteRegistrationUpdate,
   Workplace
 } from './api.schemas';
 
@@ -2608,6 +2611,78 @@ export const useReturnKey = <TError = ErrorType<ApiMessage>,
       return useMutation(getReturnKeyMutationOptions(options));
     }
 
+export const getUpdateKeyIssueDueUrl = (id: number,) => {
+
+
+
+
+  return `/api/keys/${id}/issue-due`
+}
+
+/**
+ * @summary Pas de inleverdatum van de openstaande uitgifte aan
+ */
+export const updateKeyIssueDue = async (id: number,
+    keyIssueDueUpdate: KeyIssueDueUpdate, options?: Parameters<typeof customFetch>[1]): Promise<KeyDetail> => {
+
+  return customFetch<KeyDetail>(getUpdateKeyIssueDueUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(keyIssueDueUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateKeyIssueDueMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKeyIssueDue>>, TError,{id: number;data: BodyType<KeyIssueDueUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateKeyIssueDue>>, TError,{id: number;data: BodyType<KeyIssueDueUpdate>}, TContext> => {
+
+const mutationKey = ['updateKeyIssueDue'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateKeyIssueDue>>, {id: number;data: BodyType<KeyIssueDueUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateKeyIssueDue(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateKeyIssueDueMutationResult = NonNullable<Awaited<ReturnType<typeof updateKeyIssueDue>>>
+    export type UpdateKeyIssueDueMutationBody = BodyType<KeyIssueDueUpdate>
+    export type UpdateKeyIssueDueMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Pas de inleverdatum van de openstaande uitgifte aan
+ */
+export const useUpdateKeyIssueDue = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKeyIssueDue>>, TError,{id: number;data: BodyType<KeyIssueDueUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateKeyIssueDue>>,
+        TError,
+        {id: number;data: BodyType<KeyIssueDueUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateKeyIssueDueMutationOptions(options));
+    }
+
 export const getReportKeyLossUrl = (id: number,) => {
 
 
@@ -2749,6 +2824,77 @@ export const useUploadStorageDocument = <TError = ErrorType<ErrorEnvelope>,
         TContext
       > => {
       return useMutation(getUploadStorageDocumentMutationOptions(options));
+    }
+
+export const getDeleteSiteUrl = (id: number,) => {
+
+
+
+
+  return `/api/sites/${id}`
+}
+
+/**
+ * @summary Verwijder een locatie inclusief alle gebouwen, documenten en storage-bestanden
+ */
+export const deleteSite = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteSiteUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteSiteMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSite>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSite>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteSite'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSite>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteSite(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSiteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSite>>>
+
+    export type DeleteSiteMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Verwijder een locatie inclusief alle gebouwen, documenten en storage-bestanden
+ */
+export const useDeleteSite = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSite>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSite>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteSiteMutationOptions(options));
     }
 
 export const getGetStructureUrl = () => {
@@ -6057,6 +6203,83 @@ export const useDeleteMeterReading = <TError = ErrorType<void>,
       return useMutation(getDeleteMeterReadingMutationOptions(options));
     }
 
+export const getGetMeterReadingAuditLogUrl = (id: number,) => {
+
+
+
+
+  return `/api/meter-readings/${id}/audit-log`
+}
+
+/**
+ * @summary Mutatiehistorie van een meterstand (correcties en verwijderingen)
+ */
+export const getMeterReadingAuditLog = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<MeterReadingAuditEntry[]> => {
+
+  return customFetch<MeterReadingAuditEntry[]>(getGetMeterReadingAuditLogUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMeterReadingAuditLogQueryKey = (id: number,) => {
+    return [
+    `/api/meter-readings/${id}/audit-log`
+    ] as const;
+    }
+
+
+export const getGetMeterReadingAuditLogQueryOptions = <TData = Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError = ErrorType<ApiMessage>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMeterReadingAuditLogQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMeterReadingAuditLog>>> = ({ signal }) => getMeterReadingAuditLog(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMeterReadingAuditLogQueryResult = NonNullable<Awaited<ReturnType<typeof getMeterReadingAuditLog>>>
+export type GetMeterReadingAuditLogQueryError = ErrorType<ApiMessage>
+
+
+/**
+ * @summary Mutatiehistorie van een meterstand (correcties en verwijderingen)
+ */
+
+export function useGetMeterReadingAuditLog<TData = Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError = ErrorType<ApiMessage>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMeterReadingAuditLog>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMeterReadingAuditLogQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getImportMeterReadingsUrl = () => {
 
 
@@ -6126,6 +6349,149 @@ export const useImportMeterReadings = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getImportMeterReadingsMutationOptions(options));
+    }
+
+export const getUpdateWasteRegistrationUrl = (id: number,) => {
+
+
+
+
+  return `/api/waste-registrations/${id}`
+}
+
+/**
+ * @summary Correct a waste registration (weight and/or date and/or category)
+ */
+export const updateWasteRegistration = async (id: number,
+    wasteRegistrationUpdate: WasteRegistrationUpdate, options?: Parameters<typeof customFetch>[1]): Promise<WasteRegistration> => {
+
+  return customFetch<WasteRegistration>(getUpdateWasteRegistrationUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(wasteRegistrationUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateWasteRegistrationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWasteRegistration>>, TError,{id: number;data: BodyType<WasteRegistrationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateWasteRegistration>>, TError,{id: number;data: BodyType<WasteRegistrationUpdate>}, TContext> => {
+
+const mutationKey = ['updateWasteRegistration'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateWasteRegistration>>, {id: number;data: BodyType<WasteRegistrationUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateWasteRegistration(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateWasteRegistrationMutationResult = NonNullable<Awaited<ReturnType<typeof updateWasteRegistration>>>
+    export type UpdateWasteRegistrationMutationBody = BodyType<WasteRegistrationUpdate>
+    export type UpdateWasteRegistrationMutationError = ErrorType<void>
+
+    /**
+ * @summary Correct a waste registration (weight and/or date and/or category)
+ */
+export const useUpdateWasteRegistration = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWasteRegistration>>, TError,{id: number;data: BodyType<WasteRegistrationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateWasteRegistration>>,
+        TError,
+        {id: number;data: BodyType<WasteRegistrationUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateWasteRegistrationMutationOptions(options));
+    }
+
+export const getDeleteWasteRegistrationUrl = (id: number,) => {
+
+
+
+
+  return `/api/waste-registrations/${id}`
+}
+
+/**
+ * @summary Delete a waste registration
+ */
+export const deleteWasteRegistration = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteWasteRegistrationUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteWasteRegistrationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWasteRegistration>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteWasteRegistration>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteWasteRegistration'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWasteRegistration>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteWasteRegistration(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteWasteRegistrationMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWasteRegistration>>>
+
+    export type DeleteWasteRegistrationMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a waste registration
+ */
+export const useDeleteWasteRegistration = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWasteRegistration>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteWasteRegistration>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteWasteRegistrationMutationOptions(options));
     }
 
 export const getListWasteRegistrationsUrl = (params?: ListWasteRegistrationsParams,) => {
@@ -7762,6 +8128,77 @@ export const useCreateKnowledgeArticle = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getCreateKnowledgeArticleMutationOptions(options));
+    }
+
+export const getDeleteKnowledgeArticleUrl = (id: number,) => {
+
+
+
+
+  return `/api/knowledge-articles/${id}`
+}
+
+/**
+ * @summary Delete a knowledge-base article (manager/beheerder only)
+ */
+export const deleteKnowledgeArticle = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteKnowledgeArticleUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteKnowledgeArticleMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKnowledgeArticle>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteKnowledgeArticle>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteKnowledgeArticle'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteKnowledgeArticle>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteKnowledgeArticle(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteKnowledgeArticleMutationResult = NonNullable<Awaited<ReturnType<typeof deleteKnowledgeArticle>>>
+
+    export type DeleteKnowledgeArticleMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Delete a knowledge-base article (manager/beheerder only)
+ */
+export const useDeleteKnowledgeArticle = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKnowledgeArticle>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteKnowledgeArticle>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteKnowledgeArticleMutationOptions(options));
     }
 
 export const getUpdateKnowledgeArticleUrl = (id: number,) => {

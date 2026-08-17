@@ -370,8 +370,8 @@ export const ListRoomDossierHistoryResponseItem = zod.object({
   "isUndo": zod.boolean(),
   "changes": zod.array(zod.object({
   "field": zod.string(),
-  "from": zod.union([zod.string(),zod.number(),zod.boolean(),zod.null()]).optional(),
-  "to": zod.union([zod.string(),zod.number(),zod.boolean(),zod.null()]).optional()
+  "from": zod.union([zod.string(),zod.number(),zod.null()]).optional(),
+  "to": zod.union([zod.string(),zod.number(),zod.null()]).optional()
 }))
 })
 export const ListRoomDossierHistoryResponse = zod.array(ListRoomDossierHistoryResponseItem)
@@ -469,7 +469,6 @@ export const UpdateRoomDossierBody = zod.object({
   "areaBvoM2": zod.number().min(updateRoomDossierBodyAreaBvoM2Min).nullish(),
   "department": zod.string().nullish(),
   "capacity": zod.int().min(updateRoomDossierBodyCapacityMin).nullish(),
-  "bookable": zod.boolean().optional(),
   "updatedAt": zod.string()
 })
 
@@ -542,8 +541,8 @@ export const ListFloorDossierHistoryResponseItem = zod.object({
   "isUndo": zod.boolean(),
   "changes": zod.array(zod.object({
   "field": zod.string(),
-  "from": zod.union([zod.string(),zod.number(),zod.boolean(),zod.null()]).optional(),
-  "to": zod.union([zod.string(),zod.number(),zod.boolean(),zod.null()]).optional()
+  "from": zod.union([zod.string(),zod.number(),zod.null()]).optional(),
+  "to": zod.union([zod.string(),zod.number(),zod.null()]).optional()
 }))
 })
 export const ListFloorDossierHistoryResponse = zod.array(ListFloorDossierHistoryResponseItem)
@@ -739,8 +738,8 @@ export const GetKeyResponse = zod.object({
   "holderName": zod.string().nullish(),
   "issuedByName": zod.string().nullish(),
   "issuedAt": zod.string(),
-  "returnedAt": zod.string().nullish(),
   "dueAt": zod.string().nullish(),
+  "returnedAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })),
   "lossReports": zod.array(zod.object({
@@ -837,8 +836,8 @@ export const IssueKeyParams = zod.object({
 
 export const IssueKeyBody = zod.object({
   "holderId": zod.int(),
-  "note": zod.string().nullish(),
-  "dueAt": zod.string().nullish()
+  "dueAt": zod.coerce.date().nullish(),
+  "note": zod.string().nullish()
 })
 
 export const IssueKeyResponse = zod.object({
@@ -872,8 +871,8 @@ export const IssueKeyResponse = zod.object({
   "holderName": zod.string().nullish(),
   "issuedByName": zod.string().nullish(),
   "issuedAt": zod.string(),
-  "returnedAt": zod.string().nullish(),
   "dueAt": zod.string().nullish(),
+  "returnedAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })),
   "lossReports": zod.array(zod.object({
@@ -928,8 +927,68 @@ export const ReturnKeyResponse = zod.object({
   "holderName": zod.string().nullish(),
   "issuedByName": zod.string().nullish(),
   "issuedAt": zod.string(),
-  "returnedAt": zod.string().nullish(),
   "dueAt": zod.string().nullish(),
+  "returnedAt": zod.string().nullish(),
+  "note": zod.string().nullish()
+})),
+  "lossReports": zod.array(zod.object({
+  "id": zod.int(),
+  "keyId": zod.int(),
+  "holderName": zod.string().nullish(),
+  "reportedByName": zod.string().nullish(),
+  "chargeAmount": zod.number(),
+  "note": zod.string().nullish(),
+  "ticketId": zod.int().nullish(),
+  "ticketNumber": zod.string().nullish(),
+  "createdAt": zod.string()
+}))
+})
+
+
+/**
+ * @summary Pas de inleverdatum van de openstaande uitgifte aan
+ */
+export const UpdateKeyIssueDueParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateKeyIssueDueBody = zod.object({
+  "dueAt": zod.coerce.date().nullish()
+})
+
+export const UpdateKeyIssueDueResponse = zod.object({
+  "key": zod.object({
+  "id": zod.int(),
+  "code": zod.string(),
+  "type": zod.string(),
+  "description": zod.string(),
+  "status": zod.string(),
+  "buildingId": zod.int().nullish(),
+  "buildingName": zod.string().nullish(),
+  "replacementCost": zod.number().nullish(),
+  "doorCount": zod.int(),
+  "currentHolderId": zod.int().nullish(),
+  "currentHolderName": zod.string().nullish(),
+  "issuedAt": zod.string().nullish(),
+  "dueAt": zod.string().nullish(),
+  "createdAt": zod.string()
+}),
+  "doors": zod.array(zod.object({
+  "id": zod.int(),
+  "keyId": zod.int(),
+  "description": zod.string(),
+  "roomId": zod.int().nullish(),
+  "roomName": zod.string().nullish()
+})),
+  "issues": zod.array(zod.object({
+  "id": zod.int(),
+  "keyId": zod.int(),
+  "holderId": zod.int(),
+  "holderName": zod.string().nullish(),
+  "issuedByName": zod.string().nullish(),
+  "issuedAt": zod.string(),
+  "dueAt": zod.string().nullish(),
+  "returnedAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })),
   "lossReports": zod.array(zod.object({
@@ -993,8 +1052,8 @@ export const ReportKeyLossResponse = zod.object({
   "holderName": zod.string().nullish(),
   "issuedByName": zod.string().nullish(),
   "issuedAt": zod.string(),
-  "returnedAt": zod.string().nullish(),
   "dueAt": zod.string().nullish(),
+  "returnedAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })),
   "lossReports": zod.array(zod.object({
@@ -1017,6 +1076,16 @@ export const ReportKeyLossResponse = zod.object({
 export const UploadStorageDocumentResponse = zod.object({
   "objectPath": zod.string()
 })
+
+
+/**
+ * @summary Verwijder een locatie inclusief alle gebouwen, documenten en storage-bestanden
+ */
+export const DeleteSiteParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteSiteResponse = zod.void()
 
 
 /**
@@ -2190,6 +2259,28 @@ export const DeleteMeterReadingResponse = zod.void()
 
 
 /**
+ * @summary Mutatiehistorie van een meterstand (correcties en verwijderingen)
+ */
+export const GetMeterReadingAuditLogParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetMeterReadingAuditLogResponseItem = zod.object({
+  "id": zod.int(),
+  "meterReadingId": zod.int(),
+  "action": zod.string().describe('correctie | verwijderd'),
+  "changedById": zod.int().nullish(),
+  "changedByName": zod.string().nullish(),
+  "changedAt": zod.coerce.date(),
+  "oldReadingDate": zod.string().nullish(),
+  "newReadingDate": zod.string().nullish(),
+  "oldValue": zod.number().nullish(),
+  "newValue": zod.number().nullish()
+})
+export const GetMeterReadingAuditLogResponse = zod.array(GetMeterReadingAuditLogResponseItem)
+
+
+/**
  * @summary Bulk import meter readings (parsed CSV rows)
  */
 
@@ -2210,6 +2301,45 @@ export const ImportMeterReadingsResponse = zod.object({
   "skipped": zod.int(),
   "message": zod.string()
 })
+
+
+/**
+ * @summary Correct a waste registration (weight and/or date and/or category)
+ */
+export const UpdateWasteRegistrationParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateWasteRegistrationBodyWeightKgMin = 0;
+
+
+
+export const UpdateWasteRegistrationBody = zod.object({
+  "registrationDate": zod.string().optional(),
+  "category": zod.string().optional().describe('restafval | papier | gft | plastic | glas | chemisch'),
+  "weightKg": zod.number().min(updateWasteRegistrationBodyWeightKgMin).optional()
+})
+
+export const UpdateWasteRegistrationResponse = zod.object({
+  "id": zod.int(),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "registrationDate": zod.string(),
+  "category": zod.string().describe('restafval | papier | gft | plastic | glas | chemisch'),
+  "weightKg": zod.number(),
+  "registeredById": zod.int().nullish(),
+  "registeredByName": zod.string().nullish()
+})
+
+
+/**
+ * @summary Delete a waste registration
+ */
+export const DeleteWasteRegistrationParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteWasteRegistrationResponse = zod.void()
 
 
 export const ListWasteRegistrationsQueryParams = zod.object({
@@ -2757,6 +2887,16 @@ export const CreateKnowledgeArticleResponse = zod.object({
 
 
 /**
+ * @summary Delete a knowledge-base article (manager/beheerder only)
+ */
+export const DeleteKnowledgeArticleParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteKnowledgeArticleResponse = zod.void()
+
+
+/**
  * @summary Update a knowledge-base article (manager/beheerder only)
  */
 export const UpdateKnowledgeArticleParams = zod.object({
@@ -2861,6 +3001,13 @@ export const GetSatisfactionReportResponse = zod.object({
   "key": zod.string(),
   "count": zod.int()
 })),
+  "byCategory": zod.array(zod.object({
+  "categoryId": zod.int(),
+  "categoryName": zod.string(),
+  "closedTickets": zod.int(),
+  "responses": zod.int(),
+  "responseRate": zod.int().describe('Percentage of closed tickets with a satisfaction score (0-100)')
+})),
   "recentResponses": zod.array(zod.object({
   "ticketId": zod.int(),
   "ticketNumber": zod.string(),
@@ -2868,13 +3015,6 @@ export const GetSatisfactionReportResponse = zod.object({
   "score": zod.int(),
   "comment": zod.string().nullish(),
   "submittedAt": zod.string()
-})),
-  "byCategory": zod.array(zod.object({
-  "categoryId": zod.int(),
-  "categoryName": zod.string(),
-  "closedTickets": zod.int(),
-  "responses": zod.int(),
-  "responseRate": zod.int().describe('Percentage of closed tickets with a satisfaction score (0-100)')
 }))
 })
 

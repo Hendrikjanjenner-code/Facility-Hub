@@ -25,7 +25,7 @@ router.use("/sustainability", requireRole(...SUSTAIN_ROLES));
 const METER_TYPES = ["elektriciteit", "gas", "water"];
 const WASTE_CATEGORIES = ["restafval", "papier", "gft", "plastic", "glas", "chemisch"];
 
-// ─── Meter readings ──────────────────────────────────────────────────────────
+// ─── Meter readings ───────────────────────────────────────────────────────────
 
 function readingBaseQuery() {
   return db
@@ -247,7 +247,7 @@ router.get("/meter-readings/:id/audit-log", async (req, res): Promise<void> => {
   );
 });
 
-// ─── Waste registrations ─────────────────────────────────────────────────────
+// ─── Waste registrations ──────────────────────────────────────────────────────
 
 function wasteBaseQuery() {
   return db
@@ -309,6 +309,71 @@ router.post("/waste-registrations", async (req, res): Promise<void> => {
   res.status(201).json(serializeWaste(wasteRow!));
 });
 
+router.patch("/waste-registrations/:id", async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
+  const body = req.body as { registrationDate?: unknown; category?: unknown; weightKg?: unknown };
+  const updates: Partial<typeof wasteRegistrationsTable.$inferInsert> = {};
+  if (body.registrationDate !== undefined) {
+    if (typeof body.registrationDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(body.registrationDate)) {
+      res.status(400).json({ message: "Ongeldige datum" });
+      return;
+    }
+    updates.registrationDate = body.registrationDate;
+  }
+  if (body.category !== undefined) {
+    if (typeof body.category !== "string" || !WASTE_CATEGORIES.includes(body.category)) {
+      res.status(400).json({ message: "Ongeldige categorie" });
+      return;
+    }
+    updates.category = body.category;
+  }
+  if (body.weightKg !== undefined) {
+    const w = Number(body.weightKg);
+    if (!(w > 0) || !isFinite(w)) {
+      res.status(400).json({ message: "Ongeldig gewicht" });
+      return;
+    }
+    updates.weightKg = w;
+  }
+  if (Object.keys(updates).length === 0) {
+    res.status(400).json({ message: "Geen wijzigingen opgegeven" });
+    return;
+  }
+  const [updatedRow] = await db
+    .update(wasteRegistrationsTable)
+    .set(updates)
+    .where(eq(wasteRegistrationsTable.id, id))
+    .returning();
+  if (!updatedRow) {
+    res.status(404).json({ message: "Afvalregistratie niet gevonden" });
+    return;
+  }
+  const [row] = await wasteBaseQuery().where(eq(wasteRegistrationsTable.id, id));
+  res.json(serializeWaste(row!));
+});
+
+router.delete("/waste-registrations/:id", async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
+  const [deleted] = await db
+    .delete(wasteRegistrationsTable)
+    .where(eq(wasteRegistrationsTable.id, id))
+    .returning();
+  if (!deleted) {
+    res.status(404).json({ message: "Afvalregistratie niet gevonden" });
+    return;
+  }
+  res.status(204).end();
+});
+
+
 // ─── Sustainability report ────────────────────────────────────────────────────
 
 router.get("/sustainability/report", async (req, res): Promise<void> => {
@@ -336,7 +401,7 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
     .where(readingConditions.length ? and(...readingConditions) : undefined)
     .orderBy(meterReadingsTable.readingDate);
 
-  // Verbruik = verschil tussen opeenvolgende cumulatieve standen per gebouw+type.
+  // Group readings by building+type series
   const usageByMonth = new Map<string, { usage: number; unit: string }>();
   const grouped = new Map<string, typeof readings>();
   for (const r of readings) {
@@ -345,8 +410,8 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
     grouped.get(key)!.push(r);
   }
 
-  // Als dateFrom is ingesteld: haal per serie de laatste meterstand vóór dateFrom op als
-  // baseline, zodat de eerste verbruiksdelta binnen de periode niet verloren gaat.
+  // For each series, fetch a baseline reading just before dateFrom so the first
+  // delta in the window is not lost.
   if (dateFrom) {
     for (const [key, series] of grouped.entries()) {
       const [bIdStr, mType] = key.split("|");
@@ -367,6 +432,7 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
       }
     }
   }
+
   for (const series of grouped.values()) {
     for (let i = 1; i < series.length; i++) {
       const prev = series[i - 1]!;
@@ -380,6 +446,7 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
       usageByMonth.set(key, entry);
     }
   }
+
   const monthlyUsage = Array.from(usageByMonth.entries())
     .map(([key, v]) => {
       const [month, meterType] = key.split("|");
@@ -404,6 +471,7 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
     const key = `${w.registrationDate.slice(0, 7)}|${w.category}`;
     byMonthCat.set(key, (byMonthCat.get(key) ?? 0) + w.weightKg);
   }
+
   res.json({
     monthlyUsage,
     wasteByCategory: Array.from(byCategory.entries()).map(([category, totalKg]) => ({

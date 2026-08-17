@@ -810,6 +810,43 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+  /keys/{id}/issue-due:
+    patch:
+      operationId: updateKeyIssueDue
+      tags:
+        - keys
+      summary: Pas de inleverdatum van de openstaande uitgifte aan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyIssueDueUpdate'
+      responses:
+        '200':
+          description: Bijgewerkt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDetail'
+        '404':
+          description: Sleutel niet gevonden of geen openstaande uitgifte
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+        '409':
+          description: Sleutel is niet uitgegeven
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /keys/{id}/loss:
     post:
       operationId: reportKeyLoss
@@ -867,6 +904,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+  /sites/{id}:
+    delete:
+      operationId: deleteSite
+      tags:
+        - vastgoed
+      summary: Verwijder een locatie inclusief alle gebouwen, documenten en storage-bestanden
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Locatie verwijderd
+        '404':
+          description: Locatie niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /structure:
     get:
       operationId: getStructure
@@ -1813,6 +1871,33 @@ paths:
           description: Deleted
         '404':
           description: Not found
+  /meter-readings/{id}/audit-log:
+    get:
+      operationId: getMeterReadingAuditLog
+      tags:
+        - sustainability
+      summary: Mutatiehistorie van een meterstand (correcties en verwijderingen)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MeterReadingAuditEntry'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /meter-readings/import:
     post:
       operationId: importMeterReadings
@@ -1832,6 +1917,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ImportResult'
+  /waste-registrations/{id}:
+    patch:
+      operationId: updateWasteRegistration
+      tags:
+        - sustainability
+      summary: Correct a waste registration (weight and/or date and/or category)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WasteRegistrationUpdate'
+      responses:
+        '200':
+          description: Updated registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WasteRegistration'
+        '404':
+          description: Not found
+    delete:
+      operationId: deleteWasteRegistration
+      tags:
+        - sustainability
+      summary: Delete a waste registration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
   /waste-registrations:
     get:
       operationId: listWasteRegistrations
@@ -2343,6 +2471,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/KnowledgeArticle"
   /knowledge-articles/{id}:
+    delete:
+      operationId: deleteKnowledgeArticle
+      tags: [knowledge]
+      summary: Delete a knowledge-base article (manager/beheerder only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
     patch:
       operationId: updateKnowledgeArticle
       tags: [knowledge]
@@ -2946,8 +3098,6 @@ components:
             - integer
             - 'null'
           minimum: 0
-        bookable:
-          type: boolean
         updatedAt:
           type: string
       required:
@@ -2983,13 +3133,11 @@ components:
           oneOf:
             - type: string
             - type: number
-            - type: boolean
             - type: 'null'
         to:
           oneOf:
             - type: string
             - type: number
-            - type: boolean
             - type: 'null'
     FloorDossierHistoryEntry:
       type: object
@@ -3233,11 +3381,11 @@ components:
             - 'null'
         issuedAt:
           type: string
-        returnedAt:
+        dueAt:
           type:
             - string
             - 'null'
-        dueAt:
+        returnedAt:
           type:
             - string
             - 'null'
@@ -3334,14 +3482,23 @@ components:
       properties:
         holderId:
           type: integer
-        note:
-          type:
-            - string
-            - 'null'
         dueAt:
           type:
             - string
             - 'null'
+          format: date-time
+        note:
+          type:
+            - string
+            - 'null'
+    KeyIssueDueUpdate:
+      type: object
+      properties:
+        dueAt:
+          type:
+            - string
+            - 'null'
+          format: date-time
     KeyLossInput:
       type: object
       properties:
@@ -4517,6 +4674,44 @@ components:
         - value
         - unit
         - source
+    MeterReadingAuditEntry:
+      type: object
+      required: [id, meterReadingId, action, changedAt]
+      properties:
+        id:
+          type: integer
+        meterReadingId:
+          type: integer
+        action:
+          type: string
+          description: correctie | verwijderd
+        changedById:
+          type:
+            - integer
+            - 'null'
+        changedByName:
+          type:
+            - string
+            - 'null'
+        changedAt:
+          type: string
+          format: date-time
+        oldReadingDate:
+          type:
+            - string
+            - 'null'
+        newReadingDate:
+          type:
+            - string
+            - 'null'
+        oldValue:
+          type:
+            - number
+            - 'null'
+        newValue:
+          type:
+            - number
+            - 'null'
     MeterReadingInput:
       type: object
       properties:
@@ -4599,6 +4794,17 @@ components:
         - registrationDate
         - category
         - weightKg
+    WasteRegistrationUpdate:
+      type: object
+      properties:
+        registrationDate:
+          type: string
+        category:
+          type: string
+          description: restafval | papier | gft | plastic | glas | chemisch
+        weightKg:
+          type: number
+          minimum: 0
     WasteRegistrationInput:
       type: object
       properties:
@@ -5134,15 +5340,15 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CountByKey"
-        recentResponses:
-          type: array
-          items:
-            $ref: "#/components/schemas/SatisfactionResponseItem"
         byCategory:
           type: array
           items:
             $ref: "#/components/schemas/SatisfactionByCategory"
-      required: [totalResponses, averageScore, closedTickets, responseRate, byScore, recentResponses, byCategory]
+        recentResponses:
+          type: array
+          items:
+            $ref: "#/components/schemas/SatisfactionResponseItem"
+      required: [totalResponses, averageScore, closedTickets, responseRate, byScore, byCategory, recentResponses]
     SatisfactionResponseItem:
       type: object
       properties:

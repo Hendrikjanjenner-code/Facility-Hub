@@ -393,8 +393,6 @@ export interface KeyIssueRecord {
   /** @nullable */
   returnedAt?: string | null;
   /** @nullable */
-  dueAt?: string | null;
-  /** @nullable */
   note?: string | null;
 }
 
@@ -477,8 +475,6 @@ export interface KeyIssueInput {
   holderId: number;
   /** @nullable */
   note?: string | null;
-  /** @nullable */
-  dueAt?: string | null;
 }
 
 export interface KeyLossInput {
@@ -1100,6 +1096,13 @@ export interface WasteRegistration {
   registeredByName?: string | null;
 }
 
+export interface WasteRegistrationUpdate {
+  registrationDate?: string;
+  /** restafval | papier | gft | plastic | glas | chemisch */
+  category?: string;
+  /** @minimum 0 */
+  weightKg?: number;
+}
 export interface WasteRegistrationInput {
   buildingId: number;
   registrationDate: string;
@@ -1396,7 +1399,6 @@ export interface TicketSatisfactionInput {
   /** @nullable */
   comment?: string | null;
 }
-
 export interface SatisfactionResponseItem {
   ticketId: number;
   ticketNumber: string;
@@ -1418,12 +1420,18 @@ export interface SatisfactionByCategory {
 
 export interface SatisfactionReport {
   totalResponses: number;
+
   averageScore: number;
+
   closedTickets: number;
   /** Percentage of closed tickets with a satisfaction score (0-100) */
+
   responseRate: number;
+
   byScore: CountByKey[];
+
   recentResponses: SatisfactionResponseItem[];
+
   byCategory: SatisfactionByCategory[];
 }
 
@@ -1556,4 +1564,3 @@ export type SuggestKnowledgeArticlesParams = {
 q?: string;
 ticketCategoryId?: number;
 };
-

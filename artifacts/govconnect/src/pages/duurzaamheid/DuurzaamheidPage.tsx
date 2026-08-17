@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,16 +11,14 @@ import {
   useImportMeterReadings,
   useListWasteRegistrations,
   useCreateWasteRegistration,
+  useUpdateWasteRegistration,
+  useDeleteWasteRegistration,
   useGetSustainabilityReport,
-  useGetMeterReadingAuditLog,
-  useGetUserPreference,
-  usePutUserPreference,
-  useDeleteUserPreference,
   type MeterReading,
-  type MeterReadingAuditEntry,
+  type WasteRegistration,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet, Download, Filter, X, Pencil, History } from "lucide-react";
+import { Leaf, Plus, Upload, Loader2, Gauge, Trash2, FileSpreadsheet, Download, Filter, X, Pencil } from "lucide-react";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip as ChartTooltip,
   Legend, CartesianGrid, PieChart, Pie, Cell,
@@ -75,6 +73,11 @@ const wasteSchema = z.object({
   weightKg: z.coerce.number().min(0.1, "Gewicht is verplicht"),
 });
 
+const wasteCorrectSchema = z.object({
+  registrationDate: z.string().min(10, "Datum is verplicht"),
+  category: z.string().min(1, "Kies een categorie"),
+  weightKg: z.coerce.number().min(0.1, "Gewicht is verplicht"),
+});
 function parseCsv(text: string): { headers: string[]; rows: string[][] } {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (!lines.length) return { headers: [], rows: [] };
@@ -90,13 +93,6 @@ function getQuarterRange(year: number, q: 1 | 2 | 3 | 4): { from: string; to: st
   return { from: `${year}-${starts[q - 1]}`, to: `${year}-${ends[q - 1]}` };
 }
 
-/** Return the date range for the current calendar quarter. */
-function getCurrentQuarterRange(): { from: string; to: string } {
-  const now = new Date();
-  const year = now.getFullYear();
-  const q = (Math.floor(now.getMonth() / 3) + 1) as 1 | 2 | 3 | 4;
-  return getQuarterRange(year, q);
-}
 /** Build a filename that reflects the active filters. */
 function buildExportFilename(buildingName: string | undefined, dateFrom: string, dateTo: string): string {
   const parts = ["duurzaamheid"];
@@ -119,123 +115,40 @@ export default function DuurzaamheidPage() {
   const [wasteDialogOpen, setWasteDialogOpen] = useState(false);
   const [editReading, setEditReading] = useState<MeterReading | null>(null);
   const [deleteReading, setDeleteReading] = useState<MeterReading | null>(null);
-  const [auditReading, setAuditReading] = useState<MeterReading | null>(null);
+  const [editWaste, setEditWaste] = useState<WasteRegistration | null>(null);
+  const [deleteWaste, setDeleteWaste] = useState<WasteRegistration | null>(null);
 
-  // Filter state for the rapportage tab — persisted server-side via /api/user-preferences.
-  // Date filters default to the current quarter so the page is immediately useful on first open.
+  // Filter state for the rapportage tab — initialised from localStorage
   const FILTER_KEY = "duurzaamheid_report_filters";
-  const _defaultQuarter = getCurrentQuarterRange();
-  const [filterBuildingId, setFilterBuildingIdRaw] = useState<string>("");
-  const [filterDateFrom, setFilterDateFromRaw] = useState<string>(_defaultQuarter.from);
-  const [filterDateTo, setFilterDateToRaw] = useState<string>(_defaultQuarter.to);
-
-  // initialisedFromServer: true after the first server response is applied.
-  // userHasUnsavedChanges: true while the debounce is pending (local changes not yet saved).
-  // putDebounceRef: handle for the pending PUT debounce.
-  // generationRef: incremented on clear() so any in-flight PUT knows to abort.
-  // bcRef: BroadcastChannel for real-time cross-tab synchronisation.
-  const initialisedFromServer = useRef(false);
-  const userHasUnsavedChanges = useRef(false);
-  const putDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const generationRef = useRef(0);
-  const bcRef = useRef<BroadcastChannel | null>(null);
-
-  const { data: savedPref } = useGetUserPreference(FILTER_KEY, {
-    // refetchOnWindowFocus lets a returning tab pick up changes made on another device.
-    query: { refetchOnWindowFocus: true },
-  });
-  const putPref = usePutUserPreference();
-  const deletePref = useDeleteUserPreference();
-
-  /** Apply a raw preference JSON string (or null) to local filter state. */
-  const applyPrefValue = (value: string | null) => {
-    if (!value) {
-      // No stored preference — default to the current quarter so the page is immediately useful.
-      const q = getCurrentQuarterRange();
-      setFilterBuildingIdRaw("");
-      setFilterDateFromRaw(q.from);
-      setFilterDateToRaw(q.to);
-      return;
-    }
+  const storedFilters = useMemo(() => {
     try {
-      const parsed = JSON.parse(value) as {
-        buildingId?: string;
-        dateFrom?: string;
-        dateTo?: string;
-      };
-      setFilterBuildingIdRaw(parsed.buildingId ?? "");
-      setFilterDateFromRaw(parsed.dateFrom ?? "");
-      setFilterDateToRaw(parsed.dateTo ?? "");
+      const raw = localStorage.getItem(FILTER_KEY);
+      return raw ? (JSON.parse(raw) as { buildingId?: string; dateFrom?: string; dateTo?: string }) : {};
     } catch {
-      // malformed stored value — ignore
+      return {};
     }
-  };
-
-  // BroadcastChannel: receive preference updates from other tabs in the same browser.
-  useEffect(() => {
-    const bc = new BroadcastChannel("duurzaamheid_filters");
-    bcRef.current = bc;
-    bc.onmessage = (evt: MessageEvent<{ type: string; value: string | null }>) => {
-      if (evt.data.type !== "update") return;
-      if (userHasUnsavedChanges.current) return; // local unsaved changes take priority
-      applyPrefValue(evt.data.value);
-    };
-    return () => { bc.close(); bcRef.current = null; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Cleanup pending debounce timer on unmount to prevent memory leaks.
-  useEffect(() => {
-    return () => { if (putDebounceRef.current) clearTimeout(putDebounceRef.current); };
-  }, []);
-
-  // Apply server preference on initial load and on window-focus refetches (cross-device sync).
-  // Never overwrites pending local (unsaved) changes.
-  useEffect(() => {
-    if (!savedPref) return;
-    if (!initialisedFromServer.current) {
-      initialisedFromServer.current = true;
-      if (!userHasUnsavedChanges.current) applyPrefValue(savedPref.value);
-      return;
-    }
-    // Subsequent fetches (e.g. refetchOnWindowFocus): sync only when idle.
-    if (!userHasUnsavedChanges.current) applyPrefValue(savedPref.value);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [savedPref]);
+  const [filterBuildingId, setFilterBuildingIdRaw] = useState<string>(storedFilters.buildingId ?? "");
+  const [filterDateFrom, setFilterDateFromRaw] = useState<string>(storedFilters.dateFrom ?? "");
+  const [filterDateTo, setFilterDateToRaw] = useState<string>(storedFilters.dateTo ?? "");
 
   const persistFilters = (buildingId: string, dateFrom: string, dateTo: string) => {
-    // Capture current generation to detect if clear() fires before this PUT completes.
-    const generation = generationRef.current;
-    if (putDebounceRef.current) clearTimeout(putDebounceRef.current);
-    putDebounceRef.current = setTimeout(() => {
-      if (generationRef.current !== generation) return; // clear() was called — abort
-      const value = JSON.stringify({ buildingId, dateFrom, dateTo });
-      putPref.mutate(
-        { key: FILTER_KEY, value },
-        {
-          onSuccess: () => {
-            if (generationRef.current !== generation) return; // clear() fired meanwhile
-            userHasUnsavedChanges.current = false;
-            // Notify other tabs so they sync without a round-trip.
-            bcRef.current?.postMessage({ type: "update", value });
-          },
-        },
-      );
-    }, 400);
+    try {
+      localStorage.setItem(FILTER_KEY, JSON.stringify({ buildingId, dateFrom, dateTo }));
+    } catch {
+      // ignore storage errors
+    }
   };
 
   const setFilterBuildingId = (v: string) => {
-    userHasUnsavedChanges.current = true;
     setFilterBuildingIdRaw(v);
     persistFilters(v, filterDateFrom, filterDateTo);
   };
   const setFilterDateFrom = (v: string) => {
-    userHasUnsavedChanges.current = true;
     setFilterDateFromRaw(v);
     persistFilters(filterBuildingId, v, filterDateTo);
   };
   const setFilterDateTo = (v: string) => {
-    userHasUnsavedChanges.current = true;
     setFilterDateToRaw(v);
     persistFilters(filterBuildingId, filterDateFrom, v);
   };
@@ -262,16 +175,13 @@ export default function DuurzaamheidPage() {
     Object.keys(reportParams).length ? reportParams : undefined,
   );
 
-  // id=0 keeps hook unconditional; dialog is only shown when auditReading is set
-  const { data: auditLog, isFetching: auditFetching } = useGetMeterReadingAuditLog(
-    auditReading?.id ?? 0,
-  );
-
   const createReading = useCreateMeterReading();
   const updateReading = useUpdateMeterReading();
   const doDeleteReading = useDeleteMeterReading();
   const importReadings = useImportMeterReadings();
   const createWaste = useCreateWasteRegistration();
+  const updateWaste = useUpdateWasteRegistration();
+  const doDeleteWaste = useDeleteWasteRegistration();
 
   const meterForm = useForm<z.input<typeof meterSchema>, any, z.output<typeof meterSchema>>({
     resolver: zodResolver(meterSchema),
@@ -285,6 +195,10 @@ export default function DuurzaamheidPage() {
     resolver: zodResolver(correctSchema),
   });
 
+  const wasteCorrectForm = useForm<z.input<typeof wasteCorrectSchema>, any, z.output<typeof wasteCorrectSchema>>({
+    resolver: zodResolver(wasteCorrectSchema),
+  });
+
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/meter-readings"] });
     queryClient.invalidateQueries({ queryKey: ["/api/waste-registrations"] });
@@ -294,6 +208,35 @@ export default function DuurzaamheidPage() {
   const openEditDialog = (r: MeterReading) => {
     setEditReading(r);
     correctForm.reset({ readingDate: r.readingDate, value: r.value });
+  };
+
+  const openEditWasteDialog = (w: WasteRegistration) => {
+    setEditWaste(w);
+    wasteCorrectForm.reset({ registrationDate: w.registrationDate, category: w.category, weightKg: w.weightKg });
+  };
+
+  const onSubmitWasteCorrect = (values: z.output<typeof wasteCorrectSchema>) => {
+    if (!editWaste) return;
+    updateWaste.mutate({ id: editWaste.id, data: values }, {
+      onSuccess: () => {
+        toast({ title: "Afvalregistratie gecorrigeerd" });
+        setEditWaste(null);
+        invalidate();
+      },
+      onError: () => toast({ title: "Correctie mislukt", variant: "destructive" }),
+    });
+  };
+
+  const onConfirmDeleteWaste = () => {
+    if (!deleteWaste) return;
+    doDeleteWaste.mutate({ id: deleteWaste.id }, {
+      onSuccess: () => {
+        toast({ title: "Afvalregistratie verwijderd" });
+        setDeleteWaste(null);
+        invalidate();
+      },
+      onError: () => toast({ title: "Verwijderen mislukt", variant: "destructive" }),
+    });
   };
 
   const onSubmitCorrect = (values: z.output<typeof correctSchema>) => {
@@ -441,18 +384,10 @@ export default function DuurzaamheidPage() {
     && report.wasteByMonth.length === 0;
 
   const clearFilters = () => {
-    // Cancel any pending debounced PUT so it cannot fire after the DELETE.
-    if (putDebounceRef.current) { clearTimeout(putDebounceRef.current); putDebounceRef.current = null; }
-    // Bump generation so any already-dispatched async PUT knows to discard its result.
-    generationRef.current += 1;
-    userHasUnsavedChanges.current = false;
     setFilterBuildingIdRaw("");
     setFilterDateFromRaw("");
     setFilterDateToRaw("");
-    deletePref.mutate(
-      { key: FILTER_KEY },
-      { onSuccess: () => { bcRef.current?.postMessage({ type: "update", value: null }); } },
-    );
+    try { localStorage.removeItem(FILTER_KEY); } catch { /* ignore */ }
   };
 
   // Chart data: pivot monthlyUsage naar per-maand rijen per type
@@ -796,9 +731,6 @@ export default function DuurzaamheidPage() {
                       <TableCell className="text-muted-foreground">{r.registeredByName ?? "—"}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1 justify-end">
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => setAuditReading(r)} title="Mutatiehistorie">
-                            <History className="h-3.5 w-3.5" />
-                          </Button>
                           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(r)} title="Corrigeren">
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
@@ -878,6 +810,7 @@ export default function DuurzaamheidPage() {
                     <TableHead>Categorie</TableHead>
                     <TableHead className="text-right">Gewicht</TableHead>
                     <TableHead>Geregistreerd door</TableHead>
+                    <TableHead className="w-20" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -892,6 +825,16 @@ export default function DuurzaamheidPage() {
                       </TableCell>
                       <TableCell className="text-right font-mono">{w.weightKg.toLocaleString("nl-NL")} kg</TableCell>
                       <TableCell className="text-muted-foreground">{w.registeredByName ?? "—"}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 justify-end">
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditWasteDialog(w)} title="Corrigeren">
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setDeleteWaste(w)} title="Verwijderen">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -933,69 +876,7 @@ export default function DuurzaamheidPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Audit history dialog */}
-      <Dialog open={!!auditReading} onOpenChange={(open) => { if (!open) setAuditReading(null); }}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="h-4 w-4" />
-              Mutatiehistorie
-            </DialogTitle>
-            <DialogDescription>
-              {auditReading
-                ? `${auditReading.buildingName} — ${auditReading.meterType} — stand ${auditReading.value.toLocaleString("nl-NL")} ${auditReading.unit} op ${auditReading.readingDate}`
-                : ""}
-            </DialogDescription>
-          </DialogHeader>
-          {auditFetching ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-            </div>
-          ) : !auditLog?.length ? (
-            <p className="text-sm text-muted-foreground text-center py-6">Geen mutaties geregistreerd voor deze meterstand.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tijdstip</TableHead>
-                  <TableHead>Actie</TableHead>
-                  <TableHead>Door</TableHead>
-                  <TableHead>Oud</TableHead>
-                  <TableHead>Nieuw</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {auditLog.map((entry: MeterReadingAuditEntry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                      {new Date(entry.changedAt).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={entry.action === "verwijderd" ? "destructive" : "secondary"} className="capitalize text-xs">
-                        {entry.action}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{entry.changedByName ?? "—"}</TableCell>
-                    <TableCell className="text-xs font-mono">
-                      {entry.oldValue != null ? `${entry.oldValue.toLocaleString("nl-NL")}` : "—"}
-                      {entry.oldReadingDate ? <span className="text-muted-foreground ml-1">({entry.oldReadingDate})</span> : null}
-                    </TableCell>
-                    <TableCell className="text-xs font-mono">
-                      {entry.newValue != null ? `${entry.newValue.toLocaleString("nl-NL")}` : "—"}
-                      {entry.newReadingDate ? <span className="text-muted-foreground ml-1">({entry.newReadingDate})</span> : null}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setAuditReading(null)}>Sluiten</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete confirmation */}
+      {/* Delete confirmation — meter reading */}
       <AlertDialog open={!!deleteReading} onOpenChange={(open) => { if (!open) setDeleteReading(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1014,6 +895,72 @@ export default function DuurzaamheidPage() {
               disabled={doDeleteReading.isPending}
             >
               {doDeleteReading.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit/correct dialog — waste registration */}
+      <Dialog open={!!editWaste} onOpenChange={(open) => { if (!open) setEditWaste(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Afvalregistratie corrigeren</DialogTitle>
+            <DialogDescription>
+              {editWaste ? `${editWaste.buildingName} — ${editWaste.registrationDate}` : ""}
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...wasteCorrectForm}>
+            <form onSubmit={wasteCorrectForm.handleSubmit(onSubmitWasteCorrect)} className="space-y-4">
+              <FormField control={wasteCorrectForm.control} name="registrationDate" render={({ field }) => (
+                <FormItem><FormLabel>Datum</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={wasteCorrectForm.control} name="category" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categorie</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Kies categorie" /></SelectTrigger></FormControl>
+                    <SelectContent>{WASTE_CATEGORIES.map((c) => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <FormField control={wasteCorrectForm.control} name="weightKg" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gewicht (kg)</FormLabel>
+                  <FormControl><Input type="number" step="0.1" {...field} value={(field.value as any) ?? ""} /></FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+              <DialogFooter>
+                <Button type="button" variant="ghost" onClick={() => setEditWaste(null)}>Annuleren</Button>
+                <Button type="submit" disabled={updateWaste.isPending}>
+                  {updateWaste.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Opslaan
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete confirmation — waste registration */}
+      <AlertDialog open={!!deleteWaste} onOpenChange={(open) => { if (!open) setDeleteWaste(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Afvalregistratie verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteWaste
+                ? `${deleteWaste.weightKg.toLocaleString("nl-NL")} kg ${deleteWaste.category} op ${deleteWaste.registrationDate} voor ${deleteWaste.buildingName} wordt permanent verwijderd. Rapportages en exports worden direct herberekend.`
+                : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={onConfirmDeleteWaste}
+              disabled={doDeleteWaste.isPending}
+            >
+              {doDeleteWaste.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Verwijderen
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
