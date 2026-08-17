@@ -76,73 +76,60 @@ router.get("/rooms", async (req, res): Promise<void> => {
   if (typeof q.minCapacity === "string" && q.minCapacity)
     conditions.push(gte(roomsTable.capacity, Number(q.minCapacity)));
 
-  const rows = await db
-    .select({
-      room: roomsTable,
-      floorName: floorsTable.name,
-      buildingId: buildingsTable.id,
-      buildingName: buildingsTable.name,
-      siteName: sitesTable.name,
-      assetCount: assetCountSql,
-      openTicketCount: openTicketCountSql,
-    })
-    .from(roomsTable)
-    .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
-    .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
-    .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
-    .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(roomsTable.code);
+    const rows = await db
+      .select({
+        doc: buildingDocumentsTable,
+        uploadedByName: usersTable.name,
+      })
+      .from(buildingDocumentsTable)
+      .leftJoin(usersTable, eq(buildingDocumentsTable.uploadedById, usersTable.id))
+      .where(eq(buildingDocumentsTable.buildingId, id))
+      .orderBy(desc(buildingDocumentsTable.createdAt));
 
   const redact = !TICKET_MANAGER_ROLES.includes(req.currentUser!.role);
   res.json(rows.map((r) => serializeRoom(redact, r)));
 });
 
 router.get("/rooms/:id", async (req, res): Promise<void> => {
-  const id = Number(req.params.id);
+    const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     res.status(400).json({ message: "Ongeldig id" });
     return;
   }
-  const [row] = await db
-    .select({
-      room: roomsTable,
-      floorName: floorsTable.name,
-      buildingId: buildingsTable.id,
-      buildingName: buildingsTable.name,
-      siteName: sitesTable.name,
-      assetCount: assetCountSql,
-      openTicketCount: openTicketCountSql,
-    })
-    .from(roomsTable)
-    .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
-    .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
-    .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
-    .where(eq(roomsTable.id, id));
-  if (!row) {
-    res.status(404).json({ message: "Ruimte niet gevonden" });
-    return;
-  }
-  res.json(serializeRoom(!TICKET_MANAGER_ROLES.includes(req.currentUser!.role), row));
-});
+    const [row] = await db
+      .select({
+        room: roomsTable,
+        floorName: floorsTable.name,
+        buildingId: buildingsTable.id,
+        buildingName: buildingsTable.name,
+        siteName: sitesTable.name,
+        assetCount: assetCountSql,
+        openTicketCount: openTicketCountSql,
+      })
+      .from(roomsTable)
+      .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
+      .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
+      .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
+      .where(eq(roomsTable.id, id));
+    res.json(serializeRoom(false, row!));
+  },
+);
 
-router.patch(
-  "/rooms/:id/dossier",
-  requireRole(...VASTGOED_MANAGE_ROLES),
-  async (req, res): Promise<void> => {
+router.get("/floors/:id/plan", async (req, res): Promise<void> => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
       res.status(400).json({ message: "Ongeldig id" });
       return;
     }
-    const parsed = UpdateRoomDossierBody.safeParse(req.body);
+    const parsed = CreateBuildingDocumentBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
     }
     const [existing] = await db
-      .select({ id: roomsTable.id })
-      .from(roomsTable)
-      .where(eq(roomsTable.id, id));
+      .select({ id: buildingsTable.id })
+      .from(buildingsTable)
+      .where(eq(buildingsTable.id, id));
     if (!existing) {
       res.status(404).json({ message: "Ruimte niet gevonden" });
       return;
@@ -217,7 +204,6 @@ router.get("/floors/:id/plan", async (req, res): Promise<void> => {
       code: r.code,
       functionType: r.functionType,
       areaM2: r.areaM2,
-      areaVvoM2: r.areaVvoM2,
       department: r.department,
       capacity: r.capacity,
       bookable: r.bookable,
@@ -232,7 +218,7 @@ router.get("/buildings/:id", async (req, res): Promise<void> => {
     return;
   }
     const [building] = await db
-      .select()
+      .select({ id: buildingsTable.id })
       .from(buildingsTable)
       .where(eq(buildingsTable.id, id));
   if (!building) {
@@ -326,34 +312,30 @@ router.post(
       res.status(404).json({ message: "Gebouw niet gevonden" });
       return;
     }
+
     // Idempotentie: als het document-record al bestaat voor dit objectPath
     // (bv. de vorige request slaagde maar de client verloor het antwoord),
     // geef het bestaande record terug in plaats van een duplicaat aan te maken.
-    const [existing] = await db
+    const [existingDoc] = await db
       .select({
         doc: buildingDocumentsTable,
         uploadedByName: usersTable.name,
       })
       .from(buildingDocumentsTable)
       .leftJoin(usersTable, eq(buildingDocumentsTable.uploadedById, usersTable.id))
-      .where(
-        and(
-          eq(buildingDocumentsTable.buildingId, id),
-          eq(buildingDocumentsTable.objectPath, parsed.data.objectPath),
-        ),
-      )
+      .where(eq(buildingDocumentsTable.objectPath, parsed.data.objectPath))
       .limit(1);
-    if (existing) {
+    if (existingDoc) {
       res.status(200).json({
-        id: existing.doc.id,
-        buildingId: existing.doc.buildingId,
-        title: existing.doc.title,
-        category: existing.doc.category,
-        objectPath: existing.doc.objectPath,
-        contentType: existing.doc.contentType,
-        sizeBytes: existing.doc.sizeBytes,
-        uploadedByName: existing.uploadedByName,
-        createdAt: existing.doc.createdAt.toISOString(),
+        id: existingDoc.doc.id,
+        buildingId: existingDoc.doc.buildingId,
+        title: existingDoc.doc.title,
+        category: existingDoc.doc.category,
+        objectPath: existingDoc.doc.objectPath,
+        contentType: existingDoc.doc.contentType,
+        sizeBytes: existingDoc.doc.sizeBytes,
+        uploadedByName: existingDoc.uploadedByName,
+        createdAt: existingDoc.doc.createdAt.toISOString(),
       });
       return;
     }
@@ -412,10 +394,12 @@ router.delete(
       res.status(400).json({ message: "Ongeldig id" });
       return;
     }
+
+    // Controleer of het gebouw bestaat.
     const [existing] = await db
-      .select({ id: buildingDocumentsTable.id, objectPath: buildingDocumentsTable.objectPath })
-      .from(buildingDocumentsTable)
-      .where(eq(buildingDocumentsTable.id, id));
+      .select({ id: buildingsTable.id })
+      .from(buildingsTable)
+      .where(eq(buildingsTable.id, id));
     if (!existing) {
       res.status(404).json({ message: "Document niet gevonden" });
       return;
@@ -428,7 +412,7 @@ router.delete(
     // er nog naar verwijst (gecentraliseerde cross-table check).
     try {
       if (!(await isObjectPathReferenced(existing.objectPath))) {
-        const storageService = new ObjectStorageService();
+    const storageService = new ObjectStorageService();
         await storageService.deleteObject(existing.objectPath);
       }
     } catch (err) {
@@ -436,6 +420,65 @@ router.delete(
         { err, objectPath: existing.objectPath },
         "Kon bijbehorend object niet verwijderen uit storage; wees-bestand mogelijk achtergebleven",
       );
+    }
+
+    res.status(204).end();
+  },
+);
+
+router.delete(
+  "/buildings/:id",
+  requireRole(...VASTGOED_MANAGE_ROLES),
+  async (req, res): Promise<void> => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+
+    // Controleer of het gebouw bestaat.
+    const [existing] = await db
+      .select({ id: buildingsTable.id })
+      .from(buildingsTable)
+      .where(eq(buildingsTable.id, id));
+    if (!existing) {
+      res.status(404).json({ message: "Gebouw niet gevonden" });
+      return;
+    }
+
+    // Haal alle gekoppelde documenten op vóór verwijdering.
+    const docs = await db
+      .select({ id: buildingDocumentsTable.id, objectPath: buildingDocumentsTable.objectPath })
+      .from(buildingDocumentsTable)
+      .where(eq(buildingDocumentsTable.buildingId, id));
+
+    // Verwijder DB-records: documenten eerst (FK-beperking), dan het gebouw zelf.
+    if (docs.length > 0) {
+      await db
+        .delete(buildingDocumentsTable)
+        .where(eq(buildingDocumentsTable.buildingId, id));
+    }
+    await db.delete(buildingsTable).where(eq(buildingsTable.id, id));
+
+    // Ruim storage-bestanden op (best effort).
+    // Omdat de document-rijen al verwijderd zijn, controleert isObjectPathReferenced
+    // nu alleen nog contract-documenten en MJOP-inspectiefoto's.
+    const storageService = new ObjectStorageService();
+    for (const doc of docs) {
+      try {
+        if (!(await isObjectPathReferenced(doc.objectPath))) {
+          await storageService.deleteObject(doc.objectPath);
+          req.log.info(
+            { objectPath: doc.objectPath, buildingId: id, documentId: doc.id },
+            "Storage-bestand verwijderd bij verwijdering gebouw",
+          );
+        }
+      } catch (err) {
+        req.log.warn(
+          { err, objectPath: doc.objectPath, buildingId: id, documentId: doc.id },
+          "Kon bijbehorend object niet verwijderen uit storage; wees-bestand mogelijk achtergebleven",
+        );
+      }
     }
 
     res.status(204).end();
