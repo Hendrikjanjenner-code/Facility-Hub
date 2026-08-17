@@ -204,7 +204,11 @@ router.patch(
     if (outcome.status === 404) { res.status(404).json({ message: "Ruimte niet gevonden" }); return; }
     const row = await selectRoomRow(id);
     if (!row) { res.status(404).json({ message: "Ruimte niet gevonden" }); return; }
-    res.status(outcome.status).json(serializeRoom(false, row));
+    if (outcome.status === 409) {
+      res.status(409).json({ message: "Conflicterende wijziging gedetecteerd", current: serializeRoom(false, row) });
+      return;
+    }
+    res.json(serializeRoom(false, row));
   },
 );
 

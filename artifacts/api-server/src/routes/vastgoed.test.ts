@@ -57,6 +57,7 @@ import {
   buildingsTable,
   floorsTable,
   roomsTable,
+  roomDossierHistoryTable,
 } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
@@ -118,6 +119,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  // Delete dossier history first to satisfy the FK constraint on rooms.
+  await db.delete(roomDossierHistoryTable).where(eq(roomDossierHistoryTable.roomId, roomId));
   await db.delete(roomsTable).where(eq(roomsTable.id, roomId));
   await db.delete(floorsTable).where(eq(floorsTable.id, floorId));
   await db.delete(buildingsTable).where(eq(buildingsTable.id, buildingId));
@@ -141,7 +144,7 @@ describe("PATCH /rooms/:id/dossier — optimistic locking", () => {
     const updatedAt = await getUpdatedAt();
 
     const res = await request(app)
-      .patch(`/rooms/${roomId}`)
+      .patch(`/rooms/${roomId}/dossier`)
       .send({ department: "IT", updatedAt });
 
     expect(res.status).toBe(200);
@@ -157,7 +160,7 @@ describe("PATCH /rooms/:id/dossier — optimistic locking", () => {
     const staleTs = new Date(0).toISOString(); // 1970-01-01
 
     const res = await request(app)
-      .patch(`/rooms/${roomId}`)
+      .patch(`/rooms/${roomId}/dossier`)
       .send({ department: "Finance", updatedAt: staleTs });
 
     expect(res.status).toBe(409);
@@ -173,10 +176,10 @@ describe("PATCH /rooms/:id/dossier — optimistic locking", () => {
     // Fire both requests simultaneously.
     const [first, second] = await Promise.all([
       request(app)
-        .patch(`/rooms/${roomId}`)
+        .patch(`/rooms/${roomId}/dossier`)
         .send({ functionType: "vergaderzaal", updatedAt: sharedUpdatedAt }),
       request(app)
-        .patch(`/rooms/${roomId}`)
+        .patch(`/rooms/${roomId}/dossier`)
         .send({ functionType: "opslagruimte", updatedAt: sharedUpdatedAt }),
     ]);
 
