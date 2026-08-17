@@ -154,6 +154,50 @@ export class ObjectStorageService {
     return objectFile;
   }
 
+  /**
+   * Verwijdert een object uit private storage op basis van het /objects/…-pad.
+   * ignoreNotFound: true — als het bestand er al niet meer is, geen fout.
+   */
+  async deleteObject(objectPath: string): Promise<void> {
+    if (!objectPath.startsWith('/objects/')) return;
+
+    const parts = objectPath.slice(1).split('/');
+    if (parts.length < 2) return;
+
+    const entityId = parts.slice(1).join('/');
+    let entityDir = this.getPrivateObjectDir();
+    if (!entityDir.endsWith('/')) entityDir = `${entityDir}/`;
+
+    const fullPath = `${entityDir}${entityId}`;
+    const { bucketName, objectName } = parseObjectPath(fullPath);
+    const file = objectStorageClient.bucket(bucketName).file(objectName);
+    await file.delete({ ignoreNotFound: true });
+  }
+
+  /**
+   * Geeft alle objecten terug die in de uploads-map staan, met aanmaakdatum.
+   * Wordt gebruikt door de wees-opruimroutine.
+   */
+  async listUploadObjects(): Promise<
+    Array<{ objectPath: string; timeCreated: Date | null }>
+  > {
+    let privateDir = this.getPrivateObjectDir();
+    if (!privateDir.endsWith('/')) privateDir = `${privateDir}/`;
+    const uploadsPrefix = `${privateDir}uploads/`;
+
+    const { bucketName, objectName: prefixName } =
+      parseObjectPath(uploadsPrefix);
+    const bucket = objectStorageClient.bucket(bucketName);
+    const [files] = await bucket.getFiles({ prefix: prefixName });
+
+    return files.map((f) => ({
+      objectPath: `/objects/uploads/${f.name.slice(prefixName.length)}`,
+      timeCreated: f.metadata.timeCreated
+        ? new Date(f.metadata.timeCreated as string)
+        : null,
+    }));
+  }
+
 }
 
 function parseObjectPath(path: string): {

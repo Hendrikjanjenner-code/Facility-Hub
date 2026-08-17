@@ -5,6 +5,7 @@
  * GovConnect 2.0 API
  * OpenAPI spec version: 0.1.0
  */
+import type { BudgetStatusOverBudgetPolicy } from './budgetStatusOverBudgetPolicy';
 
 export interface BudgetStatus {
   id: number;

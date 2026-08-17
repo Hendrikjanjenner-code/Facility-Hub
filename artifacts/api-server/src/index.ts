@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { ensureContractExpiryNotifications } from "./routes/contracts";
+import { cleanupOrphanedDocumentUploads } from "./lib/orphanCleanup";
 
 const rawPort = process.env["PORT"];
 
@@ -28,6 +29,14 @@ async function runContractExpiryCheck() {
   }
 }
 
+async function runOrphanCleanup() {
+  try {
+    await cleanupOrphanedDocumentUploads();
+  } catch (err) {
+    logger.error({ err }, "Fout bij wees-upload opruimroutine");
+  }
+}
+
 app.listen(port, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
@@ -39,4 +48,8 @@ app.listen(port, (err) => {
   // Voer direct uit bij server-start en daarna elke 24 uur.
   void runContractExpiryCheck();
   setInterval(() => void runContractExpiryCheck(), MS_PER_DAY);
+
+  // Opruimen van wees-uploads: direct bij start en daarna elke 24 uur.
+  void runOrphanCleanup();
+  setInterval(() => void runOrphanCleanup(), MS_PER_DAY);
 });

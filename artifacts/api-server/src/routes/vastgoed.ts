@@ -9,14 +9,16 @@ import {
   assetsTable,
   ticketsTable,
   buildingDocumentsTable,
+  conditiemetingenTable,
   usersTable,
 } from "@workspace/db";
-import { eq, and, gte, sql, notInArray, desc, type SQL } from "drizzle-orm";
+import { eq, and, gte, sql, notInArray, desc, ne, type SQL } from "drizzle-orm";
 import {
   UpdateRoomDossierBody,
   CreateBuildingDocumentBody,
 } from "@workspace/api-zod";
 import { requireAuth, requireRole, TICKET_MANAGER_ROLES } from "../lib/auth";
+import { ObjectStorageService } from "../lib/objectStorage";
 
 // Beheer van het gebouwdossier (dossier-edits, documenten) is voorbehouden
 // aan facilitair manager en beheerder. Documenten kunnen huurcontracten
@@ -366,7 +368,7 @@ router.delete(
       return;
     }
     const [existing] = await db
-      .select({ id: buildingDocumentsTable.id })
+      .select({ id: buildingDocumentsTable.id, objectPath: buildingDocumentsTable.objectPath })
       .from(buildingDocumentsTable)
       .where(eq(buildingDocumentsTable.id, id));
     if (!existing) {
@@ -376,6 +378,48 @@ router.delete(
     await db
       .delete(buildingDocumentsTable)
       .where(eq(buildingDocumentsTable.id, id));
+
+    // Verwijder het bestand uit object storage alleen als geen enkel ander record
+    // er nog naar verwijst (andere building_documents of MJOP-inspectiefoto's).
+    try {
+      // Controleer andere building_documents-rijen met hetzelfde pad.
+      const [otherDoc] = await db
+        .select({ id: buildingDocumentsTable.id })
+        .from(buildingDocumentsTable)
+        .where(
+          and(
+            eq(buildingDocumentsTable.objectPath, existing.objectPath),
+            ne(buildingDocumentsTable.id, id),
+          ),
+        );
+
+      // Controleer MJOP-conditiemetingen die dit pad als inspectiefoto bevatten
+      // (alleen als er geen ander document-record is dat het pad al vasthoudt).
+      let stillReferenced = Boolean(otherDoc);
+      if (!stillReferenced) {
+        const mjopRef = await db.execute<{ count: number }>(
+          sql`
+            SELECT 1 AS count
+            FROM ${conditiemetingenTable},
+                 jsonb_array_elements(${conditiemetingenTable.gebreken}) AS elem
+            WHERE elem->>'photoPath' = ${existing.objectPath}
+            LIMIT 1
+          `,
+        );
+        stillReferenced = mjopRef.rows.length > 0;
+      }
+
+      if (!stillReferenced) {
+        const storageService = new ObjectStorageService();
+        await storageService.deleteObject(existing.objectPath);
+      }
+    } catch (err) {
+      req.log.warn(
+        { err, objectPath: existing.objectPath },
+        "Kon bijbehorend object niet verwijderen uit storage; wees-bestand mogelijk achtergebleven",
+      );
+    }
+
     res.status(204).end();
   },
 );
