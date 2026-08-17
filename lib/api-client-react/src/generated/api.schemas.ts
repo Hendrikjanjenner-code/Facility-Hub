@@ -1116,6 +1116,7 @@ export interface KnowledgeArticle {
   body: string;
   category: string;
   tags: string[];
+  ticketCategoryIds: number[];
   createdAt: string;
   updatedAt: string;
 }
@@ -1127,6 +1128,7 @@ export interface KnowledgeArticleInput {
   body: string;
   category: string;
   tags?: string[];
+  ticketCategoryIds?: number[];
 }
 
 export interface TicketSatisfaction {
@@ -1273,7 +1275,8 @@ category?: string;
 };
 
 export type SuggestKnowledgeArticlesParams = {
-q: string;
+q?: string;
+ticketCategoryId?: number;
 };
 
 

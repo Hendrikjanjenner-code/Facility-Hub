@@ -13,4 +13,5 @@ export interface KnowledgeArticleInput {
   body: string;
   category: string;
   tags?: string[];
+  ticketCategoryIds?: number[];
 }

@@ -3891,7 +3891,6 @@ export const getUpdateBudgetPolicyUrl = (id: number,) => {
 }
 
 
-
 export const getListMeterReadingsUrl = (params?: ListMeterReadingsParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -5196,7 +5195,7 @@ export const useCreateKnowledgeArticle = <TError = ErrorType<unknown>,
       return useMutation(getCreateKnowledgeArticleMutationOptions(options));
     }
 
-export const getSuggestKnowledgeArticlesUrl = (params: SuggestKnowledgeArticlesParams,) => {
+export const getSuggestKnowledgeArticlesUrl = (params?: SuggestKnowledgeArticlesParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -5214,7 +5213,7 @@ export const getSuggestKnowledgeArticlesUrl = (params: SuggestKnowledgeArticlesP
 /**
  * @summary Quick search suggestions (max 5) for the melding form
  */
-export const suggestKnowledgeArticles = async (params: SuggestKnowledgeArticlesParams, options?: Parameters<typeof customFetch>[1]): Promise<KnowledgeArticle[]> => {
+export const suggestKnowledgeArticles = async (params?: SuggestKnowledgeArticlesParams, options?: Parameters<typeof customFetch>[1]): Promise<KnowledgeArticle[]> => {
 
   return customFetch<KnowledgeArticle[]>(getSuggestKnowledgeArticlesUrl(params),
   {
@@ -5233,7 +5232,7 @@ export const getSuggestKnowledgeArticlesQueryKey = (params?: SuggestKnowledgeArt
     }
 
 
-export const getSuggestKnowledgeArticlesQueryOptions = <TData = Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError = ErrorType<unknown>>(params: SuggestKnowledgeArticlesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getSuggestKnowledgeArticlesQueryOptions = <TData = Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError = ErrorType<unknown>>(params?: SuggestKnowledgeArticlesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -5256,7 +5255,7 @@ export type SuggestKnowledgeArticlesQueryError = ErrorType<unknown>
  */
 
 export function useSuggestKnowledgeArticles<TData = Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError = ErrorType<unknown>>(
- params: SuggestKnowledgeArticlesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+ params?: SuggestKnowledgeArticlesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof suggestKnowledgeArticles>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

@@ -52,10 +52,30 @@ export default function MeldingenNieuwPage() {
   const [suggestionQuery, setSuggestionQuery] = useState("");
   const [expandedSuggestion, setExpandedSuggestion] = useState<number | null>(null);
 
-  const { data: suggestions } = useSuggestKnowledgeArticles(
+  // Text-based suggestions (while typing)
+  const { data: textSuggestions } = useSuggestKnowledgeArticles(
     { q: suggestionQuery },
     { query: { enabled: suggestionQuery.length >= 3, staleTime: 10_000, queryKey: getSuggestKnowledgeArticlesQueryKey({ q: suggestionQuery }) } },
   );
+
+  // Category-based suggestions (immediately on category select)
+  const { data: categorySuggestions } = useSuggestKnowledgeArticles(
+    { ticketCategoryId: selectedCategory?.id },
+    { query: { enabled: !!selectedCategory, staleTime: 60_000, queryKey: getSuggestKnowledgeArticlesQueryKey({ ticketCategoryId: selectedCategory?.id }) } },
+  );
+
+  // Merge: category-linked first, then text-based, deduplicated, max 5
+  const suggestions = (() => {
+    const seen = new Set<number>();
+    const merged: KnowledgeArticle[] = [];
+    for (const a of [...(categorySuggestions ?? []), ...(textSuggestions ?? [])]) {
+      if (!seen.has(a.id) && merged.length < 5) {
+        seen.add(a.id);
+        merged.push(a);
+      }
+    }
+    return merged;
+  })();
 
   const form = useForm<z.infer<typeof baseSchema>>({
     resolver: zodResolver(baseSchema),

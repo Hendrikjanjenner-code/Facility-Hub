@@ -1885,8 +1885,12 @@ paths:
       parameters:
         - name: q
           in: query
-          required: true
+          required: false
           schema: { type: string }
+        - name: ticketCategoryId
+          in: query
+          required: false
+          schema: { type: integer }
       responses:
         "200":
           description: Suggestions
@@ -4153,9 +4157,12 @@ components:
         tags:
           type: array
           items: { type: string }
+        ticketCategoryIds:
+          type: array
+          items: { type: integer }
         createdAt: { type: string }
         updatedAt: { type: string }
-      required: [id, title, body, category, tags, createdAt, updatedAt]
+      required: [id, title, body, category, tags, ticketCategoryIds, createdAt, updatedAt]
     KnowledgeArticleInput:
       type: object
       properties:
@@ -4165,6 +4172,9 @@ components:
         tags:
           type: array
           items: { type: string }
+        ticketCategoryIds:
+          type: array
+          items: { type: integer }
       required: [title, body, category]
     TicketSatisfaction:
       type: object

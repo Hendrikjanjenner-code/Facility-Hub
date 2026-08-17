@@ -8,7 +8,7 @@ import {
   usersTable,
   notificationsTable,
 } from "@workspace/db";
-import { eq, and, or, ilike, sql, inArray, desc, gte, type SQL } from "drizzle-orm";
+import { eq, and, or, ilike, sql, inArray, desc, type SQL } from "drizzle-orm";
 import {
   CreateShopProductBody,
   UpdateShopProductBody,
@@ -41,8 +41,6 @@ function serializeProduct(p: typeof shopProductsTable.$inferSelect) {
     belowMinStock: p.stock < p.minStock,
   };
 }
-
-router.get("/shop/products", async (req, res): Promise<void> => {
   const conditions: SQL[] = [];
   const q = req.query;
   if (typeof q.category === "string" && q.category)
@@ -203,6 +201,10 @@ async function loadOrders(where?: SQL) {
 
 router.get("/shop/orders", async (req, res): Promise<void> => {
   const user = req.currentUser!;
+
+  const includeInactive = MANAGER_ROLES.includes(user.role) && req.query.includeInactive === "true";
+
+  const includeInactive = MANAGER_ROLES.includes(user.role) && req.query.includeInactive === "true";
   const conditions: SQL[] = [];
   if (!MANAGER_ROLES.includes(user.role)) {
     conditions.push(eq(shopOrdersTable.requesterId, user.id));
@@ -220,7 +222,9 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
   }
   const user = req.currentUser!;
 
-  // Aggregeer dubbele productregels zodat de voorraadcheck op de totale vraag gebeurt.
+  const includeInactive = MANAGER_ROLES.includes(user.role) && req.query.includeInactive === "true";
+
+  const includeInactive = MANAGER_ROLES.includes(user.role) && req.query.includeInactive === "true";
   const qtyByProduct = new Map<number, number>();
   for (const line of parsed.data.lines) {
     qtyByProduct.set(line.productId, (qtyByProduct.get(line.productId) ?? 0) + line.quantity);
@@ -276,7 +280,6 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
   // voor dezelfde afdeling/jaar serialiseren: de tweede request wacht op de eerste
   // voordat hij de gecommitteerde + openstaande som herberekent.
   const order = await db.transaction(async (tx) => {
-    // Lock the budget row for this department/year for the duration of the transaction.
     const [budgetRow] = await tx
       .select()
       .from(budgetsTable)
@@ -285,11 +288,8 @@ router.post("/shop/orders", async (req, res): Promise<void> => {
 
     let budgetExceeded = false;
     if (budgetRow) {
-      // Filter op hetzelfde jaar als het gevonden budget om historische boekjaren uit te sluiten.
       const yearStart = new Date(`${currentYear}-01-01T00:00:00Z`);
       const yearEnd = new Date(`${currentYear + 1}-01-01T00:00:00Z`);
-      // Tel zowel goedgekeurde/bestelde/geleverde als openstaande (ingediend) bestellingen mee
-      // zodat gelijktijdige aanvragen het budget niet samen kunnen overschrijden.
       const RESERVED_STATUSES = [...SPENT_STATUSES, "ingediend"];
       const committed = await tx
         .select({ total: sql<number>`coalesce(sum(${shopOrdersTable.totalAmount}), 0)` })

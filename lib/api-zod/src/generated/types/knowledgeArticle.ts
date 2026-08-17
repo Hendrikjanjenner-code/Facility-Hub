@@ -12,6 +12,7 @@ export interface KnowledgeArticle {
   body: string;
   category: string;
   tags: string[];
+  ticketCategoryIds: number[];
   createdAt: string;
   updatedAt: string;
 }

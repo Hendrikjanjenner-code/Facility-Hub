@@ -2125,6 +2125,7 @@ export const ListKnowledgeArticlesResponseItem = zod.object({
   "body": zod.string(),
   "category": zod.string(),
   "tags": zod.array(zod.string()),
+  "ticketCategoryIds": zod.array(zod.int()),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -2140,7 +2141,8 @@ export const CreateKnowledgeArticleBody = zod.object({
   "title": zod.string().min(1),
   "body": zod.string().min(1),
   "category": zod.string(),
-  "tags": zod.array(zod.string()).optional()
+  "tags": zod.array(zod.string()).optional(),
+  "ticketCategoryIds": zod.array(zod.int()).optional()
 })
 
 export const CreateKnowledgeArticleResponse = zod.object({
@@ -2149,6 +2151,7 @@ export const CreateKnowledgeArticleResponse = zod.object({
   "body": zod.string(),
   "category": zod.string(),
   "tags": zod.array(zod.string()),
+  "ticketCategoryIds": zod.array(zod.int()),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })
@@ -2158,7 +2161,8 @@ export const CreateKnowledgeArticleResponse = zod.object({
  * @summary Quick search suggestions (max 5) for the melding form
  */
 export const SuggestKnowledgeArticlesQueryParams = zod.object({
-  "q": zod.coerce.string()
+  "q": zod.coerce.string().optional(),
+  "ticketCategoryId": zod.coerce.number().int().optional()
 })
 
 export const SuggestKnowledgeArticlesResponseItem = zod.object({
@@ -2167,6 +2171,7 @@ export const SuggestKnowledgeArticlesResponseItem = zod.object({
   "body": zod.string(),
   "category": zod.string(),
   "tags": zod.array(zod.string()),
+  "ticketCategoryIds": zod.array(zod.int()),
   "createdAt": zod.string(),
   "updatedAt": zod.string()
 })

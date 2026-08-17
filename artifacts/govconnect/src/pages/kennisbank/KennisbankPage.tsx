@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useListKnowledgeArticles, useCreateKnowledgeArticle, useGetCurrentUser, getListKnowledgeArticlesQueryKey, KnowledgeArticle } from "@workspace/api-client-react";
+import { useListKnowledgeArticles, useCreateKnowledgeArticle, useGetCurrentUser, useListTicketCategories, getListKnowledgeArticlesQueryKey, KnowledgeArticle } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { BookOpen, Search, Plus, Tag, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = ["algemeen", "klimaat", "schoonmaak", "technisch", "sanitair", "veiligheid", "reserveringen", "catering"];
@@ -69,22 +70,30 @@ function NewArticleDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const create = useCreateKnowledgeArticle();
+  const { data: ticketCategories } = useListTicketCategories();
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [category, setCategory] = useState("algemeen");
   const [tagsInput, setTagsInput] = useState("");
+  const [selectedTicketCategoryIds, setSelectedTicketCategoryIds] = useState<number[]>([]);
+
+  const toggleTicketCategory = (id: number) => {
+    setSelectedTicketCategoryIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+  };
 
   const handleSubmit = () => {
     if (!title.trim() || !body.trim()) return;
     const tags = tagsInput.split(",").map((t) => t.trim()).filter(Boolean);
     create.mutate(
-      { data: { title: title.trim(), body: body.trim(), category, tags } },
+      { data: { title: title.trim(), body: body.trim(), category, tags, ticketCategoryIds: selectedTicketCategoryIds } },
       {
         onSuccess: () => {
           toast({ title: "Artikel aangemaakt" });
           queryClient.invalidateQueries({ queryKey: ["/api/knowledge-articles"] });
           onOpenChange(false);
-          setTitle(""); setBody(""); setTagsInput("");
+          setTitle(""); setBody(""); setTagsInput(""); setSelectedTicketCategoryIds([]);
         },
         onError: () => toast({ variant: "destructive", title: "Fout", description: "Kon artikel niet aanmaken." }),
       },
@@ -93,7 +102,7 @@ function NewArticleDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Nieuw kennisbankartikel</DialogTitle>
         </DialogHeader>
@@ -127,6 +136,25 @@ function NewArticleDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
             <Label>Tags (komma gescheiden)</Label>
             <Input value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} placeholder="bijv. verwarming, storing, klimaat" />
           </div>
+          {ticketCategories && ticketCategories.length > 0 && (
+            <div className="space-y-1.5">
+              <Label>Koppel aan meldingscategorieën</Label>
+              <p className="text-xs text-muted-foreground">
+                Dit artikel verschijnt automatisch als suggestie wanneer een melder een van deze categorieën kiest.
+              </p>
+              <div className="rounded-md border p-3 space-y-2 max-h-40 overflow-y-auto">
+                {ticketCategories.map((tc) => (
+                  <label key={tc.id} className="flex items-center gap-2 cursor-pointer text-sm">
+                    <Checkbox
+                      checked={selectedTicketCategoryIds.includes(tc.id)}
+                      onCheckedChange={() => toggleTicketCategory(tc.id)}
+                    />
+                    <span>{tc.name}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Annuleren</Button>

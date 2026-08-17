@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, knowledgeArticlesTable } from "@workspace/db";
-import { eq, ilike, or, desc, type SQL } from "drizzle-orm";
+import { eq, ilike, or, desc, sql, type SQL } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
 
 const router: IRouter = Router();
@@ -15,30 +15,58 @@ function serialize(a: typeof knowledgeArticlesTable.$inferSelect) {
     body: a.body,
     category: a.category,
     tags: (a.tags as string[]) ?? [],
+    ticketCategoryIds: (a.ticketCategoryIds as number[]) ?? [],
     createdAt: a.createdAt.toISOString(),
     updatedAt: a.updatedAt.toISOString(),
   };
 }
 
-// Quick suggest (max 5) – called while typing in the melding form
+// Quick suggest (max 5) – called while typing in the melding form, or on category select
 router.get("/knowledge-articles/suggest", async (req, res): Promise<void> => {
   const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  const ticketCategoryId =
+    typeof req.query.ticketCategoryId === "string"
+      ? parseInt(req.query.ticketCategoryId, 10)
+      : null;
+
+  // Need at least one meaningful filter
   if (!q || q.length < 2) {
+    if (ticketCategoryId === null || isNaN(ticketCategoryId)) {
+      res.json([]);
+      return;
+    }
+  }
+
+  const conditions: SQL[] = [];
+
+  if (q && q.length >= 2) {
+    const pattern = `%${q}%`;
+    const textCond = or(
+      ilike(knowledgeArticlesTable.title, pattern),
+      ilike(knowledgeArticlesTable.body, pattern),
+    );
+    if (textCond) conditions.push(textCond);
+  }
+
+  if (ticketCategoryId !== null && !isNaN(ticketCategoryId)) {
+    // jsonb @> checks if the array contains the value
+    conditions.push(
+      sql`${knowledgeArticlesTable.ticketCategoryIds} @> ${JSON.stringify([ticketCategoryId])}::jsonb`,
+    );
+  }
+
+  if (conditions.length === 0) {
     res.json([]);
     return;
   }
-  const pattern = `%${q}%`;
+
   const rows = await db
     .select()
     .from(knowledgeArticlesTable)
-    .where(
-      or(
-        ilike(knowledgeArticlesTable.title, pattern),
-        ilike(knowledgeArticlesTable.body, pattern),
-      ),
-    )
+    .where(conditions.length === 1 ? conditions[0] : or(...conditions))
     .orderBy(desc(knowledgeArticlesTable.updatedAt))
     .limit(5);
+
   res.json(rows.map(serialize));
 });
 
@@ -88,11 +116,12 @@ router.post("/knowledge-articles", async (req, res): Promise<void> => {
     res.status(403).json({ message: "Geen toegang" });
     return;
   }
-  const { title, body, category, tags } = req.body as {
+  const { title, body, category, tags, ticketCategoryIds } = req.body as {
     title?: string;
     body?: string;
     category?: string;
     tags?: string[];
+    ticketCategoryIds?: number[];
   };
   if (!title?.trim() || !body?.trim() || !category?.trim()) {
     res.status(400).json({ message: "Titel, inhoud en categorie zijn verplicht" });
@@ -105,6 +134,7 @@ router.post("/knowledge-articles", async (req, res): Promise<void> => {
       body: body.trim(),
       category: category.trim(),
       tags: Array.isArray(tags) ? tags : [],
+      ticketCategoryIds: Array.isArray(ticketCategoryIds) ? ticketCategoryIds : [],
     })
     .returning();
   res.status(201).json(serialize(created!));

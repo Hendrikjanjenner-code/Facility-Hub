@@ -7,5 +7,6 @@
  */
 
 export type SuggestKnowledgeArticlesParams = {
-q: string;
+q?: string;
+ticketCategoryId?: number;
 };

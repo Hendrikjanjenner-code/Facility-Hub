@@ -6,6 +6,7 @@ export const knowledgeArticlesTable = pgTable("knowledge_articles", {
   body: text("body").notNull(),
   category: text("category").notNull(),
   tags: jsonb("tags").notNull().default([]),
+  ticketCategoryIds: jsonb("ticket_category_ids").notNull().default([]),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
