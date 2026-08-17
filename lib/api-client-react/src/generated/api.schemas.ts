@@ -709,6 +709,10 @@ export interface DashboardSummary {
   myReservationsToday: number;
   assetCount: number;
   roomCount: number;
+  /** Aantal bouwdelen met conditiescore >= 4 */
+  mjopSlechteConditie: number;
+  /** Aantal bouwdelen die binnen 5 jaar het einde van hun levensduur bereiken */
+  mjopBijnaEol: number;
 }
 
 export interface ActivityItem {
@@ -1139,6 +1143,13 @@ export interface Bouwdeel {
   /** @nullable */
   laatsteMetingDatum?: string | null;
   openTaken: number;
+  /**
+     * Jaar waarin het einde van de levensduur wordt bereikt
+     * @nullable
+     */
+  lifespanEndYear?: number | null;
+  /** True als lifespanEndYear <= huidig jaar + 5 */
+  nearEndOfLife: boolean;
 }
 
 export interface BouwdeelInput {
@@ -1175,6 +1186,18 @@ export interface Gebrek {
   photoPath?: string | null;
 }
 
+export type ConditiemetingSuggestionType = typeof ConditiemetingSuggestionType[keyof typeof ConditiemetingSuggestionType];
+
+
+export const ConditiemetingSuggestionType = {
+  maak_taak: 'maak_taak',
+} as const;
+
+export interface ConditiemetingSuggestion {
+  type: ConditiemetingSuggestionType;
+  message: string;
+}
+
 export interface Conditiemeting {
   id: number;
   bouwdeelId: number;
@@ -1187,6 +1210,8 @@ export interface Conditiemeting {
   toelichting?: string | null;
   gebreken: Gebrek[];
   measuredAt: string;
+  /** Present when score >= 4; advises creating an MJOP task */
+  suggestion?: ConditiemetingSuggestion | null;
 }
 
 export interface ConditiemetingInput {

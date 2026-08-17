@@ -7,6 +7,8 @@ import {
   assetsTable,
   roomsTable,
   usersTable,
+  bouwdelenTable,
+  conditiemetingenTable,
 } from "@workspace/db";
 import { eq, and, or, desc, notInArray, sql } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
@@ -15,6 +17,7 @@ const router: IRouter = Router();
 router.use(requireAuth);
 
 const OPEN_STATUSES = ["nieuw", "in_behandeling", "wacht_op_info", "ingepland"];
+const MJOP_ROLES = ["facilitair_manager", "beheerder"];
 
 function todayStr(): string {
   const now = new Date();
@@ -71,6 +74,8 @@ router.get("/dashboard/summary", async (req, res): Promise<void> => {
     myResToday,
     assetCount,
     roomCount,
+    mjopSlechteConditie,
+    mjopBijnaEol,
   ] = await Promise.all([
     db.select({ c: sql<number>`count(*)::int` }).from(ticketsTable).where(openCond),
     db
@@ -145,6 +150,28 @@ router.get("/dashboard/summary", async (req, res): Promise<void> => {
       ? db.select({ c: sql<number>`count(*)::int` }).from(assetsTable)
       : Promise.resolve([{ c: 0 }]),
     db.select({ c: sql<number>`count(*)::int` }).from(roomsTable),
+    // MJOP: bouwdelen with poor condition (latest score >= 4) — only for MJOP roles
+    MJOP_ROLES.includes(user.role)
+      ? db
+          .select({ c: sql<number>`count(*)::int` })
+          .from(bouwdelenTable)
+          .where(
+            sql`(
+              select cm.score from ${conditiemetingenTable} cm
+              where cm.bouwdeel_id = ${bouwdelenTable.id}
+              order by cm.measured_at desc limit 1
+            ) >= 4`,
+          )
+      : Promise.resolve([{ c: 0 }]),
+    // MJOP: bouwdelen near end of life (within 5 years)
+    MJOP_ROLES.includes(user.role)
+      ? db
+          .select({ c: sql<number>`count(*)::int` })
+          .from(bouwdelenTable)
+          .where(
+            sql`${bouwdelenTable.installYear} + ${bouwdelenTable.expectedLifespanYears} <= extract(year from now())::int + 5`,
+          )
+      : Promise.resolve([{ c: 0 }]),
   ]);
 
   res.json({
@@ -160,6 +187,8 @@ router.get("/dashboard/summary", async (req, res): Promise<void> => {
     myReservationsToday: myResToday[0]?.c ?? 0,
     assetCount: assetCount[0]?.c ?? 0,
     roomCount: roomCount[0]?.c ?? 0,
+    mjopSlechteConditie: mjopSlechteConditie[0]?.c ?? 0,
+    mjopBijnaEol: mjopBijnaEol[0]?.c ?? 0,
   });
 });
 

@@ -29,7 +29,8 @@ import {
   Building2, 
   Activity,
   ArrowRight,
-  Star
+  Star,
+  Wrench
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -171,6 +172,16 @@ export default function DashboardPage() {
             value={summary.assetCount} 
             icon={Building2} 
             description="Geregistreerd in systeem" 
+          />
+        )}
+
+        {(user.role === 'facilitair_manager' || user.role === 'beheerder') && (
+          <StatCard
+            title="Bouwdelen slechte conditie"
+            value={summary.mjopSlechteConditie ?? 0}
+            icon={Wrench}
+            danger={true}
+            description="Score ≥ 4 (matig t/m zeer slecht)"
           />
         )}
       </div>

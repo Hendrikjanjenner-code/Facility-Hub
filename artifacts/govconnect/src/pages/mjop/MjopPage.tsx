@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -24,6 +24,8 @@ import {
   Ticket,
   Euro,
   ListChecks,
+  AlertTriangle,
+  Clock,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -342,10 +344,10 @@ function NieuwBouwdeelDialog() {
   );
 }
 
-function NieuweTaakDialog() {
+function NieuweTaakDialog({ initialBouwdeelId, onClose }: { initialBouwdeelId?: number; onClose?: () => void }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!initialBouwdeelId);
   const { data: bouwdelen } = useListBouwdelen();
   const createTaak = useCreateMjopTaak();
 
@@ -356,8 +358,16 @@ function NieuweTaakDialog() {
       taskType: "onderhoud",
       plannedYear: new Date().getFullYear() + 1,
       estimatedCost: 0,
+      bouwdeelId: initialBouwdeelId,
     },
   });
+
+  useEffect(() => {
+    if (initialBouwdeelId) {
+      setOpen(true);
+      form.setValue("bouwdeelId", initialBouwdeelId);
+    }
+  }, [initialBouwdeelId, form]);
 
   const onSubmit = (values: z.infer<typeof taakSchema>) => {
     createTaak.mutate(
@@ -366,6 +376,7 @@ function NieuweTaakDialog() {
         onSuccess: () => {
           toast({ title: "MJOP-taak toegevoegd" });
           setOpen(false);
+          onClose?.();
           form.reset();
           queryClient.invalidateQueries({ queryKey: ["/api/mjop-taken"] });
           queryClient.invalidateQueries({ queryKey: ["/api/mjop/jaarplanning"] });
@@ -518,6 +529,9 @@ function NieuweTaakDialog() {
 
 export default function MjopPage() {
   const [, setLocation] = useLocation();
+  const queryString = useSearch();
+  const urlParams = new URLSearchParams(queryString);
+  const autoOpenBouwdeelId = urlParams.get("bouwdeelId") ? Number(urlParams.get("bouwdeelId")) : undefined;
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: user } = useGetCurrentUser();
@@ -575,7 +589,10 @@ export default function MjopPage() {
         </div>
         {canManage && (
           <div className="flex gap-2">
-            <NieuweTaakDialog />
+            <NieuweTaakDialog
+              initialBouwdeelId={autoOpenBouwdeelId}
+              onClose={() => setLocation("/mjop", { replace: true })}
+            />
             <NieuwBouwdeelDialog />
           </div>
         )}
@@ -691,11 +708,26 @@ export default function MjopPage() {
                         <span>Vervanging: {euro(b.replacementCost)}</span>
                       </div>
                     </div>
-                    {b.openTaken > 0 && (
-                      <div className="mt-3 text-xs font-medium text-primary">
-                        {b.openTaken} open {b.openTaken === 1 ? "taak" : "taken"}
-                      </div>
-                    )}
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {b.openTaken > 0 && (
+                        <span className="text-xs font-medium text-primary">
+                          {b.openTaken} open{" "}
+                          {b.openTaken === 1 ? "taak" : "taken"}
+                        </span>
+                      )}
+                      {b.nearEndOfLife && (
+                        <span className="flex items-center gap-1 text-xs font-medium text-amber-700">
+                          <Clock className="h-3 w-3" />
+                          EOL {b.lifespanEndYear}
+                        </span>
+                      )}
+                      {(b.laatsteScore ?? 0) >= 4 && (
+                        <span className="flex items-center gap-1 text-xs font-medium text-red-700">
+                          <AlertTriangle className="h-3 w-3" />
+                          Slechte conditie
+                        </span>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}

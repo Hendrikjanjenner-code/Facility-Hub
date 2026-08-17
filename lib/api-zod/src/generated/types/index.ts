@@ -31,6 +31,8 @@ export * from './cateringOrderLineInput';
 export * from './cateringProductTotal';
 export * from './conditiemeting';
 export * from './conditiemetingInput';
+export * from './conditiemetingSuggestion';
+export * from './conditiemetingSuggestionType';
 export * from './contract';
 export * from './contractDocument';
 export * from './contractDocumentInput';

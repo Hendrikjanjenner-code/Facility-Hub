@@ -293,7 +293,7 @@ function VlekEditDialog({
         data: {
           department: department.trim() === "" ? null : department.trim(),
           functionType: functionType.trim() || undefined,
-          updatedAt: room.updatedAt,
+          updatedAt: new Date().toISOString(),
         },
       },
       {

@@ -5,6 +5,7 @@
  * GovConnect 2.0 API
  * OpenAPI spec version: 0.1.0
  */
+import type { ConditiemetingSuggestion } from './conditiemetingSuggestion';
 import type { Gebrek } from './gebrek';
 
 export interface Conditiemeting {
@@ -19,4 +20,6 @@ export interface Conditiemeting {
   toelichting?: string | null;
   gebreken: Gebrek[];
   measuredAt: string;
+  /** Present when score >= 4; advises creating an MJOP task */
+  suggestion?: ConditiemetingSuggestion | null;
 }

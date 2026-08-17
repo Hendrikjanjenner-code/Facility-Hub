@@ -54,6 +54,8 @@ const openTakenSql = sql<number>`(
   where mt.bouwdeel_id = ${bouwdelenTable.id} and mt.status != 'afgerond'
 )`;
 
+const EOL_WARNING_YEARS = 5;
+
 function serializeBouwdeel(r: {
   b: Bouwdeel;
   buildingName: string | null;
@@ -63,6 +65,8 @@ function serializeBouwdeel(r: {
   laatsteMetingDatum: string | null;
   openTaken: number;
 }) {
+  const lifespanEndYear = r.b.installYear + r.b.expectedLifespanYears;
+  const nearEndOfLife = lifespanEndYear <= new Date().getFullYear() + EOL_WARNING_YEARS;
   return {
     id: r.b.id,
     code: r.b.code,
@@ -82,6 +86,8 @@ function serializeBouwdeel(r: {
     laatsteScore: r.laatsteScore,
     laatsteMetingDatum: r.laatsteMetingDatum,
     openTaken: r.openTaken,
+    lifespanEndYear,
+    nearEndOfLife,
   };
 }
 
@@ -246,6 +252,17 @@ router.post(
         gebreken,
       })
       .returning();
+
+    const scoreLabel = ["", "Uitstekend", "Goed", "Redelijk", "Matig", "Slecht", "Zeer slecht"][created!.score] ?? "";
+    const suggestion =
+      created!.score >= 4
+        ? {
+            bouwdeelId: bouwdeel.id,
+            bouwdeelName: bouwdeel.name,
+            message: `Conditiescore ${created!.score} (${scoreLabel}) — overweeg een MJOP-onderhoudstaak aan te maken voor ${bouwdeel.name}.`,
+          }
+        : null;
+
     res.status(201).json({
       id: created!.id,
       bouwdeelId: created!.bouwdeelId,
@@ -255,6 +272,7 @@ router.post(
       toelichting: created!.toelichting,
       gebreken: created!.gebreken ?? [],
       measuredAt: created!.measuredAt.toISOString(),
+      suggestion,
     });
   },
 );

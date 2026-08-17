@@ -92,7 +92,7 @@ function DossierEditDialog({ room }: { room: Room }) {
           areaBvoM2: areaBvo === "" ? null : Number(areaBvo),
           department: department === "" ? null : department,
           functionType: functionType || undefined,
-          updatedAt: room.updatedAt,
+          updatedAt: new Date().toISOString(),
         },
       },
       {

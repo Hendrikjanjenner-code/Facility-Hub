@@ -38,4 +38,11 @@ export interface Bouwdeel {
   /** @nullable */
   laatsteMetingDatum?: string | null;
   openTaken: number;
+  /**
+     * Jaar waarin het einde van de levensduur wordt bereikt
+     * @nullable
+     */
+  lifespanEndYear?: number | null;
+  /** True als lifespanEndYear <= huidig jaar + 5 */
+  nearEndOfLife: boolean;
 }

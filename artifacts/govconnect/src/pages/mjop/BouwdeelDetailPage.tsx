@@ -11,6 +11,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  AlertTriangle,
   ArrowLeft,
   Building2,
   Camera,
@@ -31,6 +32,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -64,7 +66,13 @@ const API_BASE = "/api";
 
 type DraftGebrek = Gebrek & { uploading?: boolean };
 
-function NieuweMetingDialog({ bouwdeelId }: { bouwdeelId: number }) {
+function NieuweMetingDialog({
+  bouwdeelId,
+  onBadScore,
+}: {
+  bouwdeelId: number;
+  onBadScore?: (suggestion: { type: string; message: string }) => void;
+}) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -136,7 +144,7 @@ function NieuweMetingDialog({ bouwdeelId }: { bouwdeelId: number }) {
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: (meting) => {
           toast({ title: "Conditiemeting vastgelegd" });
           setOpen(false);
           reset();
@@ -147,6 +155,9 @@ function NieuweMetingDialog({ bouwdeelId }: { bouwdeelId: number }) {
           queryClient.invalidateQueries({
             queryKey: [`/api/bouwdelen/${bouwdeelId}`],
           });
+          if (meting.suggestion) {
+            onBadScore?.(meting.suggestion);
+          }
         },
         onError: () =>
           toast({ title: "Vastleggen mislukt", variant: "destructive" }),
@@ -338,6 +349,10 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
   const { data: metingen } = useListConditiemetingen(bouwdeelId);
   const { data: taken } = useListMjopTaken({ bouwdeelId });
   const convert = useConvertMjopTaakToTicket();
+  const [metingSuggestion, setMetingSuggestion] = useState<{
+    type: string;
+    message: string;
+  } | null>(null);
 
   const canManage =
     user?.role === "facilitair_manager" || user?.role === "beheerder";
@@ -412,8 +427,43 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
             </p>
           </div>
         </div>
-        {canManage && <NieuweMetingDialog bouwdeelId={bouwdeelId} />}
+        {canManage && (
+          <NieuweMetingDialog
+            bouwdeelId={bouwdeelId}
+            onBadScore={setMetingSuggestion}
+          />
+        )}
       </div>
+
+      {metingSuggestion && (
+        <Alert className="border-amber-300 bg-amber-50 text-amber-900">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="flex items-center justify-between gap-4">
+            <span>{metingSuggestion.message}</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-amber-400 bg-white text-amber-900 hover:bg-amber-100"
+                onClick={() => {
+                  setMetingSuggestion(null);
+                  setLocation(`/mjop?bouwdeelId=${metingSuggestion.bouwdeelId}`);
+                }}
+              >
+                MJOP-taak aanmaken
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-amber-700 hover:bg-amber-100"
+                onClick={() => setMetingSuggestion(null)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Card>
         <CardContent className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
