@@ -7,6 +7,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
+import { suppliersTable } from "./contracts";
 
 export const shopProductsTable = pgTable("shop_products", {
   id: serial("id").primaryKey(),
@@ -18,6 +19,7 @@ export const shopProductsTable = pgTable("shop_products", {
   stock: integer("stock").notNull().default(0),
   minStock: integer("min_stock").notNull().default(0),
   active: integer("active").notNull().default(1), // 1 = actief, 0 = inactief
+  supplierId: integer("supplier_id").references(() => suppliersTable.id), // gekoppelde leverancier
 });
 
 export const budgetsTable = pgTable("budgets", {
@@ -44,6 +46,10 @@ export const shopOrdersTable = pgTable("shop_orders", {
     .notNull()
     .defaultNow(),
   decidedAt: timestamp("decided_at", { withTimezone: true }),
+  // Orderkoppeling leverancier
+  supplierId: integer("supplier_id").references(() => suppliersTable.id),
+  supplierStatus: text("supplier_status"), // null | 'verstuurd' | 'verwerkt'
+  sentToSupplierAt: timestamp("sent_to_supplier_at", { withTimezone: true }),
 });
 
 export const shopOrderLinesTable = pgTable("shop_order_lines", {
@@ -58,6 +64,11 @@ export const shopOrderLinesTable = pgTable("shop_order_lines", {
   unitPrice: real("unit_price").notNull(),
 });
 
+/** Goedkeuringsdrempel: bestellingen op/onder dit bedrag worden direct goedgekeurd. */
+export const approvalThresholdTable = pgTable("approval_threshold", {
+  id: serial("id").primaryKey(),
+  thresholdAmount: real("threshold_amount").notNull().default(0), // 0 = altijd manager-goedkeuring
+});
 export type ShopProduct = typeof shopProductsTable.$inferSelect;
 export type Budget = typeof budgetsTable.$inferSelect;
 export type ShopOrder = typeof shopOrdersTable.$inferSelect;

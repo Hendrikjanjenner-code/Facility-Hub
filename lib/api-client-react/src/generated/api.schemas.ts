@@ -784,6 +784,10 @@ export interface ShopProduct {
   stock: number;
   minStock: number;
   belowMinStock: boolean;
+  /** @nullable */
+  supplierId?: number | null;
+  /** @nullable */
+  supplierName?: string | null;
 }
 
 export interface ShopProductInput {
@@ -800,6 +804,8 @@ export interface ShopProductInput {
   stock?: number | null;
   /** @nullable */
   minStock?: number | null;
+  /** @nullable */
+  supplierId?: number | null;
 }
 
 export interface ShopProductUpdate {
@@ -809,6 +815,8 @@ export interface ShopProductUpdate {
   price?: number;
   stock?: number;
   minStock?: number;
+  /** @nullable */
+  supplierId?: number | null;
 }
 
 export interface ShopOrderLine {
@@ -838,6 +846,17 @@ export interface ShopOrder {
   approverName?: string | null;
   /** @nullable */
   decisionNote?: string | null;
+  /** @nullable */
+  supplierId?: number | null;
+  /** @nullable */
+  supplierName?: string | null;
+  /**
+     * null | verstuurd | verwerkt
+     * @nullable
+     */
+  supplierStatus?: string | null;
+  /** @nullable */
+  sentToSupplierAt?: string | null;
   lines: ShopOrderLine[];
   createdAt: string;
   /** @nullable */
@@ -862,6 +881,17 @@ export interface ShopOrderUpdate {
   decisionNote?: string | null;
 }
 
+export interface ContractDocument {
+  id: number;
+  contractId: number;
+  fileName: string;
+  objectPath: string;
+  /** @nullable */
+  uploadedById?: number | null;
+  /** @nullable */
+  uploadedByName?: string | null;
+  createdAt: string;
+}
 /**
  * Whether orders that exceed the budget are blocked (409) or just marked
  */
@@ -897,6 +927,13 @@ export const BudgetPolicyUpdateOverBudgetPolicy = {
 
 export interface BudgetPolicyUpdate {
   overBudgetPolicy: BudgetPolicyUpdateOverBudgetPolicy;
+}
+
+export interface ContractDocumentInput {
+  /** @minLength 1 */
+  fileName: string;
+  /** @minLength 1 */
+  objectPath: string;
 }
 
 export interface CateringProductTotal {
@@ -1274,6 +1311,9 @@ status?: string;
 expiringWithinDays?: number;
 };
 
+export type SendOrderToSupplierBody = {
+  supplierId: number;
+};
 export type ListShopProductsParams = {
 category?: string;
 search?: string;
@@ -1327,9 +1367,51 @@ q?: string;
 ticketCategoryId?: number;
 };
 
+export interface ApprovalThresholdInput {
+  /** @minimum 0 */
+  thresholdAmount: number;
+}
+
 
 export interface CateringDailySummary {
   date: string;
   reservations: CateringDailyReservation[];
   totals: CateringProductTotal[];
+}
+
+export interface ApprovalThreshold {
+  /** Bestellingen op/onder dit bedrag worden direct goedgekeurd (0 = altijd manager) */
+  thresholdAmount: number;
+}
+
+export interface SupplierReview {
+  id: number;
+  supplierId: number;
+  /** @nullable */
+  reviewerId?: number | null;
+  /** @nullable */
+  reviewerName?: string | null;
+  year: number;
+  /** 1–5 */
+  score: number;
+  /** @nullable */
+  comment?: string | null;
+  createdAt: string;
+}
+
+export interface SupplierReviewInput {
+  year: number;
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  score: number;
+  /** @nullable */
+  comment?: string | null;
+}
+
+export interface SupplierReviewsResponse {
+  /** @nullable */
+  averageScore: number | null;
+  reviews: SupplierReview[];
 }

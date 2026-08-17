@@ -11,7 +11,7 @@
  * Beide worden als "referenced" beschouwd zodat actieve foto's nooit worden verwijderd.
  */
 
-import { db, buildingDocumentsTable, conditiemetingenTable } from "@workspace/db";
+import { db, buildingDocumentsTable, contractDocumentsTable, conditiemetingenTable } from "@workspace/db";
 import { sql } from "drizzle-orm";
 import { ObjectStorageService } from "./objectStorage";
 import { logger } from "./logger";
@@ -42,6 +42,11 @@ export async function cleanupOrphanedDocumentUploads(): Promise<void> {
     .select({ objectPath: buildingDocumentsTable.objectPath })
     .from(buildingDocumentsTable);
 
+  // Haal alle objectpaden op die zijn geregistreerd als contractdocument (digitale kluis).
+  const contractDocRefs = await db
+    .select({ objectPath: contractDocumentsTable.objectPath })
+    .from(contractDocumentsTable);
+
   // Haal alle photoPath-waarden op uit de MJOP-conditiemetingen (JSONB-array).
   // De SQL-functie jsonb_array_elements pakt elk gebrek-object uit de array;
   // ->> geeft de waarde als tekst.
@@ -57,6 +62,7 @@ export async function cleanupOrphanedDocumentUploads(): Promise<void> {
 
   const referencedPaths = new Set<string>([
     ...docRefs.map((r) => r.objectPath),
+    ...contractDocRefs.map((r) => r.objectPath),
     ...mjopRefs.rows.map((r) => r.photo_path),
   ]);
 

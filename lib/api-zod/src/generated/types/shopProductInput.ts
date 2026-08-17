@@ -20,4 +20,6 @@ export interface ShopProductInput {
   stock?: number | null;
   /** @nullable */
   minStock?: number | null;
+  /** @nullable */
+  supplierId?: number | null;
 }

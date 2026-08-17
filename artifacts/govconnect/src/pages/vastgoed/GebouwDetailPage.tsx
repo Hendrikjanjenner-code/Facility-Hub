@@ -248,7 +248,7 @@ function VlekEditDialog({
         </div>
         <div className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground space-y-0.5">
           <div>Oppervlakte: {room.areaM2 ?? "–"} m²</div>
-          {room.areaVvoM2 != null && <div>VVO: {room.areaVvoM2} m²</div>}
+          {room.areaM2 != null && <div>Opp: {room.areaM2} m²</div>}
         </div>
       </div>
       <DialogFooter>
@@ -283,7 +283,7 @@ function Vlekkenplan({
     for (const r of rooms) {
       const key = (colorBy === "department" ? r.department : r.functionType) ?? "Onbekend";
       if (!map.has(key)) map.set(key, PALETTE[map.size % PALETTE.length]!);
-      vvoByKey.set(key, (vvoByKey.get(key) ?? 0) + (r.areaVvoM2 ?? r.areaM2 ?? 0));
+      vvoByKey.set(key, (vvoByKey.get(key) ?? 0) + (r.areaM2 ?? 0));
     }
     return {
       colorMap: map,

@@ -1237,6 +1237,194 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Contract'
+  /contracts/{id}/documents:
+    get:
+      operationId: listContractDocuments
+      tags:
+        - contracts
+      summary: List PDF documents in the contract vault
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContractDocument'
+    post:
+      operationId: createContractDocument
+      tags:
+        - contracts
+      summary: Register a document after uploading via /storage/document-uploads
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContractDocumentInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractDocument'
+  /contracts/{id}/documents/{docId}:
+    delete:
+      operationId: deleteContractDocument
+      tags:
+        - contracts
+      summary: Remove a document from the contract vault
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: docId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+  /suppliers/{id}/reviews:
+    get:
+      operationId: listSupplierReviews
+      tags:
+        - contracts
+      summary: List reviews for a supplier with average score
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Reviews and aggregate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierReviewsResponse'
+    post:
+      operationId: createSupplierReview
+      tags:
+        - contracts
+      summary: Add a yearly review for a supplier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SupplierReviewInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplierReview'
+  /shop/approval-threshold:
+    get:
+      operationId: getApprovalThreshold
+      tags:
+        - shop
+      summary: Get the current auto-approval threshold amount
+      responses:
+        '200':
+          description: Threshold
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalThreshold'
+    put:
+      operationId: updateApprovalThreshold
+      tags:
+        - shop
+      summary: Update the auto-approval threshold (manager only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalThresholdInput'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalThreshold'
+  /shop/orders/{id}/send-to-supplier:
+    post:
+      operationId: sendOrderToSupplier
+      tags:
+        - shop
+      summary: Mark order as sent to supplier (sets supplierStatus=verstuurd)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                supplierId:
+                  type: integer
+              required:
+                - supplierId
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShopOrder'
+  /shop/orders/{id}/supplier-delivered:
+    post:
+      operationId: supplierMarkDelivered
+      tags:
+        - shop
+      summary: Supplier marks order as processed/delivered
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShopOrder'
   /shop/products:
     get:
       operationId: listShopProducts
@@ -3582,6 +3770,14 @@ components:
           type: integer
         belowMinStock:
           type: boolean
+        supplierId:
+          type:
+            - integer
+            - 'null'
+        supplierName:
+          type:
+            - string
+            - 'null'
       required:
         - id
         - name
@@ -3618,6 +3814,10 @@ components:
           type:
             - integer
             - 'null'
+        supplierId:
+          type:
+            - integer
+            - 'null'
       required:
         - name
         - category
@@ -3637,6 +3837,10 @@ components:
           type: integer
         minStock:
           type: integer
+        supplierId:
+          type:
+            - integer
+            - 'null'
     ShopOrderLine:
       type: object
       properties:
@@ -3692,6 +3896,23 @@ components:
           type:
             - string
             - 'null'
+        supplierId:
+          type:
+            - integer
+            - 'null'
+        supplierName:
+          type:
+            - string
+            - 'null'
+        supplierStatus:
+          type:
+            - string
+            - 'null'
+          description: 'null | verstuurd | verwerkt'
+        sentToSupplierAt:
+          type:
+            - string
+            - 'null'
         lines:
           type: array
           items:
@@ -3743,6 +3964,123 @@ components:
             - 'null'
       required:
         - status
+    ContractDocument:
+      type: object
+      properties:
+        id:
+          type: integer
+        contractId:
+          type: integer
+        fileName:
+          type: string
+        objectPath:
+          type: string
+        uploadedById:
+          type:
+            - integer
+            - 'null'
+        uploadedByName:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+      required:
+        - id
+        - contractId
+        - fileName
+        - objectPath
+        - createdAt
+    ContractDocumentInput:
+      type: object
+      properties:
+        fileName:
+          type: string
+          minLength: 1
+        objectPath:
+          type: string
+          minLength: 1
+      required:
+        - fileName
+        - objectPath
+    SupplierReview:
+      type: object
+      properties:
+        id:
+          type: integer
+        supplierId:
+          type: integer
+        reviewerId:
+          type:
+            - integer
+            - 'null'
+        reviewerName:
+          type:
+            - string
+            - 'null'
+        year:
+          type: integer
+        score:
+          type: integer
+          description: 1–5
+        comment:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+      required:
+        - id
+        - supplierId
+        - year
+        - score
+        - createdAt
+    SupplierReviewsResponse:
+      type: object
+      properties:
+        averageScore:
+          type:
+            - number
+            - 'null'
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupplierReview'
+      required:
+        - averageScore
+        - reviews
+    SupplierReviewInput:
+      type: object
+      properties:
+        year:
+          type: integer
+        score:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type:
+            - string
+            - 'null'
+      required:
+        - year
+        - score
+    ApprovalThreshold:
+      type: object
+      properties:
+        thresholdAmount:
+          type: number
+          description: Bestellingen op/onder dit bedrag worden direct goedgekeurd (0 = altijd manager)
+      required:
+        - thresholdAmount
+    ApprovalThresholdInput:
+      type: object
+      properties:
+        thresholdAmount:
+          type: number
+          minimum: 0
+      required:
+        - thresholdAmount
     BudgetStatus:
       type: object
       properties:

@@ -20,10 +20,13 @@ import {
   notificationsTable,
   suppliersTable,
   contractsTable,
+  contractDocumentsTable,
+  supplierReviewsTable,
   shopProductsTable,
   budgetsTable,
   shopOrdersTable,
   shopOrderLinesTable,
+  approvalThresholdTable,
   meterReadingsTable,
   wasteRegistrationsTable,
   bouwdelenTable,
@@ -60,7 +63,8 @@ async function main() {
     TRUNCATE TABLE mjop_taken, conditiemetingen, bouwdelen,
       notifications, catering_order_lines, reservations, catering_items,
       ticket_satisfaction, ticket_comments, tickets, ticket_categories, assets, workplaces, rooms, floors,
-      shop_order_lines, shop_orders, shop_products, budgets, contracts, suppliers,
+      shop_order_lines, shop_orders, shop_products, budgets, approval_threshold, contracts,
+      contract_documents, supplier_reviews, suppliers,
       key_loss_reports, key_issues, key_doors, keys, building_documents,
       meter_readings, waste_registrations,
       buildings, sites, organizations, visitors, users, knowledge_articles RESTART IDENTITY CASCADE
@@ -315,29 +319,51 @@ async function main() {
     .returning();
   const sup = (name: string) => suppliers.find((s) => s.name.startsWith(name))!;
 
-  await db.insert(contractsTable).values([
+  const contracts = await db.insert(contractsTable).values([
     { name: "Onderhoud klimaatinstallaties", supplierId: sup("Techniek").id, category: "techniek", description: "Preventief en correctief onderhoud aan alle klimaatinstallaties.", startDate: today(-700), endDate: today(45), noticePeriodDays: 90, annualValue: 48500, status: "actief", ownerId: u("fatima").id },
     { name: "Schoonmaak kantoorpanden", supplierId: sup("CleanCare").id, category: "schoonmaak", description: "Dagelijkse schoonmaak Stadhuis en Stadskantoor.", startDate: today(-400), endDate: today(330), noticePeriodDays: 180, annualValue: 132000, status: "actief", ownerId: u("fatima").id },
     { name: "Groenonderhoud buitenterreinen", supplierId: sup("GroenWerk").id, category: "groenvoorziening", description: "Onderhoud groen rondom alle vestigingen.", startDate: today(-250), endDate: today(480), noticePeriodDays: 90, annualValue: 27500, status: "actief", ownerId: u("ruben").id },
     { name: "Beveiligingsdiensten avond/nacht", supplierId: sup("SecuriTop").id, category: "beveiliging", description: "Surveillance en alarmopvolging.", startDate: today(-900), endDate: today(70), noticePeriodDays: 120, annualValue: 89000, status: "actief", ownerId: u("ruben").id },
     { name: "Banqueting raadsvergaderingen", supplierId: sup("Van Vliet").id, category: "catering", description: "Catering bij raads- en commissievergaderingen.", startDate: today(-1100), endDate: today(-30), noticePeriodDays: 60, annualValue: 18000, status: "verlopen", ownerId: u("fatima").id },
     { name: "Liftonderhoud Stadhuis", supplierId: sup("Techniek").id, category: "techniek", description: "Jaarlijkse keuring en onderhoud liften.", startDate: today(-500), endDate: today(600), noticePeriodDays: 90, annualValue: 12400, status: "actief", ownerId: u("fatima").id },
+  ]).returning();
+  const ctr = (name: string) => contracts.find((c) => c.name.startsWith(name))!;
+
+  // Voorbeelddocumenten in de digitale kluis (objectPath is placeholder — geen echte storage-objecten in seed)
+  await db.insert(contractDocumentsTable).values([
+    { contractId: ctr("Onderhoud klimaat").id, fileName: "Offerte_Techniek_Partners_2024.pdf", objectPath: "/objects/uploads/seed-doc-001", uploadedById: u("fatima").id },
+    { contractId: ctr("Onderhoud klimaat").id, fileName: "Getekend_contract_klimaat_2022.pdf", objectPath: "/objects/uploads/seed-doc-002", uploadedById: u("fatima").id },
+    { contractId: ctr("Schoonmaak").id, fileName: "SLA_schoonmaak_bijlage_A.pdf", objectPath: "/objects/uploads/seed-doc-003", uploadedById: u("ruben").id },
+    { contractId: ctr("Liftonderhoud").id, fileName: "Keuringsrapport_liften_2025.pdf", objectPath: "/objects/uploads/seed-doc-004", uploadedById: u("fatima").id },
+  ]);
+
+  // Leveranciersbeoordelingen (meerdere jaren voor Techniek Partners)
+  await db.insert(supplierReviewsTable).values([
+    { supplierId: sup("Techniek").id, reviewerId: u("fatima").id, year: 2024, score: 4, comment: "Goede responstijd en vakkundige monteurs. Facturering soms vertraagd." },
+    { supplierId: sup("Techniek").id, reviewerId: u("ruben").id, year: 2025, score: 5, comment: "Uitstekend jaar. Alle SLA-doelen gehaald, proactieve communicatie." },
+    { supplierId: sup("CleanCare").id, reviewerId: u("fatima").id, year: 2025, score: 3, comment: "Wisselende kwaliteit. Herhaaldelijk moeten bijsturen op de werf." },
+    { supplierId: sup("GroenWerk").id, reviewerId: u("ruben").id, year: 2025, score: 4, comment: "Betrouwbaar en flexibel bij extra opdrachten." },
+    { supplierId: sup("SecuriTop").id, reviewerId: u("ruben").id, year: 2025, score: 4, comment: "Professionele dienstverlening, nul incidenten." },
+    { supplierId: sup("Van Vliet").id, reviewerId: u("fatima").id, year: 2024, score: 2, comment: "Te veel fouten in bestellingen en late leveringen. Contract niet verlengd." },
   ]);
 
   // Webshop: producten, budgetten, bestellingen
+  // Goedkeuringsdrempel: bestellingen t/m €50 worden automatisch goedgekeurd
+  await db.insert(approvalThresholdTable).values([{ thresholdAmount: 50 }]);
+
   const products = await db
     .insert(shopProductsTable)
     .values([
-      { name: "Kopieerpapier A4 (doos)", description: "5x500 vel, 80 grams", category: "kantoorartikelen", price: 24.95, unit: "doos", stock: 42, minStock: 20 },
-      { name: "Balpennen blauw (50 st.)", description: "Doos met 50 stuks", category: "kantoorartikelen", price: 17.5, unit: "doos", stock: 8, minStock: 10 },
-      { name: "Whiteboardmarkers (set)", description: "Set van 4 kleuren", category: "kantoorartikelen", price: 6.75, unit: "set", stock: 31, minStock: 15 },
-      { name: "USB-C dockingstation", description: "Dual monitor, 100W PD", category: "ict", price: 189.0, unit: "stuk", stock: 6, minStock: 4 },
-      { name: "Draadloze muis", description: "Ergonomisch, stil klikgeluid", category: "ict", price: 34.5, unit: "stuk", stock: 14, minStock: 8 },
-      { name: "Headset met microfoon", description: "Voor videobellen, USB", category: "ict", price: 59.95, unit: "stuk", stock: 3, minStock: 6 },
-      { name: "Bureaustoel ergonomisch", description: "NEN-EN 1335 gecertificeerd", category: "meubilair", price: 425.0, unit: "stuk", stock: 5, minStock: 2 },
-      { name: "Monitorarm enkel", description: "Gasveer, VESA 75/100", category: "meubilair", price: 89.0, unit: "stuk", stock: 12, minStock: 5 },
-      { name: "Koffiebekers composteerbaar (1000 st.)", description: "180 ml, PLA-coating", category: "facilitair", price: 42.0, unit: "doos", stock: 18, minStock: 10 },
-      { name: "Handzeep navulling (6L)", description: "Dermatologisch getest", category: "facilitair", price: 28.5, unit: "can", stock: 9, minStock: 12 },
+      { name: "Kopieerpapier A4 (doos)", description: "5x500 vel, 80 grams", category: "kantoorartikelen", price: 24.95, unit: "doos", stock: 42, minStock: 20, supplierId: null },
+      { name: "Balpennen blauw (50 st.)", description: "Doos met 50 stuks", category: "kantoorartikelen", price: 17.5, unit: "doos", stock: 8, minStock: 10, supplierId: null },
+      { name: "Whiteboardmarkers (set)", description: "Set van 4 kleuren", category: "kantoorartikelen", price: 6.75, unit: "set", stock: 31, minStock: 15, supplierId: null },
+      { name: "USB-C dockingstation", description: "Dual monitor, 100W PD", category: "ict", price: 189.0, unit: "stuk", stock: 6, minStock: 4, supplierId: sup("Techniek").id },
+      { name: "Draadloze muis", description: "Ergonomisch, stil klikgeluid", category: "ict", price: 34.5, unit: "stuk", stock: 14, minStock: 8, supplierId: sup("Techniek").id },
+      { name: "Headset met microfoon", description: "Voor videobellen, USB", category: "ict", price: 59.95, unit: "stuk", stock: 3, minStock: 6, supplierId: sup("Techniek").id },
+      { name: "Bureaustoel ergonomisch", description: "NEN-EN 1335 gecertificeerd", category: "meubilair", price: 425.0, unit: "stuk", stock: 5, minStock: 2, supplierId: null },
+      { name: "Monitorarm enkel", description: "Gasveer, VESA 75/100", category: "meubilair", price: 89.0, unit: "stuk", stock: 12, minStock: 5, supplierId: null },
+      { name: "Koffiebekers composteerbaar (1000 st.)", description: "180 ml, PLA-coating", category: "facilitair", price: 42.0, unit: "doos", stock: 18, minStock: 10, supplierId: sup("Van Vliet").id },
+      { name: "Handzeep navulling (6L)", description: "Dermatologisch getest", category: "facilitair", price: 28.5, unit: "can", stock: 9, minStock: 12, supplierId: sup("Van Vliet").id },
     ])
     .returning();
   const prod = (name: string) => products.find((p) => p.name.startsWith(name))!;
@@ -355,7 +381,7 @@ async function main() {
     .insert(shopOrdersTable)
     .values([
       { number: "WS-2026-1001", requesterId: u("emma").id, department: "Burgerzaken", status: "geleverd", totalAmount: 124.75, approverId: u("fatima").id, decidedAt: hoursAgo(300), createdAt: hoursAgo(340) },
-      { number: "WS-2026-1002", requesterId: u("daan").id, department: "Financiën", status: "goedgekeurd", totalAmount: 378.0, approverId: u("fatima").id, decidedAt: hoursAgo(20), createdAt: hoursAgo(30) },
+      { number: "WS-2026-1002", requesterId: u("daan").id, department: "Financiën", status: "goedgekeurd", totalAmount: 378.0, approverId: u("fatima").id, decidedAt: hoursAgo(20), createdAt: hoursAgo(30), supplierId: sup("Techniek").id, supplierStatus: "verstuurd", sentToSupplierAt: hoursAgo(10) },
       { number: "WS-2026-1003", requesterId: u("noor").id, department: "Ruimtelijke Ordening", status: "ingediend", totalAmount: 484.95, createdAt: hoursAgo(4) },
       { number: "WS-2026-1004", requesterId: u("linda").id, department: "Receptie", status: "afgekeurd", totalAmount: 850.0, approverId: u("fatima").id, decisionNote: "Boven budget; graag eerst afstemmen met inkoop.", decidedAt: hoursAgo(70), createdAt: hoursAgo(90) },
       { number: "WS-2026-1005", requesterId: u("emma").id, department: "Burgerzaken", status: "ingediend", totalAmount: 119.9, createdAt: hoursAgo(1) },

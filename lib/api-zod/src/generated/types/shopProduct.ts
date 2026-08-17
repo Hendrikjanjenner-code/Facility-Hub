@@ -17,4 +17,8 @@ export interface ShopProduct {
   stock: number;
   minStock: number;
   belowMinStock: boolean;
+  /** @nullable */
+  supplierId?: number | null;
+  /** @nullable */
+  supplierName?: string | null;
 }

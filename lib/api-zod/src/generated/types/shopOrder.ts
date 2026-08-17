@@ -25,6 +25,17 @@ export interface ShopOrder {
   approverName?: string | null;
   /** @nullable */
   decisionNote?: string | null;
+  /** @nullable */
+  supplierId?: number | null;
+  /** @nullable */
+  supplierName?: string | null;
+  /**
+     * null | verstuurd | verwerkt
+     * @nullable
+     */
+  supplierStatus?: string | null;
+  /** @nullable */
+  sentToSupplierAt?: string | null;
   lines: ShopOrderLine[];
   createdAt: string;
   /** @nullable */

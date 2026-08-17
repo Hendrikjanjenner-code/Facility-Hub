@@ -19,6 +19,7 @@ import {
 } from "@workspace/api-zod";
 import { requireAuth, requireRole, TICKET_MANAGER_ROLES } from "../lib/auth";
 import { ObjectStorageService } from "../lib/objectStorage";
+import { isObjectPathReferenced } from "../lib/storageRefs";
 
 // Beheer van het gebouwdossier (dossier-edits, documenten) is voorbehouden
 // aan facilitair manager en beheerder. Documenten kunnen huurcontracten
@@ -231,7 +232,7 @@ router.get("/buildings/:id", async (req, res): Promise<void> => {
     return;
   }
     const [building] = await db
-      .select({ id: buildingsTable.id })
+      .select()
       .from(buildingsTable)
       .where(eq(buildingsTable.id, id));
   if (!building) {
@@ -373,36 +374,9 @@ router.delete(
       .where(eq(buildingDocumentsTable.id, id));
 
     // Verwijder het bestand uit object storage alleen als geen enkel ander record
-    // er nog naar verwijst (andere building_documents of MJOP-inspectiefoto's).
+    // er nog naar verwijst (gecentraliseerde cross-table check).
     try {
-      // Controleer andere building_documents-rijen met hetzelfde pad.
-      const [otherDoc] = await db
-        .select({ id: buildingDocumentsTable.id })
-        .from(buildingDocumentsTable)
-        .where(
-          and(
-            eq(buildingDocumentsTable.objectPath, existing.objectPath),
-            ne(buildingDocumentsTable.id, id),
-          ),
-        );
-
-      // Controleer MJOP-conditiemetingen die dit pad als inspectiefoto bevatten
-      // (alleen als er geen ander document-record is dat het pad al vasthoudt).
-      let stillReferenced = Boolean(otherDoc);
-      if (!stillReferenced) {
-        const mjopRef = await db.execute<{ count: number }>(
-          sql`
-            SELECT 1 AS count
-            FROM ${conditiemetingenTable},
-                 jsonb_array_elements(${conditiemetingenTable.gebreken}) AS elem
-            WHERE elem->>'photoPath' = ${existing.objectPath}
-            LIMIT 1
-          `,
-        );
-        stillReferenced = mjopRef.rows.length > 0;
-      }
-
-      if (!stillReferenced) {
+      if (!(await isObjectPathReferenced(existing.objectPath))) {
         const storageService = new ObjectStorageService();
         await storageService.deleteObject(existing.objectPath);
       }

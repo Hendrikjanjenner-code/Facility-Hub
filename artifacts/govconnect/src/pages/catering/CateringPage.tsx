@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format, addDays, subDays } from "date-fns";
 import { nl } from "date-fns/locale";
-import { useGetCateringDailySummary } from "@workspace/api-client-react";
+import { useQuery } from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
@@ -38,7 +38,18 @@ export default function CateringPage() {
   const [date, setDate] = useState<Date>(new Date());
   const dateStr = format(date, "yyyy-MM-dd");
 
-  const { data: summary, isLoading } = useGetCateringDailySummary({ date: dateStr });
+  const { data: summary, isLoading } = useQuery({
+    queryKey: ["catering-daily-summary", dateStr],
+    queryFn: async () => {
+      const res = await fetch(`/api/catering/daily-summary?date=${dateStr}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Ophalen mislukt");
+      return res.json() as Promise<{
+        date: string;
+        reservations: { id: number; title: string; status: string; startTime: string; endTime: string; roomName: string | null; buildingName: string | null; attendees: number | null; items: { id: number; cateringItemId: number; itemName: string | null; quantity: number; unitPrice: number }[] }[];
+        totals: { cateringItemId: number; itemName: string; totalQuantity: number }[];
+      }>;
+    },
+  });
 
   const handlePrevDay = () => setDate((d) => subDays(d, 1));
   const handleNextDay = () => setDate((d) => addDays(d, 1));

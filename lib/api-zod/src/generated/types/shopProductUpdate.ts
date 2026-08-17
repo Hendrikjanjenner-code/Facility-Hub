@@ -13,4 +13,6 @@ export interface ShopProductUpdate {
   price?: number;
   stock?: number;
   minStock?: number;
+  /** @nullable */
+  supplierId?: number | null;
 }

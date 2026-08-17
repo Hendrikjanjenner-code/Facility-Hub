@@ -197,7 +197,6 @@ export class ObjectStorageService {
         : null,
     }));
   }
-
 }
 
 function parseObjectPath(path: string): {
@@ -220,4 +219,3 @@ function parseObjectPath(path: string): {
     objectName,
   };
 }
-
