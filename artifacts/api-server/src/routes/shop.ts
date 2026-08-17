@@ -48,8 +48,6 @@ function serializeProduct(p: typeof shopProductsTable.$inferSelect) {
   if (typeof q.search === "string" && q.search) {
     const s = `%${q.search}%`;
     const cond = or(ilike(shopProductsTable.name, s), ilike(shopProductsTable.description, s));
-    if (cond) conditions.push(cond);
-  }
   const rows = await db
     .select()
     .from(shopProductsTable)
@@ -70,6 +68,8 @@ router.post(
       return;
     }
     const d = parsed.data;
+
+    const update: Partial<typeof shopProductsTable.$inferInsert> = {};
     const [created] = await db
       .insert(shopProductsTable)
       .values({
@@ -101,6 +101,8 @@ router.patch(
       return;
     }
     const d = parsed.data;
+
+    const update: Partial<typeof shopProductsTable.$inferInsert> = {};
     const [updated] = await db
       .update(budgetsTable)
       .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })

@@ -7,6 +7,8 @@
  */
 import type { BudgetStatusOverBudgetPolicy } from './budgetStatusOverBudgetPolicy';
 
+import type { BudgetStatusOverBudgetPolicy } from './budgetStatusOverBudgetPolicy';
+
 export interface BudgetStatus {
   id: number;
 

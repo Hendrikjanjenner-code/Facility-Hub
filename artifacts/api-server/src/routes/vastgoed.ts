@@ -75,60 +75,73 @@ router.get("/rooms", async (req, res): Promise<void> => {
   if (typeof q.minCapacity === "string" && q.minCapacity)
     conditions.push(gte(roomsTable.capacity, Number(q.minCapacity)));
 
-    const rows = await db
-      .select({
-        doc: buildingDocumentsTable,
-        uploadedByName: usersTable.name,
-      })
-      .from(buildingDocumentsTable)
-      .leftJoin(usersTable, eq(buildingDocumentsTable.uploadedById, usersTable.id))
-      .where(eq(buildingDocumentsTable.buildingId, id))
-      .orderBy(desc(buildingDocumentsTable.createdAt));
+  const rows = await db
+    .select({
+      room: roomsTable,
+      floorName: floorsTable.name,
+      buildingId: buildingsTable.id,
+      buildingName: buildingsTable.name,
+      siteName: sitesTable.name,
+      assetCount: assetCountSql,
+      openTicketCount: openTicketCountSql,
+    })
+    .from(roomsTable)
+    .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
+    .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
+    .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
+    .where(conditions.length ? and(...conditions) : undefined)
+    .orderBy(roomsTable.code);
 
   const redact = !TICKET_MANAGER_ROLES.includes(req.currentUser!.role);
   res.json(rows.map((r) => serializeRoom(redact, r)));
 });
 
 router.get("/rooms/:id", async (req, res): Promise<void> => {
-    const id = Number(req.params.id);
+  const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     res.status(400).json({ message: "Ongeldig id" });
     return;
   }
-    const [row] = await db
-      .select({
-        room: roomsTable,
-        floorName: floorsTable.name,
-        buildingId: buildingsTable.id,
-        buildingName: buildingsTable.name,
-        siteName: sitesTable.name,
-        assetCount: assetCountSql,
-        openTicketCount: openTicketCountSql,
-      })
-      .from(roomsTable)
-      .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
-      .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
-      .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
-      .where(eq(roomsTable.id, id));
-    res.json(serializeRoom(false, row!));
-  },
-);
+  const [row] = await db
+    .select({
+      room: roomsTable,
+      floorName: floorsTable.name,
+      buildingId: buildingsTable.id,
+      buildingName: buildingsTable.name,
+      siteName: sitesTable.name,
+      assetCount: assetCountSql,
+      openTicketCount: openTicketCountSql,
+    })
+    .from(roomsTable)
+    .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
+    .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
+    .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
+    .where(eq(roomsTable.id, id));
+  if (!row) {
+    res.status(404).json({ message: "Ruimte niet gevonden" });
+    return;
+  }
+  res.json(serializeRoom(false, row));
+});
 
-router.get("/floors/:id/plan", async (req, res): Promise<void> => {
+router.patch(
+  "/rooms/:id",
+  requireRole(...VASTGOED_MANAGE_ROLES),
+  async (req, res): Promise<void> => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
       res.status(400).json({ message: "Ongeldig id" });
       return;
     }
-    const parsed = CreateBuildingDocumentBody.safeParse(req.body);
+    const parsed = UpdateRoomDossierBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
     }
     const [existing] = await db
-      .select({ id: buildingDocumentsTable.id, objectPath: buildingDocumentsTable.objectPath })
-      .from(buildingDocumentsTable)
-      .where(eq(buildingDocumentsTable.id, id));
+      .select({ id: roomsTable.id })
+      .from(roomsTable)
+      .where(eq(roomsTable.id, id));
     if (!existing) {
       res.status(404).json({ message: "Ruimte niet gevonden" });
       return;
@@ -138,12 +151,12 @@ router.get("/floors/:id/plan", async (req, res): Promise<void> => {
       .update(roomsTable)
       .set({
         ...(d.functionType !== undefined ? { functionType: d.functionType } : {}),
-        ...(d.floorFinish !== undefined ? { floorFinish: d.floorFinish } : {}),
+        ...(d.floorFinish !== undefined ? { floorFinish: d.floorFinish ?? null } : {}),
         ...(d.areaM2 !== undefined ? { areaM2: d.areaM2 } : {}),
-        ...(d.areaVvoM2 !== undefined ? { areaVvoM2: d.areaVvoM2 } : {}),
-        ...(d.areaBvoM2 !== undefined ? { areaBvoM2: d.areaBvoM2 } : {}),
-        ...(d.department !== undefined ? { department: d.department } : {}),
-        ...(d.capacity !== undefined ? { capacity: d.capacity } : {}),
+        ...(d.areaVvoM2 !== undefined ? { areaVvoM2: d.areaVvoM2 ?? null } : {}),
+        ...(d.areaBvoM2 !== undefined ? { areaBvoM2: d.areaBvoM2 ?? null } : {}),
+        ...(d.department !== undefined ? { department: d.department ?? null } : {}),
+        ...(d.capacity !== undefined ? { capacity: d.capacity ?? null } : {}),
       })
       .where(eq(roomsTable.id, id));
     const [row] = await db

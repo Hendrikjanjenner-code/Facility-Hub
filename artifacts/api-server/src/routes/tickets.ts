@@ -9,6 +9,7 @@ import {
   floorsTable,
   buildingsTable,
   assetsTable,
+  mjopTakenTable,
   type Ticket,
 } from "@workspace/db";
 import { eq, desc, and, ilike, or, sql, type SQL } from "drizzle-orm";
@@ -311,7 +312,26 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
   if (data.title) update.title = data.title;
   if (data.description) update.description = data.description;
 
-  await db.update(ticketsTable).set(update).where(eq(ticketsTable.id, id));
+  // Update the ticket and (when closing) the linked MJOP task atomically
+  await db.transaction(async (tx) => {
+    await tx.update(ticketsTable).set(update).where(eq(ticketsTable.id, id));
+
+    if (
+      data.status &&
+      data.status !== existing.status &&
+      (data.status === "gereed" || data.status === "gesloten")
+    ) {
+      await tx
+        .update(mjopTakenTable)
+        .set({ status: "afgerond" })
+        .where(
+          and(
+            eq(mjopTakenTable.ticketId, id),
+            eq(mjopTakenTable.status, "in_uitvoering"),
+          ),
+        );
+    }
+  });
 
   const user = req.currentUser!;
   if (data.status && data.status !== existing.status && existing.reporterId !== user.id) {
