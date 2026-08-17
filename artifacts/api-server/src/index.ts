@@ -59,14 +59,22 @@ async function runOverdueKeysCheck() {
   }
 }
 
-// Idempotente startup-migratie: voeg updated_at toe aan rooms als die ontbreekt.
-// Nodig voor bestaande databases die vóór dit schema-veld zijn aangemaakt.
+// Idempotente startup-migraties: voeg ontbrekende kolommen toe aan bestaande databases.
 try {
   await pool.query(
     `ALTER TABLE rooms ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`,
   );
 } catch (err) {
   logger.warn({ err }, "Startup-migratie rooms.updated_at mislukt; doorgaan");
+}
+
+// Voeg last_notified_at toe aan key_issues voor de overdue-herinnerings-cooldown.
+try {
+  await pool.query(
+    `ALTER TABLE key_issues ADD COLUMN IF NOT EXISTS last_notified_at TIMESTAMPTZ`,
+  );
+} catch (err) {
+  logger.warn({ err }, "Startup-migratie key_issues.last_notified_at mislukt; doorgaan");
 }
 
 app.listen(port, (err) => {
