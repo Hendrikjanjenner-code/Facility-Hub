@@ -6,6 +6,7 @@ import {
   timestamp,
   date,
   real,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { roomsTable, workplacesTable } from "./vastgoed";
 import { usersTable } from "./users";
@@ -34,6 +35,7 @@ export const reservationsTable = pgTable("reservations", {
   setupBufferMin: integer("setup_buffer_min").notNull().default(0),
   cleanupBufferMin: integer("cleanup_buffer_min").notNull().default(0),
   status: text("status").notNull().default("bevestigd"), // bevestigd | ingecheckt | uitgecheckt | geannuleerd
+  cateringDeliveredAt: timestamp("catering_delivered_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format, addDays, subDays } from "date-fns";
 import { nl } from "date-fns/locale";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,6 +12,8 @@ import {
   Users,
   Package,
   Printer,
+  CheckCircle2,
+  Circle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -35,20 +37,58 @@ const STATUS_COLORS: Record<string, string> = {
   geannuleerd: "bg-red-100 text-red-800 border-red-200",
 };
 
+type SummaryReservation = {
+  id: number;
+  title: string;
+  status: string;
+  startTime: string;
+  endTime: string;
+  roomName: string | null;
+  buildingName: string | null;
+  attendees: number | null;
+  cateringDeliveredAt: string | null;
+  items: { id: number; cateringItemId: number; itemName: string | null; quantity: number; unitPrice: number }[];
+};
+
+type DailySummary = {
+  date: string;
+  reservations: SummaryReservation[];
+  totals: { cateringItemId: number; itemName: string; totalQuantity: number }[];
+};
+
 export default function CateringPage() {
   const [date, setDate] = useState<Date>(new Date());
   const dateStr = format(date, "yyyy-MM-dd");
+  const queryClient = useQueryClient();
 
   const { data: summary, isLoading } = useQuery({
     queryKey: ["catering-daily-summary", dateStr],
     queryFn: async () => {
       const res = await fetch(`/api/catering/daily-summary?date=${dateStr}`, { credentials: "include" });
       if (!res.ok) throw new Error("Ophalen mislukt");
-      return res.json() as Promise<{
-        date: string;
-        reservations: { id: number; title: string; status: string; startTime: string; endTime: string; roomName: string | null; buildingName: string | null; attendees: number | null; items: { id: number; cateringItemId: number; itemName: string | null; quantity: number; unitPrice: number }[] }[];
-        totals: { cateringItemId: number; itemName: string; totalQuantity: number }[];
-      }>;
+      return res.json() as Promise<DailySummary>;
+    },
+  });
+
+  const { mutate: toggleDelivered, isPending: isToggling } = useMutation({
+    mutationFn: async (reservationId: number) => {
+      const res = await fetch(`/api/catering/reservations/${reservationId}/delivered`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Markeren mislukt");
+      return res.json() as Promise<{ id: number; cateringDeliveredAt: string | null }>;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData<DailySummary>(["catering-daily-summary", dateStr], (old) => {
+        if (!old) return old;
+        return {
+          ...old,
+          reservations: old.reservations.map((r) =>
+            r.id === data.id ? { ...r, cateringDeliveredAt: data.cateringDeliveredAt } : r
+          ),
+        };
+      });
     },
   });
 
@@ -57,7 +97,6 @@ export default function CateringPage() {
   const handleToday = () => setDate(new Date());
 
   const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
-
   const formattedDate = format(date, "EEEE d MMMM yyyy", { locale: nl });
 
   return (
@@ -164,77 +203,123 @@ export default function CateringPage() {
               {summary.reservations.length !== 1 ? "en" : ""} met catering
             </h2>
             <div className="space-y-3">
-              {summary.reservations.map((reservation) => (
-                <Card
-                  key={reservation.id}
-                  className={cn(
-                    "catering-card border-l-4 transition-colors",
-                    reservation.status === "geannuleerd"
-                      ? "border-l-red-400 opacity-60"
-                      : "border-l-primary"
-                  )}
-                >
-                  <CardContent className="pt-4 pb-4">
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-3">
-                      {/* Time + room info */}
-                      <div className="flex-shrink-0 sm:w-48">
-                        <div className="flex items-center gap-1.5 text-base font-bold tabular-nums">
-                          <Clock className="h-4 w-4 text-primary flex-shrink-0" />
-                          {reservation.startTime} – {reservation.endTime}
-                        </div>
-                        {reservation.roomName && (
-                          <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
-                            <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
-                            <span>{reservation.roomName}</span>
+              {summary.reservations.map((reservation) => {
+                const delivered = !!reservation.cateringDeliveredAt;
+                return (
+                  <Card
+                    key={reservation.id}
+                    className={cn(
+                      "catering-card border-l-4 transition-colors",
+                      reservation.status === "geannuleerd"
+                        ? "border-l-red-400 opacity-60"
+                        : delivered
+                        ? "border-l-green-500 bg-green-50/40 dark:bg-green-950/20"
+                        : "border-l-primary"
+                    )}
+                  >
+                    <CardContent className="pt-4 pb-4">
+                      <div className="flex flex-col sm:flex-row sm:items-start gap-3">
+                        {/* Time + room info */}
+                        <div className="flex-shrink-0 sm:w-48">
+                          <div className={cn(
+                            "flex items-center gap-1.5 text-base font-bold tabular-nums",
+                            delivered && "text-green-700 dark:text-green-400"
+                          )}>
+                            <Clock className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className={cn(delivered && "line-through decoration-green-500/60")}>
+                              {reservation.startTime} – {reservation.endTime}
+                            </span>
                           </div>
-                        )}
-                        {reservation.buildingName && (
-                          <div className="text-xs text-muted-foreground ml-5">
-                            {reservation.buildingName}
-                          </div>
-                        )}
-                        {reservation.attendees != null && (
-                          <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
-                            <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                            {reservation.attendees} personen
-                          </div>
-                        )}
-                      </div>
-
-                      <Separator orientation="vertical" className="hidden sm:block h-auto self-stretch" />
-
-                      {/* Title + status + items */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <h3 className="font-semibold text-sm leading-tight">{reservation.title}</h3>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "text-xs flex-shrink-0",
-                              STATUS_COLORS[reservation.status] ?? ""
-                            )}
-                          >
-                            {STATUS_LABELS[reservation.status] ?? reservation.status}
-                          </Badge>
-                        </div>
-
-                        {/* Catering items */}
-                        <div className="flex flex-wrap gap-2">
-                          {reservation.items.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex items-center gap-1.5 text-sm bg-muted rounded-md px-2.5 py-1"
-                            >
-                              <span className="font-semibold text-primary">{item.quantity}×</span>
-                              <span>{item.itemName ?? `Item ${item.cateringItemId}`}</span>
+                          {reservation.roomName && (
+                            <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                              <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
+                              <span>{reservation.roomName}</span>
                             </div>
-                          ))}
+                          )}
+                          {reservation.buildingName && (
+                            <div className="text-xs text-muted-foreground ml-5">
+                              {reservation.buildingName}
+                            </div>
+                          )}
+                          {reservation.attendees != null && (
+                            <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                              <Users className="h-3.5 w-3.5 flex-shrink-0" />
+                              {reservation.attendees} personen
+                            </div>
+                          )}
+                        </div>
+
+                        <Separator orientation="vertical" className="hidden sm:block h-auto self-stretch" />
+
+                        {/* Title + status + items */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <h3 className={cn(
+                              "font-semibold text-sm leading-tight",
+                              delivered && "line-through text-muted-foreground decoration-green-500/60"
+                            )}>
+                              {reservation.title}
+                            </h3>
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "text-xs flex-shrink-0",
+                                STATUS_COLORS[reservation.status] ?? ""
+                              )}
+                            >
+                              {STATUS_LABELS[reservation.status] ?? reservation.status}
+                            </Badge>
+                          </div>
+
+                          {/* Catering items */}
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {reservation.items.map((item) => (
+                              <div
+                                key={item.id}
+                                className={cn(
+                                  "flex items-center gap-1.5 text-sm bg-muted rounded-md px-2.5 py-1",
+                                  delivered && "opacity-60"
+                                )}
+                              >
+                                <span className="font-semibold text-primary">{item.quantity}×</span>
+                                <span>{item.itemName ?? `Item ${item.cateringItemId}`}</span>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Delivery action — hidden when printing */}
+                          {reservation.status !== "geannuleerd" && (
+                            <Button
+                              variant={delivered ? "secondary" : "outline"}
+                              size="sm"
+                              disabled={isToggling}
+                              onClick={() => toggleDelivered(reservation.id)}
+                              className={cn(
+                                "print-hidden gap-1.5 text-xs h-7",
+                                delivered
+                                  ? "text-green-700 border-green-300 bg-green-100 hover:bg-green-200 dark:bg-green-900/40 dark:text-green-400 dark:hover:bg-green-900/60"
+                                  : ""
+                              )}
+                            >
+                              {delivered ? (
+                                <>
+                                  <CheckCircle2 className="h-3.5 w-3.5" />
+                                  Geleverd
+                                </>
+                              ) : (
+                                <>
+                                  <Circle className="h-3.5 w-3.5" />
+                                  Markeer als geleverd
+                                </>
+                              )}
+                            </Button>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </div>

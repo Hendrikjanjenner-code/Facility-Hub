@@ -526,6 +526,34 @@ router.get("/catering-items", async (_req, res): Promise<void> => {
 
 const CATERING_ROLES = ["cateraar", "facilitair_manager", "beheerder"];
 
+router.post("/catering/reservations/:id/delivered", async (req, res): Promise<void> => {
+  const viewer = req.currentUser!;
+  if (!CATERING_ROLES.includes(viewer.role)) {
+    res.status(403).json({ message: "Geen toegang" });
+    return;
+  }
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
+  const [existing] = await db
+    .select()
+    .from(reservationsTable)
+    .where(eq(reservationsTable.id, id));
+  if (!existing) {
+    res.status(404).json({ message: "Reservering niet gevonden" });
+    return;
+  }
+  // Toggle: if already delivered, clear; otherwise set now
+  const newValue = existing.cateringDeliveredAt ? null : new Date();
+  await db
+    .update(reservationsTable)
+    .set({ cateringDeliveredAt: newValue })
+    .where(eq(reservationsTable.id, id));
+  res.json({ id, cateringDeliveredAt: newValue ? newValue.toISOString() : null });
+});
+
 router.get("/catering/daily-summary", async (req, res): Promise<void> => {
   const viewer = req.currentUser!;
   if (!CATERING_ROLES.includes(viewer.role)) {
@@ -607,6 +635,7 @@ router.get("/catering/daily-summary", async (req, res): Promise<void> => {
       endTime: r.endTime,
       attendees: r.attendees,
       status: r.status,
+      cateringDeliveredAt: r.cateringDeliveredAt ? r.cateringDeliveredAt.toISOString() : null,
       items: lines.map((l) => ({
         id: l.line.id,
         cateringItemId: l.line.cateringItemId,
