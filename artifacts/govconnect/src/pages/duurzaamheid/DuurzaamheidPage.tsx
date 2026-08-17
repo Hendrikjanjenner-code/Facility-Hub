@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -12,6 +12,9 @@ import {
   useListWasteRegistrations,
   useCreateWasteRegistration,
   useGetSustainabilityReport,
+  useGetUserPreference,
+  usePutUserPreference,
+  useDeleteUserPreference,
   type MeterReading,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -108,37 +111,117 @@ export default function DuurzaamheidPage() {
   const [editReading, setEditReading] = useState<MeterReading | null>(null);
   const [deleteReading, setDeleteReading] = useState<MeterReading | null>(null);
 
-  // Filter state for the rapportage tab — initialised from localStorage
+  // Filter state for the rapportage tab — persisted server-side via /api/user-preferences
   const FILTER_KEY = "duurzaamheid_report_filters";
-  const storedFilters = useMemo(() => {
-    try {
-      const raw = localStorage.getItem(FILTER_KEY);
-      return raw ? (JSON.parse(raw) as { buildingId?: string; dateFrom?: string; dateTo?: string }) : {};
-    } catch {
-      return {};
-    }
-  }, []);
-  const [filterBuildingId, setFilterBuildingIdRaw] = useState<string>(storedFilters.buildingId ?? "");
-  const [filterDateFrom, setFilterDateFromRaw] = useState<string>(storedFilters.dateFrom ?? "");
-  const [filterDateTo, setFilterDateToRaw] = useState<string>(storedFilters.dateTo ?? "");
+  const [filterBuildingId, setFilterBuildingIdRaw] = useState<string>("");
+  const [filterDateFrom, setFilterDateFromRaw] = useState<string>("");
+  const [filterDateTo, setFilterDateToRaw] = useState<string>("");
 
-  const persistFilters = (buildingId: string, dateFrom: string, dateTo: string) => {
+  // initialisedFromServer: true after the first server response is applied.
+  // userHasUnsavedChanges: true while the debounce is pending (local changes not yet saved).
+  // putDebounceRef: handle for the pending PUT debounce.
+  // generationRef: incremented on clear() so any in-flight PUT knows to abort.
+  // bcRef: BroadcastChannel for real-time cross-tab synchronisation.
+  const initialisedFromServer = useRef(false);
+  const userHasUnsavedChanges = useRef(false);
+  const putDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const generationRef = useRef(0);
+  const bcRef = useRef<BroadcastChannel | null>(null);
+
+  const { data: savedPref } = useGetUserPreference(FILTER_KEY, {
+    // refetchOnWindowFocus lets a returning tab pick up changes made on another device.
+    query: { refetchOnWindowFocus: true },
+  });
+  const putPref = usePutUserPreference();
+  const deletePref = useDeleteUserPreference();
+
+  /** Apply a raw preference JSON string (or null) to local filter state. */
+  const applyPrefValue = (value: string | null) => {
+    if (!value) {
+      setFilterBuildingIdRaw("");
+      setFilterDateFromRaw("");
+      setFilterDateToRaw("");
+      return;
+    }
     try {
-      localStorage.setItem(FILTER_KEY, JSON.stringify({ buildingId, dateFrom, dateTo }));
+      const parsed = JSON.parse(value) as {
+        buildingId?: string;
+        dateFrom?: string;
+        dateTo?: string;
+      };
+      setFilterBuildingIdRaw(parsed.buildingId ?? "");
+      setFilterDateFromRaw(parsed.dateFrom ?? "");
+      setFilterDateToRaw(parsed.dateTo ?? "");
     } catch {
-      // ignore storage errors
+      // malformed stored value — ignore
     }
   };
 
+  // BroadcastChannel: receive preference updates from other tabs in the same browser.
+  useEffect(() => {
+    const bc = new BroadcastChannel("duurzaamheid_filters");
+    bcRef.current = bc;
+    bc.onmessage = (evt: MessageEvent<{ type: string; value: string | null }>) => {
+      if (evt.data.type !== "update") return;
+      if (userHasUnsavedChanges.current) return; // local unsaved changes take priority
+      applyPrefValue(evt.data.value);
+    };
+    return () => { bc.close(); bcRef.current = null; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Cleanup pending debounce timer on unmount to prevent memory leaks.
+  useEffect(() => {
+    return () => { if (putDebounceRef.current) clearTimeout(putDebounceRef.current); };
+  }, []);
+
+  // Apply server preference on initial load and on window-focus refetches (cross-device sync).
+  // Never overwrites pending local (unsaved) changes.
+  useEffect(() => {
+    if (!savedPref) return;
+    if (!initialisedFromServer.current) {
+      initialisedFromServer.current = true;
+      if (!userHasUnsavedChanges.current) applyPrefValue(savedPref.value);
+      return;
+    }
+    // Subsequent fetches (e.g. refetchOnWindowFocus): sync only when idle.
+    if (!userHasUnsavedChanges.current) applyPrefValue(savedPref.value);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedPref]);
+
+  const persistFilters = (buildingId: string, dateFrom: string, dateTo: string) => {
+    // Capture current generation to detect if clear() fires before this PUT completes.
+    const generation = generationRef.current;
+    if (putDebounceRef.current) clearTimeout(putDebounceRef.current);
+    putDebounceRef.current = setTimeout(() => {
+      if (generationRef.current !== generation) return; // clear() was called — abort
+      const value = JSON.stringify({ buildingId, dateFrom, dateTo });
+      putPref.mutate(
+        { key: FILTER_KEY, value },
+        {
+          onSuccess: () => {
+            if (generationRef.current !== generation) return; // clear() fired meanwhile
+            userHasUnsavedChanges.current = false;
+            // Notify other tabs so they sync without a round-trip.
+            bcRef.current?.postMessage({ type: "update", value });
+          },
+        },
+      );
+    }, 400);
+  };
+
   const setFilterBuildingId = (v: string) => {
+    userHasUnsavedChanges.current = true;
     setFilterBuildingIdRaw(v);
     persistFilters(v, filterDateFrom, filterDateTo);
   };
   const setFilterDateFrom = (v: string) => {
+    userHasUnsavedChanges.current = true;
     setFilterDateFromRaw(v);
     persistFilters(filterBuildingId, v, filterDateTo);
   };
   const setFilterDateTo = (v: string) => {
+    userHasUnsavedChanges.current = true;
     setFilterDateToRaw(v);
     persistFilters(filterBuildingId, filterDateFrom, v);
   };
@@ -339,10 +422,18 @@ export default function DuurzaamheidPage() {
     && report.wasteByMonth.length === 0;
 
   const clearFilters = () => {
+    // Cancel any pending debounced PUT so it cannot fire after the DELETE.
+    if (putDebounceRef.current) { clearTimeout(putDebounceRef.current); putDebounceRef.current = null; }
+    // Bump generation so any already-dispatched async PUT knows to discard its result.
+    generationRef.current += 1;
+    userHasUnsavedChanges.current = false;
     setFilterBuildingIdRaw("");
     setFilterDateFromRaw("");
     setFilterDateToRaw("");
-    try { localStorage.removeItem(FILTER_KEY); } catch { /* ignore */ }
+    deletePref.mutate(
+      { key: FILTER_KEY },
+      { onSuccess: () => { bcRef.current?.postMessage({ type: "update", value: null }); } },
+    );
   };
 
   // Chart data: pivot monthlyUsage naar per-maand rijen per type

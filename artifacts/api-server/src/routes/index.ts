@@ -16,6 +16,7 @@ import storageRouter from "./storage";
 import knowledgeRouter from "./knowledge";
 import satisfactionRouter from "./satisfaction";
 import keysRouter from "./keys";
+import userPreferencesRouter from "./user-preferences";
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use(storageRouter);
 router.use(knowledgeRouter);
 router.use(satisfactionRouter);
 router.use(keysRouter);
+router.use(userPreferencesRouter);
 
 export default router;
