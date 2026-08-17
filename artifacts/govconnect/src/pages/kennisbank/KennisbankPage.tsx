@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useListKnowledgeArticles, useCreateKnowledgeArticle, useUpdateKnowledgeArticle, useGetCurrentUser, useListTicketCategories, getListKnowledgeArticlesQueryKey, KnowledgeArticle, TicketCategory } from "@workspace/api-client-react";
+import { useListKnowledgeArticles, useCreateKnowledgeArticle, useUpdateKnowledgeArticle, useDeleteKnowledgeArticle, useGetCurrentUser, useListTicketCategories, getListKnowledgeArticlesQueryKey, KnowledgeArticle, TicketCategory } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Search, Plus, Tag, ChevronDown, ChevronUp, Loader2, Pencil, Bell } from "lucide-react";
+import { BookOpen, Search, Plus, Tag, ChevronDown, ChevronUp, Loader2, Pencil, Bell, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -27,11 +28,13 @@ function ArticleCard({
   article,
   canEdit,
   onEdit,
+  onDelete,
   ticketCategories,
 }: {
   article: KnowledgeArticle;
   canEdit: boolean;
   onEdit: (article: KnowledgeArticle) => void;
+  onDelete: (article: KnowledgeArticle) => void;
   ticketCategories: TicketCategory[];
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -86,15 +89,26 @@ function ArticleCard({
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             {canEdit && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={(e) => { e.stopPropagation(); onEdit(article); }}
-                title="Bewerken"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={(e) => { e.stopPropagation(); onEdit(article); }}
+                  title="Bewerken"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={(e) => { e.stopPropagation(); onDelete(article); }}
+                  title="Verwijderen"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </>
             )}
             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}>
               {expanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -110,6 +124,56 @@ function ArticleCard({
         </CardContent>
       )}
     </Card>
+  );
+}
+
+function DeleteConfirmDialog({
+  article,
+  open,
+  onOpenChange,
+}: {
+  article: KnowledgeArticle;
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const deleteArticle = useDeleteKnowledgeArticle();
+
+  const handleConfirm = () => {
+    deleteArticle.mutate(
+      { id: article.id },
+      {
+        onSuccess: () => {
+          toast({ title: "Artikel verwijderd" });
+          queryClient.invalidateQueries({ queryKey: ["/api/knowledge-articles"] });
+          onOpenChange(false);
+        },
+        onError: () => toast({ variant: "destructive", title: "Fout", description: "Kon artikel niet verwijderen." }),
+      },
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Artikel verwijderen</DialogTitle>
+          <DialogDescription>
+            Weet je zeker dat je <strong>"{article.title}"</strong> permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={deleteArticle.isPending}>
+            Annuleren
+          </Button>
+          <Button variant="destructive" onClick={handleConfirm} disabled={deleteArticle.isPending}>
+            {deleteArticle.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Verwijderen
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -251,6 +315,7 @@ export default function KennisbankPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [newDialogOpen, setNewDialogOpen] = useState(false);
   const [editArticle, setEditArticle] = useState<KnowledgeArticle | null>(null);
+  const [deleteArticle, setDeleteArticle] = useState<KnowledgeArticle | null>(null);
 
   const params = { search: search || undefined, category: selectedCategory || undefined };
   const { data: articles, isLoading } = useListKnowledgeArticles(
@@ -330,6 +395,7 @@ export default function KennisbankPage() {
               article={article}
               canEdit={canCreate}
               onEdit={setEditArticle}
+              onDelete={setDeleteArticle}
               ticketCategories={ticketCategories}
             />
           ))}
@@ -344,6 +410,13 @@ export default function KennisbankPage() {
           open={!!editArticle}
           onOpenChange={(o) => { if (!o) setEditArticle(null); }}
           article={editArticle}
+        />
+      )}
+      {deleteArticle && (
+        <DeleteConfirmDialog
+          article={deleteArticle}
+          open={!!deleteArticle}
+          onOpenChange={(o) => { if (!o) setDeleteArticle(null); }}
         />
       )}
     </div>

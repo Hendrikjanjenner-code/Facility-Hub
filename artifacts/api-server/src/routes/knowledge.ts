@@ -151,6 +151,29 @@ router.patch("/knowledge-articles/:id", async (req, res): Promise<void> => {
   res.json(serialize(updated));
 });
 
+// Delete article (managers only)
+router.delete("/knowledge-articles/:id", async (req, res): Promise<void> => {
+  const user = req.currentUser!;
+  if (!MANAGER_ROLES.includes(user.role)) {
+    res.status(403).json({ message: "Geen toegang" });
+    return;
+  }
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
+  const [deleted] = await db
+    .delete(knowledgeArticlesTable)
+    .where(eq(knowledgeArticlesTable.id, id))
+    .returning();
+  if (!deleted) {
+    res.status(404).json({ message: "Artikel niet gevonden" });
+    return;
+  }
+  res.status(204).end();
+});
+
 // Create article (managers only)
 router.post("/knowledge-articles", async (req, res): Promise<void> => {
   const user = req.currentUser!;

@@ -2344,6 +2344,30 @@ paths:
               schema:
                 $ref: "#/components/schemas/KnowledgeArticle"
   /knowledge-articles/{id}:
+    delete:
+      operationId: deleteKnowledgeArticle
+      tags: [knowledge]
+      summary: Delete a knowledge-base article (manager/beheerder only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
     patch:
       operationId: updateKnowledgeArticle
       tags: [knowledge]
