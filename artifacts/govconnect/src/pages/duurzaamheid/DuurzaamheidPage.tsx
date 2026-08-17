@@ -108,10 +108,40 @@ export default function DuurzaamheidPage() {
   const [editReading, setEditReading] = useState<MeterReading | null>(null);
   const [deleteReading, setDeleteReading] = useState<MeterReading | null>(null);
 
-  // Filter state for the rapportage tab
-  const [filterBuildingId, setFilterBuildingId] = useState<string>("");
-  const [filterDateFrom, setFilterDateFrom] = useState<string>("");
-  const [filterDateTo, setFilterDateTo] = useState<string>("");
+  // Filter state for the rapportage tab — initialised from localStorage
+  const FILTER_KEY = "duurzaamheid_report_filters";
+  const storedFilters = useMemo(() => {
+    try {
+      const raw = localStorage.getItem(FILTER_KEY);
+      return raw ? (JSON.parse(raw) as { buildingId?: string; dateFrom?: string; dateTo?: string }) : {};
+    } catch {
+      return {};
+    }
+  }, []);
+  const [filterBuildingId, setFilterBuildingIdRaw] = useState<string>(storedFilters.buildingId ?? "");
+  const [filterDateFrom, setFilterDateFromRaw] = useState<string>(storedFilters.dateFrom ?? "");
+  const [filterDateTo, setFilterDateToRaw] = useState<string>(storedFilters.dateTo ?? "");
+
+  const persistFilters = (buildingId: string, dateFrom: string, dateTo: string) => {
+    try {
+      localStorage.setItem(FILTER_KEY, JSON.stringify({ buildingId, dateFrom, dateTo }));
+    } catch {
+      // ignore storage errors
+    }
+  };
+
+  const setFilterBuildingId = (v: string) => {
+    setFilterBuildingIdRaw(v);
+    persistFilters(v, filterDateFrom, filterDateTo);
+  };
+  const setFilterDateFrom = (v: string) => {
+    setFilterDateFromRaw(v);
+    persistFilters(filterBuildingId, v, filterDateTo);
+  };
+  const setFilterDateTo = (v: string) => {
+    setFilterDateToRaw(v);
+    persistFilters(filterBuildingId, filterDateFrom, v);
+  };
 
   const { data: structure } = useGetStructure();
   const buildings = useMemo(
@@ -303,9 +333,10 @@ export default function DuurzaamheidPage() {
   const hasActiveFilters = filterBuildingId || filterDateFrom || filterDateTo;
 
   const clearFilters = () => {
-    setFilterBuildingId("");
-    setFilterDateFrom("");
-    setFilterDateTo("");
+    setFilterBuildingIdRaw("");
+    setFilterDateFromRaw("");
+    setFilterDateToRaw("");
+    try { localStorage.removeItem(FILTER_KEY); } catch { /* ignore */ }
   };
 
   // Chart data: pivot monthlyUsage naar per-maand rijen per type
