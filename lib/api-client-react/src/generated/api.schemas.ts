@@ -13,6 +13,10 @@ export interface ApiMessage {
   message: string;
 }
 
+export interface SendOrderToSupplierInput {
+  supplierId: number;
+}
+
 export interface LoginInput {
   email: string;
   password: string;
@@ -208,8 +212,7 @@ export interface Room {
   assetCount?: number | null;
   /** @nullable */
   openTicketCount?: number | null;
-  /** @nullable */
-  updatedAt?: string | null;
+  updatedAt: string;
 }
 
 export interface RoomDossierUpdate {
@@ -236,11 +239,14 @@ export interface RoomDossierUpdate {
      * @nullable
      */
   capacity?: number | null;
-  /** ISO-tijdstempel voor optimistic locking */
   updatedAt: string;
 }
 
-export type RoomDossierHistoryEntryChangesItem = { [key: string]: unknown };
+export interface RoomDossierChange {
+  field: string;
+  from?: string | number | null;
+  to?: string | number | null;
+}
 
 export interface RoomDossierHistoryEntry {
   id: number;
@@ -249,7 +255,19 @@ export interface RoomDossierHistoryEntry {
   changedByName?: string | null;
   changedAt: string;
   isUndo: boolean;
-  changes: RoomDossierHistoryEntryChangesItem[];
+  changes: RoomDossierChange[];
+}
+
+export interface FloorDossierHistoryEntry {
+  id: number;
+  roomId: number;
+  roomName: string;
+  roomCode: string;
+  /** @nullable */
+  changedByName?: string | null;
+  changedAt: string;
+  isUndo: boolean;
+  changes: RoomDossierChange[];
 }
 
 export interface FloorPlanRoom {
@@ -258,17 +276,14 @@ export interface FloorPlanRoom {
   code: string;
   functionType: string;
   areaM2: number;
+  updatedAt: string;
   /** @nullable */
   areaVvoM2?: number | null;
-  /** @nullable */
-  areaBvoM2?: number | null;
   /** @nullable */
   department?: string | null;
   /** @nullable */
   capacity?: number | null;
   bookable?: boolean;
-  /** @nullable */
-  updatedAt?: string | null;
 }
 
 export interface FloorPlan {
@@ -345,8 +360,6 @@ export interface KeySummary {
   currentHolderName?: string | null;
   /** @nullable */
   issuedAt?: string | null;
-  /** @nullable */
-  dueAt?: string | null;
   createdAt: string;
 }
 
@@ -369,8 +382,6 @@ export interface KeyIssueRecord {
   /** @nullable */
   issuedByName?: string | null;
   issuedAt: string;
-  /** @nullable */
-  dueAt?: string | null;
   /** @nullable */
   returnedAt?: string | null;
   /** @nullable */
@@ -454,8 +465,6 @@ export interface KeyDoorInput {
 
 export interface KeyIssueInput {
   holderId: number;
-  /** @nullable */
-  dueAt?: string | null;
   /** @nullable */
   note?: string | null;
 }
@@ -1356,15 +1365,6 @@ export interface KnowledgeArticleInput {
   ticketCategoryIds?: number[];
 }
 
-export interface KnowledgeArticleUpdate {
-  /** @minLength 1 */
-  title?: string;
-  /** @minLength 1 */
-  body?: string;
-  category?: string;
-  tags?: string[];
-  ticketCategoryIds?: number[];
-}
 export interface TicketSatisfaction {
   id: number;
   ticketId: number;
@@ -1385,15 +1385,6 @@ export interface TicketSatisfactionInput {
   comment?: string | null;
 }
 
-export interface SatisfactionByCategory {
-  categoryId: number;
-  categoryName: string;
-  closedTickets: number;
-  responses: number;
-  /** Percentage of closed tickets with a satisfaction score (0-100) */
-  responseRate: number;
-}
-
 export interface SatisfactionResponseItem {
   ticketId: number;
   ticketNumber: string;
@@ -1411,8 +1402,26 @@ export interface SatisfactionReport {
   /** Percentage of closed tickets with a satisfaction score (0-100) */
   responseRate: number;
   byScore: CountByKey[];
-  byCategory: SatisfactionByCategory[];
   recentResponses: SatisfactionResponseItem[];
+}
+
+export interface SatisfactionByCategory {
+  categoryId: number;
+  categoryName: string;
+  closedTickets: number;
+  responses: number;
+  /** Percentage of closed tickets with a satisfaction score (0-100) */
+  responseRate: number;
+}
+
+export interface KnowledgeArticleUpdate {
+  /** @minLength 1 */
+  title?: string;
+  /** @minLength 1 */
+  body?: string;
+  category?: string;
+  tags?: string[];
+  ticketCategoryIds?: number[];
 }
 
 export type ListTicketsParams = {
@@ -1481,10 +1490,6 @@ status?: string;
 expiringWithinDays?: number;
 };
 
-export type SendOrderToSupplierBody = {
-  supplierId: number;
-};
-
 export type ListShopProductsParams = {
 category?: string;
 search?: string;
@@ -1538,3 +1543,4 @@ export type SuggestKnowledgeArticlesParams = {
 q?: string;
 ticketCategoryId?: number;
 };
+

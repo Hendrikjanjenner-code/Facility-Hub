@@ -576,6 +576,40 @@ router.delete(
   },
 );
 
+router.get("/floors/:id/dossier-history", requireRole(...VASTGOED_MANAGE_ROLES), async (req, res): Promise<void> => {
+  const id = Number(req.params.id);
+  if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
+  const [floor] = await db.select({ id: floorsTable.id }).from(floorsTable).where(eq(floorsTable.id, id));
+  if (!floor) { res.status(404).json({ message: "Verdieping niet gevonden" }); return; }
+  const rows = await db
+    .select({
+      id: roomDossierHistoryTable.id,
+      roomId: roomDossierHistoryTable.roomId,
+      roomName: roomsTable.name,
+      roomCode: roomsTable.code,
+      changedByName: usersTable.name,
+      changedAt: roomDossierHistoryTable.changedAt,
+      isUndo: roomDossierHistoryTable.isUndo,
+      changes: roomDossierHistoryTable.changes,
+    })
+    .from(roomDossierHistoryTable)
+    .innerJoin(roomsTable, eq(roomDossierHistoryTable.roomId, roomsTable.id))
+    .leftJoin(usersTable, eq(roomDossierHistoryTable.changedById, usersTable.id))
+    .where(eq(roomsTable.floorId, id))
+    .orderBy(desc(roomDossierHistoryTable.changedAt))
+    .limit(50);
+  res.json(rows.map((r) => ({
+    id: r.id,
+    roomId: r.roomId,
+    roomName: r.roomName,
+    roomCode: r.roomCode,
+    changedByName: r.changedByName ?? null,
+    changedAt: r.changedAt.toISOString(),
+    isUndo: r.isUndo,
+    changes: r.changes,
+  })));
+});
+
 router.get("/structure", async (_req, res): Promise<void> => {
   const [orgs, sites, buildings, floors, roomCounts] = await Promise.all([
     db.select().from(organizationsTable),

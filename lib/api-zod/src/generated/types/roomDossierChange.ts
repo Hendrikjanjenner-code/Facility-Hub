@@ -6,6 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type SendOrderToSupplierBody = {
-  supplierId: number;
-};
+export interface RoomDossierChange {
+  field: string;
+  from?: string | number | null;
+  to?: string | number | null;
+}

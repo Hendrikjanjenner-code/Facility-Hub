@@ -453,6 +453,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+  /floors/{id}/dossier-history:
+    get:
+      operationId: listFloorDossierHistory
+      tags:
+        - vastgoed
+      summary: Recente herindelingen voor alle ruimtes op een verdieping (facilitair_manager / beheerder)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Herindelingshistorie
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FloorDossierHistoryEntry'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /buildings/{id}:
     get:
       operationId: getBuilding
@@ -1449,12 +1476,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                supplierId:
-                  type: integer
-              required:
-                - supplierId
+              $ref: '#/components/schemas/SendOrderToSupplierInput'
       responses:
         '200':
           description: Updated
@@ -2422,6 +2444,13 @@ components:
           type: string
       required:
         - message
+    SendOrderToSupplierInput:
+      type: object
+      properties:
+        supplierId:
+          type: integer
+      required:
+        - supplierId
     LoginInput:
       type: object
       properties:
@@ -2825,9 +2854,8 @@ components:
             - integer
             - 'null'
         updatedAt:
-          type:
-            - string
-            - 'null'
+          type: string
+          format: date-time
       required:
         - id
         - name
@@ -2837,6 +2865,7 @@ components:
         - areaM2
         - bookable
         - facilities
+        - updatedAt
     RoomDossierUpdate:
       type: object
       properties:
@@ -2871,7 +2900,6 @@ components:
           minimum: 0
         updatedAt:
           type: string
-          description: ISO-tijdstempel voor optimistic locking
       required:
         - updatedAt
     RoomDossierHistoryEntry:
@@ -2888,12 +2916,54 @@ components:
             - 'null'
         changedAt:
           type: string
+          format: date-time
         isUndo:
           type: boolean
         changes:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/RoomDossierChange'
+    RoomDossierChange:
+      type: object
+      required: [field]
+      properties:
+        field:
+          type: string
+        from:
+          oneOf:
+            - type: string
+            - type: number
+            - type: 'null'
+        to:
+          oneOf:
+            - type: string
+            - type: number
+            - type: 'null'
+    FloorDossierHistoryEntry:
+      type: object
+      required: [id, roomId, roomName, roomCode, changedAt, isUndo, changes]
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        roomName:
+          type: string
+        roomCode:
+          type: string
+        changedByName:
+          type:
+            - string
+            - 'null'
+        changedAt:
+          type: string
+          format: date-time
+        isUndo:
+          type: boolean
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomDossierChange'
     FloorPlan:
       type: object
       required: [floorId, floorName, level, buildingId, buildingName, rooms]
@@ -2914,7 +2984,7 @@ components:
             $ref: '#/components/schemas/FloorPlanRoom'
     FloorPlanRoom:
       type: object
-      required: [id, name, code, functionType, areaM2]
+      required: [id, name, code, functionType, areaM2, updatedAt]
       properties:
         id:
           type: integer
@@ -2926,11 +2996,10 @@ components:
           type: string
         areaM2:
           type: number
+        updatedAt:
+          type: string
+          format: date-time
         areaVvoM2:
-          type:
-            - number
-            - 'null'
-        areaBvoM2:
           type:
             - number
             - 'null'
@@ -2944,10 +3013,6 @@ components:
             - 'null'
         bookable:
           type: boolean
-        updatedAt:
-          type:
-            - string
-            - 'null'
     BuildingDetail:
       type: object
       required: [id, name, address, siteName, floorCount, roomCount, totalAreaM2, floors]
@@ -3054,10 +3119,6 @@ components:
           type:
             - string
             - 'null'
-        dueAt:
-          type:
-            - string
-            - 'null'
         createdAt:
           type: string
     KeyDetail:
@@ -3116,10 +3177,6 @@ components:
             - 'null'
         issuedAt:
           type: string
-        dueAt:
-          type:
-            - string
-            - 'null'
         returnedAt:
           type:
             - string
@@ -3217,11 +3274,6 @@ components:
       properties:
         holderId:
           type: integer
-        dueAt:
-          type:
-            - string
-            - 'null'
-          format: date-time
         note:
           type:
             - string
@@ -4992,18 +5044,6 @@ components:
           type: array
           items: { type: integer }
       required: [title, body, category]
-    KnowledgeArticleUpdate:
-      type: object
-      properties:
-        title: { type: string, minLength: 1 }
-        body: { type: string, minLength: 1 }
-        category: { type: string }
-        tags:
-          type: array
-          items: { type: string }
-        ticketCategoryIds:
-          type: array
-          items: { type: integer }
     TicketSatisfaction:
       type: object
       properties:
@@ -5030,24 +5070,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CountByKey"
-        byCategory:
-          type: array
-          items:
-            $ref: "#/components/schemas/SatisfactionByCategory"
         recentResponses:
           type: array
           items:
             $ref: "#/components/schemas/SatisfactionResponseItem"
-      required: [totalResponses, averageScore, closedTickets, responseRate, byScore, byCategory, recentResponses]
-    SatisfactionByCategory:
-      type: object
-      properties:
-        categoryId: { type: integer }
-        categoryName: { type: string }
-        closedTickets: { type: integer }
-        responses: { type: integer }
-        responseRate: { type: integer, description: "Percentage of closed tickets with a satisfaction score (0-100)" }
-      required: [categoryId, categoryName, closedTickets, responses, responseRate]
+      required: [totalResponses, averageScore, closedTickets, responseRate, byScore, recentResponses]
     SatisfactionResponseItem:
       type: object
       properties:
@@ -5058,3 +5085,24 @@ components:
         comment: { type: ["string", "null"] }
         submittedAt: { type: string }
       required: [ticketId, ticketNumber, ticketTitle, score, submittedAt]
+    SatisfactionByCategory:
+      type: object
+      properties:
+        categoryId: { type: integer }
+        categoryName: { type: string }
+        closedTickets: { type: integer }
+        responses: { type: integer }
+        responseRate: { type: integer, description: "Percentage of closed tickets with a satisfaction score (0-100)" }
+      required: [categoryId, categoryName, closedTickets, responses, responseRate]
+    KnowledgeArticleUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        body: { type: string, minLength: 1 }
+        category: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        ticketCategoryIds:
+          type: array
+          items: { type: integer }

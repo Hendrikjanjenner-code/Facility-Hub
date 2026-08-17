@@ -37,6 +37,5 @@ export interface Room {
   assetCount?: number | null;
   /** @nullable */
   openTicketCount?: number | null;
-  /** @nullable */
-  updatedAt?: string | null;
+  updatedAt: Date;
 }

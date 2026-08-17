@@ -11,9 +11,11 @@ import {
   useDeleteBuildingDocument,
   useGetCurrentUser,
   useUpdateRoomDossier,
+  useListFloorDossierHistory,
   getGetBuildingQueryKey,
   getGetFloorPlanQueryKey,
   getListBuildingDocumentsQueryKey,
+  getListFloorDossierHistoryQueryKey,
   type FloorPlanRoom,
   type BuildingDocument,
 } from "@workspace/api-client-react";
@@ -21,7 +23,10 @@ import {
   AlertCircle,
   ArrowLeft,
   Building,
+  ChevronDown,
+  ChevronUp,
   FileText,
+  History,
   Layers,
   MapPin,
   Trash2,
@@ -300,6 +305,86 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function FloorHistoryPanel({ floorId }: { floorId: number }) {
+  const [open, setOpen] = useState(false);
+  const { data: history, isLoading } = useListFloorDossierHistory(floorId, {
+    query: { enabled: open, queryKey: getListFloorDossierHistoryQueryKey(floorId) },
+  });
+
+  return (
+    <div className="rounded-md border" data-testid={`floor-history-${floorId}`}>
+      <button
+        type="button"
+        className="flex items-center justify-between w-full p-3 text-sm font-medium hover:bg-muted/50 transition-colors rounded-md"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="flex items-center gap-2">
+          <History className="h-4 w-4 text-muted-foreground" />
+          Recente herindelingen
+        </span>
+        {open ? (
+          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        )}
+      </button>
+      {open && (
+        <div className="border-t">
+          {isLoading ? (
+            <div className="p-4 space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ) : !history?.length ? (
+            <p className="text-sm text-muted-foreground p-6 text-center">
+              Geen recente herindelingen op deze verdieping.
+            </p>
+          ) : (
+            <div className="divide-y max-h-80 overflow-y-auto">
+              {history.map((entry) => (
+                <div key={entry.id} className="p-3 text-sm">
+                  <div className="flex items-start justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 font-medium min-w-0">
+                      <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded flex-shrink-0">
+                        {entry.roomCode}
+                      </span>
+                      <span className="truncate">{entry.roomName}</span>
+                      {entry.isUndo && (
+                        <Badge variant="outline" className="text-xs flex-shrink-0">
+                          Ongedaan gemaakt
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
+                      {format(new Date(entry.changedAt), "d MMM HH:mm", { locale: nl })}
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    Door: {entry.changedByName ?? "Onbekend"}
+                  </div>
+                  {entry.changes.length > 0 && (
+                    <div className="mt-1.5 space-y-0.5">
+                      {entry.changes.map((c, i) => (
+                        <div key={i} className="text-xs flex items-center gap-1.5 text-muted-foreground">
+                          <span className="capitalize font-medium text-foreground">{c.field}:</span>
+                          <span className="line-through">{String(c.from ?? "–")}</span>
+                          <span>→</span>
+                          <span className="font-medium text-foreground">{String(c.to ?? "–")}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -848,6 +933,7 @@ export default function GebouwDetailPage({ id }: { id: string }) {
             ))}
           </div>
           {activeFloorId != null && <Vlekkenplan floorId={activeFloorId} colorBy={colorBy} canManage={canManage} />}
+          {canManage && activeFloorId != null && <FloorHistoryPanel floorId={activeFloorId} />}
         </CardContent>
       </Card>
 
