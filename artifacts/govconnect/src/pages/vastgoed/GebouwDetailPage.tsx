@@ -28,6 +28,9 @@ import {
   Download,
   LayoutGrid,
   Pencil,
+  ExternalLink,
+  Users,
+  Maximize2,
 } from "lucide-react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -39,6 +42,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -333,7 +337,6 @@ function VlekEditDialog({
         </div>
         <div className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground space-y-0.5">
           <div>Oppervlakte: {room.areaM2 ?? "–"} m²</div>
-          {room.areaM2 != null && <div>Opp: {room.areaM2} m²</div>}
         </div>
       </div>
       <DialogFooter>
@@ -368,7 +371,7 @@ function Vlekkenplan({
     for (const r of rooms) {
       const key = (colorBy === "department" ? r.department : r.functionType) ?? "Onbekend";
       if (!map.has(key)) map.set(key, PALETTE[map.size % PALETTE.length]!);
-      vvoByKey.set(key, (vvoByKey.get(key) ?? 0) + (r.areaM2 ?? 0));
+      vvoByKey.set(key, (vvoByKey.get(key) ?? 0) + (r.areaVvoM2 ?? r.areaM2 ?? 0));
     }
     return {
       colorMap: map,
@@ -397,17 +400,15 @@ function Vlekkenplan({
         >
           {plan.rooms.map((r) => {
             const share = (r.areaM2 ?? 0) / totalArea;
-            return (
+            const tileButton = (
               <button
-                key={r.id}
-                onClick={() => canManage ? setEditRoom(r) : setLocation(`/ruimtes/${r.id}`)}
+                onClick={() => { if (canManage) setEditRoom(r); }}
                 className={cn(
-                  "rounded-md border-2 p-2 text-left transition-transform hover:scale-[1.02] hover:shadow-md min-w-[90px]",
+                  "rounded-md border-2 p-2 text-left transition-transform hover:scale-[1.02] hover:shadow-md min-w-[90px] cursor-pointer",
                   colorMap.get(keyOf(r)),
-                  canManage && "cursor-pointer",
                 )}
                 style={{ flexGrow: Math.max(1, Math.round(share * 100)), flexBasis: `${Math.max(8, share * 100)}%` }}
-                title={canManage ? `${r.name} — klik om afdeling/functie te wijzigen` : `${r.name} (${r.code}) — ${r.areaM2 ?? "?"} m²`}
+                title={canManage ? `${r.name} — klik om afdeling/functie te wijzigen` : `${r.name} (${r.code}) — klik voor details`}
                 data-testid={`vlek-${r.code}`}
               >
                 <div className="text-xs font-semibold truncate">{r.name}</div>
@@ -419,6 +420,48 @@ function Vlekkenplan({
                   </div>
                 )}
               </button>
+            );
+
+            if (canManage) {
+              return <span key={r.id} style={{ flexGrow: Math.max(1, Math.round(share * 100)), flexBasis: `${Math.max(8, share * 100)}%` }}>{tileButton}</span>;
+            }
+
+            return (
+              <Popover key={r.id}>
+                <PopoverTrigger asChild style={{ flexGrow: Math.max(1, Math.round(share * 100)), flexBasis: `${Math.max(8, share * 100)}%` }}>
+                  {tileButton}
+                </PopoverTrigger>
+                <PopoverContent className="w-72" align="start" side="top">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="font-semibold text-sm">{r.name}</div>
+                      <div className="text-xs font-mono text-muted-foreground">{r.code}</div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                      <div className="text-muted-foreground">Afdeling</div>
+                      <div className="font-medium">{r.department ?? "–"}</div>
+                      <div className="text-muted-foreground">Functie</div>
+                      <div className="font-medium">{r.functionType ?? "–"}</div>
+                      <div className="text-muted-foreground flex items-center gap-1"><Maximize2 className="h-3 w-3" /> Oppervlakte</div>
+                      <div className="font-medium">{r.areaM2 != null ? `${r.areaM2} m²` : "–"}</div>
+                      {r.capacity != null && (
+                        <>
+                          <div className="text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> Bezetting</div>
+                          <div className="font-medium">{r.capacity} personen</div>
+                        </>
+                      )}
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setLocation(`/ruimtes/${r.id}`)}
+                    >
+                      Ga naar ruimtepagina <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                    </Button>
+                  </div>
+                </PopoverContent>
+              </Popover>
             );
           })}
         </div>

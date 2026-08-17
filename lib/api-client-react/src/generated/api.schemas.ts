@@ -243,6 +243,8 @@ export interface FloorPlanRoom {
   functionType: string;
   areaM2: number;
   /** @nullable */
+  areaVvoM2?: number | null;
+  /** @nullable */
   department?: string | null;
   /** @nullable */
   capacity?: number | null;

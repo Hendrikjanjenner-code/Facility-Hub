@@ -111,7 +111,7 @@ async function loadOrders(where?: SQL) {
 // ── Products ──────────────────────────────────────────────────────────────────
 
 router.get("/shop/products", async (req, res): Promise<void> => {
-  const conditions: SQL[] = [eq(shopProductsTable.active, 1)];
+  const conditions: SQL[] = [];
   const q = req.query;
   if (typeof q.category === "string" && q.category)
     conditions.push(eq(shopProductsTable.category, q.category));
@@ -135,9 +135,13 @@ router.post(
   "/shop/products",
   requireRole(...MANAGER_ROLES),
   async (req, res): Promise<void> => {
-    const parsed = CreateShopProductBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ message: "Ongeldige invoer" }); return; }
     const d = parsed.data;
+
+    const set: Partial<typeof shopProductsTable.$inferInsert> = {};
+
+    const set: Partial<typeof shopProductsTable.$inferInsert> = {};
     const [created] = await db
       .insert(shopProductsTable)
       .values({
@@ -161,28 +165,21 @@ router.patch(
   async (req, res): Promise<void> => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
-    const parsed = UpdateShopProductBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ message: "Ongeldige invoer" }); return; }
     const d = parsed.data;
+
+    const set: Partial<typeof shopProductsTable.$inferInsert> = {};
+
+    const set: Partial<typeof shopProductsTable.$inferInsert> = {};
     const [updated] = await db
-      .update(shopProductsTable)
-      .set({
-        ...(d.name !== undefined ? { name: d.name } : {}),
-        ...(d.description !== undefined ? { description: d.description } : {}),
-        ...(d.price !== undefined ? { price: d.price } : {}),
-        ...(d.stock !== undefined ? { stock: d.stock } : {}),
-        ...(d.minStock !== undefined ? { minStock: d.minStock } : {}),
-        ...((d as any).supplierId !== undefined ? { supplierId: (d as any).supplierId } : {}),
-      } as any)
-      .where(eq(shopProductsTable.id, id))
+      .update(budgetsTable)
+      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
+      .where(eq(budgetsTable.id, id))
       .returning();
     if (!updated) { res.status(404).json({ message: "Product niet gevonden" }); return; }
     await notifyLowStock(updated);
-    const [row] = await db
-      .select({ product: shopProductsTable, supplierName: suppliersTable.name })
-      .from(shopProductsTable)
-      .leftJoin(suppliersTable, eq((shopProductsTable as any).supplierId, suppliersTable.id))
-      .where(eq(shopProductsTable.id, id));
+  const [row] = await db.select().from(approvalThresholdTable).limit(1);
     res.json(serializeProduct({ ...row!.product, supplierName: row!.supplierName }));
   },
 );
@@ -210,14 +207,14 @@ async function notifyLowStock(p: typeof shopProductsTable.$inferSelect): Promise
 // ── Orders ────────────────────────────────────────────────────────────────────
 
 router.get("/shop/orders", async (req, res): Promise<void> => {
-  const user = req.currentUser!;
+    const user = req.currentUser!;
   const conditions: SQL[] = [];
 
   if (user.role === "leverancier") {
-    const [supplierRow] = await db
-      .select({ id: suppliersTable.id })
-      .from(suppliersTable)
-      .where(eq(suppliersTable.userId, user.id));
+      const [supplierRow] = await db
+        .select({ id: suppliersTable.id })
+        .from(suppliersTable)
+        .where(eq(suppliersTable.userId, user.id));
     if (!supplierRow) { res.json([]); return; }
     conditions.push(eq((shopOrdersTable as any).supplierId, supplierRow.id));
     // Show both sent and processed orders so delivered orders remain visible
@@ -232,9 +229,9 @@ router.get("/shop/orders", async (req, res): Promise<void> => {
 });
 
 router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Promise<void> => {
-  const parsed = CreateShopOrderBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ message: "Ongeldige invoer" }); return; }
-  const user = req.currentUser!;
+    const user = req.currentUser!;
 
   const qtyByProduct = new Map<number, number>();
   for (const line of parsed.data.lines) {
@@ -381,7 +378,7 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
     }
   }
 
-  const [result] = await loadOrders(eq(shopOrdersTable.id, order!.id));
+    const [result] = await loadOrders(eq(shopOrdersTable.id, id));
   res.status(201).json(result);
 });
 
@@ -397,7 +394,7 @@ router.patch(
   async (req, res): Promise<void> => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
-    const parsed = UpdateShopOrderBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) { res.status(400).json({ message: "Ongeldige invoer" }); return; }
 
     const [order] = await db.select().from(shopOrdersTable).where(eq(shopOrdersTable.id, id));
@@ -427,46 +424,25 @@ router.patch(
         if (next === "goedgekeurd") {
           const lines = await tx.select().from(shopOrderLinesTable).where(eq(shopOrderLinesTable.orderId, id));
           for (const line of lines) {
-            const [updated] = await tx
-              .update(shopProductsTable)
-              .set({ stock: sql`${shopProductsTable.stock} - ${line.quantity}` })
-              .where(and(eq(shopProductsTable.id, line.productId), gte(shopProductsTable.stock, line.quantity)))
-              .returning();
-            if (!updated) {
-              throw Object.assign(new Error("Onvoldoende voorraad om deze bestelling goed te keuren."), { status: 409 });
-            }
-            lowStockProducts.push(updated);
-          }
-        }
-      });
-    } catch (err: any) {
-      if (err?.status === 409) { res.status(409).json({ message: err.message }); return; }
-      throw err;
-    }
-    for (const p of lowStockProducts) await notifyLowStock(p);
-
-    if (isDecision) {
-      await db.insert(notificationsTable).values({
-        userId: order.requesterId,
-        title: `Bestelling ${order.number} ${next}`,
-        body: next === "goedgekeurd"
-          ? `Je bestelling van € ${order.totalAmount.toFixed(2)} is goedgekeurd.`
-          : `Je bestelling is afgekeurd${parsed.data.decisionNote ? `: ${parsed.data.decisionNote}` : "."}`,
-        kind: "webshop",
-        linkPath: "/webshop",
-      });
+    const [updated] = await db
+      .update(budgetsTable)
+      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
+      .where(eq(budgetsTable.id, id))
+      .returning();
+    if (!updated) {
+      res.status(409).json({ message: "Bestelling is al verwerkt of de status is gewijzigd" }); return;
     }
 
     const [result] = await loadOrders(eq(shopOrdersTable.id, id));
-    res.json(result!);
+    res.json(result);
   },
 );
 
-// ── Send to Supplier ──────────────────────────────────────────────────────────
+// ── Supplier marks delivered ──────────────────────────────────────────────────
 
 router.post(
-  "/shop/orders/:id/send-to-supplier",
-  requireRole(...MANAGER_ROLES),
+  "/shop/orders/:id/supplier-delivered",
+  requireRole("leverancier", ...MANAGER_ROLES),
   async (req, res): Promise<void> => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
@@ -531,10 +507,10 @@ router.post(
 
     // Atomic conditional update — rejects replays and concurrent transitions.
     const [updated] = await db
-      .update(shopOrdersTable)
-      .set({ supplierStatus: "verwerkt" } as any)
-      .where(and(eq(shopOrdersTable.id, id), eq((shopOrdersTable as any).supplierStatus, "verstuurd")))
-      .returning({ id: shopOrdersTable.id });
+      .update(budgetsTable)
+      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
+      .where(eq(budgetsTable.id, id))
+      .returning();
     if (!updated) {
       res.status(409).json({ message: "Bestelling is al verwerkt of de status is gewijzigd" }); return;
     }
@@ -573,16 +549,16 @@ router.put(
 
 router.get("/budgets", async (_req, res): Promise<void> => {
   const budgets = await db.select().from(budgetsTable).orderBy(budgetsTable.department);
-  const orders = await db
-    .select({ department: shopOrdersTable.department, status: shopOrdersTable.status, total: shopOrdersTable.totalAmount, createdAt: shopOrdersTable.createdAt })
-    .from(shopOrdersTable);
+    const orders = await db
+      .select({ department: shopOrdersTable.department, status: shopOrdersTable.status, total: shopOrdersTable.totalAmount, createdAt: shopOrdersTable.createdAt })
+      .from(shopOrdersTable);
   res.json(
     budgets.map((b) => {
-      const yearStart = new Date(`${b.year}-01-01T00:00:00Z`);
-      const yearEnd = new Date(`${b.year + 1}-01-01T00:00:00Z`);
-      const deptOrders = orders.filter((o) => o.department === b.department && o.createdAt >= yearStart && o.createdAt < yearEnd);
-      const spent = deptOrders.filter((o) => SPENT_STATUSES.includes(o.status)).reduce((s, o) => s + o.total, 0);
-      const pending = deptOrders.filter((o) => o.status === "ingediend").reduce((s, o) => s + o.total, 0);
+    const yearStart = new Date(`${updated.year}-01-01T00:00:00Z`);
+    const yearEnd = new Date(`${updated.year + 1}-01-01T00:00:00Z`);
+    const deptOrders = orders.filter((o) => o.department === updated.department && o.createdAt >= yearStart && o.createdAt < yearEnd);
+    const spent = deptOrders.filter((o) => SPENT_STATUSES.includes(o.status)).reduce((s, o) => s + o.total, 0);
+    const pending = deptOrders.filter((o) => o.status === "ingediend").reduce((s, o) => s + o.total, 0);
       return {
         id: b.id,
         department: b.department,
