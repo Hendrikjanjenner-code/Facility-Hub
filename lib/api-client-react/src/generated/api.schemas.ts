@@ -1385,6 +1385,15 @@ export interface TicketSatisfactionInput {
   comment?: string | null;
 }
 
+export interface SatisfactionByCategory {
+  categoryId: number;
+  categoryName: string;
+  closedTickets: number;
+  responses: number;
+  /** Percentage of closed tickets with a satisfaction score (0-100) */
+  responseRate: number;
+}
+
 export interface SatisfactionResponseItem {
   ticketId: number;
   ticketNumber: string;
@@ -1402,6 +1411,7 @@ export interface SatisfactionReport {
   /** Percentage of closed tickets with a satisfaction score (0-100) */
   responseRate: number;
   byScore: CountByKey[];
+  byCategory: SatisfactionByCategory[];
   recentResponses: SatisfactionResponseItem[];
 }
 

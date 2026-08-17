@@ -3,6 +3,7 @@ import {
   db,
   ticketSatisfactionTable,
   ticketsTable,
+  ticketCategoriesTable,
 } from "@workspace/db";
 import { eq, sql, desc } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
@@ -136,6 +137,27 @@ router.get("/satisfaction/report", async (req, res): Promise<void> => {
     .orderBy(desc(ticketSatisfactionTable.createdAt))
     .limit(20);
 
+  // Per-category breakdown: closed tickets count and satisfaction responses count
+  const byCategory = await db
+    .select({
+      categoryId: ticketCategoriesTable.id,
+      categoryName: ticketCategoriesTable.name,
+      closedCount: sql<number>`count(case when ${ticketsTable.status} = 'gesloten' then 1 end)::int`,
+      // Only count responses for tickets that are currently closed, so rate stays ≤ 100% even if a ticket was reopened after a response was submitted
+      responseCount: sql<number>`count(case when ${ticketsTable.status} = 'gesloten' then ${ticketSatisfactionTable.id} end)::int`,
+    })
+    .from(ticketCategoriesTable)
+    .leftJoin(
+      ticketsTable,
+      eq(ticketsTable.categoryId, ticketCategoriesTable.id),
+    )
+    .leftJoin(
+      ticketSatisfactionTable,
+      eq(ticketSatisfactionTable.ticketId, ticketsTable.id),
+    )
+    .groupBy(ticketCategoriesTable.id, ticketCategoriesTable.name)
+    .orderBy(ticketCategoriesTable.name);
+
   const closedTickets = closedRow?.count ?? 0;
   const totalResponses = totalRow?.count ?? 0;
   const responseRate =
@@ -147,6 +169,16 @@ router.get("/satisfaction/report", async (req, res): Promise<void> => {
     closedTickets,
     responseRate,
     byScore,
+    byCategory: byCategory.map((row) => ({
+      categoryId: row.categoryId,
+      categoryName: row.categoryName,
+      closedTickets: row.closedCount,
+      responses: row.responseCount,
+      responseRate:
+        row.closedCount > 0
+          ? Math.round((row.responseCount / row.closedCount) * 100)
+          : 0,
+    })),
     recentResponses: recent.map((r) => ({
       ticketId: r.sat.ticketId,
       ticketNumber: r.ticketNumber ?? "",

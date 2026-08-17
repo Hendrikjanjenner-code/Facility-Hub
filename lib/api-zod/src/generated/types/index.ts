@@ -99,6 +99,7 @@ export * from './room';
 export * from './roomDossierHistoryEntry';
 export * from './roomDossierHistoryEntryChangesItem';
 export * from './roomDossierUpdate';
+export * from './satisfactionByCategory';
 export * from './satisfactionReport';
 export * from './satisfactionResponseItem';
 export * from './sendOrderToSupplierBody';

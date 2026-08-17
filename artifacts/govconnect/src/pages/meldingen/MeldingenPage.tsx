@@ -1,17 +1,25 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useListTickets, useListTicketCategories, useGetCurrentUser } from "@workspace/api-client-react";
+import {
+  useListTickets,
+  useListTicketCategories,
+  useGetCurrentUser,
+  useGetSatisfactionReport,
+  getGetSatisfactionReportQueryKey,
+} from "@workspace/api-client-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Ticket, Search, Plus, Filter, AlertCircle, Clock } from "lucide-react";
+import { Ticket, Search, Plus, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTicketStatusColor, getTicketStatusLabel, getPriorityColor } from "@/lib/status-helpers";
+
+const MANAGER_ROLES = ["facilitair_manager", "beheerder"];
 
 export default function MeldingenPage() {
   const [, setLocation] = useLocation();
@@ -20,8 +28,14 @@ export default function MeldingenPage() {
   const [status, setStatus] = useState<string>("all");
   const [priority, setPriority] = useState<string>("all");
   const [category, setCategory] = useState<string>("all");
+  const [showAllRates, setShowAllRates] = useState(false);
+
+  const isManager = !!user && MANAGER_ROLES.includes(user.role);
 
   const { data: categories } = useListTicketCategories();
+  const { data: satisfactionReport } = useGetSatisfactionReport({
+    query: { enabled: isManager, queryKey: getGetSatisfactionReportQueryKey() },
+  });
 
   const params: any = {};
   if (search) params.search = search;
@@ -30,6 +44,12 @@ export default function MeldingenPage() {
   if (category !== "all") params.category = category;
 
   const { data: tickets, isLoading } = useListTickets(params);
+
+  // Categories with closed tickets, sorted by response rate ascending (worst first)
+  const categoryRates = (satisfactionReport?.byCategory ?? [])
+    .filter((c) => c.closedTickets > 0)
+    .sort((a, b) => a.responseRate - b.responseRate);
+  const visibleRates = showAllRates ? categoryRates : categoryRates.slice(0, 5);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -46,6 +66,59 @@ export default function MeldingenPage() {
           </Button>
         )}
       </div>
+
+      {/* Response-rate per category — managers only */}
+      {isManager && categoryRates.length > 0 && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">
+              Responsrate per categorie
+              <span className="ml-2 text-xs font-normal text-muted-foreground">
+                — percentage gesloten meldingen met beoordeling
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {visibleRates.map((cat) => (
+              <div key={cat.categoryId} className="flex items-center gap-3 text-sm">
+                <span className="w-44 truncate text-muted-foreground flex-shrink-0">{cat.categoryName}</span>
+                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${
+                      cat.responseRate < 30
+                        ? "bg-destructive"
+                        : cat.responseRate < 60
+                        ? "bg-orange-400"
+                        : "bg-green-500"
+                    }`}
+                    style={{ width: `${cat.responseRate}%` }}
+                  />
+                </div>
+                <span className="w-12 text-right text-xs font-medium flex-shrink-0">
+                  {cat.responseRate}%
+                </span>
+                <span className="w-20 text-right text-xs text-muted-foreground flex-shrink-0">
+                  {cat.responses}/{cat.closedTickets}
+                </span>
+              </div>
+            ))}
+            {categoryRates.length > 5 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full mt-1 text-xs text-muted-foreground"
+                onClick={() => setShowAllRates((v) => !v)}
+              >
+                {showAllRates ? (
+                  <><ChevronUp className="h-3 w-3 mr-1" /> Minder tonen</>
+                ) : (
+                  <><ChevronDown className="h-3 w-3 mr-1" /> Alle {categoryRates.length} categorieën tonen</>
+                )}
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-4 bg-card p-4 rounded-lg border shadow-sm">
         <div className="relative flex-1">

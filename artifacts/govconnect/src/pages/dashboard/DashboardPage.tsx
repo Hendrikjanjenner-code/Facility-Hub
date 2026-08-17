@@ -300,6 +300,37 @@ export default function DashboardPage() {
                   </div>
                 );
               })}
+
+              {/* Top-3 categories with lowest response rate (only show categories that have closed tickets) */}
+              {(() => {
+                const withClosed = (satisfactionReport.byCategory ?? []).filter(c => c.closedTickets > 0);
+                if (withClosed.length === 0) return null;
+                const bottom3 = [...withClosed]
+                  .sort((a, b) => a.responseRate - b.responseRate)
+                  .slice(0, 3);
+                return (
+                  <div className="pt-3 border-t space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Laagste responsrate per categorie
+                    </p>
+                    {bottom3.map((cat) => (
+                      <div key={cat.categoryId} className="flex items-center gap-2 text-sm">
+                        <span className="flex-1 truncate text-muted-foreground">{cat.categoryName}</span>
+                        <div className="w-20 h-1.5 bg-muted rounded-full overflow-hidden flex-shrink-0">
+                          <div
+                            className="h-full rounded-full transition-all bg-orange-400"
+                            style={{ width: `${cat.responseRate}%` }}
+                          />
+                        </div>
+                        <span className="w-8 text-right text-xs font-medium flex-shrink-0">
+                          {cat.responseRate}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
               {satisfactionReport.recentResponses?.slice(0, 3).map((r) => (
                 <div key={r.ticketId} className="pt-2 border-t first:border-t-0">
                   <div className="flex items-center gap-1 mb-0.5">

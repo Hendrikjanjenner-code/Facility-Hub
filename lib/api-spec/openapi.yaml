@@ -5030,11 +5030,24 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CountByKey"
+        byCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/SatisfactionByCategory"
         recentResponses:
           type: array
           items:
             $ref: "#/components/schemas/SatisfactionResponseItem"
-      required: [totalResponses, averageScore, closedTickets, responseRate, byScore, recentResponses]
+      required: [totalResponses, averageScore, closedTickets, responseRate, byScore, byCategory, recentResponses]
+    SatisfactionByCategory:
+      type: object
+      properties:
+        categoryId: { type: integer }
+        categoryName: { type: string }
+        closedTickets: { type: integer }
+        responses: { type: integer }
+        responseRate: { type: integer, description: "Percentage of closed tickets with a satisfaction score (0-100)" }
+      required: [categoryId, categoryName, closedTickets, responses, responseRate]
     SatisfactionResponseItem:
       type: object
       properties:

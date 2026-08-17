@@ -2769,6 +2769,13 @@ export const GetSatisfactionReportResponse = zod.object({
   "key": zod.string(),
   "count": zod.int()
 })),
+  "byCategory": zod.array(zod.object({
+  "categoryId": zod.int(),
+  "categoryName": zod.string(),
+  "closedTickets": zod.int(),
+  "responses": zod.int(),
+  "responseRate": zod.int().describe('Percentage of closed tickets with a satisfaction score (0-100)')
+})),
   "recentResponses": zod.array(zod.object({
   "ticketId": zod.int(),
   "ticketNumber": zod.string(),

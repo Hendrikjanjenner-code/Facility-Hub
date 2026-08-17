@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CountByKey } from './countByKey';
+import type { SatisfactionByCategory } from './satisfactionByCategory';
 import type { SatisfactionResponseItem } from './satisfactionResponseItem';
 
 export interface SatisfactionReport {
@@ -15,5 +16,6 @@ export interface SatisfactionReport {
   /** Percentage of closed tickets with a satisfaction score (0-100) */
   responseRate: number;
   byScore: CountByKey[];
+  byCategory: SatisfactionByCategory[];
   recentResponses: SatisfactionResponseItem[];
 }
