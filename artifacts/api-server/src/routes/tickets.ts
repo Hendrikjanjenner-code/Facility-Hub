@@ -330,7 +330,10 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
         .where(
           and(
             eq(mjopTakenTable.ticketId, id),
-            eq(mjopTakenTable.status, "in_uitvoering"),
+            or(
+              eq(mjopTakenTable.status, "in_uitvoering"),
+              eq(mjopTakenTable.status, "gepland"),
+            ),
           ),
         );
     }
