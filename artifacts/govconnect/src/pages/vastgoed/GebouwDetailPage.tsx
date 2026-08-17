@@ -55,15 +55,12 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import {
+  setPendingUpload,
+  clearPendingUpload,
+} from "@/lib/pending-upload-helpers";
+import { PendingUploadBanner } from "@/components/vastgoed/PendingUploadBanner";
 const API_BASE = "/api";
-
-interface PendingUpload {
-  objectPath: string;
-  contentType: string;
-  sizeBytes: number;
-  title: string;
-  category: string;
-}
 const DOC_CATEGORIES = [
   { value: "huurcontract", label: "Huurcontract" },
   { value: "bouwtekening", label: "Bouwtekening" },
@@ -388,178 +385,6 @@ function FloorHistoryPanel({ floorId }: { floorId: number }) {
   );
 }
 
-function PendingUploadBanner({
-  buildingId,
-  documents,
-}: {
-  buildingId: number;
-  documents: Array<{ objectPath: string }> | undefined;
-}) {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  const createDoc = useCreateBuildingDocument();
-
-  const [pending, setPending] = useState<PendingUpload | null>(null);
-  const [retryTitle, setRetryTitle] = useState("");
-  const [retryCategory, setRetryCategory] = useState("overig");
-  const [retryOpen, setRetryOpen] = useState(false);
-  const [busy, setBusy] = useState(false);
-
-  // Lees localStorage zodra de documentenlijst beschikbaar is.
-  // Reset altijd de lokale state als buildingId verandert zodat de banner
-  // nooit actief blijft voor een ander gebouw na client-side navigatie.
-  useEffect(() => {
-    if (!documents) return;
-    const entry = getPendingUpload(buildingId);
-
-    if (!entry) {
-      // Geen pending entry voor dit gebouw – zorg dat er geen stale state is.
-      setPending(null);
-      setRetryTitle("");
-      setRetryCategory("overig");
-      setRetryOpen(false);
-      setBusy(false);
-      return;
-    }
-
-    // Controleer of het pad al geregistreerd is in de documentenlijst.
-    const alreadySaved = documents.some((d) => d.objectPath === entry.objectPath);
-    if (alreadySaved) {
-      // Upload was al opgeslagen (bijv. via een andere tab/sessie). Wis marker.
-      clearPendingUpload(buildingId);
-      setPending(null);
-      return;
-    }
-
-    // Pad staat in storage maar niet in de DB – toon de herstelknop.
-    setPending(entry);
-    setRetryTitle(entry.title);
-    setRetryCategory(entry.category);
-  }, [buildingId, documents]);
-
-  if (!pending) return null;
-
-  /** Geeft true terug als de DELETE 2xx antwoordde, anders false. */
-  const tryDeleteOrphan = async (objectPath: string): Promise<boolean> => {
-    const urlPath = objectPath.replace(/^\/objects\//, "");
-    try {
-      const resp = await fetch(`${API_BASE}/storage/objects/${urlPath}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      return resp.ok;
-    } catch {
-      return false;
-    }
-  };
-
-  const handleDismiss = async () => {
-    setBusy(true);
-    const deleted = await tryDeleteOrphan(pending.objectPath);
-    if (deleted) {
-      // Verwijdering geslaagd – wis de localStorage-marker en verberg de banner.
-      clearPendingUpload(buildingId);
-      setPending(null);
-      setRetryOpen(false);
-    } else {
-      // Verwijdering mislukt (bijv. sessie verlopen of netwerk onbeschikbaar).
-      // Houd de localStorage-marker zodat de banner terugkomt bij het volgende bezoek.
-      toast({
-        title: "Verwijderen mislukt",
-        description:
-          "Het bestand kon niet worden verwijderd. Controleer uw verbinding en probeer het opnieuw.",
-        variant: "destructive",
-      });
-    }
-    setBusy(false);
-  };
-
-  const handleRetry = () => {
-    setBusy(true);
-    createDoc.mutate(
-      {
-        id: buildingId,
-        data: {
-          title: retryTitle.trim() || pending.title,
-          category: retryCategory as (typeof DOC_CATEGORIES)[number]["value"],
-          objectPath: pending.objectPath,
-          contentType: pending.contentType,
-          sizeBytes: pending.sizeBytes,
-        },
-      },
-      {
-        onSuccess: () => {
-          clearPendingUpload(buildingId);
-          queryClient.invalidateQueries({ queryKey: getListBuildingDocumentsQueryKey(buildingId) });
-          toast({ title: "Document alsnog opgeslagen" });
-          setPending(null);
-          setRetryOpen(false);
-        },
-        onError: () => {
-          toast({ title: "Opslaan mislukt – probeer het opnieuw", variant: "destructive" });
-        },
-        onSettled: () => setBusy(false),
-      },
-    );
-  };
-
-  return (
-    <Alert variant="destructive" className="mb-4" data-testid="pending-upload-banner">
-      <AlertCircle className="h-4 w-4" />
-      <AlertDescription className="flex flex-col gap-2">
-        <span>
-          Een eerdere upload (<strong>{pending.title || pending.objectPath}</strong>) is mogelijk
-          niet opgeslagen omdat de verbinding wegviel.
-        </span>
-        {retryOpen ? (
-          <div className="space-y-3 mt-1">
-            <div className="space-y-1">
-              <Label htmlFor="retry-title" className="text-xs">Titel</Label>
-              <Input
-                id="retry-title"
-                value={retryTitle}
-                onChange={(e) => setRetryTitle(e.target.value)}
-                className="h-8 text-sm"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">Categorie</Label>
-              <Select value={retryCategory} onValueChange={setRetryCategory}>
-                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {DOC_CATEGORIES.map((c) => (
-                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex gap-2">
-              <Button size="sm" onClick={handleRetry} disabled={busy || !retryTitle.trim()}>
-                <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-                {busy ? "Bezig…" : "Alsnog opslaan"}
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setRetryOpen(false)} disabled={busy}>
-                Terug
-              </Button>
-              <Button size="sm" variant="ghost" onClick={handleDismiss} disabled={busy} className="ml-auto text-destructive-foreground/70">
-                Verwijderen
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex gap-2 flex-wrap">
-            <Button size="sm" variant="outline" onClick={() => setRetryOpen(true)}>
-              <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Opnieuw proberen
-            </Button>
-            <Button size="sm" variant="ghost" onClick={handleDismiss} className="text-destructive-foreground/70">
-              Verwijderen &amp; negeren
-            </Button>
-          </div>
-        )}
-      </AlertDescription>
-    </Alert>
-  );
-}
 const PALETTE = [
   "bg-blue-200 border-blue-400 text-blue-900",
   "bg-emerald-200 border-emerald-400 text-emerald-900",
@@ -1002,34 +827,4 @@ export default function GebouwDetailPage({ id }: { id: string }) {
       )}
     </div>
   );
-}
-
-function setPendingUpload(buildingId: number, entry: PendingUpload) {
-  try {
-    localStorage.setItem(pendingUploadKey(buildingId), JSON.stringify(entry));
-  } catch {
-    // localStorage unavailable – silently skip
-  }
-}
-
-function getPendingUpload(buildingId: number): PendingUpload | null {
-  try {
-    const raw = localStorage.getItem(pendingUploadKey(buildingId));
-    if (!raw) return null;
-    return JSON.parse(raw) as PendingUpload;
-  } catch {
-    return null;
-  }
-}
-
-function pendingUploadKey(buildingId: number) {
-  return `govconnect:pending-doc-${buildingId}`;
-}
-
-function clearPendingUpload(buildingId: number) {
-  try {
-    localStorage.removeItem(pendingUploadKey(buildingId));
-  } catch {
-    // ignore
-  }
 }
