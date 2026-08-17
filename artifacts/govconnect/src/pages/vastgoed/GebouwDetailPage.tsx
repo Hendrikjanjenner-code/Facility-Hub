@@ -15,6 +15,7 @@ import {
   getGetFloorPlanQueryKey,
   getListBuildingDocumentsQueryKey,
   type FloorPlanRoom,
+  type BuildingDocument,
 } from "@workspace/api-client-react";
 import {
   AlertCircle,
@@ -144,13 +145,33 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
         },
       },
       {
-        onSuccess: () => {
+        onSuccess: async (newDoc) => {
           // Upload succesvol opgeslagen – wis de localStorage-marker.
           clearPendingUpload(buildingId);
-          queryClient.invalidateQueries({ queryKey: getListBuildingDocumentsQueryKey(buildingId) });
-          toast({ title: "Document toegevoegd" });
+
+          // Voeg het nieuwe document direct toe aan de cache zodat het meteen
+          // zichtbaar is — ook bij een trage verbinding.
+          queryClient.setQueryData<BuildingDocument[]>(
+            getListBuildingDocumentsQueryKey(buildingId),
+            (old) => (old ? [newDoc, ...old] : [newDoc]),
+          );
+
+          // Sluit de dialog en reset het formulier zodra het record is aangemaakt.
+          setUploading(false);
           reset();
           setOpen(false);
+
+          // Wacht op de invalidatie zodat de lijst zeker up-to-date is voordat
+          // de succesmelding verdwijnt.
+          try {
+            await queryClient.invalidateQueries({ queryKey: getListBuildingDocumentsQueryKey(buildingId) });
+            toast({ title: "Document toegevoegd" });
+          } catch {
+            toast({
+              title: "Document opgeslagen, maar vernieuwen van de lijst mislukte.",
+              variant: "destructive",
+            });
+          }
         },
         onError: () => {
           // Het bestand staat nog in storage maar het record is niet aangemaakt.
