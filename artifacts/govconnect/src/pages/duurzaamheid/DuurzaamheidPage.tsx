@@ -332,6 +332,12 @@ export default function DuurzaamheidPage() {
 
   const hasActiveFilters = filterBuildingId || filterDateFrom || filterDateTo;
 
+  // True when the API responded but every array is empty — the filter matched nothing.
+  const isReportEmpty = report !== undefined
+    && report.monthlyUsage.length === 0
+    && report.wasteByCategory.length === 0
+    && report.wasteByMonth.length === 0;
+
   const clearFilters = () => {
     setFilterBuildingIdRaw("");
     setFilterDateFromRaw("");
@@ -450,7 +456,14 @@ export default function DuurzaamheidPage() {
                       Filters wissen
                     </Button>
                   )}
-                  <Button variant="outline" size="sm" className="h-8" onClick={exportCsv} disabled={!report}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8"
+                    onClick={exportCsv}
+                    disabled={!report || isReportEmpty}
+                    title={isReportEmpty ? "Geen data om te exporteren voor de geselecteerde filters" : undefined}
+                  >
                     <Download className="mr-2 h-4 w-4" />
                     Exporteer CSV
                   </Button>
@@ -508,7 +521,24 @@ export default function DuurzaamheidPage() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          {/* Empty-state banner when filters match no data */}
+          {isReportEmpty && (
+            <Card className="border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12 text-center gap-3">
+                <FileSpreadsheet className="h-10 w-10 text-muted-foreground/40" />
+                <p className="text-base font-medium text-muted-foreground">Geen data voor dit gebouw en deze periode</p>
+                <p className="text-sm text-muted-foreground/70">
+                  Pas de filters aan of{" "}
+                  <button className="underline underline-offset-2 hover:text-foreground transition-colors" onClick={clearFilters}>
+                    wis alle filters
+                  </button>{" "}
+                  om alle beschikbare gegevens te tonen.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className={isReportEmpty ? "hidden" : "grid gap-6 lg:grid-cols-2"}>
             <Card>
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2"><Gauge className="h-4 w-4 text-primary" />Maandelijks verbruik</CardTitle>
@@ -550,7 +580,7 @@ export default function DuurzaamheidPage() {
             </Card>
           </div>
 
-          <Card>
+          <Card className={isReportEmpty ? "hidden" : ""}>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2"><Leaf className="h-4 w-4 text-primary" />Afval per maand</CardTitle>
               <CardDescription>Gewicht per categorie per maand (kg)</CardDescription>
