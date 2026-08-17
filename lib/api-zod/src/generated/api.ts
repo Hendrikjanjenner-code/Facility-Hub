@@ -24,13 +24,16 @@ export const LoginBody = zod.object({
   "password": zod.string()
 })
 
+export const loginResponseNotificationPreferenceDefault = `all`;
+
 export const LoginResponse = zod.object({
   "id": zod.int(),
   "email": zod.string(),
   "name": zod.string(),
   "role": zod.string().describe('eindgebruiker | servicedesk | facilitair_manager | cateraar | receptie | beheerder | leverancier'),
   "department": zod.string().nullish(),
-  "avatarColor": zod.string().nullish()
+  "avatarColor": zod.string().nullish(),
+  "notificationPreference": zod.string().default(loginResponseNotificationPreferenceDefault).describe('inapp_only | email | all')
 })
 
 
@@ -45,13 +48,36 @@ export const LogoutResponse = zod.object({
 /**
  * @summary Get current logged-in user
  */
+export const getCurrentUserResponseNotificationPreferenceDefault = `all`;
+
 export const GetCurrentUserResponse = zod.object({
   "id": zod.int(),
   "email": zod.string(),
   "name": zod.string(),
   "role": zod.string().describe('eindgebruiker | servicedesk | facilitair_manager | cateraar | receptie | beheerder | leverancier'),
   "department": zod.string().nullish(),
-  "avatarColor": zod.string().nullish()
+  "avatarColor": zod.string().nullish(),
+  "notificationPreference": zod.string().default(getCurrentUserResponseNotificationPreferenceDefault).describe('inapp_only | email | all')
+})
+
+
+/**
+ * @summary Update notification preferences for the current user
+ */
+export const UpdateMyPreferencesBody = zod.object({
+  "notificationPreference": zod.string().describe('inapp_only | email | all')
+})
+
+export const updateMyPreferencesResponseNotificationPreferenceDefault = `all`;
+
+export const UpdateMyPreferencesResponse = zod.object({
+  "id": zod.int(),
+  "email": zod.string(),
+  "name": zod.string(),
+  "role": zod.string().describe('eindgebruiker | servicedesk | facilitair_manager | cateraar | receptie | beheerder | leverancier'),
+  "department": zod.string().nullish(),
+  "avatarColor": zod.string().nullish(),
+  "notificationPreference": zod.string().default(updateMyPreferencesResponseNotificationPreferenceDefault).describe('inapp_only | email | all')
 })
 
 
@@ -70,13 +96,16 @@ export const ListDemoAccountsResponse = zod.array(ListDemoAccountsResponseItem)
 /**
  * @summary List all users
  */
+export const listUsersResponseNotificationPreferenceDefault = `all`;
+
 export const ListUsersResponseItem = zod.object({
   "id": zod.int(),
   "email": zod.string(),
   "name": zod.string(),
   "role": zod.string().describe('eindgebruiker | servicedesk | facilitair_manager | cateraar | receptie | beheerder | leverancier'),
   "department": zod.string().nullish(),
-  "avatarColor": zod.string().nullish()
+  "avatarColor": zod.string().nullish(),
+  "notificationPreference": zod.string().default(listUsersResponseNotificationPreferenceDefault).describe('inapp_only | email | all')
 })
 export const ListUsersResponse = zod.array(ListUsersResponseItem)
 
@@ -739,8 +768,8 @@ export const GetKeyResponse = zod.object({
   "holderName": zod.string().nullish(),
   "issuedByName": zod.string().nullish(),
   "issuedAt": zod.string(),
-  "dueAt": zod.string().nullish(),
   "returnedAt": zod.string().nullish(),
+  "dueAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })),
   "lossReports": zod.array(zod.object({
@@ -837,7 +866,7 @@ export const IssueKeyParams = zod.object({
 
 export const IssueKeyBody = zod.object({
   "holderId": zod.int(),
-  "dueAt": zod.coerce.date().nullish(),
+  "dueAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })
 
@@ -872,8 +901,8 @@ export const IssueKeyResponse = zod.object({
   "holderName": zod.string().nullish(),
   "issuedByName": zod.string().nullish(),
   "issuedAt": zod.string(),
-  "dueAt": zod.string().nullish(),
   "returnedAt": zod.string().nullish(),
+  "dueAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })),
   "lossReports": zod.array(zod.object({
@@ -928,8 +957,8 @@ export const ReturnKeyResponse = zod.object({
   "holderName": zod.string().nullish(),
   "issuedByName": zod.string().nullish(),
   "issuedAt": zod.string(),
-  "dueAt": zod.string().nullish(),
   "returnedAt": zod.string().nullish(),
+  "dueAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })),
   "lossReports": zod.array(zod.object({
@@ -988,8 +1017,8 @@ export const UpdateKeyIssueDueResponse = zod.object({
   "holderName": zod.string().nullish(),
   "issuedByName": zod.string().nullish(),
   "issuedAt": zod.string(),
-  "dueAt": zod.string().nullish(),
   "returnedAt": zod.string().nullish(),
+  "dueAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })),
   "lossReports": zod.array(zod.object({
@@ -1053,8 +1082,8 @@ export const ReportKeyLossResponse = zod.object({
   "holderName": zod.string().nullish(),
   "issuedByName": zod.string().nullish(),
   "issuedAt": zod.string(),
-  "dueAt": zod.string().nullish(),
   "returnedAt": zod.string().nullish(),
+  "dueAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })),
   "lossReports": zod.array(zod.object({
@@ -1999,9 +2028,12 @@ export const UpdateShopProductParams = zod.object({
 export const UpdateShopProductBody = zod.object({
   "name": zod.string().optional(),
   "description": zod.string().nullish(),
+  "category": zod.string().optional(),
   "price": zod.number().optional(),
+  "unit": zod.string().optional(),
   "stock": zod.int().optional(),
   "minStock": zod.int().optional(),
+  "active": zod.int().optional(),
   "supplierId": zod.int().nullish()
 })
 
@@ -2304,45 +2336,6 @@ export const ImportMeterReadingsResponse = zod.object({
 })
 
 
-/**
- * @summary Correct a waste registration (weight and/or date and/or category)
- */
-export const UpdateWasteRegistrationParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const updateWasteRegistrationBodyWeightKgMin = 0;
-
-
-
-export const UpdateWasteRegistrationBody = zod.object({
-  "registrationDate": zod.string().optional(),
-  "category": zod.string().optional().describe('restafval | papier | gft | plastic | glas | chemisch'),
-  "weightKg": zod.number().min(updateWasteRegistrationBodyWeightKgMin).optional()
-})
-
-export const UpdateWasteRegistrationResponse = zod.object({
-  "id": zod.int(),
-  "buildingId": zod.int(),
-  "buildingName": zod.string().nullish(),
-  "registrationDate": zod.string(),
-  "category": zod.string().describe('restafval | papier | gft | plastic | glas | chemisch'),
-  "weightKg": zod.number(),
-  "registeredById": zod.int().nullish(),
-  "registeredByName": zod.string().nullish()
-})
-
-
-/**
- * @summary Delete a waste registration
- */
-export const DeleteWasteRegistrationParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const DeleteWasteRegistrationResponse = zod.void()
-
-
 export const ListWasteRegistrationsQueryParams = zod.object({
   "buildingId": zod.coerce.number().int().optional()
 })
@@ -2361,7 +2354,7 @@ export const ListWasteRegistrationsResponse = zod.array(ListWasteRegistrationsRe
 
 
 export const CreateWasteRegistrationBody = zod.object({
-  "buildingId": zod.int(),
+  "buildingId": zod.int().optional(),
   "registrationDate": zod.string(),
   "category": zod.string(),
   "weightKg": zod.number()
@@ -2377,6 +2370,36 @@ export const CreateWasteRegistrationResponse = zod.object({
   "registeredById": zod.int().nullish(),
   "registeredByName": zod.string().nullish()
 })
+
+
+export const UpdateWasteRegistrationParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateWasteRegistrationBody = zod.object({
+  "buildingId": zod.int().optional(),
+  "registrationDate": zod.string(),
+  "category": zod.string(),
+  "weightKg": zod.number()
+})
+
+export const UpdateWasteRegistrationResponse = zod.object({
+  "id": zod.int(),
+  "buildingId": zod.int(),
+  "buildingName": zod.string().nullish(),
+  "registrationDate": zod.string(),
+  "category": zod.string().describe('restafval | papier | gft | plastic | glas | chemisch'),
+  "weightKg": zod.number(),
+  "registeredById": zod.int().nullish(),
+  "registeredByName": zod.string().nullish()
+})
+
+
+export const DeleteWasteRegistrationParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteWasteRegistrationResponse = zod.void()
 
 
 /**
@@ -3002,13 +3025,6 @@ export const GetSatisfactionReportResponse = zod.object({
   "key": zod.string(),
   "count": zod.int()
 })),
-  "byCategory": zod.array(zod.object({
-  "categoryId": zod.int(),
-  "categoryName": zod.string(),
-  "closedTickets": zod.int(),
-  "responses": zod.int(),
-  "responseRate": zod.int().describe('Percentage of closed tickets with a satisfaction score (0-100)')
-})),
   "recentResponses": zod.array(zod.object({
   "ticketId": zod.int(),
   "ticketNumber": zod.string(),
@@ -3016,6 +3032,13 @@ export const GetSatisfactionReportResponse = zod.object({
   "score": zod.int(),
   "comment": zod.string().nullish(),
   "submittedAt": zod.string()
+})),
+  "byCategory": zod.array(zod.object({
+  "categoryId": zod.int(),
+  "categoryName": zod.string(),
+  "closedTickets": zod.int(),
+  "responses": zod.int(),
+  "responseRate": zod.int().describe('Percentage of closed tickets with a satisfaction score (0-100)')
 }))
 })
 

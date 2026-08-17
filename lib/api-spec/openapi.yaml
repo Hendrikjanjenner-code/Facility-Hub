@@ -95,6 +95,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+  /users/me/preferences:
+    put:
+      operationId: updateMyPreferences
+      tags:
+        - auth
+      summary: Update notification preferences for the current user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserPreferences'
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid preference value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+        '401':
+          description: Not logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /auth/demo-accounts:
     get:
       operationId: listDemoAccounts
@@ -1917,49 +1948,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ImportResult'
-  /waste-registrations/{id}:
-    patch:
-      operationId: updateWasteRegistration
-      tags:
-        - sustainability
-      summary: Correct a waste registration (weight and/or date and/or category)
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WasteRegistrationUpdate'
-      responses:
-        '200':
-          description: Updated registration
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WasteRegistration'
-        '404':
-          description: Not found
-    delete:
-      operationId: deleteWasteRegistration
-      tags:
-        - sustainability
-      summary: Delete a waste registration
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '204':
-          description: Deleted
-        '404':
-          description: Not found
   /waste-registrations:
     get:
       operationId: listWasteRegistrations
@@ -1996,6 +1984,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WasteRegistration'
+  /waste-registrations/{id}:
+    patch:
+      operationId: updateWasteRegistration
+      tags:
+        - sustainability
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WasteRegistrationInput'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WasteRegistration'
+        '404':
+          description: Not found
+    delete:
+      operationId: deleteWasteRegistration
+      tags:
+        - sustainability
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
   /sustainability/report:
     get:
       operationId: getSustainabilityReport
@@ -2685,11 +2714,24 @@ components:
           type:
             - string
             - 'null'
+        notificationPreference:
+          type: string
+          description: "inapp_only | email | all"
+          default: all
       required:
         - id
         - email
         - name
         - role
+        - notificationPreference
+    UpdateUserPreferences:
+      type: object
+      properties:
+        notificationPreference:
+          type: string
+          description: "inapp_only | email | all"
+      required:
+        - notificationPreference
     TicketCategory:
       type: object
       properties:
@@ -3385,11 +3427,11 @@ components:
             - 'null'
         issuedAt:
           type: string
-        dueAt:
+        returnedAt:
           type:
             - string
             - 'null'
-        returnedAt:
+        dueAt:
           type:
             - string
             - 'null'
@@ -3490,7 +3532,6 @@ components:
           type:
             - string
             - 'null'
-          format: date-time
         note:
           type:
             - string
@@ -4350,11 +4391,17 @@ components:
           type:
             - string
             - 'null'
+        category:
+          type: string
         price:
           type: number
+        unit:
+          type: string
         stock:
           type: integer
         minStock:
+          type: integer
+        active:
           type: integer
         supplierId:
           type:
@@ -4798,17 +4845,6 @@ components:
         - registrationDate
         - category
         - weightKg
-    WasteRegistrationUpdate:
-      type: object
-      properties:
-        registrationDate:
-          type: string
-        category:
-          type: string
-          description: restafval | papier | gft | plastic | glas | chemisch
-        weightKg:
-          type: number
-          minimum: 0
     WasteRegistrationInput:
       type: object
       properties:
@@ -4821,7 +4857,6 @@ components:
         weightKg:
           type: number
       required:
-        - buildingId
         - registrationDate
         - category
         - weightKg
@@ -5344,15 +5379,15 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CountByKey"
-        byCategory:
-          type: array
-          items:
-            $ref: "#/components/schemas/SatisfactionByCategory"
         recentResponses:
           type: array
           items:
             $ref: "#/components/schemas/SatisfactionResponseItem"
-      required: [totalResponses, averageScore, closedTickets, responseRate, byScore, byCategory, recentResponses]
+        byCategory:
+          type: array
+          items:
+            $ref: "#/components/schemas/SatisfactionByCategory"
+      required: [totalResponses, averageScore, closedTickets, responseRate, byScore, recentResponses, byCategory]
     SatisfactionResponseItem:
       type: object
       properties:

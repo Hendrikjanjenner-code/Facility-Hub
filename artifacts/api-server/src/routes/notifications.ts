@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, notificationsTable } from "@workspace/db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { requireAuth } from "../lib/auth";
 
 const router: IRouter = Router();
@@ -23,7 +23,12 @@ router.get("/notifications", async (req, res): Promise<void> => {
   const rows = await db
     .select()
     .from(notificationsTable)
-    .where(eq(notificationsTable.userId, req.currentUser!.id))
+    .where(
+      and(
+        eq(notificationsTable.userId, req.currentUser!.id),
+        sql`${notificationsTable.kind} != 'system'`,
+      ),
+    )
     .orderBy(desc(notificationsTable.createdAt))
     .limit(50);
   res.json(rows.map(serialize));

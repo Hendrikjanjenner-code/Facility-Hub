@@ -7,7 +7,7 @@
  */
 
 export interface WasteRegistrationInput {
-  buildingId: number;
+  buildingId?: number;
   registrationDate: string;
   category: string;
   weightKg: number;

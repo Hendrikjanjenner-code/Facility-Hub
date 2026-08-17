@@ -22,7 +22,7 @@ import {
   Wrench,
   Bell,
   LogOut,
-  User as UserIcon,
+  Settings,
   Check,
   FileText,
   ShoppingCart,
@@ -278,6 +278,11 @@ function UserMenu({ user }: { user: User }) {
         <div className="px-2 py-1.5 text-xs text-muted-foreground">
           Rol: <span className="font-medium text-foreground capitalize">{user.role.replace('_', ' ')}</span>
         </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => setLocation("/profiel")} className="cursor-pointer">
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Instellingen</span>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />

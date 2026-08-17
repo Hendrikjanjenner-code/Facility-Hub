@@ -73,12 +73,12 @@ router.get("/suppliers", async (_req, res): Promise<void> => {
   const rows = await db
     .select({
       supplier: suppliersTable,
+      contractCount: sql<number>`count(${contractsTable.id})::int`,
       userName: usersTable.name,
-      contractCount: sql<number>`cast(count(${contractsTable.id}) as int)`,
     })
     .from(suppliersTable)
-    .leftJoin(usersTable, eq(suppliersTable.userId, usersTable.id))
     .leftJoin(contractsTable, eq(contractsTable.supplierId, suppliersTable.id))
+    .leftJoin(usersTable, eq(suppliersTable.userId, usersTable.id))
     .groupBy(suppliersTable.id, usersTable.name);
   res.json(
     rows.map((r) => ({
@@ -89,14 +89,25 @@ router.get("/suppliers", async (_req, res): Promise<void> => {
   );
 });
 
-router.post("/suppliers", async (req, res): Promise<void> => {
+router.post("/suppliers", requireRole(...MANAGER_ROLES), async (req, res): Promise<void> => {
   const parsed = CreateSupplierBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
   }
   const d = parsed.data;
-  const [created] = await db.insert(suppliersTable).values(d).returning();
+  const [created] = await db
+    .insert(suppliersTable)
+    .values({
+      name: d.name,
+      category: (d as any).category ?? "overig",
+      contactName: (d as any).contactName ?? null,
+      email: (d as any).email ?? null,
+      phone: (d as any).phone ?? null,
+      kvkNumber: (d as any).kvkNumber ?? null,
+      userId: (d as any).userId ?? null,
+    })
+    .returning();
   res.status(201).json({ ...created!, userName: null, contractCount: 0 });
 });
 
@@ -160,7 +171,13 @@ router.post(
 
     const [created] = await db
       .insert(supplierReviewsTable)
-      .values({ supplierId, reviewerId: req.currentUser!.id, year, score, comment: comment as string | undefined })
+      .values({
+        supplierId,
+        year,
+        score,
+        comment: (comment as string | undefined) ?? null,
+        reviewerId: req.currentUser!.id,
+      })
       .returning();
 
     res.status(201).json(created!);
@@ -181,7 +198,8 @@ router.get("/contracts", async (req, res): Promise<void> => {
   }
   if (typeof req.query.status === "string" && req.query.status)
     conditions.push(eq(contractsTable.status, req.query.status));
-  const rows = await contractBaseQuery().where(conditions.length ? and(...conditions) : undefined);
+  const rows = await contractBaseQuery()
+    .where(conditions.length ? and(...conditions) : undefined);
   let result = rows.map(serializeContract);
   const within = Number(req.query.expiringWithinDays);
   if (!Number.isNaN(within) && req.query.expiringWithinDays !== undefined) {
@@ -203,11 +221,17 @@ router.post(
     const [created] = await db
       .insert(contractsTable)
       .values({
-        ...d,
-        description: d.description ?? undefined,
-        noticePeriodDays: d.noticePeriodDays ?? undefined,
+        name: d.name,
+        supplierId: (d as any).supplierId as number,
+        category: (d as any).category as string ?? "overig",
+        description: (d as any).description ?? null,
+        startDate: (d as any).startDate as string,
+        endDate: d.endDate,
+        noticePeriodDays: d.noticePeriodDays ?? 90,
         annualValue: d.annualValue ?? undefined,
-      })
+        status: (d as any).status as string ?? "actief",
+        ownerId: (d as any).ownerId ?? undefined,
+      } as any)
       .returning();
     const [row] = await contractBaseQuery().where(eq(contractsTable.id, created!.id));
     res.json(serializeContract(row!));
@@ -493,6 +517,26 @@ router.get(
 
 // ───── Expiry Notifications ───────────────────────────────────────────────────
 
+/**
+ * Controleert actieve contracten en maakt (per contract per drempelwaarde) een notificatie aan
+ * voor de contracteigenaar.
+ *
+ * Escalatieniveaus:
+ *  1. Regulier: contract valt binnen de opzegtermijn (noticePeriodDays), einddatum nog niet verstreken
+ *  2. Kritiek:  contract eindigt over 0–14 dagen
+ *
+ * Idempotentie wordt gegarandeerd via een stabiele referenceKey per contract/drempel
+ * gecombineerd met een unieke database-index op (user_id, reference_key).
+ *
+ * Meldingsvoorkeur per eigenaar (task #31):
+ *  • inapp_only  – alleen in-app, geen e-mail
+ *  • email       – alleen e-mail, geen in-app
+ *  • all         – zowel in-app als e-mail (standaard)
+ *
+ * E-mail-levering via duurzame outbox (task #32): de e-mail wordt in emailQueueTable
+ * geplaatst en pas als verstuurd gemarkeerd nadat de SMTP-transactie slaagt.
+ * Bij een tijdelijke SMTP-storing retries de wachtrij automatisch met exponentieel backoff.
+ */
 export async function ensureContractExpiryNotifications(): Promise<void> {
   const rows = await contractBaseQuery().where(eq(contractsTable.status, "actief"));
   const contracts = rows.map(serializeContract);
@@ -500,10 +544,20 @@ export async function ensureContractExpiryNotifications(): Promise<void> {
   for (const c of contracts) {
     if (!c.ownerId) continue;
 
-    // Niveau 1: binnen opzegtermijn én nog niet verlopen
+    // Eigenaar ophalen buiten de transactie (read-only, geen lock nodig).
+    const [owner] = await db
+      .select({ email: usersTable.email, name: usersTable.name, notificationPreference: usersTable.notificationPreference })
+      .from(usersTable)
+      .where(eq(usersTable.id, c.ownerId));
+
+    const pref = owner?.notificationPreference ?? "all";
+    const wantsInApp = pref === "inapp_only" || pref === "all";
+    const wantsEmail = pref === "email" || pref === "all";
+
+    // Niveau 1: binnen opzegtermijn én nog niet verlopen — in-app only
     // referenceKey bevat einddatum zodat een verlenging automatisch een nieuwe
-    // melding genereert (task #31).
-    if (c.expiringSoon && c.daysUntilEnd >= 0) {
+    // melding genereert.
+    if (wantsInApp && c.expiringSoon && c.daysUntilEnd >= 0) {
       await db
         .insert(notificationsTable)
         .values({
@@ -517,35 +571,31 @@ export async function ensureContractExpiryNotifications(): Promise<void> {
         .onConflictDoNothing();
     }
 
-    // Niveau 2 (escalatie): nog 0–14 dagen — ook e-mail via outbox
+    // Niveau 2 (escalatie): nog 0–14 dagen
     if (c.daysUntilEnd >= 0 && c.daysUntilEnd <= 14) {
-      // referenceKey bevat einddatum (task #31) zodat een verlenging een nieuwe
-      // e-mail triggert; de emailQueueTable referenceKey is identiek.
       const urgentKey = `contract:${c.id}:urgent:${c.endDate}`;
-
-      // Eigenaar ophalen buiten de transactie (read-only, geen lock nodig).
-      const [owner] = await db
-        .select({ email: usersTable.email, name: usersTable.name })
-        .from(usersTable)
-        .where(eq(usersTable.id, c.ownerId));
 
       // Atomische transactie: notificatie + wachtrij-item in één commit.
       // • Als de notificatie al bestaat: beide onConflictDoNothing zijn no-ops.
       // • Bij crash vóór commit: transactie teruggedraaid → volgende run probeert opnieuw.
       await db.transaction(async (tx) => {
-        await tx
-          .insert(notificationsTable)
-          .values({
-            userId: c.ownerId!,
-            title: `Urgent: contract eindigt binnenkort — ${c.name}`,
-            body: `Let op: ${c.name} (${c.supplierName ?? "onbekende leverancier"}) eindigt op ${c.endDate}. Er zijn nog maar ${c.daysUntilEnd} dag(en) over. Actie vereist!`,
-            kind: "contract_urgent",
-            linkPath: "/contracten",
-            referenceKey: urgentKey,
-          })
-          .onConflictDoNothing();
+        // In-app: alleen bij inapp_only of all
+        if (wantsInApp) {
+          await tx
+            .insert(notificationsTable)
+            .values({
+              userId: c.ownerId!,
+              title: `Urgent: contract eindigt binnenkort — ${c.name}`,
+              body: `Let op: ${c.name} (${c.supplierName ?? "onbekende leverancier"}) eindigt op ${c.endDate}. Er zijn nog maar ${c.daysUntilEnd} dag(en) over. Actie vereist!`,
+              kind: "contract_urgent",
+              linkPath: "/contracten",
+              referenceKey: urgentKey,
+            })
+            .onConflictDoNothing();
+        }
 
-        if (owner) {
+        // E-mail outbox: alleen bij email of all
+        if (wantsEmail && owner) {
           const appUrl = process.env["APP_URL"] ?? "https://govconnect.nl";
           await tx
             .insert(emailQueueTable)

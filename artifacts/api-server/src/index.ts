@@ -67,6 +67,29 @@ try {
 } catch (err) {
   logger.warn({ err }, "Startup-migratie rooms.updated_at mislukt; doorgaan");
 }
+try {
+  await pool.query(
+    `ALTER TABLE users ADD COLUMN IF NOT EXISTS notification_preference TEXT NOT NULL DEFAULT 'all'`,
+  );
+} catch (err) {
+  logger.warn({ err }, "Startup-migratie users.notification_preference mislukt; doorgaan");
+}
+try {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS mjop_taak_geschiedenis (
+      id SERIAL PRIMARY KEY,
+      taak_id INTEGER NOT NULL REFERENCES mjop_taken(id) ON DELETE CASCADE,
+      oud_status TEXT NOT NULL,
+      nieuw_status TEXT NOT NULL,
+      gewijzigd_door INTEGER REFERENCES users(id),
+      ticket_id INTEGER REFERENCES tickets(id),
+      reden TEXT,
+      gewijzigd_op TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+} catch (err) {
+  logger.warn({ err }, "Startup-migratie mjop_taak_geschiedenis mislukt; doorgaan");
+}
 
 // Voeg last_notified_at toe aan key_issues voor de overdue-herinnerings-cooldown.
 try {

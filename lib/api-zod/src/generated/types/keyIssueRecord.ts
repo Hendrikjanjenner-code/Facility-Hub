@@ -16,9 +16,9 @@ export interface KeyIssueRecord {
   issuedByName?: string | null;
   issuedAt: string;
   /** @nullable */
-  dueAt?: string | null;
-  /** @nullable */
   returnedAt?: string | null;
+  /** @nullable */
+  dueAt?: string | null;
   /** @nullable */
   note?: string | null;
 }

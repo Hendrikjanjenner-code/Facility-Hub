@@ -16,4 +16,6 @@ export interface User {
   department?: string | null;
   /** @nullable */
   avatarColor?: string | null;
+  /** inapp_only | email | all */
+  notificationPreference: string;
 }

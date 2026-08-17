@@ -309,7 +309,7 @@ router.post(
         if (changedLater.has(c.field)) {
           skippedFields.push(c.field);
         } else {
-          updates[c.field as DossierField] = c.from;
+          updates[c.field as DossierField] = c.from as string | number | null;
         }
       }
 

@@ -122,6 +122,7 @@ import type {
   TicketUpdate,
   UndoRoomDossierEntryResult,
   UpdateKeyIssueDueBody,
+  UpdateUserPreferences,
   UploadResult,
   User,
   Visitor,
@@ -129,7 +130,6 @@ import type {
   VisitorUpdate,
   WasteRegistration,
   WasteRegistrationInput,
-  WasteRegistrationUpdate,
   Workplace
 } from './api.schemas';
 
@@ -455,6 +455,77 @@ export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUs
 
 
 
+
+export const getUpdateMyPreferencesUrl = () => {
+
+
+
+
+  return `/api/users/me/preferences`
+}
+
+/**
+ * @summary Update notification preferences for the current user
+ */
+export const updateMyPreferences = async (updateUserPreferences: UpdateUserPreferences, options?: Parameters<typeof customFetch>[1]): Promise<User> => {
+
+  return customFetch<User>(getUpdateMyPreferencesUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(updateUserPreferences)
+  }
+);}
+
+
+
+
+
+export const getUpdateMyPreferencesMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMyPreferences>>, TError,{data: BodyType<UpdateUserPreferences>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateMyPreferences>>, TError,{data: BodyType<UpdateUserPreferences>}, TContext> => {
+
+const mutationKey = ['updateMyPreferences'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateMyPreferences>>, {data: BodyType<UpdateUserPreferences>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateMyPreferences(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateMyPreferencesMutationResult = NonNullable<Awaited<ReturnType<typeof updateMyPreferences>>>
+    export type UpdateMyPreferencesMutationBody = BodyType<UpdateUserPreferences>
+    export type UpdateMyPreferencesMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Update notification preferences for the current user
+ */
+export const useUpdateMyPreferences = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateMyPreferences>>, TError,{data: BodyType<UpdateUserPreferences>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateMyPreferences>>,
+        TError,
+        {data: BodyType<UpdateUserPreferences>},
+        TContext
+      > => {
+      return useMutation(getUpdateMyPreferencesMutationOptions(options));
+    }
 
 export const getListDemoAccountsUrl = () => {
 
@@ -6351,149 +6422,6 @@ export const useImportMeterReadings = <TError = ErrorType<unknown>,
       return useMutation(getImportMeterReadingsMutationOptions(options));
     }
 
-export const getUpdateWasteRegistrationUrl = (id: number,) => {
-
-
-
-
-  return `/api/waste-registrations/${id}`
-}
-
-/**
- * @summary Correct a waste registration (weight and/or date and/or category)
- */
-export const updateWasteRegistration = async (id: number,
-    wasteRegistrationUpdate: WasteRegistrationUpdate, options?: Parameters<typeof customFetch>[1]): Promise<WasteRegistration> => {
-
-  return customFetch<WasteRegistration>(getUpdateWasteRegistrationUrl(id),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(wasteRegistrationUpdate)
-  }
-);}
-
-
-
-
-
-export const getUpdateWasteRegistrationMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWasteRegistration>>, TError,{id: number;data: BodyType<WasteRegistrationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof updateWasteRegistration>>, TError,{id: number;data: BodyType<WasteRegistrationUpdate>}, TContext> => {
-
-const mutationKey = ['updateWasteRegistration'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateWasteRegistration>>, {id: number;data: BodyType<WasteRegistrationUpdate>}> = (props) => {
-          const {id,data} = props ?? {};
-
-          return  updateWasteRegistration(id,data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type UpdateWasteRegistrationMutationResult = NonNullable<Awaited<ReturnType<typeof updateWasteRegistration>>>
-    export type UpdateWasteRegistrationMutationBody = BodyType<WasteRegistrationUpdate>
-    export type UpdateWasteRegistrationMutationError = ErrorType<void>
-
-    /**
- * @summary Correct a waste registration (weight and/or date and/or category)
- */
-export const useUpdateWasteRegistration = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWasteRegistration>>, TError,{id: number;data: BodyType<WasteRegistrationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof updateWasteRegistration>>,
-        TError,
-        {id: number;data: BodyType<WasteRegistrationUpdate>},
-        TContext
-      > => {
-      return useMutation(getUpdateWasteRegistrationMutationOptions(options));
-    }
-
-export const getDeleteWasteRegistrationUrl = (id: number,) => {
-
-
-
-
-  return `/api/waste-registrations/${id}`
-}
-
-/**
- * @summary Delete a waste registration
- */
-export const deleteWasteRegistration = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
-
-  return customFetch<void>(getDeleteWasteRegistrationUrl(id),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-);}
-
-
-
-
-
-export const getDeleteWasteRegistrationMutationOptions = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWasteRegistration>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteWasteRegistration>>, TError,{id: number}, TContext> => {
-
-const mutationKey = ['deleteWasteRegistration'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWasteRegistration>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
-
-          return  deleteWasteRegistration(id,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteWasteRegistrationMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWasteRegistration>>>
-
-    export type DeleteWasteRegistrationMutationError = ErrorType<void>
-
-    /**
- * @summary Delete a waste registration
- */
-export const useDeleteWasteRegistration = <TError = ErrorType<void>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWasteRegistration>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteWasteRegistration>>,
-        TError,
-        {id: number},
-        TContext
-      > => {
-      return useMutation(getDeleteWasteRegistrationMutationOptions(options));
-    }
-
 export const getListWasteRegistrationsUrl = (params?: ListWasteRegistrationsParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -6635,6 +6563,137 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCreateWasteRegistrationMutationOptions(options));
+    }
+
+export const getUpdateWasteRegistrationUrl = (id: number,) => {
+
+
+
+
+  return `/api/waste-registrations/${id}`
+}
+
+export const updateWasteRegistration = async (id: number,
+    wasteRegistrationInput: WasteRegistrationInput, options?: Parameters<typeof customFetch>[1]): Promise<WasteRegistration> => {
+
+  return customFetch<WasteRegistration>(getUpdateWasteRegistrationUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(wasteRegistrationInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateWasteRegistrationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWasteRegistration>>, TError,{id: number;data: BodyType<WasteRegistrationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateWasteRegistration>>, TError,{id: number;data: BodyType<WasteRegistrationInput>}, TContext> => {
+
+const mutationKey = ['updateWasteRegistration'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateWasteRegistration>>, {id: number;data: BodyType<WasteRegistrationInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateWasteRegistration(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateWasteRegistrationMutationResult = NonNullable<Awaited<ReturnType<typeof updateWasteRegistration>>>
+    export type UpdateWasteRegistrationMutationBody = BodyType<WasteRegistrationInput>
+    export type UpdateWasteRegistrationMutationError = ErrorType<void>
+
+    export const useUpdateWasteRegistration = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWasteRegistration>>, TError,{id: number;data: BodyType<WasteRegistrationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateWasteRegistration>>,
+        TError,
+        {id: number;data: BodyType<WasteRegistrationInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateWasteRegistrationMutationOptions(options));
+    }
+
+export const getDeleteWasteRegistrationUrl = (id: number,) => {
+
+
+
+
+  return `/api/waste-registrations/${id}`
+}
+
+export const deleteWasteRegistration = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteWasteRegistrationUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteWasteRegistrationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWasteRegistration>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteWasteRegistration>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteWasteRegistration'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWasteRegistration>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteWasteRegistration(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteWasteRegistrationMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWasteRegistration>>>
+
+    export type DeleteWasteRegistrationMutationError = ErrorType<void>
+
+    export const useDeleteWasteRegistration = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWasteRegistration>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteWasteRegistration>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteWasteRegistrationMutationOptions(options));
     }
 
 export const getGetSustainabilityReportUrl = (params?: GetSustainabilityReportParams,) => {

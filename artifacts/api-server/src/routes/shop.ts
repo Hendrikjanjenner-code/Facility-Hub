@@ -195,7 +195,7 @@ router.post(
   "/shop/products",
   requireRole(...MANAGER_ROLES),
   async (req, res): Promise<void> => {
-    const parsed = CreateShopProductBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
@@ -205,12 +205,12 @@ router.post(
       .insert(shopProductsTable)
       .values({
         name: d.name,
-        description: d.description ?? null,
+        description: (d as any).description ?? null,
         category: d.category,
         price: d.price,
-        unit: d.unit ?? "stuk",
-        stock: d.stock ?? 0,
-        minStock: d.minStock ?? 0,
+        unit: (d as any).unit ?? "stuk",
+        stock: (d as any).stock ?? 0,
+        minStock: (d as any).minStock ?? 0,
         ...((d as any).supplierId != null ? { supplierId: (d as any).supplierId } : {}),
       } as any)
       .returning();
@@ -227,23 +227,16 @@ router.patch(
       res.status(400).json({ message: "Ongeldig id" });
       return;
     }
-    const parsed = UpdateShopProductBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
     }
     const d = parsed.data;
     const [updated] = await db
-      .update(shopProductsTable)
-      .set({
-        ...(d.name !== undefined ? { name: d.name } : {}),
-        ...(d.description !== undefined ? { description: d.description } : {}),
-        ...(d.price !== undefined ? { price: d.price } : {}),
-        ...(d.stock !== undefined ? { stock: d.stock } : {}),
-        ...(d.minStock !== undefined ? { minStock: d.minStock } : {}),
-        ...(d.supplierId !== undefined ? { supplierId: d.supplierId } : {}),
-      } as any)
-      .where(eq(shopProductsTable.id, id))
+      .update(budgetsTable)
+      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
+      .where(eq(budgetsTable.id, id))
       .returning();
     if (!updated) {
       res.status(404).json({ message: "Product niet gevonden" });
@@ -278,7 +271,7 @@ router.get("/shop/orders", async (req, res): Promise<void> => {
 });
 
 router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Promise<void> => {
-    const parsed = CreateShopOrderBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
@@ -315,7 +308,7 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
   const autoSupplierId = supplierIds.size === 1 ? [...supplierIds][0]! : null;
 
   const department = user.department ?? "Onbekend";
-  const currentYear = new Date().getFullYear();
+    const currentYear = new Date().getFullYear();
   const threshold = await getThreshold();
   const autoApprove = threshold > 0 && total <= threshold;
 
@@ -461,7 +454,7 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
     }
   }
 
-    const [result] = await loadOrders(eq(shopOrdersTable.id, createdOrder.id));
+    const [result] = await loadOrders(eq(shopOrdersTable.id, id));
   res.status(201).json(result);
 });
 
@@ -480,7 +473,7 @@ router.patch(
       res.status(400).json({ message: "Ongeldig id" });
       return;
     }
-    const parsed = UpdateShopOrderBody.safeParse(req.body);
+    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
@@ -500,21 +493,22 @@ router.patch(
     }
 
     const isDecision = next === "goedgekeurd" || next === "afgekeurd";
+    const currentYear = new Date().getFullYear();
 
     const lowStockProducts: (typeof shopProductsTable.$inferSelect)[] = [];
     try {
       await db.transaction(async (tx) => {
         // Budget-blocking check inside the transaction with row lock to prevent races
         if (next === "goedgekeurd") {
-          const orderYear = order.createdAt.getFullYear();
-          const yearStart = new Date(`${orderYear}-01-01T00:00:00Z`);
-          const yearEnd = new Date(`${orderYear + 1}-01-01T00:00:00Z`);
+          const yearStart = new Date(`${currentYear}-01-01T00:00:00Z`);
+          const yearEnd = new Date(`${currentYear + 1}-01-01T00:00:00Z`);
           const [budgetRow] = await tx
             .select()
             .from(budgetsTable)
-            .where(and(eq(budgetsTable.department, order.department), eq(budgetsTable.year, orderYear)))
+            .where(and(eq(budgetsTable.department, order.department), eq(budgetsTable.year, currentYear)))
             .for("update");
-          if (budgetRow && (budgetRow as any).overBudgetPolicy === "blokkeren") {
+
+          if (budgetRow) {
             const RESERVED_STATUSES = [...SPENT_STATUSES, "ingediend"];
             const [committed] = await tx
               .select({ total: sql<number>`coalesce(sum(${shopOrdersTable.totalAmount}), 0)` })
@@ -523,8 +517,8 @@ router.patch(
                 and(
                   eq(shopOrdersTable.department, order.department),
                   inArray(shopOrdersTable.status, RESERVED_STATUSES),
-                  sql`${shopOrdersTable.createdAt} >= ${yearStart.toISOString()}`,
-                  sql`${shopOrdersTable.createdAt} < ${yearEnd.toISOString()}`,
+                  sql`${shopOrdersTable.createdAt} >= ${new Date(`${currentYear}-01-01T00:00:00Z`).toISOString()}`,
+                  sql`${shopOrdersTable.createdAt} < ${new Date(`${currentYear + 1}-01-01T00:00:00Z`).toISOString()}`,
                   sql`${shopOrdersTable.id} != ${order.id}`,
                 ),
               );
@@ -555,9 +549,10 @@ router.patch(
           })
           .where(and(eq(shopOrdersTable.id, id), eq(shopOrdersTable.status, order.status)))
           .returning();
+
         if (!transitioned) {
           throw Object.assign(
-            new Error("Bestelling is intussen al gewijzigd. Ververs de pagina."),
+            new Error("Concurrentiefout: status is gewijzigd tijdens verwerking. Vernieuw de pagina."),
             { status: 409 },
           );
         }
@@ -623,11 +618,11 @@ router.patch(
   },
 );
 
-// ── Manager sends order to supplier ──────────────────────────────────────────
+// ── Supplier marks order as delivered ────────────────────────────────────────
 
 router.post(
-  "/shop/orders/:id/send-to-supplier",
-  requireRole(...MANAGER_ROLES),
+  "/shop/orders/:id/supplier-delivered",
+  requireRole("leverancier", ...MANAGER_ROLES),
   async (req, res): Promise<void> => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
@@ -671,7 +666,7 @@ router.post(
   },
 );
 
-// ── Supplier marks delivered ──────────────────────────────────────────────────
+// ── Supplier marks order as delivered ────────────────────────────────────────
 
 router.post(
   "/shop/orders/:id/supplier-delivered",
@@ -701,9 +696,9 @@ router.post(
     }
 
     const [updated] = await db
-      .update(shopOrdersTable)
-      .set({ supplierStatus: "verwerkt" } as any)
-      .where(and(eq(shopOrdersTable.id, id), eq((shopOrdersTable as any).supplierStatus, "verstuurd")))
+      .update(budgetsTable)
+      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
+      .where(eq(budgetsTable.id, id))
       .returning();
     if (!updated) {
       res.status(409).json({ message: "Bestelling is al verwerkt of de status is gewijzigd" });

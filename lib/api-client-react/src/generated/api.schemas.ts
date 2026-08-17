@@ -39,6 +39,13 @@ export interface User {
   department?: string | null;
   /** @nullable */
   avatarColor?: string | null;
+  /** inapp_only | email | all */
+  notificationPreference: string;
+}
+
+export interface UpdateUserPreferences {
+  /** inapp_only | email | all */
+  notificationPreference: string;
 }
 
 export interface FormField {
@@ -391,9 +398,9 @@ export interface KeyIssueRecord {
   issuedByName?: string | null;
   issuedAt: string;
   /** @nullable */
-  dueAt?: string | null;
-  /** @nullable */
   returnedAt?: string | null;
+  /** @nullable */
+  dueAt?: string | null;
   /** @nullable */
   note?: string | null;
 }
@@ -881,9 +888,12 @@ export interface ShopProductUpdate {
   name?: string;
   /** @nullable */
   description?: string | null;
+  category?: string;
   price?: number;
+  unit?: string;
   stock?: number;
   minStock?: number;
+  active?: number;
   /** @nullable */
   supplierId?: number | null;
 }
@@ -1125,16 +1135,8 @@ export interface WasteRegistration {
   registeredByName?: string | null;
 }
 
-export interface WasteRegistrationUpdate {
-  registrationDate?: string;
-  /** restafval | papier | gft | plastic | glas | chemisch */
-  category?: string;
-  /** @minimum 0 */
-  weightKg?: number;
-}
-
 export interface WasteRegistrationInput {
-  buildingId: number;
+  buildingId?: number;
   registrationDate: string;
   category: string;
   weightKg: number;
@@ -1430,15 +1432,6 @@ export interface TicketSatisfactionInput {
   comment?: string | null;
 }
 
-export interface SatisfactionByCategory {
-  categoryId: number;
-  categoryName: string;
-  closedTickets: number;
-  responses: number;
-  /** Percentage of closed tickets with a satisfaction score (0-100) */
-  responseRate: number;
-}
-
 export interface SatisfactionResponseItem {
   ticketId: number;
   ticketNumber: string;
@@ -1449,6 +1442,15 @@ export interface SatisfactionResponseItem {
   submittedAt: string;
 }
 
+export interface SatisfactionByCategory {
+  categoryId: number;
+  categoryName: string;
+  closedTickets: number;
+  responses: number;
+  /** Percentage of closed tickets with a satisfaction score (0-100) */
+  responseRate: number;
+}
+
 export interface SatisfactionReport {
   totalResponses: number;
   averageScore: number;
@@ -1456,8 +1458,8 @@ export interface SatisfactionReport {
   /** Percentage of closed tickets with a satisfaction score (0-100) */
   responseRate: number;
   byScore: CountByKey[];
-  byCategory: SatisfactionByCategory[];
   recentResponses: SatisfactionResponseItem[];
+  byCategory: SatisfactionByCategory[];
 }
 
 export interface KnowledgeArticleUpdate {

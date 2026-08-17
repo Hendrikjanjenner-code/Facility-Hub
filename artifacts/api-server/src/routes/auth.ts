@@ -92,38 +92,47 @@ router.get("/auth/demo-accounts", async (_req, res): Promise<void> => {
     res.json([]);
     return;
   }
-  const users = await db.select().from(usersTable).orderBy(asc(usersTable.id));
+  const users = await db
+    .select({
+      id: usersTable.id,
+      name: usersTable.name,
+      role: usersTable.role,
+    })
+    .from(usersTable)
+    .orderBy(asc(usersTable.name));
   const seen = new Set<string>();
-  const accounts = [];
+  const accounts: { id: number; name: string; role: string; roleLabel: string }[] = [];
   for (const u of users) {
-    if (seen.has(u.role)) continue;
-    seen.add(u.role);
-    accounts.push({
-      email: u.email,
-      name: u.name,
-      role: u.role,
-      roleLabel: ROLE_LABELS[u.role] ?? u.role,
-    });
+    const roleLabel = ROLE_LABELS[u.role] ?? u.role;
+    const key = `${u.role}:${u.name}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      accounts.push({ id: u.id, name: u.name, role: u.role, roleLabel });
+    }
   }
   res.json(accounts);
 });
 
-// Staff directory: only roles that assign tickets or register visitors for others.
-// Returns minimal fields (no email/department).
-router.get(
-  "/users",
+// ── Notification preferences (task #31) ───────────────────────────────────────
+
+router.put(
+  "/users/me/preferences",
   requireAuth,
-  requireRole("receptie", "servicedesk", "facilitair_manager", "beheerder"),
-  async (_req, res): Promise<void> => {
-    const users = await db
-      .select({
-        id: usersTable.id,
-        name: usersTable.name,
-        role: usersTable.role,
-      })
-      .from(usersTable)
-      .orderBy(asc(usersTable.name));
-    res.json(users);
+  async (req, res): Promise<void> => {
+    const { notificationPreference } = req.body as { notificationPreference?: unknown };
+    const allowed = ["inapp_only", "email", "all"];
+    if (!allowed.includes(notificationPreference as string)) {
+      res
+        .status(400)
+        .json({ message: "Ongeldige waarde. Kies 'inapp_only', 'email' of 'all'." });
+      return;
+    }
+    const [updated] = await db
+      .update(usersTable)
+      .set({ notificationPreference: notificationPreference as string })
+      .where(eq(usersTable.id, req.currentUser!.id))
+      .returning();
+    res.json(toPublicUser(updated!));
   },
 );
 

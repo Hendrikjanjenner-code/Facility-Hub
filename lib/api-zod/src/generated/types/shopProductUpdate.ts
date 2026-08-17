@@ -10,9 +10,12 @@ export interface ShopProductUpdate {
   name?: string;
   /** @nullable */
   description?: string | null;
+  category?: string;
   price?: number;
+  unit?: string;
   stock?: number;
   minStock?: number;
+  active?: number;
   /** @nullable */
   supplierId?: number | null;
 }

@@ -31,6 +31,7 @@ vi.mock("../lib/auth", async (importOriginal) => {
         role: "facilitair_manager",
         department: "test",
         avatarColor: "#000",
+        notificationPreference: "email",
       };
       next();
     },

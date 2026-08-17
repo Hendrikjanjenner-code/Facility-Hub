@@ -10,6 +10,8 @@ export const usersTable = pgTable("users", {
   role: text("role").notNull(), // eindgebruiker | servicedesk | facilitair_manager | cateraar | receptie | beheerder | leverancier
   department: text("department"),
   avatarColor: text("avatar_color"),
+  /** inapp_only | email | all  — standaard "email" (huidig gedrag behouden) */
+  notificationPreference: text("notification_preference").notNull().default("all"),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true });

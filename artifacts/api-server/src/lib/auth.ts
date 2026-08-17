@@ -20,6 +20,7 @@ export function toPublicUser(u: User) {
     role: u.role,
     department: u.department,
     avatarColor: u.avatarColor,
+    notificationPreference: u.notificationPreference,
   };
 }
 
