@@ -376,6 +376,70 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+        '409':
+          description: Ruimte is intussen door iemand anders gewijzigd; actuele waarden in het antwoord
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+  /rooms/{id}/dossier-history:
+    get:
+      operationId: listRoomDossierHistory
+      tags:
+        - vastgoed
+      summary: Wijzigingshistorie van het ruimtedossier (facilitair_manager / beheerder)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Historie
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoomDossierHistoryEntry'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /rooms/{id}/dossier-history/undo:
+    post:
+      operationId: undoRoomDossierChange
+      tags:
+        - vastgoed
+      summary: Maak de laatste dossierwijziging ongedaan (facilitair_manager / beheerder)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Bijgewerkte ruimte
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+        '409':
+          description: Al ongedaan gemaakt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /floors/{id}/plan:
     get:
       operationId: getFloorPlan
@@ -1393,12 +1457,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                supplierId:
-                  type: integer
-              required:
-                - supplierId
+              $ref: '#/components/schemas/SendOrderToSupplierInput'
       responses:
         '200':
           description: Updated
@@ -2237,6 +2296,13 @@ components:
           type: string
       required:
         - message
+    SendOrderToSupplierInput:
+      type: object
+      properties:
+        supplierId:
+          type: integer
+      required:
+        - supplierId
     LoginInput:
       type: object
       properties:
@@ -2639,6 +2705,9 @@ components:
           type:
             - integer
             - 'null'
+        updatedAt:
+          type: string
+          format: date-time
       required:
         - id
         - name
@@ -2648,6 +2717,7 @@ components:
         - areaM2
         - bookable
         - facilities
+        - updatedAt
     RoomDossierUpdate:
       type: object
       properties:
@@ -2680,6 +2750,47 @@ components:
             - integer
             - 'null'
           minimum: 0
+        updatedAt:
+          type: string
+      required:
+        - updatedAt
+    RoomDossierHistoryEntry:
+      type: object
+      required: [id, roomId, changedAt, isUndo, changes]
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+        changedByName:
+          type:
+            - string
+            - 'null'
+        changedAt:
+          type: string
+          format: date-time
+        isUndo:
+          type: boolean
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomDossierChange'
+    RoomDossierChange:
+      type: object
+      required: [field]
+      properties:
+        field:
+          type: string
+        from:
+          oneOf:
+            - type: string
+            - type: number
+            - type: 'null'
+        to:
+          oneOf:
+            - type: string
+            - type: number
+            - type: 'null'
     FloorPlan:
       type: object
       required: [floorId, floorName, level, buildingId, buildingName, rooms]
@@ -2700,7 +2811,7 @@ components:
             $ref: '#/components/schemas/FloorPlanRoom'
     FloorPlanRoom:
       type: object
-      required: [id, name, code, functionType, areaM2]
+      required: [id, name, code, functionType, areaM2, updatedAt]
       properties:
         id:
           type: integer
@@ -2712,6 +2823,13 @@ components:
           type: string
         areaM2:
           type: number
+        updatedAt:
+          type: string
+          format: date-time
+        areaVvoM2:
+          type:
+            - number
+            - 'null'
         department:
           type:
             - string

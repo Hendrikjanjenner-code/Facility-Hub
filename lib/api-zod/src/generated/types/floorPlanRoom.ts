@@ -12,10 +12,12 @@ export interface FloorPlanRoom {
   code: string;
   functionType: string;
   areaM2: number;
+  updatedAt: Date;
+  /** @nullable */
+  areaVvoM2?: number | null;
   /** @nullable */
   department?: string | null;
   /** @nullable */
   capacity?: number | null;
   bookable?: boolean;
-  updatedAt: string;
 }

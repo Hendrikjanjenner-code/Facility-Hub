@@ -6,6 +6,7 @@ import {
   boolean,
   real,
   timestamp,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
@@ -62,6 +63,22 @@ export const roomsTable = pgTable("rooms", {
     .defaultNow(),
 });
 
+export const roomDossierHistoryTable = pgTable("room_dossier_history", {
+  id: serial("id").primaryKey(),
+  roomId: integer("room_id")
+    .notNull()
+    .references(() => roomsTable.id),
+  changedById: integer("changed_by_id")
+    .notNull()
+    .references(() => usersTable.id),
+  changedAt: timestamp("changed_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  // Lijst van { field, from, to } — alleen daadwerkelijk gewijzigde velden.
+  changes: jsonb("changes").notNull(),
+  // Markeert dat deze regel een terugdraaiing van een eerdere wijziging is.
+  isUndo: boolean("is_undo").notNull().default(false),
+});
 export const workplacesTable = pgTable("workplaces", {
   id: serial("id").primaryKey(),
   floorId: integer("floor_id")
@@ -98,3 +115,5 @@ export type Building = typeof buildingsTable.$inferSelect;
 export type Floor = typeof floorsTable.$inferSelect;
 export type Room = typeof roomsTable.$inferSelect;
 export type Workplace = typeof workplacesTable.$inferSelect;
+
+export type RoomDossierHistory = typeof roomDossierHistoryTable.$inferSelect;

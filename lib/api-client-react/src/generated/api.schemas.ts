@@ -13,6 +13,10 @@ export interface ApiMessage {
   message: string;
 }
 
+export interface SendOrderToSupplierInput {
+  supplierId: number;
+}
+
 export interface LoginInput {
   email: string;
   password: string;
@@ -238,12 +242,29 @@ export interface RoomDossierUpdate {
   updatedAt: string;
 }
 
+export interface RoomDossierChange {
+  field: string;
+  from?: string | number | null;
+  to?: string | number | null;
+}
+
+export interface RoomDossierHistoryEntry {
+  id: number;
+  roomId: number;
+  /** @nullable */
+  changedByName?: string | null;
+  changedAt: string;
+  isUndo: boolean;
+  changes: RoomDossierChange[];
+}
+
 export interface FloorPlanRoom {
   id: number;
   name: string;
   code: string;
   functionType: string;
   areaM2: number;
+  updatedAt: string;
   /** @nullable */
   areaVvoM2?: number | null;
   /** @nullable */
@@ -251,7 +272,6 @@ export interface FloorPlanRoom {
   /** @nullable */
   capacity?: number | null;
   bookable?: boolean;
-  updatedAt: string;
 }
 
 export interface FloorPlan {
@@ -543,6 +563,19 @@ export interface CateringDailyReservation {
   status: string;
   items: CateringOrderLine[];
 }
+
+export interface CateringProductTotal {
+  cateringItemId: number;
+  itemName: string;
+  totalQuantity: number;
+}
+
+export interface CateringDailySummary {
+  date: string;
+  reservations: CateringDailyReservation[];
+  totals: CateringProductTotal[];
+}
+
 export interface Workplace {
   id: number;
   name: string;
@@ -897,6 +930,56 @@ export interface ContractDocument {
   uploadedByName?: string | null;
   createdAt: string;
 }
+
+export interface ContractDocumentInput {
+  /** @minLength 1 */
+  fileName: string;
+  /** @minLength 1 */
+  objectPath: string;
+}
+
+export interface SupplierReview {
+  id: number;
+  supplierId: number;
+  /** @nullable */
+  reviewerId?: number | null;
+  /** @nullable */
+  reviewerName?: string | null;
+  year: number;
+  /** 1–5 */
+  score: number;
+  /** @nullable */
+  comment?: string | null;
+  createdAt: string;
+}
+
+export interface SupplierReviewsResponse {
+  /** @nullable */
+  averageScore: number | null;
+  reviews: SupplierReview[];
+}
+
+export interface SupplierReviewInput {
+  year: number;
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  score: number;
+  /** @nullable */
+  comment?: string | null;
+}
+
+export interface ApprovalThreshold {
+  /** Bestellingen op/onder dit bedrag worden direct goedgekeurd (0 = altijd manager) */
+  thresholdAmount: number;
+}
+
+export interface ApprovalThresholdInput {
+  /** @minimum 0 */
+  thresholdAmount: number;
+}
+
 /**
  * Whether orders that exceed the budget are blocked (409) or just marked
  */
@@ -932,19 +1015,6 @@ export const BudgetPolicyUpdateOverBudgetPolicy = {
 
 export interface BudgetPolicyUpdate {
   overBudgetPolicy: BudgetPolicyUpdateOverBudgetPolicy;
-}
-
-export interface ContractDocumentInput {
-  /** @minLength 1 */
-  fileName: string;
-  /** @minLength 1 */
-  objectPath: string;
-}
-
-export interface CateringProductTotal {
-  cateringItemId: number;
-  itemName: string;
-  totalQuantity: number;
 }
 
 export interface MeterReading {
@@ -1303,6 +1373,7 @@ export type GetCateringDailySummaryParams = {
  */
 date?: string;
 };
+
 export type ListVisitorsParams = {
 date?: string;
 status?: string;
@@ -1319,9 +1390,6 @@ status?: string;
 expiringWithinDays?: number;
 };
 
-export type SendOrderToSupplierBody = {
-  supplierId: number;
-};
 export type ListShopProductsParams = {
 category?: string;
 search?: string;
@@ -1375,51 +1443,3 @@ q?: string;
 ticketCategoryId?: number;
 };
 
-export interface ApprovalThresholdInput {
-  /** @minimum 0 */
-  thresholdAmount: number;
-}
-
-
-export interface CateringDailySummary {
-  date: string;
-  reservations: CateringDailyReservation[];
-  totals: CateringProductTotal[];
-}
-
-export interface ApprovalThreshold {
-  /** Bestellingen op/onder dit bedrag worden direct goedgekeurd (0 = altijd manager) */
-  thresholdAmount: number;
-}
-
-export interface SupplierReview {
-  id: number;
-  supplierId: number;
-  /** @nullable */
-  reviewerId?: number | null;
-  /** @nullable */
-  reviewerName?: string | null;
-  year: number;
-  /** 1–5 */
-  score: number;
-  /** @nullable */
-  comment?: string | null;
-  createdAt: string;
-}
-
-export interface SupplierReviewInput {
-  year: number;
-  /**
-     * @minimum 1
-     * @maximum 5
-     */
-  score: number;
-  /** @nullable */
-  comment?: string | null;
-}
-
-export interface SupplierReviewsResponse {
-  /** @nullable */
-  averageScore: number | null;
-  reviews: SupplierReview[];
-}

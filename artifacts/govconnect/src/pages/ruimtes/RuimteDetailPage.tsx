@@ -11,6 +11,9 @@ import {
   useUpdateRoomDossier,
   useGetCurrentUser,
   getGetRoomQueryKey,
+  useListRoomDossierHistory,
+  getListRoomDossierHistoryQueryKey,
+  useUndoRoomDossierChange,
   type Room
 } from "@workspace/api-client-react";
 import { 
@@ -25,7 +28,9 @@ import {
   Layers,
   LayoutGrid,
   Pencil,
-  Briefcase
+  Briefcase,
+  History,
+  Undo2
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -67,6 +72,7 @@ function DossierEditDialog({ room }: { room: Room }) {
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetRoomQueryKey(room.id) });
+          queryClient.invalidateQueries({ queryKey: getListRoomDossierHistoryQueryKey(room.id) });
           toast({ title: "Ruimtedossier bijgewerkt" });
           setOpen(false);
         },
@@ -131,6 +137,15 @@ function DossierEditDialog({ room }: { room: Room }) {
   );
 }
 
+const FIELD_LABELS: Record<string, string> = {
+  functionType: "Functie",
+  floorFinish: "Vloerafwerking",
+  areaM2: "Oppervlakte (m²)",
+  areaVvoM2: "VVO (m²)",
+  areaBvoM2: "BVO (m²)",
+  department: "Afdeling",
+  capacity: "Capaciteit",
+};
 export default function RuimteDetailPage({ id }: { id: string }) {
   const roomId = parseInt(id);
   const [, setLocation] = useLocation();
@@ -307,6 +322,8 @@ export default function RuimteDetailPage({ id }: { id: string }) {
               </Card>
             </TabsContent>
           </Tabs>
+
+          {canEdit && <DossierHistoryCard roomId={room.id} />}
         </div>
 
         <div className="space-y-6">
@@ -347,5 +364,86 @@ export default function RuimteDetailPage({ id }: { id: string }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function formatValue(v: string | number | null | undefined) {
+  return v === null || v === undefined || v === "" ? "leeg" : String(v);
+}
+
+function DossierHistoryCard({ roomId }: { roomId: number }) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: history, isLoading } = useListRoomDossierHistory(roomId, {
+    query: { queryKey: getListRoomDossierHistoryQueryKey(roomId) },
+  });
+  const undo = useUndoRoomDossierChange();
+
+  const canUndo = !!history?.length && !history[0]!.isUndo;
+
+  const doUndo = () => {
+    undo.mutate(
+      { id: roomId },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetRoomQueryKey(roomId) });
+          queryClient.invalidateQueries({ queryKey: getListRoomDossierHistoryQueryKey(roomId) });
+          toast({ title: "Laatste wijziging ongedaan gemaakt" });
+        },
+        onError: () =>
+          toast({ title: "Ongedaan maken mislukt", variant: "destructive" }),
+      },
+    );
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <History className="h-5 w-5" /> Wijzigingshistorie
+          </CardTitle>
+          {canUndo && (
+            <Button variant="outline" size="sm" onClick={doUndo} disabled={undo.isPending}>
+              <Undo2 className="h-3.5 w-3.5 mr-1.5" /> Laatste wijziging ongedaan maken
+            </Button>
+          )}
+        </div>
+        <CardDescription>Herindelingen en dossierwijzigingen van deze ruimte.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-16 w-full" />
+        ) : !history?.length ? (
+          <p className="text-sm text-muted-foreground">Nog geen wijzigingen geregistreerd.</p>
+        ) : (
+          <div className="space-y-4">
+            {history.map((entry) => (
+              <div key={entry.id} className="text-sm border rounded-lg p-3 bg-muted/30">
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <span className="font-medium">{entry.changedByName ?? "Onbekend"}</span>
+                  <div className="flex items-center gap-2">
+                    {entry.isUndo && (
+                      <Badge variant="secondary" className="text-[10px]">Teruggedraaid</Badge>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {format(new Date(entry.changedAt), "d MMM yyyy HH:mm", { locale: nl })}
+                    </span>
+                  </div>
+                </div>
+                <ul className="space-y-0.5 text-muted-foreground">
+                  {entry.changes.map((c, i) => (
+                    <li key={i}>
+                      <span className="text-foreground">{FIELD_LABELS[c.field] ?? c.field}</span>
+                      : {formatValue(c.from)} → {formatValue(c.to)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 }

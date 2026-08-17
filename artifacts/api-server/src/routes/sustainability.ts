@@ -159,7 +159,7 @@ router.patch("/meter-readings/:id", requireRole(...SUSTAIN_ROLES), async (req, r
     res.status(404).json({ message: "Meterstand niet gevonden" });
     return;
   }
-  const [row] = await readingBaseQuery().where(eq(meterReadingsTable.id, id));
+  const [row] = await readingBaseQuery().where(eq(meterReadingsTable.id, updatedRow.id));
   res.json(serializeReading(row!));
 });
 
