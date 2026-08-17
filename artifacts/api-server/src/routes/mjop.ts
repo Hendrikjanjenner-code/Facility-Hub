@@ -28,7 +28,11 @@ const MJOP_ROLES = ["facilitair_manager", "beheerder"];
 
 const router: IRouter = Router();
 // De volledige MJOP-module (inclusief lezen) is voorbehouden aan de MJOP-rollen.
-router.use(requireAuth, requireRole(...MJOP_ROLES));
+// Let op: pad-gescoped, anders blokkeert deze guard ook routers die later
+// geregistreerd worden (storage, kennisbank, sleutelbeheer, ...).
+for (const prefix of ["/bouwdelen", "/mjop", "/mjop-taken"]) {
+  router.use(prefix, requireAuth, requireRole(...MJOP_ROLES));
+}
 const VALID_TASK_TYPES = ["inspectie", "onderhoud", "vervanging", "renovatie"];
 const VALID_TASK_STATUSES = ["gepland", "in_uitvoering", "afgerond"];
 const VALID_ERNST = ["licht", "serieus", "ernstig"];

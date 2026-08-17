@@ -133,7 +133,7 @@ router.get("/satisfaction/report", async (req, res): Promise<void> => {
 
   res.json({
     totalResponses: totalRow?.count ?? 0,
-    averageScore: totalRow?.avg ?? 0,
+    averageScore: Number(totalRow?.avg ?? 0),
     byScore,
     recentResponses: recent.map((r) => ({
       ticketId: r.sat.ticketId,

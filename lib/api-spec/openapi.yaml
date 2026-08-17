@@ -23,6 +23,7 @@ tags:
   - name: Storage
   - name: knowledge
   - name: satisfaction
+  - name: keys
 paths:
   /healthz:
     get:
@@ -344,6 +345,409 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+  /rooms/{id}/dossier:
+    patch:
+      operationId: updateRoomDossier
+      tags:
+        - vastgoed
+      summary: Werk het ruimtedossier bij (facilitair_manager / beheerder)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomDossierUpdate'
+      responses:
+        '200':
+          description: Bijgewerkte ruimte
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /floors/{id}/plan:
+    get:
+      operationId: getFloorPlan
+      tags:
+        - vastgoed
+      summary: Vlekkenplan-data voor een verdieping
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Vlekkenplan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FloorPlan'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /buildings/{id}:
+    get:
+      operationId: getBuilding
+      tags:
+        - vastgoed
+      summary: Gebouwdossier (gebouw, verdiepingen, kerncijfers)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Gebouw
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildingDetail'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /buildings/{id}/documents:
+    get:
+      operationId: listBuildingDocuments
+      tags:
+        - vastgoed
+      summary: Documenten van een gebouw
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Documenten
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BuildingDocument'
+    post:
+      operationId: createBuildingDocument
+      tags:
+        - vastgoed
+      summary: Registreer een geüpload document bij een gebouw
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildingDocumentInput'
+      responses:
+        '201':
+          description: Document geregistreerd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildingDocument'
+  /building-documents/{id}:
+    delete:
+      operationId: deleteBuildingDocument
+      tags:
+        - vastgoed
+      summary: Verwijder een gebouwdocument
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Verwijderd
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /keys:
+    get:
+      operationId: listKeys
+      tags:
+        - keys
+      summary: Sleutels en passen (met huidige houder)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sleutels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeySummary'
+    post:
+      operationId: createKey
+      tags:
+        - keys
+      summary: Registreer een sleutel of pas
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyInput'
+      responses:
+        '201':
+          description: Aangemaakt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeySummary'
+  /keys/{id}:
+    get:
+      operationId: getKey
+      tags:
+        - keys
+      summary: Sleuteldossier met sleutelplan, uitgiftes en verliesmeldingen
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Sleuteldossier
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDetail'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+    patch:
+      operationId: updateKey
+      tags:
+        - keys
+      summary: Werk sleutelgegevens bij
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyUpdate'
+      responses:
+        '200':
+          description: Bijgewerkt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeySummary'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /keys/{id}/doors:
+    post:
+      operationId: createKeyDoor
+      tags:
+        - keys
+      summary: Voeg een deur/cilinder toe aan het sleutelplan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyDoorInput'
+      responses:
+        '201':
+          description: Toegevoegd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDoor'
+  /key-doors/{id}:
+    delete:
+      operationId: deleteKeyDoor
+      tags:
+        - keys
+      summary: Verwijder een deur/cilinder uit het sleutelplan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Verwijderd
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /keys/{id}/issue:
+    post:
+      operationId: issueKey
+      tags:
+        - keys
+      summary: Geef een sleutel/pas uit aan een medewerker
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyIssueInput'
+      responses:
+        '201':
+          description: Uitgegeven
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDetail'
+        '409':
+          description: Sleutel niet beschikbaar
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /keys/{id}/return:
+    post:
+      operationId: returnKey
+      tags:
+        - keys
+      summary: Neem een uitgegeven sleutel/pas in
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ingenomen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDetail'
+        '409':
+          description: Sleutel is niet uitgegeven
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /keys/{id}/loss:
+    post:
+      operationId: reportKeyLoss
+      tags:
+        - keys
+      summary: Meld een sleutel/pas als vermist (verliesprocedure met kostenverrekening en servicedesk-ticket)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyLossInput'
+      responses:
+        '201':
+          description: Verlies geregistreerd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyDetail'
+  /storage/document-uploads:
+    post:
+      tags:
+        - Storage
+      operationId: uploadStorageDocument
+      summary: Upload een document (PDF of afbeelding, max 15 MB) naar private storage; bestandstype wordt server-side geverifieerd
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          description: Bestand opgeslagen.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResult'
+        '400':
+          description: Geen geldig document of bestand te groot.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+        '500':
+          description: Upload mislukt.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
   /structure:
     get:
       operationId: getStructure
@@ -1899,6 +2303,18 @@ components:
           type: string
         areaM2:
           type: number
+        areaVvoM2:
+          type:
+            - number
+            - 'null'
+        areaBvoM2:
+          type:
+            - number
+            - 'null'
+        department:
+          type:
+            - string
+            - 'null'
         floorFinish:
           type:
             - string
@@ -1930,6 +2346,357 @@ components:
         - areaM2
         - bookable
         - facilities
+    RoomDossierUpdate:
+      type: object
+      properties:
+        functionType:
+          type: string
+          minLength: 1
+        floorFinish:
+          type:
+            - string
+            - 'null'
+        areaM2:
+          type: number
+          minimum: 0
+        areaVvoM2:
+          type:
+            - number
+            - 'null'
+          minimum: 0
+        areaBvoM2:
+          type:
+            - number
+            - 'null'
+          minimum: 0
+        department:
+          type:
+            - string
+            - 'null'
+        capacity:
+          type:
+            - integer
+            - 'null'
+          minimum: 0
+    FloorPlan:
+      type: object
+      required: [floorId, floorName, level, buildingId, buildingName, rooms]
+      properties:
+        floorId:
+          type: integer
+        floorName:
+          type: string
+        level:
+          type: integer
+        buildingId:
+          type: integer
+        buildingName:
+          type: string
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/FloorPlanRoom'
+    FloorPlanRoom:
+      type: object
+      required: [id, name, code, functionType, areaM2]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        code:
+          type: string
+        functionType:
+          type: string
+        areaM2:
+          type: number
+        department:
+          type:
+            - string
+            - 'null'
+        capacity:
+          type:
+            - integer
+            - 'null'
+        bookable:
+          type: boolean
+    BuildingDetail:
+      type: object
+      required: [id, name, address, siteName, floorCount, roomCount, totalAreaM2, floors]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        siteName:
+          type:
+            - string
+            - 'null'
+        floorCount:
+          type: integer
+        roomCount:
+          type: integer
+        totalAreaM2:
+          type: number
+        floors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Floor'
+    BuildingDocument:
+      type: object
+      required: [id, buildingId, title, category, objectPath, contentType, sizeBytes, uploadedByName, createdAt]
+      properties:
+        id:
+          type: integer
+        buildingId:
+          type: integer
+        title:
+          type: string
+        category:
+          type: string
+        objectPath:
+          type: string
+        contentType:
+          type: string
+        sizeBytes:
+          type: integer
+        uploadedByName:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+    BuildingDocumentInput:
+      type: object
+      required: [title, category, objectPath, contentType, sizeBytes]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        category:
+          type: string
+          enum: [huurcontract, bouwtekening, energielabel, overig]
+        objectPath:
+          type: string
+          minLength: 1
+        contentType:
+          type: string
+        sizeBytes:
+          type: integer
+          minimum: 0
+    KeySummary:
+      type: object
+      required: [id, code, type, description, status, doorCount, createdAt]
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        buildingId:
+          type:
+            - integer
+            - 'null'
+        buildingName:
+          type:
+            - string
+            - 'null'
+        replacementCost:
+          type:
+            - number
+            - 'null'
+        doorCount:
+          type: integer
+        currentHolderId:
+          type:
+            - integer
+            - 'null'
+        currentHolderName:
+          type:
+            - string
+            - 'null'
+        issuedAt:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+    KeyDetail:
+      type: object
+      required: [key, doors, issues, lossReports]
+      properties:
+        key:
+          $ref: '#/components/schemas/KeySummary'
+        doors:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyDoor'
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyIssueRecord'
+        lossReports:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyLossRecord'
+    KeyDoor:
+      type: object
+      required: [id, keyId, description]
+      properties:
+        id:
+          type: integer
+        keyId:
+          type: integer
+        description:
+          type: string
+        roomId:
+          type:
+            - integer
+            - 'null'
+        roomName:
+          type:
+            - string
+            - 'null'
+    KeyIssueRecord:
+      type: object
+      required: [id, keyId, holderId, issuedAt]
+      properties:
+        id:
+          type: integer
+        keyId:
+          type: integer
+        holderId:
+          type: integer
+        holderName:
+          type:
+            - string
+            - 'null'
+        issuedByName:
+          type:
+            - string
+            - 'null'
+        issuedAt:
+          type: string
+        returnedAt:
+          type:
+            - string
+            - 'null'
+        note:
+          type:
+            - string
+            - 'null'
+    KeyLossRecord:
+      type: object
+      required: [id, keyId, chargeAmount, createdAt]
+      properties:
+        id:
+          type: integer
+        keyId:
+          type: integer
+        holderName:
+          type:
+            - string
+            - 'null'
+        reportedByName:
+          type:
+            - string
+            - 'null'
+        chargeAmount:
+          type: number
+        note:
+          type:
+            - string
+            - 'null'
+        ticketId:
+          type:
+            - integer
+            - 'null'
+        ticketNumber:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+    KeyInput:
+      type: object
+      required: [code, type, description]
+      properties:
+        code:
+          type: string
+          minLength: 1
+        type:
+          type: string
+          enum: [sleutel, pas]
+        description:
+          type: string
+          minLength: 1
+        buildingId:
+          type:
+            - integer
+            - 'null'
+        replacementCost:
+          type:
+            - number
+            - 'null'
+          minimum: 0
+    KeyUpdate:
+      type: object
+      properties:
+        description:
+          type: string
+          minLength: 1
+        buildingId:
+          type:
+            - integer
+            - 'null'
+        replacementCost:
+          type:
+            - number
+            - 'null'
+          minimum: 0
+        status:
+          type: string
+          enum: [beschikbaar, geblokkeerd]
+    KeyDoorInput:
+      type: object
+      required: [description]
+      properties:
+        description:
+          type: string
+          minLength: 1
+        roomId:
+          type:
+            - integer
+            - 'null'
+    KeyIssueInput:
+      type: object
+      required: [holderId]
+      properties:
+        holderId:
+          type: integer
+        note:
+          type:
+            - string
+            - 'null'
+    KeyLossInput:
+      type: object
+      properties:
+        chargeAmount:
+          type:
+            - number
+            - 'null'
+          minimum: 0
+        note:
+          type:
+            - string
+            - 'null'
     Reservation:
       type: object
       properties:

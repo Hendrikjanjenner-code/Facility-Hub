@@ -98,6 +98,65 @@ router.post(
   },
 );
 
+const MAX_DOCUMENT_BYTES = 15 * 1024 * 1024; // 15 MB
+
+/**
+ * Bepaalt het documenttype op basis van magic bytes (PDF of afbeelding).
+ */
+function sniffDocumentType(buf: Buffer): string | null {
+  if (buf.length >= 5 && buf.subarray(0, 5).toString('latin1') === '%PDF-')
+    return 'application/pdf';
+  return sniffImageType(buf);
+}
+
+/**
+ * POST /storage/document-uploads
+ *
+ * Upload van een gebouwdocument (PDF of afbeelding, max 15 MB).
+ * Zelfde beveiligingsmodel als /storage/uploads: bytes via de API,
+ * magic-byte verificatie, alleen vastgoedbeheer-rollen.
+ */
+router.post(
+  '/storage/document-uploads',
+  express.raw({ type: () => true, limit: MAX_DOCUMENT_BYTES }),
+  async (req: Request, res: Response) => {
+    const user = await loadUser(req);
+    if (!user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+    if (!STORAGE_ROLES.includes(user.role)) {
+      res.status(403).json({ error: 'Forbidden' });
+      return;
+    }
+
+    const body = req.body as unknown;
+    if (!Buffer.isBuffer(body) || body.length === 0) {
+      res.status(400).json({ error: 'Geen bestand ontvangen' });
+      return;
+    }
+    const detectedType = sniffDocumentType(body);
+    if (!detectedType) {
+      res.status(400).json({
+        error:
+          'Alleen PDF-documenten en afbeeldingen (JPEG, PNG, GIF, WebP, HEIC) zijn toegestaan',
+      });
+      return;
+    }
+
+    try {
+      const objectPath = await objectStorageService.uploadObject(
+        body,
+        detectedType,
+      );
+      res.status(201).json({ objectPath });
+    } catch (error) {
+      req.log.error({ err: error }, 'Error uploading document');
+      res.status(500).json({ error: 'Upload mislukt' });
+    }
+  },
+);
+
 /**
  * GET /storage/public-objects/*
  *

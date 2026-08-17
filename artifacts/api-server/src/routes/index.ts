@@ -15,6 +15,7 @@ import mjopRouter from "./mjop";
 import storageRouter from "./storage";
 import knowledgeRouter from "./knowledge";
 import satisfactionRouter from "./satisfaction";
+import keysRouter from "./keys";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use(mjopRouter);
 router.use(storageRouter);
 router.use(knowledgeRouter);
 router.use(satisfactionRouter);
+router.use(keysRouter);
 
 export default router;

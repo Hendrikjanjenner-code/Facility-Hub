@@ -17,6 +17,9 @@ import ReserveringDetailPage from './pages/reserveringen/ReserveringDetailPage';
 import WerkplekkenPage from './pages/werkplekken/WerkplekkenPage';
 import BezoekersPage from './pages/bezoekers/BezoekersPage';
 import VastgoedPage from './pages/vastgoed/VastgoedPage';
+import GebouwDetailPage from './pages/vastgoed/GebouwDetailPage';
+import SleutelbeheerPage from './pages/sleutelbeheer/SleutelbeheerPage';
+import SleutelDetailPage from './pages/sleutelbeheer/SleutelDetailPage';
 import RuimtesPage from './pages/ruimtes/RuimtesPage';
 import RuimteDetailPage from './pages/ruimtes/RuimteDetailPage';
 import AssetsPage from './pages/assets/AssetsPage';
@@ -87,6 +90,9 @@ function Router() {
         <Route path="/werkplekken">{(params) => <ProtectedRoute component={WerkplekkenPage} />}</Route>
         <Route path="/bezoekers">{(params) => <ProtectedRoute component={BezoekersPage} />}</Route>
         <Route path="/vastgoed">{(params) => <ProtectedRoute component={VastgoedPage} />}</Route>
+        <Route path="/gebouwen/:id">{(params) => <ProtectedRoute component={GebouwDetailPage} id={params.id} />}</Route>
+        <Route path="/sleutelbeheer/:id">{(params) => <ProtectedRoute component={SleutelDetailPage} id={params.id} />}</Route>
+        <Route path="/sleutelbeheer">{(params) => <ProtectedRoute component={SleutelbeheerPage} />}</Route>
         
         <Route path="/ruimtes/:id">{(params) => <ProtectedRoute component={RuimteDetailPage} id={params.id} />}</Route>
         <Route path="/ruimtes">{(params) => <ProtectedRoute component={RuimtesPage} />}</Route>

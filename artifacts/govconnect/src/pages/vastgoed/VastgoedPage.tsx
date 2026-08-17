@@ -109,7 +109,22 @@ export default function VastgoedPage() {
             {org.sites.map(site => (
               <TreeNode key={site.id} label={`${site.name} (${site.city})`} icon={Map} defaultExpanded>
                 {site.buildings.map(building => (
-                  <TreeNode key={building.id} label={building.name} icon={Building}>
+                  <TreeNode 
+                    key={building.id} 
+                    label={building.name} 
+                    icon={Building}
+                    action={
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-7 text-xs"
+                        onClick={() => setLocation(`/gebouwen/${building.id}`)}
+                        data-testid={`link-gebouw-${building.id}`}
+                      >
+                        <ExternalLink className="mr-1 h-3 w-3" /> Gebouwdossier
+                      </Button>
+                    }
+                  >
                     {building.floors.map(floor => (
                       <TreeNode 
                         key={floor.id} 

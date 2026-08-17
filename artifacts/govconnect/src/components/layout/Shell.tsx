@@ -17,6 +17,7 @@ import {
   Users, 
   Building2, 
   DoorOpen, 
+  KeyRound,
   PcCase,
   Wrench,
   Bell,
@@ -97,6 +98,12 @@ const navItems: NavItem[] = [
     href: "/ruimtes",
     icon: DoorOpen,
     roles: ["servicedesk", "facilitair_manager", "beheerder"]
+  },
+  {
+    title: "Sleutelbeheer",
+    href: "/sleutelbeheer",
+    icon: KeyRound,
+    roles: ["facilitair_manager", "beheerder", "receptie"]
   },
   {
     title: "Assets",

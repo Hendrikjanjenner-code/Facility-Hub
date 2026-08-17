@@ -30,6 +30,10 @@ import {
   conditiemetingenTable,
   mjopTakenTable,
   knowledgeArticlesTable,
+  keysTable,
+  keyDoorsTable,
+  keyIssuesTable,
+  keyLossReportsTable,
 } from "@workspace/db";
 import { sql } from "drizzle-orm";
 import { scryptSync, randomBytes } from "node:crypto";
@@ -57,6 +61,7 @@ async function main() {
       notifications, catering_order_lines, reservations, catering_items,
       ticket_satisfaction, ticket_comments, tickets, ticket_categories, assets, workplaces, rooms, floors,
       shop_order_lines, shop_orders, shop_products, budgets, contracts, suppliers,
+      key_loss_reports, key_issues, key_doors, keys, building_documents,
       meter_readings, waste_registrations,
       buildings, sites, organizations, visitors, users, knowledge_articles RESTART IDENTITY CASCADE
   `);
@@ -104,20 +109,20 @@ async function main() {
   const rooms = await db
     .insert(roomsTable)
     .values([
-      { floorId: sh0.id, name: "Raadzaal", code: "SH-0.01", functionType: "vergaderruimte", areaM2: 180, floorFinish: "parket", capacity: 60, bookable: true, facilities: ["beamer", "geluidsinstallatie", "microfoons", "livestream"] },
-      { floorId: sh0.id, name: "Trouwzaal", code: "SH-0.02", functionType: "ceremoniezaal", areaM2: 95, floorFinish: "parket", capacity: 40, bookable: true, facilities: ["geluidsinstallatie", "piano"] },
-      { floorId: sh0.id, name: "Ontvangsthal", code: "SH-0.03", functionType: "ontvangst", areaM2: 220, floorFinish: "natuursteen", capacity: null, bookable: false, facilities: ["receptiebalie"] },
-      { floorId: sh1.id, name: "Vergaderzaal De Rijn", code: "SH-1.04", functionType: "vergaderruimte", areaM2: 42, floorFinish: "tapijt", capacity: 12, bookable: true, facilities: ["scherm", "videobellen", "whiteboard"] },
-      { floorId: sh1.id, name: "Vergaderzaal De Waal", code: "SH-1.05", functionType: "vergaderruimte", areaM2: 28, floorFinish: "tapijt", capacity: 8, bookable: true, facilities: ["scherm", "whiteboard"] },
-      { floorId: sh1.id, name: "B&W-kamer", code: "SH-1.06", functionType: "vergaderruimte", areaM2: 55, floorFinish: "tapijt", capacity: 14, bookable: false, facilities: ["scherm", "videobellen"] },
-      { floorId: sh2.id, name: "Focusruimte De Lek", code: "SH-2.07", functionType: "focusruimte", areaM2: 9, floorFinish: "tapijt", capacity: 2, bookable: true, facilities: ["scherm"] },
-      { floorId: sh2.id, name: "Kantoortuin Zuid", code: "SH-2.08", functionType: "kantoortuin", areaM2: 310, floorFinish: "tapijt", capacity: 48, bookable: false, facilities: [] },
-      { floorId: sk0.id, name: "Bedrijfsrestaurant", code: "SK-0.01", functionType: "restaurant", areaM2: 260, floorFinish: "pvc", capacity: 120, bookable: false, facilities: ["uitgiftebalie", "koffiecorner"] },
-      { floorId: sk0.id, name: "Vergaderzaal De Maas", code: "SK-0.02", functionType: "vergaderruimte", areaM2: 36, floorFinish: "pvc", capacity: 10, bookable: true, facilities: ["scherm", "videobellen"] },
-      { floorId: sk1.id, name: "Vergaderzaal De IJssel", code: "SK-1.03", functionType: "vergaderruimte", areaM2: 24, floorFinish: "tapijt", capacity: 6, bookable: true, facilities: ["scherm"] },
-      { floorId: sk1.id, name: "Kantoortuin Noord", code: "SK-1.04", functionType: "kantoortuin", areaM2: 280, floorFinish: "tapijt", capacity: 40, bookable: false, facilities: [] },
-      { floorId: wf0.id, name: "Werkplaats", code: "GW-0.01", functionType: "werkplaats", areaM2: 450, floorFinish: "beton", capacity: null, bookable: false, facilities: ["hefbrug", "gereedschap"] },
-      { floorId: wf0.id, name: "Kantine Werf", code: "GW-0.02", functionType: "kantine", areaM2: 60, floorFinish: "pvc", capacity: 24, bookable: false, facilities: ["koffiecorner"] },
+      { floorId: sh0.id, name: "Raadzaal", code: "SH-0.01", functionType: "vergaderruimte", areaM2: 180, areaVvoM2: 172, areaBvoM2: 205, department: "Bestuur", floorFinish: "parket", capacity: 60, bookable: true, facilities: ["beamer", "geluidsinstallatie", "microfoons", "livestream"] },
+      { floorId: sh0.id, name: "Trouwzaal", code: "SH-0.02", functionType: "ceremoniezaal", areaM2: 95, areaVvoM2: 90, areaBvoM2: 108, department: "Burgerzaken", floorFinish: "parket", capacity: 40, bookable: true, facilities: ["geluidsinstallatie", "piano"] },
+      { floorId: sh0.id, name: "Ontvangsthal", code: "SH-0.03", functionType: "ontvangst", areaM2: 220, areaVvoM2: 205, areaBvoM2: 255, department: "Receptie", floorFinish: "natuursteen", capacity: null, bookable: false, facilities: ["receptiebalie"] },
+      { floorId: sh1.id, name: "Vergaderzaal De Rijn", code: "SH-1.04", functionType: "vergaderruimte", areaM2: 42, areaVvoM2: 40, areaBvoM2: 48, department: "Bestuur", floorFinish: "tapijt", capacity: 12, bookable: true, facilities: ["scherm", "videobellen", "whiteboard"] },
+      { floorId: sh1.id, name: "Vergaderzaal De Waal", code: "SH-1.05", functionType: "vergaderruimte", areaM2: 28, areaVvoM2: 26, areaBvoM2: 32, department: "Bestuur", floorFinish: "tapijt", capacity: 8, bookable: true, facilities: ["scherm", "whiteboard"] },
+      { floorId: sh1.id, name: "B&W-kamer", code: "SH-1.06", functionType: "vergaderruimte", areaM2: 55, areaVvoM2: 52, areaBvoM2: 63, department: "Bestuur", floorFinish: "tapijt", capacity: 14, bookable: false, facilities: ["scherm", "videobellen"] },
+      { floorId: sh2.id, name: "Focusruimte De Lek", code: "SH-2.07", functionType: "focusruimte", areaM2: 9, areaVvoM2: 8.5, areaBvoM2: 10.5, department: "Ruimtelijke Ordening", floorFinish: "tapijt", capacity: 2, bookable: true, facilities: ["scherm"] },
+      { floorId: sh2.id, name: "Kantoortuin Zuid", code: "SH-2.08", functionType: "kantoortuin", areaM2: 310, areaVvoM2: 295, areaBvoM2: 355, department: "Ruimtelijke Ordening", floorFinish: "tapijt", capacity: 48, bookable: false, facilities: [] },
+      { floorId: sk0.id, name: "Bedrijfsrestaurant", code: "SK-0.01", functionType: "restaurant", areaM2: 260, areaVvoM2: 245, areaBvoM2: 300, department: "Catering", floorFinish: "pvc", capacity: 120, bookable: false, facilities: ["uitgiftebalie", "koffiecorner"] },
+      { floorId: sk0.id, name: "Vergaderzaal De Maas", code: "SK-0.02", functionType: "vergaderruimte", areaM2: 36, areaVvoM2: 34, areaBvoM2: 41, department: "Financiën", floorFinish: "pvc", capacity: 10, bookable: true, facilities: ["scherm", "videobellen"] },
+      { floorId: sk1.id, name: "Vergaderzaal De IJssel", code: "SK-1.03", functionType: "vergaderruimte", areaM2: 24, areaVvoM2: 22.5, areaBvoM2: 28, department: "Financiën", floorFinish: "tapijt", capacity: 6, bookable: true, facilities: ["scherm"] },
+      { floorId: sk1.id, name: "Kantoortuin Noord", code: "SK-1.04", functionType: "kantoortuin", areaM2: 280, areaVvoM2: 265, areaBvoM2: 320, department: "Financiën", floorFinish: "tapijt", capacity: 40, bookable: false, facilities: [] },
+      { floorId: wf0.id, name: "Werkplaats", code: "GW-0.01", functionType: "werkplaats", areaM2: 450, areaVvoM2: 430, areaBvoM2: 505, department: "Facilitair Bedrijf", floorFinish: "beton", capacity: null, bookable: false, facilities: ["hefbrug", "gereedschap"] },
+      { floorId: wf0.id, name: "Kantine Werf", code: "GW-0.02", functionType: "kantine", areaM2: 60, areaVvoM2: 56, areaBvoM2: 70, department: "Facilitair Bedrijf", floorFinish: "pvc", capacity: 24, bookable: false, facilities: ["koffiecorner"] },
     ])
     .returning();
   const room = (code: string) => rooms.find((r) => r.code === code)!;
@@ -482,6 +487,45 @@ async function main() {
   await db.insert(ticketSatisfactionTable).values([
     { ticketId: ticket("GC-2026-1008").id, score: 5, comment: "Snel opgelost, prima communicatie!", createdAt: hoursAgo(150) },
     { ticketId: ticket("GC-2026-1003").id, score: 4, comment: "Goed afgehandeld.", createdAt: hoursAgo(25) },
+  ]);
+
+  // Sleutel- en pasbeheer
+  const seededKeys = await db
+    .insert(keysTable)
+    .values([
+      { code: "SL-001", type: "sleutel", description: "Hoofdsleutel Stadhuis (loper)", buildingId: stadhuis!.id, status: "uitgegeven", replacementCost: 450 },
+      { code: "SL-002", type: "sleutel", description: "Sleutel Raadzaal en Trouwzaal", buildingId: stadhuis!.id, status: "beschikbaar", replacementCost: 85 },
+      { code: "SL-003", type: "sleutel", description: "Sleutel Werkplaats Gemeentewerf", buildingId: werf!.id, status: "uitgegeven", replacementCost: 120 },
+      { code: "SL-004", type: "sleutel", description: "Sleutel serverruimte Stadskantoor", buildingId: stadskantoor!.id, status: "vermist", replacementCost: 275 },
+      { code: "PAS-101", type: "pas", description: "Toegangspas alle publieksruimtes", buildingId: stadhuis!.id, status: "uitgegeven", replacementCost: 25 },
+      { code: "PAS-102", type: "pas", description: "Toegangspas Stadskantoor kantooretages", buildingId: stadskantoor!.id, status: "beschikbaar", replacementCost: 25 },
+      { code: "PAS-103", type: "pas", description: "Bezoekerspas receptie (leen)", buildingId: stadhuis!.id, status: "geblokkeerd", replacementCost: 25 },
+    ])
+    .returning();
+  const key = (code: string) => seededKeys.find((k) => k.code === code)!;
+
+  await db.insert(keyDoorsTable).values([
+    { keyId: key("SL-001").id, description: "Cilinder C-01, hoofdingang Marktplein", roomId: room("SH-0.03").id },
+    { keyId: key("SL-001").id, description: "Cilinder C-02, personeelsingang achterzijde", roomId: null },
+    { keyId: key("SL-001").id, description: "Cilinder C-05, B&W-kamer", roomId: room("SH-1.06").id },
+    { keyId: key("SL-002").id, description: "Cilinder C-03, Raadzaal", roomId: room("SH-0.01").id },
+    { keyId: key("SL-002").id, description: "Cilinder C-04, Trouwzaal", roomId: room("SH-0.02").id },
+    { keyId: key("SL-003").id, description: "Cilinder W-01, werkplaats roldeur", roomId: room("GW-0.01").id },
+    { keyId: key("SL-004").id, description: "Cilinder S-01, serverruimte", roomId: null },
+    { keyId: key("PAS-101").id, description: "Paslezer ontvangsthal", roomId: room("SH-0.03").id },
+    { keyId: key("PAS-102").id, description: "Paslezer lift en trappenhuis Stadskantoor", roomId: null },
+  ]);
+
+  await db.insert(keyIssuesTable).values([
+    { keyId: key("SL-001").id, holderId: u("ruben").id, issuedById: u("linda").id, issuedAt: hoursAgo(24 * 90), note: "Vaste loper beheerder" },
+    { keyId: key("SL-003").id, holderId: u("kees").id, issuedById: u("linda").id, issuedAt: hoursAgo(24 * 14), note: "Onderhoudswerkzaamheden werf" },
+    { keyId: key("PAS-101").id, holderId: u("emma").id, issuedById: u("linda").id, issuedAt: hoursAgo(24 * 30) },
+    { keyId: key("SL-002").id, holderId: u("noor").id, issuedById: u("linda").id, issuedAt: hoursAgo(24 * 60), returnedAt: hoursAgo(24 * 40), note: "Tijdelijk voor raadsvergaderingen" },
+    { keyId: key("SL-004").id, holderId: u("daan").id, issuedById: u("linda").id, issuedAt: hoursAgo(24 * 45), returnedAt: hoursAgo(24 * 10), note: "Uitgifte beëindigd via verliesprocedure" },
+  ]);
+
+  await db.insert(keyLossReportsTable).values([
+    { keyId: key("SL-004").id, reportedById: u("linda").id, holderId: u("daan").id, chargeAmount: 275, note: "Sleutel verloren tijdens verhuizing; cilinder vervangen.", ticketId: null, createdAt: hoursAgo(24 * 10) },
   ]);
 
   console.log("Seed voltooid:", {
