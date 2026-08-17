@@ -4,6 +4,7 @@ import { pool } from "@workspace/db";
 import { ensureContractExpiryNotifications } from "./routes/contracts";
 import { cleanupOrphanedDocumentUploads } from "./lib/orphanCleanup";
 import { checkOverdueKeys } from "./routes/keys";
+import { checkSlechteConditieZonderMjop } from "./routes/mjop";
 
 const rawPort = process.env["PORT"];
 
@@ -36,6 +37,16 @@ async function runOrphanCleanup() {
     await cleanupOrphanedDocumentUploads();
   } catch (err) {
     logger.error({ err }, "Fout bij wees-upload opruimroutine");
+  }
+}
+
+async function runSlechteConditieCheck() {
+  try {
+    logger.info("Dagelijkse slechte-conditie-check gestart");
+    await checkSlechteConditieZonderMjop();
+    logger.info("Dagelijkse slechte-conditie-check afgerond");
+  } catch (err) {
+    logger.error({ err }, "Fout bij slechte-conditie-check");
   }
 }
 
@@ -73,6 +84,10 @@ app.listen(port, (err) => {
   // Opruimen van wees-uploads: direct bij start en daarna elke 24 uur.
   void runOrphanCleanup();
   setInterval(() => void runOrphanCleanup(), MS_PER_DAY);
+
+  // Dagelijkse check: bouwdelen met slechte conditie zonder MJOP-opvolging.
+  void runSlechteConditieCheck();
+  setInterval(() => void runSlechteConditieCheck(), MS_PER_DAY);
 
   // Dagelijkse check voor te late sleuteluitgiftes met inleverdatum.
   void runOverdueKeysCheck();

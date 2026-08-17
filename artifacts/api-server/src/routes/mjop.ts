@@ -12,6 +12,7 @@ import {
   usersTable,
   ticketsTable,
   ticketCategoriesTable,
+  notificationsTable,
   type Bouwdeel,
   type MjopTaak,
   type Gebrek,
@@ -1253,5 +1254,83 @@ router.post(
     res.status(201).json({ aangemaakt: created.length, taken: created });
   },
 );
+
+// ── Dagelijkse herinnering: slechte conditie zonder MJOP-opvolging ────────────
+
+function isoWeekKey(date: Date): string {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const week = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+
+/**
+ * Dagelijkse check: signaleer bouwdelen met score ≥ 4 en geen open MJOP-taak
+ * die al langer dan SLECHTE_CONDITIE_HERINNERING_DAGEN (standaard 14) onopgevolgd zijn.
+ * Stuurt een notificatie naar alle facilitair managers; idempotent via weeksleutel.
+ */
+export async function checkSlechteConditieZonderMjop(): Promise<void> {
+  const thresholdDays = Number(
+    process.env["SLECHTE_CONDITIE_HERINNERING_DAGEN"] ?? 14,
+  );
+  const cutoff = new Date(Date.now() - thresholdDays * 86400000);
+  const yearWeek = isoWeekKey(new Date());
+
+  // Bouwdelen waarvan de laatste meting score ≥ 4 heeft, de meting ouder is dan
+  // de drempelperiode EN er geen openstaande MJOP-taken zijn.
+  const candidates = await db
+    .select({
+      id: bouwdelenTable.id,
+      name: bouwdelenTable.name,
+      code: bouwdelenTable.code,
+      buildingName: buildingsTable.name,
+    })
+    .from(bouwdelenTable)
+    .leftJoin(buildingsTable, eq(bouwdelenTable.buildingId, buildingsTable.id))
+    .where(
+      sql`
+        (select cm.score from ${conditiemetingenTable} cm
+         where cm.bouwdeel_id = ${bouwdelenTable.id}
+         order by cm.measured_at desc limit 1) >= 4
+        AND (select cm.measured_at from ${conditiemetingenTable} cm
+             where cm.bouwdeel_id = ${bouwdelenTable.id}
+             order by cm.measured_at desc limit 1) <= ${cutoff}
+        AND (select count(*)::int from ${mjopTakenTable} mt
+             where mt.bouwdeel_id = ${bouwdelenTable.id}
+             and mt.status != 'afgerond') = 0
+      `,
+    );
+
+  if (!candidates.length) return;
+
+  const managers = await db
+    .select({ id: usersTable.id })
+    .from(usersTable)
+    .where(eq(usersTable.role, "facilitair_manager"));
+
+  if (!managers.length) return;
+
+  for (const bouwdeel of candidates) {
+    const linkPath = `/bouwdelen/${bouwdeel.id}`;
+    const title = `Bouwdeel zonder MJOP-opvolging: ${bouwdeel.code} — ${bouwdeel.name}`;
+    const body =
+      `${bouwdeel.name}${bouwdeel.buildingName ? ` (${bouwdeel.buildingName})` : ""} heeft al meer dan ${thresholdDays} dagen een slechte conditiescore (≥ 4) zonder openstaande MJOP-taak.`;
+
+    for (const manager of managers) {
+      await db
+        .insert(notificationsTable)
+        .values({
+          userId: manager.id,
+          title,
+          body,
+          kind: "slechte_conditie_herinnering",
+          linkPath,
+          referenceKey: `bouwdeel:${bouwdeel.id}:slechte_conditie:${yearWeek}`,
+        })
+        .onConflictDoNothing();
+    }
+  }
+}
 
 export default router;
