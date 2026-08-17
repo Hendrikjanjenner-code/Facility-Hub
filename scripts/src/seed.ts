@@ -32,6 +32,8 @@ import {
   bouwdelenTable,
   conditiemetingenTable,
   mjopTakenTable,
+  kostenKengetallenTable,
+  mjopScenariosTable,
   knowledgeArticlesTable,
   keysTable,
   keyDoorsTable,
@@ -60,7 +62,7 @@ function hoursAgo(h: number): Date {
 
 async function main() {
   await db.execute(sql`
-    TRUNCATE TABLE mjop_taken, conditiemetingen, bouwdelen,
+    TRUNCATE TABLE mjop_taken, mjop_scenarios, kosten_kengetallen, conditiemetingen, bouwdelen,
       notifications, catering_order_lines, reservations, catering_items,
       ticket_satisfaction, ticket_comments, tickets, ticket_categories, assets, workplaces, rooms, floors,
       shop_order_lines, shop_orders, shop_products, budgets, approval_threshold, contracts,
@@ -451,34 +453,34 @@ async function main() {
   const bouwdelen = await db
     .insert(bouwdelenTable)
     .values([
-      { code: "BD-DAK-001", name: "Bitumen dakbedekking Stadhuis", category: "dak", buildingId: stadhuis!.id, floorId: null, roomId: null, material: "bitumen", installYear: 2004, expectedLifespanYears: 25, replacementCost: 185000, notes: "Laatste renovatie 2004, plaatselijke blaasvorming." },
-      { code: "BD-GEV-001", name: "Kozijnen voorgevel Stadhuis", category: "gevel", buildingId: stadhuis!.id, floorId: null, roomId: null, material: "hardhout", installYear: 1998, expectedLifespanYears: 40, replacementCost: 240000, notes: "Monumentale gevel, schilderwerk cyclus 6 jaar." },
-      { code: "BD-INS-001", name: "Klimaatinstallatie Stadhuis", category: "installaties", buildingId: stadhuis!.id, floorId: null, roomId: null, material: "VRV-systeem", installYear: 2019, expectedLifespanYears: 15, replacementCost: 320000, notes: null },
-      { code: "BD-INS-002", name: "Liftinstallatie Stadhuis", category: "transport", buildingId: stadhuis!.id, floorId: sh0.id, roomId: null, material: "staal", installYear: 2010, expectedLifespanYears: 25, replacementCost: 95000, notes: "Jaarlijkse keuring verplicht." },
-      { code: "BD-INT-001", name: "Parketvloer Raadzaal", category: "interieur", buildingId: stadhuis!.id, floorId: sh0.id, roomId: room("SH-0.01").id, material: "eiken parket", installYear: 2012, expectedLifespanYears: 30, replacementCost: 48000, notes: null },
-      { code: "BD-DAK-002", name: "Dakbedekking Stadskantoor", category: "dak", buildingId: stadskantoor!.id, floorId: null, roomId: null, material: "EPDM", installYear: 2016, expectedLifespanYears: 30, replacementCost: 130000, notes: null },
-      { code: "BD-INS-003", name: "Verwarmingsketels Stadskantoor", category: "installaties", buildingId: stadskantoor!.id, floorId: null, roomId: null, material: "HR-ketels", installYear: 2011, expectedLifespanYears: 18, replacementCost: 75000, notes: "Vervanging door warmtepomp overwegen." },
-      { code: "BD-GEV-002", name: "Overheaddeuren Gemeentewerf", category: "gevel", buildingId: werf!.id, floorId: wf0.id, roomId: room("GW-0.01").id, material: "staal", installYear: 2008, expectedLifespanYears: 25, replacementCost: 42000, notes: null },
+      { code: "BD-DAK-001", name: "Bitumen dakbedekking Stadhuis", category: "dak", nlSfbCode: "(17)", buildingId: stadhuis!.id, floorId: null, roomId: null, material: "bitumen", installYear: 2004, expectedLifespanYears: 25, replacementCost: 185000, notes: "Laatste renovatie 2004, plaatselijke blaasvorming." },
+      { code: "BD-GEV-001", name: "Kozijnen voorgevel Stadhuis", category: "gevel", nlSfbCode: "(31)", buildingId: stadhuis!.id, floorId: null, roomId: null, material: "hardhout", installYear: 1998, expectedLifespanYears: 40, replacementCost: 240000, notes: "Monumentale gevel, schilderwerk cyclus 6 jaar." },
+      { code: "BD-INS-001", name: "Klimaatinstallatie Stadhuis", category: "installaties", nlSfbCode: "(45)", buildingId: stadhuis!.id, floorId: null, roomId: null, material: "VRV-systeem", installYear: 2019, expectedLifespanYears: 15, replacementCost: 320000, notes: null },
+      { code: "BD-INS-002", name: "Liftinstallatie Stadhuis", category: "transport", nlSfbCode: "(52)", buildingId: stadhuis!.id, floorId: sh0.id, roomId: null, material: "staal", installYear: 2010, expectedLifespanYears: 25, replacementCost: 95000, notes: "Jaarlijkse keuring verplicht." },
+      { code: "BD-INT-001", name: "Parketvloer Raadzaal", category: "interieur", nlSfbCode: "(21)", buildingId: stadhuis!.id, floorId: sh0.id, roomId: room("SH-0.01").id, material: "eiken parket", installYear: 2012, expectedLifespanYears: 30, replacementCost: 48000, notes: null },
+      { code: "BD-DAK-002", name: "Dakbedekking Stadskantoor", category: "dak", nlSfbCode: "(17)", buildingId: stadskantoor!.id, floorId: null, roomId: null, material: "EPDM", installYear: 2016, expectedLifespanYears: 30, replacementCost: 130000, notes: null },
+      { code: "BD-INS-003", name: "Verwarmingsketels Stadskantoor", category: "installaties", nlSfbCode: "(42)", buildingId: stadskantoor!.id, floorId: null, roomId: null, material: "HR-ketels", installYear: 2011, expectedLifespanYears: 18, replacementCost: 75000, notes: "Vervanging door warmtepomp overwegen." },
+      { code: "BD-GEV-002", name: "Overheaddeuren Gemeentewerf", category: "gevel", nlSfbCode: "(33)", buildingId: werf!.id, floorId: wf0.id, roomId: room("GW-0.01").id, material: "staal", installYear: 2008, expectedLifespanYears: 25, replacementCost: 42000, notes: null },
     ])
     .returning();
   const bd = (code: string) => bouwdelen.find((b) => b.code === code)!;
 
   await db.insert(conditiemetingenTable).values([
-    { bouwdeelId: bd("BD-DAK-001").id, inspectorId: u("ruben").id, score: 4, toelichting: "Dakbedekking toont veroudering; einde levensduur nadert.", gebreken: [
-      { description: "Blaasvorming in bitumen aan zuidzijde", ernst: "serieus", omvang: "10-30%", photoPath: null },
-      { description: "Craquelé rond dakdoorvoeren", ernst: "licht", omvang: "2-10%", photoPath: null },
+    { bouwdeelId: bd("BD-DAK-001").id, inspectorId: u("ruben").id, score: 4, scoreAfgeleid: 4, scoreOverride: null, toelichting: "Dakbedekking toont veroudering; einde levensduur nadert.", gebreken: [
+      { description: "Blaasvorming in bitumen aan zuidzijde", ernst: "serieus", omvang: "10-30%", intensiteit: "hoog", photoPath: null },
+      { description: "Craquelé rond dakdoorvoeren", ernst: "licht", omvang: "2-10%", intensiteit: "laag", photoPath: null },
     ], measuredAt: hoursAgo(24 * 45) },
-    { bouwdeelId: bd("BD-DAK-001").id, inspectorId: u("ruben").id, score: 3, toelichting: "Reguliere inspectie, plaatselijke gebreken hersteld.", gebreken: [], measuredAt: hoursAgo(24 * 400) },
-    { bouwdeelId: bd("BD-GEV-001").id, inspectorId: u("fatima").id, score: 3, toelichting: "Schilderwerk verweerd, houtrot beperkt.", gebreken: [
-      { description: "Houtrot in onderdorpel raadzaalzijde", ernst: "serieus", omvang: "< 2%", photoPath: null },
+    { bouwdeelId: bd("BD-DAK-001").id, inspectorId: u("ruben").id, score: 3, scoreAfgeleid: null, scoreOverride: 3, toelichting: "Reguliere inspectie, plaatselijke gebreken hersteld.", gebreken: [], measuredAt: hoursAgo(24 * 400) },
+    { bouwdeelId: bd("BD-GEV-001").id, inspectorId: u("fatima").id, score: 3, scoreAfgeleid: 3, scoreOverride: null, toelichting: "Schilderwerk verweerd, houtrot beperkt.", gebreken: [
+      { description: "Houtrot in onderdorpel raadzaalzijde", ernst: "serieus", omvang: "< 2%", intensiteit: "midden", photoPath: null },
     ], measuredAt: hoursAgo(24 * 60) },
-    { bouwdeelId: bd("BD-INS-001").id, inspectorId: u("ruben").id, score: 2, toelichting: "Installatie in goede conditie, filters vervangen.", gebreken: [], measuredAt: hoursAgo(24 * 20) },
-    { bouwdeelId: bd("BD-INS-003").id, inspectorId: u("ruben").id, score: 4, toelichting: "Ketels naderen einde levensduur, rendement loopt terug.", gebreken: [
-      { description: "Corrosie aan rookgasafvoer ketel 2", ernst: "ernstig", omvang: "2-10%", photoPath: null },
+    { bouwdeelId: bd("BD-INS-001").id, inspectorId: u("ruben").id, score: 2, scoreAfgeleid: null, scoreOverride: 2, toelichting: "Installatie in goede conditie, filters vervangen.", gebreken: [], measuredAt: hoursAgo(24 * 20) },
+    { bouwdeelId: bd("BD-INS-003").id, inspectorId: u("ruben").id, score: 4, scoreAfgeleid: 4, scoreOverride: null, toelichting: "Ketels naderen einde levensduur, rendement loopt terug.", gebreken: [
+      { description: "Corrosie aan rookgasafvoer ketel 2", ernst: "ernstig", omvang: "2-10%", intensiteit: "hoog", photoPath: null },
     ], measuredAt: hoursAgo(24 * 10) },
-    { bouwdeelId: bd("BD-GEV-002").id, inspectorId: u("ruben").id, score: 5, toelichting: "Deuren zwaar belast, aandrijving storingsgevoelig.", gebreken: [
-      { description: "Aandrijfmotor deur 2 hapert bij openen", ernst: "ernstig", omvang: "30-70%", photoPath: null },
-      { description: "Lakschade en roestvorming onderzijde", ernst: "serieus", omvang: "10-30%", photoPath: null },
+    { bouwdeelId: bd("BD-GEV-002").id, inspectorId: u("ruben").id, score: 5, scoreAfgeleid: 5, scoreOverride: null, toelichting: "Deuren zwaar belast, aandrijving storingsgevoelig.", gebreken: [
+      { description: "Aandrijfmotor deur 2 hapert bij openen", ernst: "ernstig", omvang: "30-70%", intensiteit: "hoog", photoPath: null },
+      { description: "Lakschade en roestvorming onderzijde", ernst: "serieus", omvang: "10-30%", intensiteit: "midden", photoPath: null },
     ], measuredAt: hoursAgo(24 * 5) },
   ]);
 
@@ -496,6 +498,37 @@ async function main() {
     { bouwdeelId: bd("BD-DAK-002").id, title: "Dakinspectie Stadskantoor", description: "Tweejaarlijkse conditiemeting EPDM-dak.", taskType: "inspectie", plannedYear: jaar + 1, estimatedCost: 1500, status: "gepland" },
   ]);
 
+  // Kostenbibliotheek
+  await db.insert(kostenKengetallenTable).values([
+    { name: "Bitumen dakbedekking (enkellaags)", category: "dak", nlSfbCode: "(17)", unit: "m²", pricePerUnit: 85, notes: "Inclusief ondervloer en isolatie" },
+    { name: "EPDM dakbedekking", category: "dak", nlSfbCode: "(17)", unit: "m²", pricePerUnit: 65, notes: "Exclusief isolatie" },
+    { name: "Hardhout kozijnen incl. schilderwerk", category: "gevel", nlSfbCode: "(31)", unit: "m²", pricePerUnit: 950, notes: "Inclusief hang- en sluitwerk" },
+    { name: "Stalen overheaddeur", category: "gevel", nlSfbCode: "(33)", unit: "stuk", pricePerUnit: 8500, notes: "Inclusief aandrijfmotor en installatie" },
+    { name: "VRV-klimaatinstallatie (vervanging)", category: "installaties", nlSfbCode: "(45)", unit: "m²", pricePerUnit: 220, notes: "Kantoor/utiliteitsbouw, per bruto vloeroppervlak" },
+    { name: "HR-ketel (tot 100 kW)", category: "installaties", nlSfbCode: "(42)", unit: "stuk", pricePerUnit: 4800, notes: "Inclusief installatie, exclusief leidingwerk" },
+    { name: "Warmtepomp (lucht-water)", category: "installaties", nlSfbCode: "(42)", unit: "stuk", pricePerUnit: 18000, notes: "Inclusief installatie en inregeling" },
+    { name: "Personenlift (traction, 8 personen)", category: "transport", nlSfbCode: "(52)", unit: "stuk", pricePerUnit: 95000, notes: "Incl. machinekamer en veiligheidskeuring" },
+    { name: "Eiken parketvloer schuren en lakken", category: "interieur", nlSfbCode: "(21)", unit: "m²", pricePerUnit: 45, notes: "3-laags lakwerk, inclusief plinten" },
+    { name: "Gevelbekleding (betonsteen)", category: "gevel", nlSfbCode: "(28)", unit: "m²", pricePerUnit: 180, notes: "Inclusief steigerkosten" },
+  ]);
+
+  // Scenarioplanning
+  await db.insert(mjopScenariosTable).values([
+    {
+      name: "Alleen noodzakelijk",
+      type: "noodzakelijk",
+      description: "Vervanging alleen bij slechte conditie (score ≥ 5) of overschrijding nominale levensduur. Laagste budgetbeslag.",
+      buildingId: null,
+      isActive: true,
+    },
+    {
+      name: "Instandhouding hoog niveau",
+      type: "hoog",
+      description: "Vervanging bij matige conditie (score ≥ 3) of op 80% van de levensduur. Hogere kosten, betere staat.",
+      buildingId: null,
+      isActive: false,
+    },
+  ]);
 
   // Knowledge articles
   await db.insert(knowledgeArticlesTable).values([

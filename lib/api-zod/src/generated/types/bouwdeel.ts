@@ -39,10 +39,8 @@ export interface Bouwdeel {
   laatsteMetingDatum?: string | null;
   openTaken: number;
   /**
-     * Jaar waarin het einde van de levensduur wordt bereikt
+     * NL-SfB-code (bijv. 23, 45.1)
      * @nullable
      */
-  lifespanEndYear?: number | null;
-  /** True als lifespanEndYear <= huidig jaar + 5 */
-  nearEndOfLife: boolean;
+  nlSfbCode?: string | null;
 }

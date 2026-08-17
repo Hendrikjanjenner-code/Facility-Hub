@@ -5,9 +5,11 @@
  * GovConnect 2.0 API
  * OpenAPI spec version: 0.1.0
  */
-import type { ConditiemetingSuggestionType } from './conditiemetingSuggestionType';
 
-export interface ConditiemetingSuggestion {
-  type: ConditiemetingSuggestionType;
-  message: string;
-}
+/**
+ * Automatisch gegenereerd onderhoudsadvies op basis van de conditiescore
+ */
+export type ConditiemetingSuggestion = {
+  type?: string;
+  message?: string;
+} | null;

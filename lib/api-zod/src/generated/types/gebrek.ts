@@ -17,4 +17,9 @@ export interface Gebrek {
      * @nullable
      */
   photoPath?: string | null;
+  /**
+     * laag | midden | hoog
+     * @nullable
+     */
+  intensiteit?: string | null;
 }

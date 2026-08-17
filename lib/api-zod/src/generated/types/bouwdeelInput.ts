@@ -25,4 +25,9 @@ export interface BouwdeelInput {
   replacementCost: number;
   /** @nullable */
   notes?: string | null;
+  /**
+     * NL-SfB-code (bijv. 23, 45.1)
+     * @nullable
+     */
+  nlSfbCode?: string | null;
 }

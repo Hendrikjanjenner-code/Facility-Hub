@@ -11,9 +11,10 @@ import {
   CreateMeterReadingBody,
   ImportMeterReadingsBody,
   CreateWasteRegistrationBody,
-  CreateMeterReadingBody as UpdateMeterReadingBody,
+  UpdateMeterReadingBody,
 } from "@workspace/api-zod";
 import { requireAuth, requireRole } from "../lib/auth";
+
 const router: IRouter = Router();
 router.use(requireAuth);
 const SUSTAIN_ROLES = ["facilitair_manager", "beheerder", "servicedesk"] as const;
@@ -83,11 +84,11 @@ router.post("/waste-registrations", async (req, res): Promise<void> => {
     })
     .returning();
   const [row] = await wasteBaseQuery().where(eq(wasteRegistrationsTable.id, created!.id));
-  res.status(201).json(serializeWaste(row!));
+  res.status(201).json(serializeReading(row!));
 });
 
 router.post("/meter-readings/import", async (req, res): Promise<void> => {
-  const parsed = ImportMeterReadingsBody.safeParse(req.body);
+  const parsed = CreateWasteRegistrationBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
@@ -121,16 +122,29 @@ router.post("/meter-readings/import", async (req, res): Promise<void> => {
 // Task #16: correctie van een meterstand
 router.patch("/meter-readings/:id", requireRole(...SUSTAIN_ROLES), async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-
-  const body = req.body as { readingDate?: unknown; value?: unknown };
-  const updates: Partial<typeof meterReadingsTable.$inferInsert> = {};
-  if (typeof body.readingDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.readingDate))
-    updates.readingDate = body.readingDate;
-  const v = Number(body.value);
-  if (!Number.isNaN(v) && v >= 0) updates.value = v;
-  if (Object.keys(updates).length === 0) {
-    res.status(400).json({ message: "Geen geldige velden opgegeven" });
+  if (Number.isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
     return;
+  }
+  const parsed = CreateWasteRegistrationBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ message: "Ongeldige invoer" });
+    return;
+  }
+  const updates: Partial<typeof meterReadingsTable.$inferInsert> = {};
+  if (parsed.data.readingDate !== undefined) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed.data.readingDate)) {
+      res.status(400).json({ message: "Ongeldige datum" });
+      return;
+    }
+    updates.readingDate = parsed.data.readingDate;
+  }
+  if (parsed.data.value !== undefined) {
+    if (!(parsed.data.value >= 0) || !isFinite(parsed.data.value)) {
+      res.status(400).json({ message: "Ongeldige meterstand" });
+      return;
+    }
+    updates.value = parsed.data.value;
   }
   const [updatedRow] = await db
     .update(meterReadingsTable)
@@ -141,16 +155,17 @@ router.patch("/meter-readings/:id", requireRole(...SUSTAIN_ROLES), async (req, r
     res.status(404).json({ message: "Meterstand niet gevonden" });
     return;
   }
-  const [row] = await readingBaseQuery().where(eq(meterReadingsTable.id, id));
+  const [row] = await wasteBaseQuery().where(eq(wasteRegistrationsTable.id, created!.id));
   res.json(serializeReading(row!));
 });
 
 // Task #16: verwijderen van een meterstand
 router.delete("/meter-readings/:id", requireRole(...SUSTAIN_ROLES), async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-
-  const body = req.body as { readingDate?: unknown; value?: unknown };
-
+  if (Number.isNaN(id)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
   const [deleted] = await db
     .delete(meterReadingsTable)
     .where(eq(meterReadingsTable.id, id))
@@ -251,7 +266,7 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
   const usageByMonth = new Map<string, { usage: number; unit: string }>();
   const grouped = new Map<string, typeof readings>();
   for (const r of readings) {
-    const key = `${r.buildingId}|${r.meterType}`;
+    const key = `${w.registrationDate.slice(0, 7)}|${w.category}`;
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key)!.push(r);
   }
@@ -285,10 +300,10 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
       const usage = cur.value - prev.value;
       if (usage < 0) continue;
       const month = cur.readingDate.slice(0, 7);
-      const usageKey = `${month}|${cur.meterType}`;
-      const entry = usageByMonth.get(usageKey) ?? { usage: 0, unit: cur.unit };
+    const key = `${w.registrationDate.slice(0, 7)}|${w.category}`;
+      const entry = usageByMonth.get(key) ?? { usage: 0, unit: cur.unit };
       entry.usage += usage;
-      usageByMonth.set(usageKey, entry);
+      usageByMonth.set(key, entry);
     }
   }
   const monthlyUsage = Array.from(usageByMonth.entries())

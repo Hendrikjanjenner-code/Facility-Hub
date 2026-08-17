@@ -12,8 +12,15 @@ export interface ConditiemetingInput {
      * @minimum 1
      * @maximum 6
      */
-  score: number;
+  score?: number;
   /** @nullable */
   toelichting?: string | null;
   gebreken?: Gebrek[];
+  /**
+     * Handmatige override van de afgeleide score (1–6)
+     * @minimum 1
+     * @maximum 6
+     * @nullable
+     */
+  scoreOverride?: number | null;
 }

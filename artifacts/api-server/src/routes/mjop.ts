@@ -4,6 +4,8 @@ import {
   bouwdelenTable,
   conditiemetingenTable,
   mjopTakenTable,
+  kostenKengetallenTable,
+  mjopScenariosTable,
   buildingsTable,
   floorsTable,
   roomsTable,
@@ -14,7 +16,7 @@ import {
   type MjopTaak,
   type Gebrek,
 } from "@workspace/db";
-import { eq, and, desc, ilike, or, sql, notInArray, type SQL } from "drizzle-orm";
+import { eq, and, desc, ilike, or, sql, notInArray, inArray, type SQL } from "drizzle-orm";
 import {
   CreateBouwdeelBody,
   CreateConditiemetingBody,
@@ -28,15 +30,40 @@ const MJOP_ROLES = ["facilitair_manager", "beheerder"];
 
 const router: IRouter = Router();
 // De volledige MJOP-module (inclusief lezen) is voorbehouden aan de MJOP-rollen.
-// Let op: pad-gescoped, anders blokkeert deze guard ook routers die later
-// geregistreerd worden (storage, kennisbank, sleutelbeheer, ...).
 for (const prefix of ["/bouwdelen", "/mjop", "/mjop-taken"]) {
   router.use(prefix, requireAuth, requireRole(...MJOP_ROLES));
 }
 const VALID_TASK_TYPES = ["inspectie", "onderhoud", "vervanging", "renovatie"];
 const VALID_TASK_STATUSES = ["gepland", "in_uitvoering", "afgerond"];
 const VALID_ERNST = ["licht", "serieus", "ernstig"];
+const VALID_OMVANG = ["< 2%", "2-10%", "10-30%", "30-70%", "> 70%"];
+const VALID_INTENSITEIT = ["laag", "midden", "hoog"];
+const VALID_SCENARIO_TYPES = ["noodzakelijk", "hoog"];
 const SLA_HOURS: Record<string, number> = { P1: 4, P2: 8, P3: 24, P4: 72 };
+
+// NEN 2767 score afleiding op basis van gebreken
+function deriveScore(gebreken: Gebrek[]): number | null {
+  if (!gebreken.length) return null;
+  const ernstVal: Record<string, number> = { licht: 1, serieus: 2, ernstig: 3 };
+  const omvangVal: Record<string, number> = {
+    "< 2%": 1, "2-10%": 2, "10-30%": 3, "30-70%": 4, "> 70%": 5,
+  };
+  const intensiteitVal: Record<string, number> = { laag: 1, midden: 2, hoog: 3 };
+  let maxZ = 0;
+  for (const g of gebreken) {
+    const e = ernstVal[g.ernst] ?? 1;
+    const o = omvangVal[g.omvang ?? "< 2%"] ?? 1;
+    const i = intensiteitVal[g.intensiteit ?? "midden"] ?? 2;
+    const z = e * o * i;
+    if (z > maxZ) maxZ = z;
+  }
+  if (maxZ <= 1) return 1;
+  if (maxZ <= 3) return 2;
+  if (maxZ <= 8) return 3;
+  if (maxZ <= 18) return 4;
+  if (maxZ <= 30) return 5;
+  return 6;
+}
 
 const latestScoreSql = sql<number | null>`(
   select cm.score from ${conditiemetingenTable} cm
@@ -54,8 +81,6 @@ const openTakenSql = sql<number>`(
   where mt.bouwdeel_id = ${bouwdelenTable.id} and mt.status != 'afgerond'
 )`;
 
-const EOL_WARNING_YEARS = 5;
-
 function serializeBouwdeel(r: {
   b: Bouwdeel;
   buildingName: string | null;
@@ -65,13 +90,12 @@ function serializeBouwdeel(r: {
   laatsteMetingDatum: string | null;
   openTaken: number;
 }) {
-  const lifespanEndYear = r.b.installYear + r.b.expectedLifespanYears;
-  const nearEndOfLife = lifespanEndYear <= new Date().getFullYear() + EOL_WARNING_YEARS;
   return {
     id: r.b.id,
     code: r.b.code,
     name: r.b.name,
     category: r.b.category,
+    nlSfbCode: r.b.nlSfbCode,
     buildingId: r.b.buildingId,
     buildingName: r.buildingName,
     floorId: r.b.floorId,
@@ -86,8 +110,6 @@ function serializeBouwdeel(r: {
     laatsteScore: r.laatsteScore,
     laatsteMetingDatum: r.laatsteMetingDatum,
     openTaken: r.openTaken,
-    lifespanEndYear,
-    nearEndOfLife,
   };
 }
 
@@ -118,6 +140,8 @@ router.get("/bouwdelen", async (req, res): Promise<void> => {
     conditions.push(eq(bouwdelenTable.buildingId, Number(q.buildingId)));
   if (typeof q.category === "string" && q.category)
     conditions.push(eq(bouwdelenTable.category, q.category));
+  if (typeof q.nlSfbCode === "string" && q.nlSfbCode)
+    conditions.push(eq(bouwdelenTable.nlSfbCode, q.nlSfbCode));
   if (typeof q.search === "string" && q.search) {
     const s = `%${q.search}%`;
     const cond = or(
@@ -155,6 +179,7 @@ router.post(
         code: data.code,
         name: data.name,
         category: data.category,
+        nlSfbCode: data.nlSfbCode ?? null,
         buildingId: data.buildingId,
         floorId: data.floorId ?? null,
         roomId: data.roomId ?? null,
@@ -184,6 +209,24 @@ router.get("/bouwdelen/:id", async (req, res): Promise<void> => {
   res.json(row);
 });
 
+function serializeConditiemeting(r: {
+  m: typeof conditiemetingenTable.$inferSelect;
+  inspectorName: string | null;
+}) {
+  return {
+    id: r.m.id,
+    bouwdeelId: r.m.bouwdeelId,
+    inspectorId: r.m.inspectorId,
+    inspectorName: r.inspectorName,
+    score: r.m.score,
+    scoreAfgeleid: r.m.scoreAfgeleid,
+    scoreOverride: r.m.scoreOverride,
+    toelichting: r.m.toelichting,
+    gebreken: r.m.gebreken ?? [],
+    measuredAt: r.m.measuredAt.toISOString(),
+  };
+}
+
 router.get(
   "/bouwdelen/:id/conditiemetingen",
   async (req, res): Promise<void> => {
@@ -201,18 +244,7 @@ router.get(
       .leftJoin(usersTable, eq(conditiemetingenTable.inspectorId, usersTable.id))
       .where(eq(conditiemetingenTable.bouwdeelId, id))
       .orderBy(desc(conditiemetingenTable.measuredAt));
-    res.json(
-      rows.map((r) => ({
-        id: r.m.id,
-        bouwdeelId: r.m.bouwdeelId,
-        inspectorId: r.m.inspectorId,
-        inspectorName: r.inspectorName,
-        score: r.m.score,
-        toelichting: r.m.toelichting,
-        gebreken: r.m.gebreken ?? [],
-        measuredAt: r.m.measuredAt.toISOString(),
-      })),
-    );
+    res.json(rows.map(serializeConditiemeting));
   },
 );
 
@@ -238,41 +270,47 @@ router.post(
     const gebreken: Gebrek[] = (data.gebreken ?? []).map((g) => ({
       description: g.description,
       ernst: VALID_ERNST.includes(g.ernst) ? g.ernst : "licht",
-      omvang: g.omvang ?? null,
+      omvang: VALID_OMVANG.includes(g.omvang ?? "") ? (g.omvang ?? null) : null,
+      intensiteit: VALID_INTENSITEIT.includes(g.intensiteit ?? "")
+        ? (g.intensiteit ?? null)
+        : null,
       photoPath: g.photoPath ?? null,
     }));
+
+    const scoreAfgeleid = deriveScore(gebreken);
+    const scoreOverride =
+      data.scoreOverride != null &&
+      data.scoreOverride >= 1 &&
+      data.scoreOverride <= 6
+        ? data.scoreOverride
+        : null;
+    // Effectieve score: override heeft voorrang, anders afgeleid; bij geen gebreken + geen override: 1
+    const score = scoreOverride ?? scoreAfgeleid ?? 1;
+
     const user = req.currentUser!;
     const [created] = await db
       .insert(conditiemetingenTable)
       .values({
         bouwdeelId: id,
         inspectorId: user.id,
-        score: data.score,
+        score,
+        scoreAfgeleid,
+        scoreOverride,
         toelichting: data.toelichting ?? null,
         gebreken,
       })
       .returning();
-
-    const scoreLabel = ["", "Uitstekend", "Goed", "Redelijk", "Matig", "Slecht", "Zeer slecht"][created!.score] ?? "";
-    const suggestion =
-      created!.score >= 4
-        ? {
-            bouwdeelId: bouwdeel.id,
-            bouwdeelName: bouwdeel.name,
-            message: `Conditiescore ${created!.score} (${scoreLabel}) — overweeg een MJOP-onderhoudstaak aan te maken voor ${bouwdeel.name}.`,
-          }
-        : null;
-
     res.status(201).json({
       id: created!.id,
       bouwdeelId: created!.bouwdeelId,
       inspectorId: created!.inspectorId,
       inspectorName: user.name,
       score: created!.score,
+      scoreAfgeleid: created!.scoreAfgeleid,
+      scoreOverride: created!.scoreOverride,
       toelichting: created!.toelichting,
       gebreken: created!.gebreken ?? [],
       measuredAt: created!.measuredAt.toISOString(),
-      suggestion,
     });
   },
 );
@@ -439,7 +477,6 @@ router.post(
       .from(bouwdelenTable)
       .where(eq(bouwdelenTable.id, taak.bouwdeelId));
 
-    // Route naar de categorie "Technische storing" indien aanwezig, anders "Overig"
     const categories = await db.select().from(ticketCategoriesTable);
     const category =
       categories.find((c) => c.name === "Technische storing") ??
@@ -509,10 +546,7 @@ router.post(
 );
 
 router.get("/mjop/jaarplanning", async (_req, res): Promise<void> => {
-  const taken = await db
-    .select()
-    .from(mjopTakenTable)
-    .where(notInArray(mjopTakenTable.status, []));
+  const taken = await db.select().from(mjopTakenTable);
   const byYear = new Map<number, typeof taken>();
   for (const t of taken) {
     const list = byYear.get(t.plannedYear) ?? [];
@@ -538,5 +572,515 @@ router.get("/mjop/jaarplanning", async (_req, res): Promise<void> => {
     }),
   );
 });
+
+// ── Kostenbibliotheek ────────────────────────────────────────────────────────
+
+router.get("/mjop/kengetallen", async (_req, res): Promise<void> => {
+  const rows = await db
+    .select()
+    .from(kostenKengetallenTable)
+    .orderBy(kostenKengetallenTable.category, kostenKengetallenTable.name);
+  res.json(
+    rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      category: r.category,
+      nlSfbCode: r.nlSfbCode,
+      unit: r.unit,
+      pricePerUnit: r.pricePerUnit,
+      notes: r.notes,
+      createdAt: r.createdAt.toISOString(),
+    })),
+  );
+});
+
+router.post(
+  "/mjop/kengetallen",
+  requireRole(...MJOP_ROLES),
+  async (req, res): Promise<void> => {
+    const { name, category, nlSfbCode, unit, pricePerUnit, notes } = req.body as Record<string, unknown>;
+    if (
+      typeof name !== "string" || !name.trim() ||
+      typeof category !== "string" || !category.trim() ||
+      typeof unit !== "string" || !unit.trim() ||
+      typeof pricePerUnit !== "number" || pricePerUnit < 0
+    ) {
+      res.status(400).json({ message: "Ongeldige invoer" });
+      return;
+    }
+    const [created] = await db
+      .insert(kostenKengetallenTable)
+      .values({
+        name: name.trim(),
+        category: category.trim(),
+        nlSfbCode: typeof nlSfbCode === "string" ? nlSfbCode : null,
+        unit: unit.trim(),
+        pricePerUnit,
+        notes: typeof notes === "string" ? notes : null,
+      })
+      .returning();
+    res.status(201).json({
+      id: created!.id,
+      name: created!.name,
+      category: created!.category,
+      nlSfbCode: created!.nlSfbCode,
+      unit: created!.unit,
+      pricePerUnit: created!.pricePerUnit,
+      notes: created!.notes,
+      createdAt: created!.createdAt.toISOString(),
+    });
+  },
+);
+
+router.patch(
+  "/mjop/kengetallen/:id",
+  requireRole(...MJOP_ROLES),
+  async (req, res): Promise<void> => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+    const [existing] = await db
+      .select()
+      .from(kostenKengetallenTable)
+      .where(eq(kostenKengetallenTable.id, id));
+    if (!existing) {
+      res.status(404).json({ message: "Kengetal niet gevonden" });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Partial<typeof kostenKengetallenTable.$inferInsert> = {};
+    if (typeof body.name === "string" && body.name.trim()) update.name = body.name.trim();
+    if (typeof body.category === "string" && body.category.trim()) update.category = body.category.trim();
+    if ("nlSfbCode" in body) update.nlSfbCode = typeof body.nlSfbCode === "string" ? body.nlSfbCode : null;
+    if (typeof body.unit === "string" && body.unit.trim()) update.unit = body.unit.trim();
+    if (typeof body.pricePerUnit === "number") update.pricePerUnit = body.pricePerUnit;
+    if ("notes" in body) update.notes = typeof body.notes === "string" ? body.notes : null;
+    const [updated] = await db
+      .update(kostenKengetallenTable)
+      .set(update)
+      .where(eq(kostenKengetallenTable.id, id))
+      .returning();
+    res.json({
+      id: updated!.id,
+      name: updated!.name,
+      category: updated!.category,
+      nlSfbCode: updated!.nlSfbCode,
+      unit: updated!.unit,
+      pricePerUnit: updated!.pricePerUnit,
+      notes: updated!.notes,
+      createdAt: updated!.createdAt.toISOString(),
+    });
+  },
+);
+
+router.delete(
+  "/mjop/kengetallen/:id",
+  requireRole(...MJOP_ROLES),
+  async (req, res): Promise<void> => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+    const [existing] = await db
+      .select()
+      .from(kostenKengetallenTable)
+      .where(eq(kostenKengetallenTable.id, id));
+    if (!existing) {
+      res.status(404).json({ message: "Kengetal niet gevonden" });
+      return;
+    }
+    await db.delete(kostenKengetallenTable).where(eq(kostenKengetallenTable.id, id));
+    res.status(204).end();
+  },
+);
+
+// ── Scenarioplanning ─────────────────────────────────────────────────────────
+
+router.get("/mjop/scenarios", async (_req, res): Promise<void> => {
+  const rows = await db
+    .select()
+    .from(mjopScenariosTable)
+    .orderBy(mjopScenariosTable.createdAt);
+  res.json(
+    rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      type: r.type,
+      description: r.description,
+      buildingId: r.buildingId,
+      isActive: r.isActive,
+      createdAt: r.createdAt.toISOString(),
+    })),
+  );
+});
+
+router.post(
+  "/mjop/scenarios",
+  requireRole(...MJOP_ROLES),
+  async (req, res): Promise<void> => {
+    const { name, type, description, buildingId, isActive } = req.body as Record<string, unknown>;
+    if (
+      typeof name !== "string" || !name.trim() ||
+      typeof type !== "string" || !VALID_SCENARIO_TYPES.includes(type)
+    ) {
+      res.status(400).json({ message: "Ongeldige invoer" });
+      return;
+    }
+    const [created] = await db
+      .insert(mjopScenariosTable)
+      .values({
+        name: name.trim(),
+        type,
+        description: typeof description === "string" ? description : null,
+        buildingId: typeof buildingId === "number" ? buildingId : null,
+        isActive: isActive === true,
+      })
+      .returning();
+    res.status(201).json({
+      id: created!.id,
+      name: created!.name,
+      type: created!.type,
+      description: created!.description,
+      buildingId: created!.buildingId,
+      isActive: created!.isActive,
+      createdAt: created!.createdAt.toISOString(),
+    });
+  },
+);
+
+router.patch(
+  "/mjop/scenarios/:id",
+  requireRole(...MJOP_ROLES),
+  async (req, res): Promise<void> => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+    const [existing] = await db
+      .select()
+      .from(mjopScenariosTable)
+      .where(eq(mjopScenariosTable.id, id));
+    if (!existing) {
+      res.status(404).json({ message: "Scenario niet gevonden" });
+      return;
+    }
+    const body = req.body as Record<string, unknown>;
+    const update: Partial<typeof mjopScenariosTable.$inferInsert> = {};
+    if (typeof body.name === "string" && body.name.trim()) update.name = body.name.trim();
+    if (typeof body.type === "string" && VALID_SCENARIO_TYPES.includes(body.type)) update.type = body.type;
+    if ("description" in body) update.description = typeof body.description === "string" ? body.description : null;
+    if ("buildingId" in body) update.buildingId = typeof body.buildingId === "number" ? body.buildingId : null;
+    if (typeof body.isActive === "boolean") {
+      update.isActive = body.isActive;
+      // Als dit scenario actief wordt, deactiveer de rest van hetzelfde type
+      if (body.isActive) {
+        await db
+          .update(mjopScenariosTable)
+          .set({ isActive: false })
+          .where(and(eq(mjopScenariosTable.type, existing.type), sql`id != ${id}`));
+      }
+    }
+    const [updated] = await db
+      .update(mjopScenariosTable)
+      .set(update)
+      .where(eq(mjopScenariosTable.id, id))
+      .returning();
+    res.json({
+      id: updated!.id,
+      name: updated!.name,
+      type: updated!.type,
+      description: updated!.description,
+      buildingId: updated!.buildingId,
+      isActive: updated!.isActive,
+      createdAt: updated!.createdAt.toISOString(),
+    });
+  },
+);
+
+router.delete(
+  "/mjop/scenarios/:id",
+  requireRole(...MJOP_ROLES),
+  async (req, res): Promise<void> => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+    const [existing] = await db
+      .select()
+      .from(mjopScenariosTable)
+      .where(eq(mjopScenariosTable.id, id));
+    if (!existing) {
+      res.status(404).json({ message: "Scenario niet gevonden" });
+      return;
+    }
+    await db.delete(mjopScenariosTable).where(eq(mjopScenariosTable.id, id));
+    res.status(204).end();
+  },
+);
+
+/**
+ * Meerjarenbegroting voor een scenario.
+ * Berekent per bouwdeel wanneer vervanging nodig is op basis van:
+ *  - type "noodzakelijk": score >= 5 OF voorbij einde levensduur
+ *  - type "hoog": score >= 3 OF >= 80% van levensduur bereikt
+ * Horizon: huidig jaar t/m huidig jaar + 15
+ */
+router.get("/mjop/scenarios/:id/begroting", async (req, res): Promise<void> => {
+  const scenarioId = Number(req.params.id);
+  if (Number.isNaN(scenarioId)) {
+    res.status(400).json({ message: "Ongeldig id" });
+    return;
+  }
+  const [scenario] = await db
+    .select()
+    .from(mjopScenariosTable)
+    .where(eq(mjopScenariosTable.id, scenarioId));
+  if (!scenario) {
+    res.status(404).json({ message: "Scenario niet gevonden" });
+    return;
+  }
+
+  // Haal alle bouwdelen op (gefilterd op gebouw indien scenario gebouw-specifiek is)
+  const bdWhere = scenario.buildingId
+    ? eq(bouwdelenTable.buildingId, scenario.buildingId)
+    : undefined;
+  const bouwdelen = await db
+    .select({
+      b: bouwdelenTable,
+      buildingName: buildingsTable.name,
+    })
+    .from(bouwdelenTable)
+    .leftJoin(buildingsTable, eq(bouwdelenTable.buildingId, buildingsTable.id))
+    .where(bdWhere);
+
+  // Laatste conditiescore per bouwdeel
+  const scores = await db
+    .select({
+      bouwdeelId: conditiemetingenTable.bouwdeelId,
+      score: conditiemetingenTable.score,
+    })
+    .from(conditiemetingenTable)
+    .where(sql`measured_at = (
+      select max(c2.measured_at) from ${conditiemetingenTable} c2
+      where c2.bouwdeel_id = ${conditiemetingenTable.bouwdeelId}
+    )`);
+  const scoreMap = new Map(scores.map((s) => [s.bouwdeelId, s.score]));
+
+  const currentYear = new Date().getFullYear();
+  const horizon = currentYear + 15;
+
+  type TaakEntry = {
+    bouwdeelId: number;
+    bouwdeelCode: string;
+    bouwdeelName: string;
+    buildingName: string | null;
+    taskType: string;
+    cost: number;
+    reason: string;
+  };
+  const byYear = new Map<number, TaakEntry[]>();
+  for (let y = currentYear; y <= horizon; y++) byYear.set(y, []);
+
+  for (const { b, buildingName } of bouwdelen) {
+    const endOfLife = b.installYear + b.expectedLifespanYears;
+    const latestScore = scoreMap.get(b.id) ?? null;
+
+    let vervangingJaar: number | null = null;
+    let reason = "";
+
+    if (scenario.type === "noodzakelijk") {
+      // Vervang alleen als score >= 5 of al voorbij einde levensduur
+      if (endOfLife <= horizon) {
+        if (endOfLife < currentYear) {
+          vervangingJaar = currentYear; // al over tijd
+          reason = "Einde levensduur overschreden";
+        } else {
+          vervangingJaar = endOfLife;
+          reason = "Einde nominale levensduur";
+        }
+      }
+      if (latestScore !== null && latestScore >= 5) {
+        const urgentJaar = Math.max(currentYear, endOfLife - 3);
+        if (vervangingJaar === null || urgentJaar < vervangingJaar) {
+          vervangingJaar = urgentJaar;
+          reason = `Slechte conditie (score ${latestScore})`;
+        }
+      }
+    } else {
+      // type "hoog": vervang bij score >= 3 of bij 80% levensduur
+      const hoogJaar = b.installYear + Math.round(b.expectedLifespanYears * 0.8);
+      const targetJaar = Math.max(currentYear, hoogJaar);
+      if (targetJaar <= horizon) {
+        vervangingJaar = targetJaar;
+        reason = "80% levensduur bereikt (instandhouding hoog niveau)";
+      }
+      if (latestScore !== null && latestScore >= 3) {
+        const urgentJaar = Math.max(currentYear, targetJaar - 2);
+        if (vervangingJaar === null || urgentJaar < vervangingJaar) {
+          vervangingJaar = urgentJaar;
+          reason = `Conditie matig (score ${latestScore}), vroegtijdige vervanging`;
+        }
+      }
+    }
+
+    if (vervangingJaar !== null && byYear.has(vervangingJaar)) {
+      byYear.get(vervangingJaar)!.push({
+        bouwdeelId: b.id,
+        bouwdeelCode: b.code,
+        bouwdeelName: b.name,
+        buildingName,
+        taskType: "vervanging",
+        cost: b.replacementCost,
+        reason,
+      });
+    }
+  }
+
+  const result = [...byYear.entries()]
+    .filter(([, taken]) => taken.length > 0)
+    .map(([year, taken]) => ({
+      year,
+      totalCost: taken.reduce((s, t) => s + t.cost, 0),
+      taken,
+    }))
+    .sort((a, b) => a.year - b.year);
+
+  res.json(result);
+});
+
+/**
+ * Genereer jaarplan voor een scenario.
+ * Maakt mjop_taken aan voor het opgegeven jaar op basis van de begrotingsberekening.
+ * Slaat bouwdelen over die al een taak hebben voor dat jaar vanuit dit scenario.
+ */
+router.post(
+  "/mjop/scenarios/:id/jaarplan",
+  requireRole(...MJOP_ROLES),
+  async (req, res): Promise<void> => {
+    const scenarioId = Number(req.params.id);
+    if (Number.isNaN(scenarioId)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+    const [scenario] = await db
+      .select()
+      .from(mjopScenariosTable)
+      .where(eq(mjopScenariosTable.id, scenarioId));
+    if (!scenario) {
+      res.status(404).json({ message: "Scenario niet gevonden" });
+      return;
+    }
+
+    const rawJaar = req.body?.jaar;
+    const targetJaar = typeof rawJaar === "number" && rawJaar > 2000
+      ? rawJaar
+      : new Date().getFullYear() + 1;
+
+    // Haal bouwdelen op
+    const bdWhere = scenario.buildingId
+      ? eq(bouwdelenTable.buildingId, scenario.buildingId)
+      : undefined;
+    const bouwdelen = await db
+      .select({ b: bouwdelenTable, buildingName: buildingsTable.name })
+      .from(bouwdelenTable)
+      .leftJoin(buildingsTable, eq(bouwdelenTable.buildingId, buildingsTable.id))
+      .where(bdWhere);
+
+    // Laatste conditiescore per bouwdeel
+    const scores = await db
+      .select({ bouwdeelId: conditiemetingenTable.bouwdeelId, score: conditiemetingenTable.score })
+      .from(conditiemetingenTable)
+      .where(sql`measured_at = (
+        select max(c2.measured_at) from ${conditiemetingenTable} c2
+        where c2.bouwdeel_id = ${conditiemetingenTable.bouwdeelId}
+      )`);
+    const scoreMap = new Map(scores.map((s) => [s.bouwdeelId, s.score]));
+
+    // Zoek bestaande taken voor dit jaar+scenario om duplicaten te voorkomen
+    const allBdIds = bouwdelen.map(({ b }) => b.id);
+    const existingTaken = allBdIds.length
+      ? await db
+          .select({ bouwdeelId: mjopTakenTable.bouwdeelId })
+          .from(mjopTakenTable)
+          .where(
+            and(
+              eq(mjopTakenTable.plannedYear, targetJaar),
+              eq(mjopTakenTable.scenarioId, scenarioId),
+              inArray(mjopTakenTable.bouwdeelId, allBdIds),
+            ),
+          )
+      : [];
+    const bestaandeBdIds = new Set(existingTaken.map((t) => t.bouwdeelId));
+
+    const currentYear = new Date().getFullYear();
+    const toCreate: (typeof mjopTakenTable.$inferInsert)[] = [];
+
+    for (const { b } of bouwdelen) {
+      if (bestaandeBdIds.has(b.id)) continue; // Sla over: al een taak voor dit jaar
+
+      const endOfLife = b.installYear + b.expectedLifespanYears;
+      const latestScore = scoreMap.get(b.id) ?? null;
+      let vervangingJaar: number | null = null;
+      let reason = "";
+
+      if (scenario.type === "noodzakelijk") {
+        if (endOfLife < currentYear) {
+          vervangingJaar = currentYear;
+          reason = "Einde levensduur overschreden";
+        } else if (endOfLife <= currentYear + 15) {
+          vervangingJaar = endOfLife;
+          reason = "Einde nominale levensduur";
+        }
+        if (latestScore !== null && latestScore >= 5) {
+          const urgentJaar = Math.max(currentYear, endOfLife - 3);
+          if (vervangingJaar === null || urgentJaar < vervangingJaar) {
+            vervangingJaar = urgentJaar;
+            reason = `Slechte conditie (score ${latestScore})`;
+          }
+        }
+      } else {
+        const hoogJaar = b.installYear + Math.round(b.expectedLifespanYears * 0.8);
+        const targetH = Math.max(currentYear, hoogJaar);
+        if (targetH <= currentYear + 15) {
+          vervangingJaar = targetH;
+          reason = "80% levensduur bereikt (instandhouding hoog niveau)";
+        }
+        if (latestScore !== null && latestScore >= 3) {
+          const urgentJaar = Math.max(currentYear, (vervangingJaar ?? targetH) - 2);
+          if (vervangingJaar === null || urgentJaar < vervangingJaar) {
+            vervangingJaar = urgentJaar;
+            reason = `Conditie matig (score ${latestScore}), vroegtijdige vervanging`;
+          }
+        }
+      }
+
+      if (vervangingJaar === targetJaar) {
+        toCreate.push({
+          bouwdeelId: b.id,
+          title: `[${scenario.name}] Vervanging ${b.name}`,
+          description: reason,
+          taskType: "vervanging",
+          plannedYear: targetJaar,
+          estimatedCost: b.replacementCost,
+          status: "gepland",
+          scenarioId,
+        });
+      }
+    }
+
+    if (!toCreate.length) {
+      res.json({ aangemaakt: 0, taken: [], message: "Geen vervangingen gepland voor dit jaar in dit scenario." });
+      return;
+    }
+
+    const created = await db.insert(mjopTakenTable).values(toCreate).returning();
+    res.status(201).json({ aangemaakt: created.length, taken: created });
+  },
+);
 
 export default router;

@@ -1860,6 +1860,10 @@ paths:
           in: query
           schema:
             type: string
+        - name: nlSfbCode
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: Bouwdelen
@@ -2052,6 +2056,96 @@ paths:
                 $ref: '#/components/schemas/MjopTaak'
         '409':
           description: Task already linked to a ticket
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /mjop/kengetallen:
+    get:
+      operationId: listKostenKengetallen
+      tags:
+        - mjop
+      summary: List all kostenkengetallen (unit price benchmarks)
+      responses:
+        '200':
+          description: Lijst van kengetallen
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KostenKengetal'
+    post:
+      operationId: createKostenKengetal
+      tags:
+        - mjop
+      summary: Create a new kostenkengetal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KostenKengetalInput'
+      responses:
+        '201':
+          description: Aangemaakt kengetal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KostenKengetal'
+        '400':
+          description: Ongeldige invoer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+  /mjop/kengetallen/{id}:
+    patch:
+      operationId: updateKostenKengetal
+      tags:
+        - mjop
+      summary: Update a kostenkengetal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KostenKengetalInput'
+      responses:
+        '200':
+          description: Bijgewerkt kengetal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KostenKengetal'
+        '404':
+          description: Niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+    delete:
+      operationId: deleteKostenKengetal
+      tags:
+        - mjop
+      summary: Delete a kostenkengetal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Verwijderd
+        '404':
+          description: Niet gevonden
           content:
             application/json:
               schema:
@@ -3637,10 +3731,7 @@ components:
           type: integer
         mjopSlechteConditie:
           type: integer
-          description: Aantal bouwdelen met conditiescore >= 4
-        mjopBijnaEol:
-          type: integer
-          description: Aantal bouwdelen die binnen 5 jaar het einde van hun levensduur bereiken
+          description: Aantal bouwdelen met conditiescore ≥ 5
       required:
         - openTickets
         - ticketsByStatus
@@ -3654,8 +3745,6 @@ components:
         - myReservationsToday
         - assetCount
         - roomCount
-        - mjopSlechteConditie
-        - mjopBijnaEol
     CountByKey:
       type: object
       properties:
@@ -4496,14 +4585,11 @@ components:
             - 'null'
         openTaken:
           type: integer
-        lifespanEndYear:
+        nlSfbCode:
           type:
-            - integer
+            - string
             - 'null'
-          description: Jaar waarin het einde van de levensduur wordt bereikt
-        nearEndOfLife:
-          type: boolean
-          description: True als lifespanEndYear <= huidig jaar + 5
+          description: NL-SfB-code (bijv. 23, 45.1)
       required:
         - id
         - code
@@ -4514,7 +4600,6 @@ components:
         - expectedLifespanYears
         - replacementCost
         - openTaken
-        - nearEndOfLife
     BouwdeelInput:
       type: object
       properties:
@@ -4551,6 +4636,11 @@ components:
           type:
             - string
             - 'null'
+        nlSfbCode:
+          type:
+            - string
+            - 'null'
+          description: NL-SfB-code (bijv. 23, 45.1)
       required:
         - code
         - name
@@ -4576,9 +4666,68 @@ components:
             - string
             - 'null'
           description: Object storage pad van de foto (/objects/...)
+        intensiteit:
+          type:
+            - string
+            - 'null'
+          description: laag | midden | hoog
       required:
         - description
         - ernst
+    KostenKengetal:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        nlSfbCode:
+          type:
+            - string
+            - 'null'
+        unit:
+          type: string
+        pricePerUnit:
+          type: number
+        notes:
+          type:
+            - string
+            - 'null'
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - category
+        - unit
+        - pricePerUnit
+        - createdAt
+    KostenKengetalInput:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        nlSfbCode:
+          type:
+            - string
+            - 'null'
+        unit:
+          type: string
+        pricePerUnit:
+          type: number
+        notes:
+          type:
+            - string
+            - 'null'
+      required:
+        - name
+        - category
+        - unit
+        - pricePerUnit
     Conditiemeting:
       type: object
       properties:
@@ -4605,11 +4754,25 @@ components:
             $ref: '#/components/schemas/Gebrek'
         measuredAt:
           type: string
+        scoreAfgeleid:
+          type:
+            - integer
+            - 'null'
+          description: Automatisch afgeleide NEN 2767-score op basis van gebreken
+        scoreOverride:
+          type:
+            - integer
+            - 'null'
+          description: Handmatige override van de afgeleide score
         suggestion:
+          type: object
           nullable: true
-          allOf:
-            - $ref: '#/components/schemas/ConditiemetingSuggestion'
-          description: Present when score >= 4; advises creating an MJOP task
+          properties:
+            type:
+              type: string
+            message:
+              type: string
+          description: Automatisch gegenereerd onderhoudsadvies op basis van de conditiescore
       required:
         - id
         - bouwdeelId
@@ -4617,15 +4780,6 @@ components:
         - score
         - gebreken
         - measuredAt
-    ConditiemetingSuggestion:
-      type: object
-      properties:
-        type:
-          type: string
-          enum: [maak_taak]
-        message:
-          type: string
-      required: [type, message]
     ConditiemetingInput:
       type: object
       properties:
@@ -4641,8 +4795,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Gebrek'
-      required:
-        - score
+        scoreOverride:
+          type:
+            - integer
+            - 'null'
+          minimum: 1
+          maximum: 6
+          description: Handmatige override van de afgeleide score (1–6)
     MjopTaak:
       type: object
       properties:

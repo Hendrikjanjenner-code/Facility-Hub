@@ -20,6 +20,16 @@ export interface Conditiemeting {
   toelichting?: string | null;
   gebreken: Gebrek[];
   measuredAt: string;
-  /** Present when score >= 4; advises creating an MJOP task */
-  suggestion?: ConditiemetingSuggestion | null;
+  /**
+     * Automatisch afgeleide NEN 2767-score op basis van gebreken
+     * @nullable
+     */
+  scoreAfgeleid?: number | null;
+  /**
+     * Handmatige override van de afgeleide score
+     * @nullable
+     */
+  scoreOverride?: number | null;
+  /** Automatisch gegenereerd onderhoudsadvies op basis van de conditiescore */
+  suggestion?: ConditiemetingSuggestion;
 }

@@ -10,4 +10,5 @@ export type ListBouwdelenParams = {
 buildingId?: number;
 category?: string;
 search?: string;
+nlSfbCode?: string;
 };

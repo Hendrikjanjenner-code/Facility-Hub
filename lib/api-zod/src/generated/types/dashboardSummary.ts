@@ -21,8 +21,6 @@ export interface DashboardSummary {
   myReservationsToday: number;
   assetCount: number;
   roomCount: number;
-  /** Aantal bouwdelen met conditiescore >= 4 */
-  mjopSlechteConditie: number;
-  /** Aantal bouwdelen die binnen 5 jaar het einde van hun levensduur bereiken */
-  mjopBijnaEol: number;
+  /** Aantal bouwdelen met conditiescore ≥ 5 */
+  mjopSlechteConditie?: number;
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import {
   useGetBouwdeel,
@@ -17,6 +17,7 @@ import {
   Camera,
   ClipboardCheck,
   Euro,
+  Info,
   Loader2,
   Plus,
   Ticket,
@@ -59,7 +60,9 @@ import {
   taakStatusLabel,
   ERNST_OPTIES,
   OMVANG_OPTIES,
+  INTENSITEIT_OPTIES,
   euro,
+  deriveNen2767Score,
 } from "./mjop-helpers";
 
 const API_BASE = "/api";
@@ -76,15 +79,33 @@ function NieuweMetingDialog({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [score, setScore] = useState<string>("");
   const [toelichting, setToelichting] = useState("");
   const [gebreken, setGebreken] = useState<DraftGebrek[]>([]);
+  const [scoreOverride, setScoreOverride] = useState<string>("__auto__");
   const createMeting = useCreateConditiemeting();
+
+  // Auto-derive score whenever gebreken change
+  const scoreAfgeleid = deriveNen2767Score(
+    gebreken.map((g) => ({
+      ernst: g.ernst,
+      omvang: g.omvang ?? null,
+      intensiteit: g.intensiteit ?? null,
+    })),
+  );
+  const effectiveScore = scoreOverride !== "__auto__"
+    ? Number(scoreOverride)
+    : (scoreAfgeleid ?? 1);
 
   const addGebrek = () =>
     setGebreken((g) => [
       ...g,
-      { description: "", ernst: "licht", omvang: "< 2%", photoPath: null },
+      {
+        description: "",
+        ernst: "licht",
+        omvang: "< 2%",
+        intensiteit: "midden",
+        photoPath: null,
+      },
     ]);
 
   const updateGebrek = (i: number, patch: Partial<DraftGebrek>) =>
@@ -123,22 +144,18 @@ function NieuweMetingDialog({
   };
 
   const reset = () => {
-    setScore("");
     setToelichting("");
     setGebreken([]);
+    setScoreOverride("__auto__");
   };
 
   const onSubmit = () => {
-    if (!score) {
-      toast({ title: "Kies een conditiescore", variant: "destructive" });
-      return;
-    }
     const valid = gebreken.filter((g) => g.description.trim().length > 0);
     createMeting.mutate(
       {
         id: bouwdeelId,
         data: {
-          score: Number(score),
+          scoreOverride: scoreOverride !== "__auto__" ? Number(scoreOverride) : null,
           toelichting: toelichting || null,
           gebreken: valid.map(({ uploading, ...g }) => g),
         },
@@ -155,8 +172,8 @@ function NieuweMetingDialog({
           queryClient.invalidateQueries({
             queryKey: [`/api/bouwdelen/${bouwdeelId}`],
           });
-          if (meting.suggestion) {
-            onBadScore?.(meting.suggestion);
+          if (meting.suggestion?.type && meting.suggestion?.message) {
+            onBadScore?.({ type: meting.suggestion.type, message: meting.suggestion.message });
           }
         },
         onError: () =>
@@ -177,18 +194,45 @@ function NieuweMetingDialog({
         <DialogHeader>
           <DialogTitle>Nieuwe conditiemeting (NEN 2767)</DialogTitle>
           <DialogDescription>
-            Leg de conditiescore vast en registreer eventuele gebreken met foto.
+            Registreer gebreken met ernst, omvang en intensiteit. De score wordt
+            automatisch afgeleid; u kunt hem handmatig overschrijven.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Conditiescore</Label>
-              <Select value={score} onValueChange={setScore}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Kies score (1-6)" />
+          {/* Auto-derived score display */}
+          <div className="rounded-lg border bg-muted/40 p-3 flex items-center gap-4">
+            <div className="flex-1">
+              <div className="text-xs font-medium text-muted-foreground mb-1">
+                Afgeleide conditiescore (NEN 2767)
+              </div>
+              <div className="flex items-center gap-2">
+                {scoreAfgeleid ? (
+                  <Badge
+                    variant="secondary"
+                    className={cn("border-transparent font-bold text-base px-3 py-1", scoreColor(scoreAfgeleid))}
+                  >
+                    {scoreAfgeleid} — {scoreLabel(scoreAfgeleid)}
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-base px-3 py-1">
+                    {gebreken.length === 0 ? "Geen gebreken → score 1" : "Vul gebreken in"}
+                  </Badge>
+                )}
+                {effectiveScore !== scoreAfgeleid && scoreOverride !== "__auto__" && (
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Info className="h-3 w-3" /> overschreven
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="space-y-1 min-w-[140px]">
+              <Label className="text-xs">Handmatige override</Label>
+              <Select value={scoreOverride} onValueChange={setScoreOverride}>
+                <SelectTrigger className="h-8">
+                  <SelectValue placeholder="Automatisch" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="__auto__">Automatisch</SelectItem>
                   {[1, 2, 3, 4, 5, 6].map((s) => (
                     <SelectItem key={s} value={String(s)}>
                       {s} — {scoreLabel(s)}
@@ -198,6 +242,7 @@ function NieuweMetingDialog({
               </Select>
             </div>
           </div>
+
           <div className="space-y-2">
             <Label>Toelichting (optioneel)</Label>
             <Textarea
@@ -218,7 +263,7 @@ function NieuweMetingDialog({
             </div>
             {gebreken.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                Geen gebreken geregistreerd.
+                Geen gebreken geregistreerd — score wordt 1 (uitstekend).
               </p>
             )}
             {gebreken.map((g, i) => (
@@ -239,83 +284,107 @@ function NieuweMetingDialog({
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Select
-                    value={g.ernst}
-                    onValueChange={(v) => updateGebrek(i, { ernst: v })}
-                  >
-                    <SelectTrigger className="w-[130px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ERNST_OPTIES.map((e) => (
-                        <SelectItem key={e} value={e} className="capitalize">
-                          {e}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={g.omvang ?? ""}
-                    onValueChange={(v) => updateGebrek(i, { omvang: v })}
-                  >
-                    <SelectTrigger className="w-[120px]">
-                      <SelectValue placeholder="Omvang" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {OMVANG_OPTIES.map((o) => (
-                        <SelectItem key={o} value={o}>
-                          {o}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      disabled={g.uploading}
-                      onClick={() =>
-                        document.getElementById(`gebrek-foto-${i}`)?.click()
-                      }
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Ernst</Label>
+                    <Select
+                      value={g.ernst}
+                      onValueChange={(v) => updateGebrek(i, { ernst: v })}
                     >
-                      {g.uploading ? (
-                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Camera className="mr-1.5 h-3.5 w-3.5" />
-                      )}
-                      {g.photoPath ? "Foto vervangen" : "Foto uploaden"}
-                    </Button>
-                    <input
-                      id={`gebrek-foto-${i}`}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) uploadPhoto(i, file);
-                        e.target.value = "";
-                      }}
-                    />
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ERNST_OPTIES.map((e) => (
+                          <SelectItem key={e} value={e} className="capitalize">
+                            {e}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Omvang</Label>
+                    <Select
+                      value={g.omvang ?? ""}
+                      onValueChange={(v) => updateGebrek(i, { omvang: v })}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue placeholder="Omvang" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {OMVANG_OPTIES.map((o) => (
+                          <SelectItem key={o} value={o}>
+                            {o}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Intensiteit</Label>
+                    <Select
+                      value={g.intensiteit ?? "midden"}
+                      onValueChange={(v) => updateGebrek(i, { intensiteit: v })}
+                    >
+                      <SelectTrigger className="h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {INTENSITEIT_OPTIES.map((it) => (
+                          <SelectItem key={it} value={it} className="capitalize">
+                            {it}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                {g.photoPath && (
-                  <div className="relative inline-block">
-                    <img
-                      src={`${API_BASE}/storage${g.photoPath}`}
-                      alt="Foto van gebrek"
-                      className="h-24 rounded-md border object-cover"
-                    />
-                    <button
-                      type="button"
-                      className="absolute -top-2 -right-2 bg-background border rounded-full p-0.5 shadow"
-                      onClick={() => updateGebrek(i, { photoPath: null })}
-                    >
-                      <X className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={g.uploading}
+                    onClick={() =>
+                      document.getElementById(`gebrek-foto-${i}`)?.click()
+                    }
+                  >
+                    {g.uploading ? (
+                      <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Camera className="mr-1.5 h-3.5 w-3.5" />
+                    )}
+                    {g.photoPath ? "Foto vervangen" : "Foto uploaden"}
+                  </Button>
+                  <input
+                    id={`gebrek-foto-${i}`}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) uploadPhoto(i, file);
+                      e.target.value = "";
+                    }}
+                  />
+                  {g.photoPath && (
+                    <div className="relative inline-block">
+                      <img
+                        src={`${API_BASE}/storage${g.photoPath}`}
+                        alt="Foto van gebrek"
+                        className="h-16 rounded-md border object-cover"
+                      />
+                      <button
+                        type="button"
+                        className="absolute -top-2 -right-2 bg-background border rounded-full p-0.5 shadow"
+                        onClick={() => updateGebrek(i, { photoPath: null })}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -424,6 +493,11 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
             </h1>
             <p className="text-muted-foreground font-mono text-sm">
               {bouwdeel.code}
+              {bouwdeel.nlSfbCode && (
+                <span className="ml-2 font-sans text-xs bg-muted px-1.5 py-0.5 rounded">
+                  NL-SfB {bouwdeel.nlSfbCode}
+                </span>
+              )}
             </p>
           </div>
         </div>
@@ -447,7 +521,7 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                 className="border-amber-400 bg-white text-amber-900 hover:bg-amber-100"
                 onClick={() => {
                   setMetingSuggestion(null);
-                  setLocation(`/mjop?bouwdeelId=${metingSuggestion.bouwdeelId}`);
+                  setLocation(`/mjop?bouwdeelId=${bouwdeelId}`);
                 }}
               >
                 MJOP-taak aanmaken
@@ -518,15 +592,27 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
               metingen.map((m) => (
                 <div key={m.id} className="rounded-lg border p-4 space-y-3">
                   <div className="flex items-center justify-between">
-                    <Badge
-                      variant="secondary"
-                      className={cn(
-                        "border-transparent font-semibold",
-                        scoreColor(m.score),
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          "border-transparent font-semibold",
+                          scoreColor(m.score),
+                        )}
+                      >
+                        Score {m.score} — {scoreLabel(m.score)}
+                      </Badge>
+                      {m.scoreOverride && m.scoreAfgeleid && m.scoreOverride !== m.scoreAfgeleid && (
+                        <span className="text-xs text-muted-foreground">
+                          (afgeleid: {m.scoreAfgeleid}, handmatig overschreven)
+                        </span>
                       )}
-                    >
-                      Score {m.score} — {scoreLabel(m.score)}
-                    </Badge>
+                      {!m.scoreOverride && m.scoreAfgeleid && (
+                        <span className="text-xs text-muted-foreground">
+                          (automatisch afgeleid)
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs text-muted-foreground">
                       {new Date(m.measuredAt).toLocaleDateString("nl-NL", {
                         day: "numeric",
@@ -549,36 +635,37 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                           key={i}
                           className="flex items-start gap-3 text-sm bg-muted/40 rounded-md p-2"
                         >
-                          {g.photoPath && (
-                            <a
-                              href={`${API_BASE}/storage${g.photoPath}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <img
-                                src={`${API_BASE}/storage${g.photoPath}`}
-                                alt="Foto van gebrek"
-                                className="h-16 w-16 rounded object-cover border"
-                              />
-                            </a>
-                          )}
                           <div className="flex-1">
-                            <div className="font-medium">{g.description}</div>
-                            <div className="flex gap-1.5 mt-1">
+                            <p className="font-medium">{g.description}</p>
+                            <div className="flex flex-wrap gap-1.5 mt-1">
                               <Badge
                                 variant="secondary"
                                 className={cn(
-                                  "border-transparent capitalize",
+                                  "border-transparent text-xs",
                                   ernstColor(g.ernst),
                                 )}
                               >
                                 {g.ernst}
                               </Badge>
                               {g.omvang && (
-                                <Badge variant="outline">omvang {g.omvang}</Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  Omvang: {g.omvang}
+                                </Badge>
+                              )}
+                              {g.intensiteit && (
+                                <Badge variant="outline" className="text-xs">
+                                  Intensiteit: {g.intensiteit}
+                                </Badge>
                               )}
                             </div>
                           </div>
+                          {g.photoPath && (
+                            <img
+                              src={`${API_BASE}/storage${g.photoPath}`}
+                              alt="Foto"
+                              className="h-16 w-16 rounded object-cover border flex-shrink-0"
+                            />
+                          )}
                         </div>
                       ))}
                     </div>
@@ -596,44 +683,48 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
           <CardContent className="space-y-3">
             {!taken?.length ? (
               <p className="text-sm text-muted-foreground py-6 text-center">
-                Geen taken voor dit bouwdeel.
+                Geen taken gepland voor dit bouwdeel.
               </p>
             ) : (
               taken.map((t) => (
-                <div
-                  key={t.id}
-                  className="rounded-lg border p-3 flex items-center justify-between gap-3"
-                >
-                  <div className="min-w-0">
-                    <div className="font-medium truncate">{t.title}</div>
-                    <div className="text-xs text-muted-foreground capitalize">
-                      {t.taskType} • {t.plannedYear} • {euro(t.estimatedCost)}
+                <div key={t.id} className="rounded-lg border p-3 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="font-medium text-sm">{t.title}</p>
+                      {t.description && (
+                        <p className="text-xs text-muted-foreground">{t.description}</p>
+                      )}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
                     <Badge
                       variant="secondary"
-                      className={cn("border-transparent", taakStatusColor(t.status))}
+                      className={cn("border-transparent text-xs", taakStatusColor(t.status))}
                     >
                       {taakStatusLabel(t.status)}
                     </Badge>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    <span className="capitalize">{t.taskType}</span>
+                    <span>{t.plannedYear}</span>
+                    <span className="font-medium text-foreground">{euro(t.estimatedCost)}</span>
                     {t.ticketId ? (
                       <Button
                         variant="link"
                         size="sm"
-                        className="h-auto p-0"
+                        className="h-auto p-0 text-xs"
                         onClick={() => setLocation(`/meldingen/${t.ticketId}`)}
                       >
+                        <Ticket className="mr-1 h-3 w-3" />
                         {t.ticketNumber}
                       </Button>
                     ) : canManage ? (
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-6 text-xs px-2"
                         disabled={convert.isPending}
                         onClick={() => onConvert(t.id)}
                       >
-                        <Ticket className="mr-1.5 h-3.5 w-3.5" />
+                        <Ticket className="mr-1 h-3 w-3" />
                         Naar melding
                       </Button>
                     ) : null}

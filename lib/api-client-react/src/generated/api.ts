@@ -61,6 +61,8 @@ import type {
   KeyUpdate,
   KnowledgeArticle,
   KnowledgeArticleInput,
+  KostenKengetal,
+  KostenKengetalInput,
   ListAssetsParams,
   ListBouwdelenParams,
   ListContractsParams,
@@ -6859,6 +6861,297 @@ export const useConvertMjopTaakToTicket = <TError = ErrorType<ApiMessage>,
         TContext
       > => {
       return useMutation(getConvertMjopTaakToTicketMutationOptions(options));
+    }
+
+export const getListKostenKengetallenUrl = () => {
+
+
+
+
+  return `/api/mjop/kengetallen`
+}
+
+/**
+ * @summary List all kostenkengetallen (unit price benchmarks)
+ */
+export const listKostenKengetallen = async ( options?: Parameters<typeof customFetch>[1]): Promise<KostenKengetal[]> => {
+
+  return customFetch<KostenKengetal[]>(getListKostenKengetallenUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListKostenKengetallenQueryKey = () => {
+    return [
+    `/api/mjop/kengetallen`
+    ] as const;
+    }
+
+
+export const getListKostenKengetallenQueryOptions = <TData = Awaited<ReturnType<typeof listKostenKengetallen>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listKostenKengetallen>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListKostenKengetallenQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listKostenKengetallen>>> = ({ signal }) => listKostenKengetallen({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listKostenKengetallen>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListKostenKengetallenQueryResult = NonNullable<Awaited<ReturnType<typeof listKostenKengetallen>>>
+export type ListKostenKengetallenQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all kostenkengetallen (unit price benchmarks)
+ */
+
+export function useListKostenKengetallen<TData = Awaited<ReturnType<typeof listKostenKengetallen>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listKostenKengetallen>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListKostenKengetallenQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateKostenKengetalUrl = () => {
+
+
+
+
+  return `/api/mjop/kengetallen`
+}
+
+/**
+ * @summary Create a new kostenkengetal
+ */
+export const createKostenKengetal = async (kostenKengetalInput: KostenKengetalInput, options?: Parameters<typeof customFetch>[1]): Promise<KostenKengetal> => {
+
+  return customFetch<KostenKengetal>(getCreateKostenKengetalUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(kostenKengetalInput)
+  }
+);}
+
+
+
+
+
+export const getCreateKostenKengetalMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKostenKengetal>>, TError,{data: BodyType<KostenKengetalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createKostenKengetal>>, TError,{data: BodyType<KostenKengetalInput>}, TContext> => {
+
+const mutationKey = ['createKostenKengetal'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createKostenKengetal>>, {data: BodyType<KostenKengetalInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createKostenKengetal(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateKostenKengetalMutationResult = NonNullable<Awaited<ReturnType<typeof createKostenKengetal>>>
+    export type CreateKostenKengetalMutationBody = BodyType<KostenKengetalInput>
+    export type CreateKostenKengetalMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Create a new kostenkengetal
+ */
+export const useCreateKostenKengetal = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKostenKengetal>>, TError,{data: BodyType<KostenKengetalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createKostenKengetal>>,
+        TError,
+        {data: BodyType<KostenKengetalInput>},
+        TContext
+      > => {
+      return useMutation(getCreateKostenKengetalMutationOptions(options));
+    }
+
+export const getUpdateKostenKengetalUrl = (id: number,) => {
+
+
+
+
+  return `/api/mjop/kengetallen/${id}`
+}
+
+/**
+ * @summary Update a kostenkengetal
+ */
+export const updateKostenKengetal = async (id: number,
+    kostenKengetalInput: KostenKengetalInput, options?: Parameters<typeof customFetch>[1]): Promise<KostenKengetal> => {
+
+  return customFetch<KostenKengetal>(getUpdateKostenKengetalUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(kostenKengetalInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateKostenKengetalMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKostenKengetal>>, TError,{id: number;data: BodyType<KostenKengetalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateKostenKengetal>>, TError,{id: number;data: BodyType<KostenKengetalInput>}, TContext> => {
+
+const mutationKey = ['updateKostenKengetal'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateKostenKengetal>>, {id: number;data: BodyType<KostenKengetalInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateKostenKengetal(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateKostenKengetalMutationResult = NonNullable<Awaited<ReturnType<typeof updateKostenKengetal>>>
+    export type UpdateKostenKengetalMutationBody = BodyType<KostenKengetalInput>
+    export type UpdateKostenKengetalMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Update a kostenkengetal
+ */
+export const useUpdateKostenKengetal = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKostenKengetal>>, TError,{id: number;data: BodyType<KostenKengetalInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateKostenKengetal>>,
+        TError,
+        {id: number;data: BodyType<KostenKengetalInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateKostenKengetalMutationOptions(options));
+    }
+
+export const getDeleteKostenKengetalUrl = (id: number,) => {
+
+
+
+
+  return `/api/mjop/kengetallen/${id}`
+}
+
+/**
+ * @summary Delete a kostenkengetal
+ */
+export const deleteKostenKengetal = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteKostenKengetalUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteKostenKengetalMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKostenKengetal>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteKostenKengetal>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteKostenKengetal'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteKostenKengetal>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteKostenKengetal(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteKostenKengetalMutationResult = NonNullable<Awaited<ReturnType<typeof deleteKostenKengetal>>>
+
+    export type DeleteKostenKengetalMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Delete a kostenkengetal
+ */
+export const useDeleteKostenKengetal = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKostenKengetal>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteKostenKengetal>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteKostenKengetalMutationOptions(options));
     }
 
 export const getGetJaarplanningUrl = () => {

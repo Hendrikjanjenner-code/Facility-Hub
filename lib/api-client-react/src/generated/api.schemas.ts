@@ -709,10 +709,8 @@ export interface DashboardSummary {
   myReservationsToday: number;
   assetCount: number;
   roomCount: number;
-  /** Aantal bouwdelen met conditiescore >= 4 */
-  mjopSlechteConditie: number;
-  /** Aantal bouwdelen die binnen 5 jaar het einde van hun levensduur bereiken */
-  mjopBijnaEol: number;
+  /** Aantal bouwdelen met conditiescore ≥ 5 */
+  mjopSlechteConditie?: number;
 }
 
 export interface ActivityItem {
@@ -1144,12 +1142,10 @@ export interface Bouwdeel {
   laatsteMetingDatum?: string | null;
   openTaken: number;
   /**
-     * Jaar waarin het einde van de levensduur wordt bereikt
+     * NL-SfB-code (bijv. 23, 45.1)
      * @nullable
      */
-  lifespanEndYear?: number | null;
-  /** True als lifespanEndYear <= huidig jaar + 5 */
-  nearEndOfLife: boolean;
+  nlSfbCode?: string | null;
 }
 
 export interface BouwdeelInput {
@@ -1171,6 +1167,11 @@ export interface BouwdeelInput {
   replacementCost: number;
   /** @nullable */
   notes?: string | null;
+  /**
+     * NL-SfB-code (bijv. 23, 45.1)
+     * @nullable
+     */
+  nlSfbCode?: string | null;
 }
 
 export interface Gebrek {
@@ -1184,19 +1185,44 @@ export interface Gebrek {
      * @nullable
      */
   photoPath?: string | null;
+  /**
+     * laag | midden | hoog
+     * @nullable
+     */
+  intensiteit?: string | null;
 }
 
-export type ConditiemetingSuggestionType = typeof ConditiemetingSuggestionType[keyof typeof ConditiemetingSuggestionType];
-
-
-export const ConditiemetingSuggestionType = {
-  maak_taak: 'maak_taak',
-} as const;
-
-export interface ConditiemetingSuggestion {
-  type: ConditiemetingSuggestionType;
-  message: string;
+export interface KostenKengetal {
+  id: number;
+  name: string;
+  category: string;
+  /** @nullable */
+  nlSfbCode?: string | null;
+  unit: string;
+  pricePerUnit: number;
+  /** @nullable */
+  notes?: string | null;
+  createdAt: string;
 }
+
+export interface KostenKengetalInput {
+  name: string;
+  category: string;
+  /** @nullable */
+  nlSfbCode?: string | null;
+  unit: string;
+  pricePerUnit: number;
+  /** @nullable */
+  notes?: string | null;
+}
+
+/**
+ * Automatisch gegenereerd onderhoudsadvies op basis van de conditiescore
+ */
+export type ConditiemetingSuggestion = {
+  type?: string;
+  message?: string;
+} | null;
 
 export interface Conditiemeting {
   id: number;
@@ -1210,8 +1236,18 @@ export interface Conditiemeting {
   toelichting?: string | null;
   gebreken: Gebrek[];
   measuredAt: string;
-  /** Present when score >= 4; advises creating an MJOP task */
-  suggestion?: ConditiemetingSuggestion | null;
+  /**
+     * Automatisch afgeleide NEN 2767-score op basis van gebreken
+     * @nullable
+     */
+  scoreAfgeleid?: number | null;
+  /**
+     * Handmatige override van de afgeleide score
+     * @nullable
+     */
+  scoreOverride?: number | null;
+  /** Automatisch gegenereerd onderhoudsadvies op basis van de conditiescore */
+  suggestion?: ConditiemetingSuggestion;
 }
 
 export interface ConditiemetingInput {
@@ -1219,10 +1255,17 @@ export interface ConditiemetingInput {
      * @minimum 1
      * @maximum 6
      */
-  score: number;
+  score?: number;
   /** @nullable */
   toelichting?: string | null;
   gebreken?: Gebrek[];
+  /**
+     * Handmatige override van de afgeleide score (1–6)
+     * @minimum 1
+     * @maximum 6
+     * @nullable
+     */
+  scoreOverride?: number | null;
 }
 
 export interface MjopTaak {
@@ -1450,6 +1493,7 @@ export type ListBouwdelenParams = {
 buildingId?: number;
 category?: string;
 search?: string;
+nlSfbCode?: string;
 };
 
 export type ListMjopTakenParams = {

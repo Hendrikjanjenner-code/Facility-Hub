@@ -1421,8 +1421,7 @@ export const GetDashboardSummaryResponse = zod.object({
   "myReservationsToday": zod.int(),
   "assetCount": zod.int(),
   "roomCount": zod.int(),
-  "mjopSlechteConditie": zod.int().describe('Aantal bouwdelen met conditiescore >= 4'),
-  "mjopBijnaEol": zod.int().describe('Aantal bouwdelen die binnen 5 jaar het einde van hun levensduur bereiken')
+  "mjopSlechteConditie": zod.int().optional().describe('Aantal bouwdelen met conditiescore ≥ 5')
 })
 
 
@@ -2210,7 +2209,8 @@ export const GetSustainabilityReportResponse = zod.object({
 export const ListBouwdelenQueryParams = zod.object({
   "buildingId": zod.coerce.number().int().optional(),
   "category": zod.coerce.string().optional(),
-  "search": zod.coerce.string().optional()
+  "search": zod.coerce.string().optional(),
+  "nlSfbCode": zod.coerce.string().optional()
 })
 
 export const ListBouwdelenResponseItem = zod.object({
@@ -2232,8 +2232,7 @@ export const ListBouwdelenResponseItem = zod.object({
   "laatsteScore": zod.int().nullish().describe('Meest recente NEN 2767-conditiescore (1-6)'),
   "laatsteMetingDatum": zod.string().nullish(),
   "openTaken": zod.int(),
-  "lifespanEndYear": zod.int().nullish().describe('Jaar waarin het einde van de levensduur wordt bereikt'),
-  "nearEndOfLife": zod.boolean().describe('True als lifespanEndYear <= huidig jaar + 5')
+  "nlSfbCode": zod.string().nullish().describe('NL-SfB-code (bijv. 23, 45.1)')
 })
 export const ListBouwdelenResponse = zod.array(ListBouwdelenResponseItem)
 
@@ -2257,7 +2256,8 @@ export const CreateBouwdeelBody = zod.object({
   "installYear": zod.int(),
   "expectedLifespanYears": zod.int(),
   "replacementCost": zod.number(),
-  "notes": zod.string().nullish()
+  "notes": zod.string().nullish(),
+  "nlSfbCode": zod.string().nullish().describe('NL-SfB-code (bijv. 23, 45.1)')
 })
 
 export const CreateBouwdeelResponse = zod.object({
@@ -2279,8 +2279,7 @@ export const CreateBouwdeelResponse = zod.object({
   "laatsteScore": zod.int().nullish().describe('Meest recente NEN 2767-conditiescore (1-6)'),
   "laatsteMetingDatum": zod.string().nullish(),
   "openTaken": zod.int(),
-  "lifespanEndYear": zod.int().nullish().describe('Jaar waarin het einde van de levensduur wordt bereikt'),
-  "nearEndOfLife": zod.boolean().describe('True als lifespanEndYear <= huidig jaar + 5')
+  "nlSfbCode": zod.string().nullish().describe('NL-SfB-code (bijv. 23, 45.1)')
 })
 
 
@@ -2307,8 +2306,7 @@ export const GetBouwdeelResponse = zod.object({
   "laatsteScore": zod.int().nullish().describe('Meest recente NEN 2767-conditiescore (1-6)'),
   "laatsteMetingDatum": zod.string().nullish(),
   "openTaken": zod.int(),
-  "lifespanEndYear": zod.int().nullish().describe('Jaar waarin het einde van de levensduur wordt bereikt'),
-  "nearEndOfLife": zod.boolean().describe('True als lifespanEndYear <= huidig jaar + 5')
+  "nlSfbCode": zod.string().nullish().describe('NL-SfB-code (bijv. 23, 45.1)')
 })
 
 
@@ -2330,13 +2328,16 @@ export const ListConditiemetingenResponseItem = zod.object({
   "description": zod.string(),
   "ernst": zod.string().describe('licht | serieus | ernstig'),
   "omvang": zod.string().nullish(),
-  "photoPath": zod.string().nullish().describe('Object storage pad van de foto (\/objects\/...)')
+  "photoPath": zod.string().nullish().describe('Object storage pad van de foto (\/objects\/...)'),
+  "intensiteit": zod.string().nullish().describe('laag | midden | hoog')
 })),
   "measuredAt": zod.string(),
+  "scoreAfgeleid": zod.int().nullish().describe('Automatisch afgeleide NEN 2767-score op basis van gebreken'),
+  "scoreOverride": zod.int().nullish().describe('Handmatige override van de afgeleide score'),
   "suggestion": zod.object({
-  "type": zod.enum(['maak_taak']),
-  "message": zod.string()
-}).nullish().describe('Present when score >= 4; advises creating an MJOP task')
+  "type": zod.string().optional(),
+  "message": zod.string().optional()
+}).nullish().describe('Automatisch gegenereerd onderhoudsadvies op basis van de conditiescore')
 })
 export const ListConditiemetingenResponse = zod.array(ListConditiemetingenResponseItem)
 
@@ -2350,17 +2351,21 @@ export const CreateConditiemetingParams = zod.object({
 
 export const createConditiemetingBodyScoreMax = 6;
 
+export const createConditiemetingBodyScoreOverrideMax = 6;
+
 
 
 export const CreateConditiemetingBody = zod.object({
-  "score": zod.int().min(1).max(createConditiemetingBodyScoreMax),
+  "score": zod.int().min(1).max(createConditiemetingBodyScoreMax).optional(),
   "toelichting": zod.string().nullish(),
   "gebreken": zod.array(zod.object({
   "description": zod.string(),
   "ernst": zod.string().describe('licht | serieus | ernstig'),
   "omvang": zod.string().nullish(),
-  "photoPath": zod.string().nullish().describe('Object storage pad van de foto (\/objects\/...)')
-})).optional()
+  "photoPath": zod.string().nullish().describe('Object storage pad van de foto (\/objects\/...)'),
+  "intensiteit": zod.string().nullish().describe('laag | midden | hoog')
+})).optional(),
+  "scoreOverride": zod.int().min(1).max(createConditiemetingBodyScoreOverrideMax).nullish().describe('Handmatige override van de afgeleide score (1–6)')
 })
 
 export const CreateConditiemetingResponse = zod.object({
@@ -2374,13 +2379,16 @@ export const CreateConditiemetingResponse = zod.object({
   "description": zod.string(),
   "ernst": zod.string().describe('licht | serieus | ernstig'),
   "omvang": zod.string().nullish(),
-  "photoPath": zod.string().nullish().describe('Object storage pad van de foto (\/objects\/...)')
+  "photoPath": zod.string().nullish().describe('Object storage pad van de foto (\/objects\/...)'),
+  "intensiteit": zod.string().nullish().describe('laag | midden | hoog')
 })),
   "measuredAt": zod.string(),
+  "scoreAfgeleid": zod.int().nullish().describe('Automatisch afgeleide NEN 2767-score op basis van gebreken'),
+  "scoreOverride": zod.int().nullish().describe('Handmatige override van de afgeleide score'),
   "suggestion": zod.object({
-  "type": zod.enum(['maak_taak']),
-  "message": zod.string()
-}).nullish().describe('Present when score >= 4; advises creating an MJOP task')
+  "type": zod.string().optional(),
+  "message": zod.string().optional()
+}).nullish().describe('Automatisch gegenereerd onderhoudsadvies op basis van de conditiescore')
 })
 
 
@@ -2500,6 +2508,84 @@ export const ConvertMjopTaakToTicketResponse = zod.object({
   "ticketNumber": zod.string().nullish(),
   "createdAt": zod.string()
 })
+
+
+/**
+ * @summary List all kostenkengetallen (unit price benchmarks)
+ */
+export const ListKostenKengetallenResponseItem = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "category": zod.string(),
+  "nlSfbCode": zod.string().nullish(),
+  "unit": zod.string(),
+  "pricePerUnit": zod.number(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListKostenKengetallenResponse = zod.array(ListKostenKengetallenResponseItem)
+
+
+/**
+ * @summary Create a new kostenkengetal
+ */
+export const CreateKostenKengetalBody = zod.object({
+  "name": zod.string(),
+  "category": zod.string(),
+  "nlSfbCode": zod.string().nullish(),
+  "unit": zod.string(),
+  "pricePerUnit": zod.number(),
+  "notes": zod.string().nullish()
+})
+
+export const CreateKostenKengetalResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "category": zod.string(),
+  "nlSfbCode": zod.string().nullish(),
+  "unit": zod.string(),
+  "pricePerUnit": zod.number(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Update a kostenkengetal
+ */
+export const UpdateKostenKengetalParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateKostenKengetalBody = zod.object({
+  "name": zod.string(),
+  "category": zod.string(),
+  "nlSfbCode": zod.string().nullish(),
+  "unit": zod.string(),
+  "pricePerUnit": zod.number(),
+  "notes": zod.string().nullish()
+})
+
+export const UpdateKostenKengetalResponse = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "category": zod.string(),
+  "nlSfbCode": zod.string().nullish(),
+  "unit": zod.string(),
+  "pricePerUnit": zod.number(),
+  "notes": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a kostenkengetal
+ */
+export const DeleteKostenKengetalParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteKostenKengetalResponse = zod.void()
 
 
 /**
