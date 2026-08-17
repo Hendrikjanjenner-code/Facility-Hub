@@ -334,13 +334,14 @@ router.get(
       .where(eq(contractDocumentsTable.contractId, contractId))
       .orderBy(desc(contractDocumentsTable.createdAt));
 
+    const isSupplier = user.role === "leverancier";
     res.json(
       rows.map((r) => ({
         id: r.doc.id,
         contractId: r.doc.contractId,
         fileName: r.doc.fileName,
-        objectPath: r.doc.objectPath,
-        uploadedById: r.doc.uploadedById,
+        // Do not expose internal storage paths to suppliers
+        ...(isSupplier ? {} : { objectPath: r.doc.objectPath, uploadedById: r.doc.uploadedById }),
         uploadedByName: r.uploadedByName,
         createdAt: r.doc.createdAt.toISOString(),
       })),

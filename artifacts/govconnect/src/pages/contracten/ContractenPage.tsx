@@ -16,7 +16,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 const getListContractDocumentsQueryKey = (contractId: number) => [`/api/contracts/${contractId}/documents`];
 
 function useListContractDocuments(contractId: number, opts?: { query?: { queryKey?: unknown[]; enabled?: boolean } }) {
-  return useQuery<Array<{ id: number; title: string; objectPath: string; contentType: string; sizeBytes: number; uploadedByName: string | null; createdAt: string }>>({
+  return useQuery<Array<{ id: number; fileName: string; uploadedByName: string | null; createdAt: string }>>({
     queryKey: opts?.query?.queryKey ?? getListContractDocumentsQueryKey(contractId),
     queryFn: () => fetch(`/api/contracts/${contractId}/documents`, { credentials: "include" }).then((r) => r.json()),
     enabled: opts?.query?.enabled ?? true,
@@ -146,7 +146,7 @@ function StarRating({ score, max = 5 }: { score: number; max?: number }) {
 
 // ── Contract documents panel ──────────────────────────────────────────────────
 
-function ContractDocumentsPanel({ contractId, isManager }: { contractId: number; isManager: boolean }) {
+function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contractId: number; isManager: boolean; isSupplier?: boolean }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -219,7 +219,7 @@ function ContractDocumentsPanel({ contractId, isManager }: { contractId: number;
       >
         <span className="flex items-center gap-2">
           <File className="h-4 w-4 text-muted-foreground" />
-          Digitale kluis
+          {isSupplier ? "Gedeelde documenten" : "Digitale kluis"}
           {docs && docs.length > 0 && (
             <Badge variant="secondary" className="text-xs">{docs.length}</Badge>
           )}
@@ -238,7 +238,7 @@ function ContractDocumentsPanel({ contractId, isManager }: { contractId: number;
               {docs.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between gap-2 border rounded bg-background px-3 py-2">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{doc.title}</p>
+                    <p className="text-sm font-medium truncate">{doc.fileName}</p>
                     <p className="text-xs text-muted-foreground">
                       {doc.uploadedByName} · {new Date(doc.createdAt).toLocaleDateString("nl-NL")}
                     </p>
@@ -656,7 +656,7 @@ export default function ContractenPage() {
                           {c.description && (
                             <p className="text-sm text-muted-foreground mb-4">{c.description}</p>
                           )}
-                          <ContractDocumentsPanel contractId={c.id} isManager={isManager} />
+                          <ContractDocumentsPanel contractId={c.id} isManager={isManager} isSupplier={user?.role === "leverancier"} />
                         </div>
                       )}
                     </CardContent>
