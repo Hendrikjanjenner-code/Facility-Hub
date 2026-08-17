@@ -301,7 +301,6 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
   }
 
   const update: Partial<typeof ticketsTable.$inferInsert> = {};
-
   if (data.status) update.status = data.status;
   if (data.priority) {
     update.priority = data.priority;
@@ -316,11 +315,6 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
   if (data.title) update.title = data.title;
   if (data.description) update.description = data.description;
 
-  const closingTicket =
-    data.status &&
-    data.status !== existing.status &&
-    (data.status === "gereed" || data.status === "gesloten");
-
   // Update the ticket and (when closing) auto-complete linked MJOP tasks atomically.
   // RETURNING ensures we only notify for rows actually transitioned in this request
   // (prevents duplicate alerts from concurrent ticket-close requests).
@@ -328,20 +322,8 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
   await db.transaction(async (tx) => {
     await tx.update(ticketsTable).set(update).where(eq(ticketsTable.id, id));
 
-    if (closingTicket) {
-      const completedTaken = await tx
-        .update(mjopTakenTable)
-        .set({ status: "afgerond" })
-        .where(
-          and(
-            eq(mjopTakenTable.ticketId, id),
-            or(
-              eq(mjopTakenTable.status, "in_uitvoering"),
-              eq(mjopTakenTable.status, "gepland"),
-            ),
-          ),
-        )
-        .returning();
+    if (shouldFinishMjopTasks(data.status, existing.status)) {
+      const completedTaken = await finishLinkedMjopTasks(tx, id);
 
       if (completedTaken.length > 0) {
         // Resolve beheerder recipients inside the transaction for atomicity
@@ -515,3 +497,45 @@ router.get("/ticket-categories", async (_req, res): Promise<void> => {
 });
 
 export default router;
+
+/**
+ * Returns true when closing a ticket should finish its linked MJOP tasks.
+ * Exported for unit testing.
+ */
+export function shouldFinishMjopTasks(
+  newStatus: string | undefined,
+  existingStatus: string,
+): boolean {
+  if (!newStatus) return false;
+  if (newStatus === existingStatus) return false;
+  return newStatus === "gereed" || newStatus === "gesloten";
+}
+
+/**
+ * Marks all linked MJOP tasks that are still active (gepland / in_uitvoering)
+ * as afgerond. Tasks already afgerond are left untouched by the WHERE filter.
+ * Returns the completed rows so callers can act on them (e.g. send notifications).
+ * Exported for unit testing.
+ */
+export async function finishLinkedMjopTasks(
+  tx: { update: typeof db.update },
+  ticketId: number,
+): Promise<Array<{ id: number; title: string; bouwdeelId: number }>> {
+  return tx
+    .update(mjopTakenTable)
+    .set({ status: "afgerond" })
+    .where(
+      and(
+        eq(mjopTakenTable.ticketId, ticketId),
+        or(
+          eq(mjopTakenTable.status, "in_uitvoering"),
+          eq(mjopTakenTable.status, "gepland"),
+        ),
+      ),
+    )
+    .returning({
+      id: mjopTakenTable.id,
+      title: mjopTakenTable.title,
+      bouwdeelId: mjopTakenTable.bouwdeelId,
+    });
+}

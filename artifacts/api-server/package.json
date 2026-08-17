@@ -8,7 +8,8 @@
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --reporter=verbose"
+    "test": "vitest run --reporter=verbose",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@google-cloud/storage": "^8.0.0",
@@ -30,6 +31,7 @@
     "@types/node": "catalog:",
     "@types/nodemailer": "^8.0.1",
     "@types/supertest": "^7.2.1",
+    "@vitest/coverage-v8": "^4.1.10",
     "@vitest/runner": "^4.1.10",
     "esbuild": "0.27.3",
     "esbuild-plugin-pino": "^2.3.3",
