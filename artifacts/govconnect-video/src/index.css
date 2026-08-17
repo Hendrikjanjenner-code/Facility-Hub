@@ -1,0 +1,53 @@
+@import 'tailwindcss';
+
+:root {
+  --color-primary: hsl(200, 90%, 30%); /* Deep petrol blue */
+  --color-accent: hsl(199, 89%, 48%); /* Lighter cyan for highlights */
+  
+  --color-sidebar: hsl(222, 47%, 11%); /* Dark ink */
+  --color-sidebar-muted: hsl(222, 47%, 18%);
+  
+  --color-bg-light: hsl(210, 40%, 98%);
+  --color-bg-white: #ffffff;
+  --color-bg-dark: hsl(222, 47%, 11%);
+
+  --color-text-primary: hsl(222, 47%, 11%);
+  --color-text-secondary: hsl(215, 16%, 47%);
+  --color-text-inverse: #ffffff;
+  --color-text-inverse-muted: hsl(210, 40%, 85%);
+
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --font-mono: 'Spline Sans Mono', monospace;
+}
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-accent: var(--color-accent);
+  --color-sidebar: var(--color-sidebar);
+  --color-sidebar-muted: var(--color-sidebar-muted);
+  --color-bg-light: var(--color-bg-light);
+  --color-bg-white: var(--color-bg-white);
+  --color-bg-dark: var(--color-bg-dark);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-inverse: var(--color-text-inverse);
+  --color-text-inverse-muted: var(--color-text-inverse-muted);
+  
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.text-stroke-1 {
+  -webkit-text-stroke: 1px var(--color-sidebar);
+}
+.text-stroke-white {
+  -webkit-text-stroke: 1px rgba(255,255,255,0.2);
+}
