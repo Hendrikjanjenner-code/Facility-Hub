@@ -1503,17 +1503,29 @@ export default function MjopPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: user } = useGetCurrentUser();
+  const [activeTab, setActiveTab] = useState("bouwdelen");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [nlSfbFilter, setNlSfbFilter] = useState("all");
+  const [scoreFilter, setScoreFilter] = useState("all");
   const [taakStatus, setTaakStatus] = useState("all");
   const [taakJaar, setTaakJaar] = useState("all");
 
-  const { data: bouwdelen, isLoading } = useListBouwdelen({
+  // Unfiltered query for summary stats
+  const { data: allBouwdelen } = useListBouwdelen();
+
+  const { data: bouwdelenRaw, isLoading } = useListBouwdelen({
     search: search || undefined,
     category: category !== "all" ? category : undefined,
     nlSfbCode: nlSfbFilter !== "all" ? nlSfbFilter : undefined,
   });
+
+  // Apply score filter client-side (score is already returned per bouwdeel)
+  const bouwdelen = scoreFilter === "all"
+    ? bouwdelenRaw
+    : bouwdelenRaw?.filter((b) =>
+        b.laatsteScore != null && b.laatsteScore >= Number(scoreFilter),
+      );
   const { data: taken } = useListMjopTaken({
     status: taakStatus !== "all" ? taakStatus : undefined,
     year: taakJaar !== "all" ? Number(taakJaar) : undefined,
@@ -1547,6 +1559,21 @@ export default function MjopPage() {
   ).sort();
   const maxCost = Math.max(...(jaarplanning?.map((j) => j.totalCost) ?? [1]), 1);
 
+  // Summary stats computed from the unfiltered list
+  const slechteConditieCount = allBouwdelen?.filter(
+    (b) => b.laatsteScore != null && b.laatsteScore >= 4,
+  ).length ?? 0;
+  const totalBouwdelen = allBouwdelen?.length ?? 0;
+  const nietGemetenCount = allBouwdelen?.filter((b) => b.laatsteScore == null).length ?? 0;
+
+  const goToSlechteConditie = () => {
+    setActiveTab("bouwdelen");
+    setScoreFilter("4");
+    setSearch("");
+    setCategory("all");
+    setNlSfbFilter("all");
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -1565,7 +1592,58 @@ export default function MjopPage() {
         )}
       </div>
 
-      <Tabs defaultValue="bouwdelen">
+      {/* ── Overzichtskaarten ── */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Card>
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="rounded-lg bg-muted p-2">
+              <Building2 className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Totaal bouwdelen</p>
+              <p className="text-2xl font-bold">{totalBouwdelen}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Klikbare "slechte conditie" kaart */}
+        <Card
+          className="cursor-pointer hover:border-destructive/60 transition-colors group"
+          onClick={goToSlechteConditie}
+          title="Klik om te filteren op bouwdelen met slechte conditie (score ≥ 4)"
+        >
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
+              <Wrench className="h-5 w-5 text-red-600 dark:text-red-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-muted-foreground group-hover:text-destructive transition-colors">
+                Slechte conditie (≥ 4)
+              </p>
+              <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                {slechteConditieCount}
+              </p>
+            </div>
+            <span className="text-xs text-muted-foreground group-hover:text-destructive transition-colors">
+              bekijk →
+            </span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="rounded-lg bg-muted p-2">
+              <Search className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Niet gemeten</p>
+              <p className="text-2xl font-bold">{nietGemetenCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="bouwdelen">
             <Building2 className="mr-2 h-4 w-4" />
@@ -1627,7 +1705,30 @@ export default function MjopPage() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={scoreFilter} onValueChange={setScoreFilter}>
+              <SelectTrigger className="w-[210px]">
+                <SelectValue placeholder="Alle condities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Alle condities</SelectItem>
+                <SelectItem value="4">Slechte conditie (score ≥ 4)</SelectItem>
+                <SelectItem value="5">Zeer slecht (score ≥ 5)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          {scoreFilter !== "all" && (
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-transparent">
+                Gefilterd: slechte conditie (score ≥ {scoreFilter})
+              </Badge>
+              <button
+                className="text-xs text-muted-foreground underline hover:text-foreground"
+                onClick={() => setScoreFilter("all")}
+              >
+                filter wissen
+              </button>
+            </div>
+          )}
 
           {isLoading ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
