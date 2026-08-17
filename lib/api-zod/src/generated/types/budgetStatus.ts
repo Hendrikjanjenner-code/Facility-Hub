@@ -8,12 +8,21 @@
 
 export interface BudgetStatus {
   id: number;
+
   department: string;
+
   year: number;
+
   amount: number;
   /** Sum of approved/ordered/delivered orders */
+
   spent: number;
   /** Sum of submitted (not yet decided) orders */
+
   pending: number;
+
   remaining: number;
+  /** Whether orders that exceed the budget are blocked (409) or just marked */
+
+  overBudgetPolicy: BudgetStatusOverBudgetPolicy;
 }

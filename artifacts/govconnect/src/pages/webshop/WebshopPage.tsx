@@ -5,13 +5,14 @@ import {
   useListShopOrders,
   useUpdateShopOrder,
   useListBudgets,
+  useUpdateBudgetPolicy,
   useGetCurrentUser,
   getListBudgetsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ShoppingCart, Search, Plus, Minus, Trash2, Loader2, PackageCheck,
-  CheckCircle2, XCircle, Wallet, ClipboardList, AlertTriangle,
+  CheckCircle2, XCircle, Wallet, ClipboardList, AlertTriangle, ShieldAlert, ShieldCheck,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -69,6 +70,7 @@ export default function WebshopPage() {
   });
   const createOrder = useCreateShopOrder();
   const updateOrder = useUpdateShopOrder();
+  const updatePolicy = useUpdateBudgetPolicy();
 
   const categories = Array.from(new Set(products?.map((p) => p.category) || []));
   const cartTotal = cart.reduce((s, l) => s + l.price * l.quantity, 0);
@@ -347,6 +349,7 @@ export default function WebshopPage() {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {budgets?.map((b) => {
                 const pct = Math.min(100, Math.round((b.spent / b.amount) * 100));
+                const isBlocking = b.overBudgetPolicy === "blokkeren";
                 return (
                   <Card key={b.id}>
                     <CardHeader className="pb-2">
@@ -355,7 +358,7 @@ export default function WebshopPage() {
                         <span className="ml-auto text-xs font-normal text-muted-foreground">{b.year}</span>
                       </CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
+                    <CardContent className="space-y-3">
                       <Progress value={pct} className={cn(pct >= 90 && "[&>div]:bg-destructive")} />
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Besteed: {eur(b.spent)}</span>
@@ -364,6 +367,51 @@ export default function WebshopPage() {
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>Budget: {eur(b.amount)}</span>
                         {b.pending > 0 && <span>In aanvraag: {eur(b.pending)}</span>}
+                      </div>
+                      <div className="border-t pt-2">
+                        <p className="text-xs text-muted-foreground mb-1.5">Bij budgetoverschrijding:</p>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant={!isBlocking ? "default" : "outline"}
+                            className="flex-1 h-8 text-xs"
+                            disabled={updatePolicy.isPending}
+                            onClick={() =>
+                              updatePolicy.mutate(
+                                { id: b.id, data: { overBudgetPolicy: "markeren" } },
+                                {
+                                  onSuccess: () => {
+                                    toast({ title: `${b.department}: beleid ingesteld op markeren` });
+                                    queryClient.invalidateQueries({ queryKey: getListBudgetsQueryKey() });
+                                  },
+                                  onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+                                },
+                              )
+                            }
+                          >
+                            <ShieldCheck className="mr-1 h-3 w-3" />Markeren
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={isBlocking ? "default" : "outline"}
+                            className={cn("flex-1 h-8 text-xs", isBlocking && "bg-destructive hover:bg-destructive/90")}
+                            disabled={updatePolicy.isPending}
+                            onClick={() =>
+                              updatePolicy.mutate(
+                                { id: b.id, data: { overBudgetPolicy: "blokkeren" } },
+                                {
+                                  onSuccess: () => {
+                                    toast({ title: `${b.department}: beleid ingesteld op blokkeren` });
+                                    queryClient.invalidateQueries({ queryKey: getListBudgetsQueryKey() });
+                                  },
+                                  onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+                                },
+                              )
+                            }
+                          >
+                            <ShieldAlert className="mr-1 h-3 w-3" />Blokkeren
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

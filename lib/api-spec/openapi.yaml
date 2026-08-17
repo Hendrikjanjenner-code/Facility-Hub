@@ -1371,6 +1371,37 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/BudgetStatus'
+  /budgets/{id}:
+    patch:
+      operationId: updateBudgetPolicy
+      tags:
+        - shop
+      summary: Update over-budget policy for a department budget
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BudgetPolicyUpdate'
+      responses:
+        '200':
+          description: Updated budget
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetStatus'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /meter-readings:
     get:
       operationId: listMeterReadings
@@ -3582,6 +3613,10 @@ components:
           description: Sum of submitted (not yet decided) orders
         remaining:
           type: number
+        overBudgetPolicy:
+          type: string
+          enum: [markeren, blokkeren]
+          description: Whether orders that exceed the budget are blocked (409) or just marked
       required:
         - id
         - department
@@ -3590,6 +3625,15 @@ components:
         - spent
         - pending
         - remaining
+        - overBudgetPolicy
+    BudgetPolicyUpdate:
+      type: object
+      properties:
+        overBudgetPolicy:
+          type: string
+          enum: [markeren, blokkeren]
+      required:
+        - overBudgetPolicy
     MeterReading:
       type: object
       properties:

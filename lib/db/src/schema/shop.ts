@@ -25,6 +25,7 @@ export const budgetsTable = pgTable("budgets", {
   department: text("department").notNull(),
   year: integer("year").notNull(),
   amount: real("amount").notNull(),
+  overBudgetPolicy: text("over_budget_policy").notNull().default("markeren"), // "markeren" | "blokkeren"
 });
 
 export const shopOrdersTable = pgTable("shop_orders", {

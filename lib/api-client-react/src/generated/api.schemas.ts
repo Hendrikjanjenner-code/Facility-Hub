@@ -848,6 +848,10 @@ export interface ShopOrderUpdate {
   decisionNote?: string | null;
 }
 
+/**
+ * Whether orders that exceed the budget are blocked (409) or just marked
+ */
+export type BudgetStatusOverBudgetPolicy = typeof BudgetStatusOverBudgetPolicy[keyof typeof BudgetStatusOverBudgetPolicy];
 export interface BudgetStatus {
   id: number;
   department: string;
@@ -858,8 +862,11 @@ export interface BudgetStatus {
   /** Sum of submitted (not yet decided) orders */
   pending: number;
   remaining: number;
+  /** Whether orders that exceed the budget are blocked (409) or just marked */
+  overBudgetPolicy: BudgetStatusOverBudgetPolicy;
 }
 
+export type BudgetPolicyUpdateOverBudgetPolicy = typeof BudgetPolicyUpdateOverBudgetPolicy[keyof typeof BudgetPolicyUpdateOverBudgetPolicy];
 export interface MeterReading {
   id: number;
   buildingId: number;
@@ -1259,3 +1266,17 @@ export type SuggestKnowledgeArticlesParams = {
 q: string;
 };
 
+
+export const BudgetStatusOverBudgetPolicy = {
+  markeren: 'markeren',
+  blokkeren: 'blokkeren',
+} as const;
+
+export const BudgetPolicyUpdateOverBudgetPolicy = {
+  markeren: 'markeren',
+  blokkeren: 'blokkeren',
+} as const;
+
+export interface BudgetPolicyUpdate {
+  overBudgetPolicy: BudgetPolicyUpdateOverBudgetPolicy;
+}
