@@ -44,16 +44,24 @@ function StatCard({
   value, 
   icon: Icon, 
   description, 
-  danger = false 
+  danger = false,
+  onClick,
 }: { 
   title: string, 
   value: number | string, 
   icon: any, 
   description?: string,
-  danger?: boolean
+  danger?: boolean,
+  onClick?: () => void,
 }) {
   return (
-    <Card>
+    <Card
+      className={onClick ? "cursor-pointer hover:border-primary/50 transition-colors" : undefined}
+      onClick={onClick}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
         <Icon className={`h-4 w-4 ${danger ? 'text-destructive' : 'text-muted-foreground'}`} />
@@ -182,6 +190,7 @@ export default function DashboardPage() {
             icon={Wrench}
             danger={true}
             description="Score ≥ 4 (matig t/m zeer slecht)"
+            onClick={() => setLocation("/mjop?filter=slechteConditie")}
           />
         )}
       </div>

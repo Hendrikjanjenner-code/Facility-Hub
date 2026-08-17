@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -35,6 +35,7 @@ import {
   AlertTriangle,
   ShieldAlert,
   Info,
+  X,
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -1537,6 +1538,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
 
 export default function MjopPage() {
   const [, setLocation] = useLocation();
+  const searchString = useSearch();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: user } = useGetCurrentUser();
@@ -1544,9 +1546,22 @@ export default function MjopPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [nlSfbFilter, setNlSfbFilter] = useState("all");
-  const [scoreFilter, setScoreFilter] = useState("all");
+  // scoreFilter drives client-side score filtering; seeded from ?filter=slechteConditie URL param
+  const [scoreFilter, setScoreFilter] = useState(() => {
+    const params = new URLSearchParams(searchString);
+    return params.get("filter") === "slechteConditie" ? "4" : "all";
+  });
   const [taakStatus, setTaakStatus] = useState("all");
   const [taakJaar, setTaakJaar] = useState("all");
+
+  // Sync scoreFilter when URL param changes (e.g. back-navigation from dashboard)
+  useEffect(() => {
+    const params = new URLSearchParams(searchString);
+    if (params.get("filter") === "slechteConditie") {
+      setScoreFilter("4");
+      setActiveTab("bouwdelen");
+    }
+  }, [searchString]);
 
   // Unfiltered query for summary stats
   const { data: allBouwdelen } = useListBouwdelen();
@@ -1557,12 +1572,20 @@ export default function MjopPage() {
     nlSfbCode: nlSfbFilter !== "all" ? nlSfbFilter : undefined,
   });
 
-  // Apply score filter client-side (score is already returned per bouwdeel)
+  // Apply score filter client-side
   const bouwdelen = scoreFilter === "all"
     ? bouwdelenRaw
     : bouwdelenRaw?.filter((b) =>
         b.laatsteScore != null && b.laatsteScore >= Number(scoreFilter),
       );
+
+  const clearScoreFilter = () => {
+    setScoreFilter("all");
+    // Also clear URL param if it was set from the dashboard
+    const params = new URLSearchParams(searchString);
+    if (params.get("filter")) setLocation("/mjop");
+  };
+
   const { data: taken } = useListMjopTaken({
     status: taakStatus !== "all" ? taakStatus : undefined,
     year: taakJaar !== "all" ? Number(taakJaar) : undefined,
@@ -1706,6 +1729,21 @@ export default function MjopPage() {
 
         {/* ── Bouwdelen tab ── */}
         <TabsContent value="bouwdelen" className="space-y-4 mt-4">
+          {scoreFilter !== "all" && (
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1 text-sm bg-destructive/10 text-destructive border-destructive/20">
+                <Wrench className="h-3.5 w-3.5" />
+                Slechte conditie (score ≥ {scoreFilter})
+                <button
+                  onClick={clearScoreFilter}
+                  className="ml-1 rounded-full hover:bg-destructive/20 transition-colors p-0.5"
+                  aria-label="Filter verwijderen"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row gap-3 bg-card p-4 rounded-lg border shadow-sm flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -1753,19 +1791,6 @@ export default function MjopPage() {
               </SelectContent>
             </Select>
           </div>
-          {scoreFilter !== "all" && (
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-transparent">
-                Gefilterd: slechte conditie (score ≥ {scoreFilter})
-              </Badge>
-              <button
-                className="text-xs text-muted-foreground underline hover:text-foreground"
-                onClick={() => setScoreFilter("all")}
-              >
-                filter wissen
-              </button>
-            </div>
-          )}
 
           {isLoading ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
