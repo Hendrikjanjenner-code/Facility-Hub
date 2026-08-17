@@ -326,28 +326,79 @@ router.post(
       res.status(404).json({ message: "Gebouw niet gevonden" });
       return;
     }
-    const [doc] = await db
-      .insert(buildingDocumentsTable)
-      .values({
-        buildingId: id,
-        title: parsed.data.title,
-        category: parsed.data.category,
-        objectPath: parsed.data.objectPath,
-        contentType: parsed.data.contentType,
-        sizeBytes: parsed.data.sizeBytes,
-        uploadedById: req.currentUser!.id,
+    // Idempotentie: als het document-record al bestaat voor dit objectPath
+    // (bv. de vorige request slaagde maar de client verloor het antwoord),
+    // geef het bestaande record terug in plaats van een duplicaat aan te maken.
+    const [existing] = await db
+      .select({
+        doc: buildingDocumentsTable,
+        uploadedByName: usersTable.name,
       })
-      .returning();
+      .from(buildingDocumentsTable)
+      .leftJoin(usersTable, eq(buildingDocumentsTable.uploadedById, usersTable.id))
+      .where(
+        and(
+          eq(buildingDocumentsTable.buildingId, id),
+          eq(buildingDocumentsTable.objectPath, parsed.data.objectPath),
+        ),
+      )
+      .limit(1);
+    if (existing) {
+      res.status(200).json({
+        id: existing.doc.id,
+        buildingId: existing.doc.buildingId,
+        title: existing.doc.title,
+        category: existing.doc.category,
+        objectPath: existing.doc.objectPath,
+        contentType: existing.doc.contentType,
+        sizeBytes: existing.doc.sizeBytes,
+        uploadedByName: existing.uploadedByName,
+        createdAt: existing.doc.createdAt.toISOString(),
+      });
+      return;
+    }
+
+    let doc: typeof buildingDocumentsTable.$inferSelect;
+    try {
+      const [inserted] = await db
+        .insert(buildingDocumentsTable)
+        .values({
+          buildingId: id,
+          title: parsed.data.title,
+          category: parsed.data.category,
+          objectPath: parsed.data.objectPath,
+          contentType: parsed.data.contentType,
+          sizeBytes: parsed.data.sizeBytes,
+          uploadedById: req.currentUser!.id,
+        })
+        .returning();
+      doc = inserted!;
+    } catch (err) {
+      req.log.error(
+        { err, objectPath: parsed.data.objectPath },
+        "Document-record aanmaken mislukt na geslaagde upload",
+      );
+      // Het geüploade bestand blijft tijdelijk als wees-object in storage
+      // staan. De periodieke opruimroutine verwijdert het na 24 uur.
+      // De client kan het opslaan opnieuw proberen zonder het bestand
+      // opnieuw te uploaden.
+      res.status(500).json({
+        message:
+          "Het bestand is geüpload maar kon niet worden opgeslagen als document. " +
+          "Gebruik de knop 'Opnieuw proberen' om het opslaan te herhalen.",
+      });
+      return;
+    }
     res.status(201).json({
-      id: doc!.id,
-      buildingId: doc!.buildingId,
-      title: doc!.title,
-      category: doc!.category,
-      objectPath: doc!.objectPath,
-      contentType: doc!.contentType,
-      sizeBytes: doc!.sizeBytes,
+      id: doc.id,
+      buildingId: doc.buildingId,
+      title: doc.title,
+      category: doc.category,
+      objectPath: doc.objectPath,
+      contentType: doc.contentType,
+      sizeBytes: doc.sizeBytes,
       uploadedByName: req.currentUser!.name,
-      createdAt: doc!.createdAt.toISOString(),
+      createdAt: doc.createdAt.toISOString(),
     });
   },
 );

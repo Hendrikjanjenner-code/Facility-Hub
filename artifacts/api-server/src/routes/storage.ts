@@ -11,6 +11,8 @@ import {
   ObjectStorageService,
 } from '../lib/objectStorage';
 import { loadUser } from '../lib/auth';
+import { db, buildingDocumentsTable } from '@workspace/db';
+import { eq } from 'drizzle-orm';
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -199,6 +201,64 @@ router.get(
     }
   },
 );
+
+/**
+ * DELETE /storage/objects/*
+ *
+ * Verwijder een eerder geüpload object. Alleen de uploadende rollen mogen
+ * objecten verwijderen. Gebruik dit om wees-bestanden op te ruimen als een
+ * document-record aanmaken mislukt.
+ */
+router.delete('/storage/objects/*path', async (req: Request, res: Response) => {
+  try {
+    const user = await loadUser(req);
+    if (!user) {
+      res.status(401).json({ error: 'Unauthorized' });
+      return;
+    }
+    if (!STORAGE_ROLES.includes(user.role)) {
+      res.status(403).json({ error: 'Forbidden' });
+      return;
+    }
+
+    const raw = req.params.path;
+    const wildcardPath = Array.isArray(raw) ? raw.join('/') : raw;
+    const objectPath = `/objects/${wildcardPath}`;
+
+    // Sta alleen verwijdering toe van bestanden in de uploads-map,
+    // niet van andere objectpaden.
+    if (!objectPath.startsWith('/objects/uploads/')) {
+      res.status(400).json({ error: 'Kan alleen uploadobjecten verwijderen' });
+      return;
+    }
+
+    // Weiger verwijdering als het object al als document-record is opgeslagen.
+    // Dit voorkomt dat een actief document per ongeluk uit storage wordt
+    // verwijderd. Alleen echte wees-objecten (nog niet opgeslagen) mogen weg.
+    const [existing] = await db
+      .select({ id: buildingDocumentsTable.id })
+      .from(buildingDocumentsTable)
+      .where(eq(buildingDocumentsTable.objectPath, objectPath))
+      .limit(1);
+    if (existing) {
+      res.status(409).json({
+        error: 'Object is al gekoppeld aan een document en kan niet worden verwijderd via dit endpoint',
+      });
+      return;
+    }
+
+    await objectStorageService.deleteObject(objectPath);
+    res.status(204).end();
+  } catch (error) {
+    if (error instanceof ObjectNotFoundError) {
+      // Al weg — beschouw dit als succesvol (idempotent cleanup)
+      res.status(204).end();
+      return;
+    }
+    req.log.error({ err: error }, 'Error deleting object');
+    res.status(500).json({ error: 'Verwijderen mislukt' });
+  }
+});
 
 /**
  * GET /storage/objects/*

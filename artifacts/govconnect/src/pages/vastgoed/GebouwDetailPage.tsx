@@ -17,6 +17,7 @@ import {
   type FloorPlanRoom,
 } from "@workspace/api-client-react";
 import {
+  AlertCircle,
   ArrowLeft,
   Building,
   FileText,
@@ -29,6 +30,7 @@ import {
   Pencil,
 } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -66,24 +68,109 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
   const [category, setCategory] = useState<string>("overig");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  // Tracks the objectPath after a successful storage upload so we can retry
+  // saving the document record without re-uploading the file.
+  const [pendingObjectPath, setPendingObjectPath] = useState<string | null>(null);
+  const [pendingMeta, setPendingMeta] = useState<{ contentType: string; sizeBytes: number } | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const createDoc = useCreateBuildingDocument();
 
   const reset = () => {
     setTitle("");
     setCategory("overig");
     setFile(null);
+    setPendingObjectPath(null);
+    setPendingMeta(null);
+    setSaveError(null);
+  };
+
+  /** Verwijder een wees-object uit storage (best-effort, fouten worden genegeerd).
+   *  Wordt alleen aangeroepen als de gebruiker de dialog annuleert terwijl er
+   *  een geüpload bestand is waarvan het record niet is aangemaakt. */
+  const tryDeleteOrphan = async (objectPath: string) => {
+    // objectPath is bijv. "/objects/uploads/abc123.pdf"
+    const urlPath = objectPath.replace(/^\/objects\//, "");
+    try {
+      await fetch(`${API_BASE}/storage/objects/${urlPath}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+    } catch {
+      // Best-effort; de periodieke wees-opruimroutine ruimt het na 24 uur op.
+    }
+  };
+
+  const handleOpenChange = (v: boolean) => {
+    if (!v && pendingObjectPath && saveError) {
+      // Gebruiker sluit de dialog terwijl het bestand al geüpload is maar het
+      // record aanmaken mislukte. Ruim het wees-object op.
+      void tryDeleteOrphan(pendingObjectPath);
+    }
+    setOpen(v);
+    if (!v) reset();
+  };
+
+  /** Sla het document-record op in de database. Kan worden aangeroepen met een
+   *  al geüpload objectPath (retry) of na een nieuwe upload. */
+  const saveDocRecord = (objectPath: string, meta: { contentType: string; sizeBytes: number }) => {
+    setSaveError(null);
+    createDoc.mutate(
+      {
+        id: buildingId,
+        data: {
+          title: title.trim(),
+          category: category as (typeof DOC_CATEGORIES)[number]["value"],
+          objectPath,
+          contentType: meta.contentType,
+          sizeBytes: meta.sizeBytes,
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getListBuildingDocumentsQueryKey(buildingId) });
+          toast({ title: "Document toegevoegd" });
+          reset();
+          setOpen(false);
+        },
+        onError: () => {
+          // Het bestand staat nog in storage maar het record is niet aangemaakt.
+          // Bewaar pendingObjectPath zodat de gebruiker het opslaan kan herhalen
+          // zonder het bestand opnieuw te hoeven uploaden.
+          setSaveError(
+            "Het bestand is geüpload maar kon niet worden opgeslagen. " +
+            "Controleer uw verbinding en probeer het opnieuw.",
+          );
+          setUploading(false);
+        },
+        onSettled: () => setUploading(false),
+      },
+    );
   };
 
   const submit = async () => {
-    if (!file || !title.trim()) {
-      toast({ title: "Kies een bestand en vul een titel in", variant: "destructive" });
+    if (!title.trim()) {
+      toast({ title: "Vul een titel in", variant: "destructive" });
+      return;
+    }
+
+    // Retry-pad: bestand is al geüpload, alleen het opslaan opnieuw proberen.
+    if (pendingObjectPath && pendingMeta) {
+      setUploading(true);
+      saveDocRecord(pendingObjectPath, pendingMeta);
+      return;
+    }
+
+    if (!file) {
+      toast({ title: "Kies een bestand", variant: "destructive" });
       return;
     }
     if (file.size > 15 * 1024 * 1024) {
       toast({ title: "Bestand is te groot (max 15 MB)", variant: "destructive" });
       return;
     }
+
     setUploading(true);
+    setSaveError(null);
     try {
       const resp = await fetch(`${API_BASE}/storage/document-uploads`, {
         method: "POST",
@@ -96,36 +183,25 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
         throw new Error(err?.error ?? "Upload mislukt");
       }
       const { objectPath } = (await resp.json()) as { objectPath: string };
-      createDoc.mutate(
-        {
-          id: buildingId,
-          data: {
-            title: title.trim(),
-            category: category as (typeof DOC_CATEGORIES)[number]["value"],
-            objectPath,
-            contentType: file.type || "application/octet-stream",
-            sizeBytes: file.size,
-          },
-        },
-        {
-          onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getListBuildingDocumentsQueryKey(buildingId) });
-            toast({ title: "Document toegevoegd" });
-            reset();
-            setOpen(false);
-          },
-          onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
-          onSettled: () => setUploading(false),
-        },
-      );
+      const meta = { contentType: file.type || "application/octet-stream", sizeBytes: file.size };
+
+      // Bewaar het pad zodat we het opslaan kunnen herhalen zonder opnieuw te uploaden.
+      setPendingObjectPath(objectPath);
+      setPendingMeta(meta);
+
+      saveDocRecord(objectPath, meta);
     } catch (e) {
       setUploading(false);
       toast({ title: e instanceof Error ? e.message : "Upload mislukt", variant: "destructive" });
     }
   };
 
+  // Retry-modus: bestand is al in storage, alleen het opslaan mislukte.
+  const isRetryMode = Boolean(pendingObjectPath && saveError);
+  const isBusy = uploading || createDoc.isPending;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm">
           <Upload className="h-3.5 w-3.5 mr-1.5" /> Document uploaden
@@ -137,6 +213,12 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
           <DialogDescription>PDF of afbeelding, maximaal 15 MB.</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
+          {saveError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{saveError}</AlertDescription>
+            </Alert>
+          )}
           <div className="space-y-1.5">
             <Label htmlFor="doc-title">Titel</Label>
             <Input id="doc-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Bijv. Huurcontract 2026" />
@@ -152,15 +234,18 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="doc-file">Bestand</Label>
-            <Input id="doc-file" type="file" accept="application/pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-          </div>
+          {/* In retry-modus is het bestand al geüpload; geen nieuw bestand nodig. */}
+          {!isRetryMode && (
+            <div className="space-y-1.5">
+              <Label htmlFor="doc-file">Bestand</Label>
+              <Input id="doc-file" type="file" accept="application/pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            </div>
+          )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Annuleren</Button>
-          <Button onClick={submit} disabled={uploading || createDoc.isPending}>
-            {uploading ? "Bezig..." : "Uploaden"}
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>Annuleren</Button>
+          <Button onClick={submit} disabled={isBusy}>
+            {isBusy ? "Bezig..." : isRetryMode ? "Opnieuw proberen" : "Uploaden"}
           </Button>
         </DialogFooter>
       </DialogContent>
