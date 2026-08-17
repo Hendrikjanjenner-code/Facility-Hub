@@ -139,6 +139,22 @@ export default function WebshopPage() {
       }
       return [...prev, { productId: p.id, name: p.name, unit: p.unit, price: p.price, quantity: 1, stock: p.stock }];
     });
+
+    // Check if adding this product would exceed the budget with a blocking policy
+    if (myBudget && myBudget.overBudgetPolicy === "blokkeren") {
+      const existingLine = cart.find((l) => l.productId === p.id);
+      const addedQty = existingLine ? 1 : 1;
+      const newTotal = cartTotal + p.price * addedQty;
+      if (newTotal > myBudget.remaining) {
+        toast({
+          title: `${p.name} toegevoegd aan winkelmandje`,
+          description: `⚠️ Je winkelmandje overschrijdt het resterende budget (${eur(myBudget.remaining)}). Bestellen is geblokkeerd totdat het budget is aangepast.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     toast({ title: `${p.name} toegevoegd aan winkelmandje` });
   };
 
@@ -444,9 +460,27 @@ export default function WebshopPage() {
                       </div>
                     </CardContent>
                     <div className="p-4 pt-0">
-                      <Button className="w-full" variant="secondary" disabled={p.stock === 0} onClick={() => addToCart(p)}>
-                        <ShoppingCart className="mr-2 h-4 w-4" />In winkelmandje
-                      </Button>
+                      {(() => {
+                        const wouldExceedBlocked =
+                          myBudget &&
+                          myBudget.overBudgetPolicy === "blokkeren" &&
+                          cartTotal + p.price > myBudget.remaining;
+                        return (
+                          <Button
+                            className="w-full"
+                            variant={wouldExceedBlocked ? "outline" : "secondary"}
+                            disabled={p.stock === 0}
+                            onClick={() => addToCart(p)}
+                          >
+                            {wouldExceedBlocked ? (
+                              <AlertTriangle className="mr-2 h-4 w-4 text-destructive" />
+                            ) : (
+                              <ShoppingCart className="mr-2 h-4 w-4" />
+                            )}
+                            In winkelmandje
+                          </Button>
+                        );
+                      })()}
                     </div>
                   </Card>
                 ))}
