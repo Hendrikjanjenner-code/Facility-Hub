@@ -397,6 +397,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+  /rooms/{id}/dossier-history/{entryId}/undo:
+    post:
+      operationId: undoRoomDossierEntry
+      tags:
+        - vastgoed
+      summary: Draai één specifieke historieregel terug (velden die later zijn gewijzigd worden overgeslagen)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Terugdraaiing geslaagd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UndoRoomDossierEntryResult'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
+        '409':
+          description: Conflict (bijv. terugdraaiing van een terugdraaiing)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /rooms/{id}/dossier:
     patch:
       operationId: updateRoomDossier
@@ -2897,6 +2933,18 @@ components:
         - name
         - level
         - roomCount
+    UndoRoomDossierEntryResult:
+      type: object
+      required:
+        - room
+        - skippedFields
+      properties:
+        room:
+          $ref: '#/components/schemas/Room'
+        skippedFields:
+          type: array
+          items:
+            type: string
     Room:
       type: object
       properties:

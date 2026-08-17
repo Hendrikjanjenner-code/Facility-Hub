@@ -13,8 +13,9 @@ import {
   getGetRoomQueryKey,
   useListRoomDossierHistory,
   getListRoomDossierHistoryQueryKey,
-  useUndoRoomDossierChange,
-  type Room
+  useUndoRoomDossierEntry,
+  type Room,
+  type UndoRoomDossierEntryResult,
 } from "@workspace/api-client-react";
 import { 
   ArrowLeft, 
@@ -383,21 +384,38 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
   const { data: history, isLoading } = useListRoomDossierHistory(roomId, {
     query: { queryKey: getListRoomDossierHistoryQueryKey(roomId) },
   });
-  const undo = useUndoRoomDossierChange();
+  const undo = useUndoRoomDossierEntry();
+  const [pendingEntryId, setPendingEntryId] = useState<number | null>(null);
 
-  const canUndo = !!history?.length && !history[0]!.isUndo;
-
-  const doUndo = () => {
+  const doUndo = (entryId: number) => {
+    setPendingEntryId(entryId);
     undo.mutate(
-      { id: roomId },
+      { id: roomId, entryId },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
           queryClient.invalidateQueries({ queryKey: getGetRoomQueryKey(roomId) });
           queryClient.invalidateQueries({ queryKey: getListRoomDossierHistoryQueryKey(roomId) });
-          toast({ title: "Laatste wijziging ongedaan gemaakt" });
+          if (result.skippedFields.length > 0) {
+            const labels = result.skippedFields
+              .map((f) => FIELD_LABELS[f] ?? f)
+              .join(", ");
+            toast({
+              title: "Wijziging gedeeltelijk teruggedraaid",
+              description: `Overgeslagen (later opnieuw gewijzigd): ${labels}.`,
+            });
+          } else {
+            toast({ title: "Wijziging ongedaan gemaakt" });
+          }
         },
-        onError: () =>
-          toast({ title: "Ongedaan maken mislukt", variant: "destructive" }),
+        onError: (err: unknown) => {
+          const msg = (err as { message?: string })?.message;
+          toast({
+            title: "Ongedaan maken mislukt",
+            description: msg ?? undefined,
+            variant: "destructive",
+          });
+        },
+        onSettled: () => setPendingEntryId(null),
       },
     );
   };
@@ -405,16 +423,9 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" /> Wijzigingshistorie
-          </CardTitle>
-          {canUndo && (
-            <Button variant="outline" size="sm" onClick={doUndo} disabled={undo.isPending}>
-              <Undo2 className="h-3.5 w-3.5 mr-1.5" /> Laatste wijziging ongedaan maken
-            </Button>
-          )}
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <History className="h-5 w-5" /> Wijzigingshistorie
+        </CardTitle>
         <CardDescription>Herindelingen en dossierwijzigingen van deze ruimte.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -423,19 +434,31 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
         ) : !history?.length ? (
           <p className="text-sm text-muted-foreground">Nog geen wijzigingen geregistreerd.</p>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {history.map((entry) => (
               <div key={entry.id} className="text-sm border rounded-lg p-3 bg-muted/30">
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className="font-medium">{entry.changedByName ?? "Onbekend"}</span>
-                  <div className="flex items-center gap-2">
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium">{entry.changedByName ?? "Onbekend"}</span>
                     {entry.isUndo && (
                       <Badge variant="secondary" className="text-[10px]">Teruggedraaid</Badge>
                     )}
                     <span className="text-xs text-muted-foreground">
-                      {format(new Date(entry.changedAt), "d MMM yyyy HH:mm", { locale: nl })}
+                      {format(new Date(entry.changedAt as string), "d MMM yyyy HH:mm", { locale: nl })}
                     </span>
                   </div>
+                  {!entry.isUndo && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs shrink-0"
+                      disabled={undo.isPending && pendingEntryId === entry.id}
+                      onClick={() => doUndo(entry.id)}
+                    >
+                      <Undo2 className="h-3 w-3 mr-1" />
+                      Terugdraaien
+                    </Button>
+                  )}
                 </div>
                 <ul className="space-y-0.5 text-muted-foreground">
                   {(entry.changes as { field: string; from: string | number | null; to: string | number | null }[]).map((c, i) => (
@@ -453,3 +476,4 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
     </Card>
   );
 }
+

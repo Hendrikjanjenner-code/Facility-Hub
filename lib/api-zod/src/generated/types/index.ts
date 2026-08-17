@@ -135,6 +135,7 @@ export * from './ticketInputFormData';
 export * from './ticketSatisfaction';
 export * from './ticketSatisfactionInput';
 export * from './ticketUpdate';
+export * from './undoRoomDossierEntryResult';
 export * from './uploadResult';
 export * from './user';
 export * from './visitor';

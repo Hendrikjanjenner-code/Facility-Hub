@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CountByKey } from './countByKey';
+import type { SatisfactionByCategory } from './satisfactionByCategory';
 import type { SatisfactionResponseItem } from './satisfactionResponseItem';
 
 export interface SatisfactionReport {
@@ -16,4 +17,5 @@ export interface SatisfactionReport {
   responseRate: number;
   byScore: CountByKey[];
   recentResponses: SatisfactionResponseItem[];
+  byCategory?: SatisfactionByCategory[];
 }

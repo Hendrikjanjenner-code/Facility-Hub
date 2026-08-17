@@ -10,4 +10,6 @@ export interface KeyIssueInput {
   holderId: number;
   /** @nullable */
   note?: string | null;
+  /** @nullable */
+  dueAt?: Date | null;
 }

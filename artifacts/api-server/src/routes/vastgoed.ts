@@ -22,7 +22,7 @@ import {
   keysTable,
   keyDoorsTable,
 } from "@workspace/db";
-import { eq, and, gte, sql, inArray, notInArray, desc, ne, type SQL } from "drizzle-orm";
+import { eq, and, gte, gt, sql, inArray, notInArray, desc, ne, type SQL } from "drizzle-orm";
 import {
   UpdateRoomDossierBody,
   CreateBuildingDocumentBody,
@@ -268,6 +268,79 @@ router.post(
     if (outcome.status !== 200) { res.status(outcome.status).json({ message: outcome.message }); return; }
     const row = await selectRoomRow(id);
     res.json(serializeRoom(false, row!));
+  },
+);
+
+/** Undo a specific history entry (only its fields; skips fields changed afterwards). */
+router.post(
+  "/rooms/:id/dossier-history/:entryId/undo",
+  requireRole(...VASTGOED_MANAGE_ROLES),
+  async (req, res): Promise<void> => {
+    const roomId = Number(req.params.id);
+    const entryId = Number(req.params.entryId);
+    if (Number.isNaN(roomId) || Number.isNaN(entryId)) {
+      res.status(400).json({ message: "Ongeldig id" }); return;
+    }
+
+    const result = await db.transaction(async (tx) => {
+      // Lock the room first so any concurrent PATCH is serialized before we
+      // read history. This guarantees the "changed later" detection is accurate.
+      const [current] = await tx.select().from(roomsTable).where(eq(roomsTable.id, roomId)).for("update");
+      if (!current) return { status: 404 as const, message: "Ruimte niet gevonden" };
+
+      const [entry] = await tx
+        .select()
+        .from(roomDossierHistoryTable)
+        .where(and(eq(roomDossierHistoryTable.id, entryId), eq(roomDossierHistoryTable.roomId, roomId)));
+      if (!entry) return { status: 404 as const, message: "Wijzigingsregel niet gevonden" };
+      if (entry.isUndo) return { status: 409 as const, message: "Een terugdraaiing kan zelf niet worden teruggedraaid" };
+
+      // Detect fields changed in later entries (read while holding the room lock)
+      const laterEntries = await tx
+        .select()
+        .from(roomDossierHistoryTable)
+        .where(and(eq(roomDossierHistoryTable.roomId, roomId), gt(roomDossierHistoryTable.id, entryId)));
+      const changedLater = new Set<string>();
+      for (const later of laterEntries) {
+        for (const c of (later.changes as DossierChange[])) changedLater.add(c.field);
+      }
+
+      const changes = entry.changes as DossierChange[];
+      const skippedFields: string[] = [];
+      const updates: Partial<Record<DossierField, string | number | null>> = {};
+      for (const c of changes) {
+        if (changedLater.has(c.field)) {
+          skippedFields.push(c.field);
+        } else {
+          updates[c.field as DossierField] = c.from;
+        }
+      }
+
+      const appliedChanges =
+        Object.keys(updates).length > 0
+          ? await applyDossierUpdateTx(tx, roomId, current, updates, req.currentUser!.id, true)
+          : [];
+
+      // applyDossierUpdateTx skips the history insert when no values actually
+      // changed (e.g. all fields were already reverted by an earlier undo).
+      // Always record the undo attempt so the history stays complete.
+      if (appliedChanges.length === 0) {
+        await tx.insert(roomDossierHistoryTable).values({
+          roomId,
+          changedById: req.currentUser!.id,
+          changes: [],
+          isUndo: true,
+        });
+      }
+
+      return { status: 200 as const, skippedFields };
+    });
+
+    if (result.status !== 200) {
+      res.status(result.status).json({ message: (result as { message: string }).message }); return;
+    }
+    const row = await selectRoomRow(roomId);
+    res.json({ room: serializeRoom(false, row!), skippedFields: result.skippedFields });
   },
 );
 router.get("/floors/:id/plan", async (req, res): Promise<void> => {

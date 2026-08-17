@@ -25,5 +25,7 @@ export interface KeySummary {
   currentHolderName?: string | null;
   /** @nullable */
   issuedAt?: string | null;
+  /** @nullable */
+  dueAt?: Date | null;
   createdAt: string;
 }

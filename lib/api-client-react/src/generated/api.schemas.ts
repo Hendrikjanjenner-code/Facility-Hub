@@ -214,7 +214,6 @@ export interface Room {
   openTicketCount?: number | null;
   updatedAt: string;
 }
-
 export interface RoomDossierUpdate {
   /** @minLength 1 */
   functionType?: string;
@@ -257,7 +256,10 @@ export interface RoomDossierHistoryEntry {
   isUndo: boolean;
   changes: RoomDossierChange[];
 }
-
+export interface UndoRoomDossierEntryResult {
+  room: Room;
+  skippedFields: string[];
+}
 export interface FloorDossierHistoryEntry {
   id: number;
   roomId: number;
@@ -360,6 +362,8 @@ export interface KeySummary {
   currentHolderName?: string | null;
   /** @nullable */
   issuedAt?: string | null;
+  /** @nullable */
+  dueAt?: string | null;
   createdAt: string;
 }
 
@@ -382,6 +386,8 @@ export interface KeyIssueRecord {
   /** @nullable */
   issuedByName?: string | null;
   issuedAt: string;
+  /** @nullable */
+  dueAt?: string | null;
   /** @nullable */
   returnedAt?: string | null;
   /** @nullable */
@@ -467,6 +473,8 @@ export interface KeyIssueInput {
   holderId: number;
   /** @nullable */
   note?: string | null;
+  /** @nullable */
+  dueAt?: string | null;
 }
 
 export interface KeyIssueDueUpdate {
@@ -1417,7 +1425,6 @@ export interface SatisfactionResponseItem {
   comment?: string | null;
   submittedAt: string;
 }
-
 export interface SatisfactionReport {
   totalResponses: number;
   averageScore: number;
@@ -1426,8 +1433,8 @@ export interface SatisfactionReport {
   responseRate: number;
   byScore: CountByKey[];
   recentResponses: SatisfactionResponseItem[];
+  byCategory?: SatisfactionByCategory[];
 }
-
 export interface SatisfactionByCategory {
   categoryId: number;
   categoryName: string;
@@ -1436,7 +1443,6 @@ export interface SatisfactionByCategory {
   /** Percentage of closed tickets with a satisfaction score (0-100) */
   responseRate: number;
 }
-
 export interface KnowledgeArticleUpdate {
   /** @minLength 1 */
   title?: string;

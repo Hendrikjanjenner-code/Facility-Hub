@@ -121,6 +121,7 @@ import type {
   TicketSatisfaction,
   TicketSatisfactionInput,
   TicketUpdate,
+  UndoRoomDossierEntryResult,
   UploadResult,
   User,
   Visitor,
@@ -1203,6 +1204,12 @@ export const useUndoRoomDossierChange = <TError = ErrorType<ApiMessage>,
       return useMutation(getUndoRoomDossierChangeMutationOptions(options));
     }
 
+export const getUndoRoomDossierEntryUrl = (id: number,
+    entryId: number,) => {
+
+
+  return `/api/rooms/${id}/dossier-history/${entryId}/undo`
+}
 export const getUpdateRoomDossierUrl = (id: number,) => {
 
 
@@ -6984,3 +6991,57 @@ export function useGetMeterReadingAuditLog<TData = Awaited<ReturnType<typeof get
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+export const getUndoRoomDossierEntryMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof undoRoomDossierEntry>>, TError,{id: number;entryId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof undoRoomDossierEntry>>, TError,{id: number;entryId: number}, TContext> => {
+
+const mutationKey = ['undoRoomDossierEntry'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof undoRoomDossierEntry>>, {id: number;entryId: number}> = (props) => {
+          const {id,entryId} = props ?? {};
+
+          return  undoRoomDossierEntry(id,entryId,requestOptions)
+        }
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UndoRoomDossierEntryMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Draai één specifieke historieregel terug (velden die later zijn gewijzigd worden overgeslagen)
+ */
+export const useUndoRoomDossierEntry = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof undoRoomDossierEntry>>, TError,{id: number;entryId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof undoRoomDossierEntry>>,
+        TError,
+        {id: number;entryId: number},
+        TContext
+      > => {
+      return useMutation(getUndoRoomDossierEntryMutationOptions(options));
+    }
+
+    export type UndoRoomDossierEntryMutationResult = NonNullable<Awaited<ReturnType<typeof undoRoomDossierEntry>>>
+
+/**
+ * @summary Draai één specifieke historieregel terug (velden die later zijn gewijzigd worden overgeslagen)
+ */
+export const undoRoomDossierEntry = async (id: number,
+    entryId: number, options?: Parameters<typeof customFetch>[1]): Promise<UndoRoomDossierEntryResult> => {
+
+  return customFetch<UndoRoomDossierEntryResult>(getUndoRoomDossierEntryUrl(id,entryId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
