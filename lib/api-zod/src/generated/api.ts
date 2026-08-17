@@ -419,6 +419,7 @@ export const GetFloorPlanResponse = zod.object({
   "code": zod.string(),
   "functionType": zod.string(),
   "areaM2": zod.number(),
+  "areaVvoM2": zod.number().nullish(),
   "department": zod.string().nullish(),
   "capacity": zod.int().nullish(),
   "bookable": zod.boolean().optional()

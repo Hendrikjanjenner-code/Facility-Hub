@@ -75,75 +75,60 @@ router.get("/rooms", async (req, res): Promise<void> => {
   if (typeof q.minCapacity === "string" && q.minCapacity)
     conditions.push(gte(roomsTable.capacity, Number(q.minCapacity)));
 
-  const rows = await db
-    .select({
-      room: roomsTable,
-      floorName: floorsTable.name,
-      buildingId: buildingsTable.id,
-      buildingName: buildingsTable.name,
-      siteName: sitesTable.name,
-      assetCount: assetCountSql,
-      openTicketCount: openTicketCountSql,
-    })
-    .from(roomsTable)
-    .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
-    .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
-    .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
-    .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(roomsTable.code);
+    const rows = await db
+      .select({
+        doc: buildingDocumentsTable,
+        uploadedByName: usersTable.name,
+      })
+      .from(buildingDocumentsTable)
+      .leftJoin(usersTable, eq(buildingDocumentsTable.uploadedById, usersTable.id))
+      .where(eq(buildingDocumentsTable.buildingId, id))
+      .orderBy(desc(buildingDocumentsTable.createdAt));
 
   const redact = !TICKET_MANAGER_ROLES.includes(req.currentUser!.role);
   res.json(rows.map((r) => serializeRoom(redact, r)));
 });
 
 router.get("/rooms/:id", async (req, res): Promise<void> => {
-  const id = Number(req.params.id);
+    const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     res.status(400).json({ message: "Ongeldig id" });
     return;
   }
-  const [row] = await db
-    .select({
-      room: roomsTable,
-      floorName: floorsTable.name,
-      buildingId: buildingsTable.id,
-      buildingName: buildingsTable.name,
-      siteName: sitesTable.name,
-      assetCount: assetCountSql,
-      openTicketCount: openTicketCountSql,
-    })
-    .from(roomsTable)
-    .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
-    .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
-    .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
-    .where(eq(roomsTable.id, id));
-  if (!row) {
-    res.status(404).json({ message: "Ruimte niet gevonden" });
-    return;
-  }
-  res.json(
-    serializeRoom(!TICKET_MANAGER_ROLES.includes(req.currentUser!.role), row),
-  );
-});
+    const [row] = await db
+      .select({
+        room: roomsTable,
+        floorName: floorsTable.name,
+        buildingId: buildingsTable.id,
+        buildingName: buildingsTable.name,
+        siteName: sitesTable.name,
+        assetCount: assetCountSql,
+        openTicketCount: openTicketCountSql,
+      })
+      .from(roomsTable)
+      .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
+      .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
+      .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
+      .where(eq(roomsTable.id, id));
+    res.json(serializeRoom(false, row!));
+  },
+);
 
-router.patch(
-  "/rooms/:id/dossier",
-  requireRole(...VASTGOED_MANAGE_ROLES),
-  async (req, res): Promise<void> => {
+router.get("/floors/:id/plan", async (req, res): Promise<void> => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
       res.status(400).json({ message: "Ongeldig id" });
       return;
     }
-    const parsed = UpdateRoomDossierBody.safeParse(req.body);
+    const parsed = CreateBuildingDocumentBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
     }
     const [existing] = await db
-      .select({ id: roomsTable.id })
-      .from(roomsTable)
-      .where(eq(roomsTable.id, id));
+      .select({ id: buildingDocumentsTable.id, objectPath: buildingDocumentsTable.objectPath })
+      .from(buildingDocumentsTable)
+      .where(eq(buildingDocumentsTable.id, id));
     if (!existing) {
       res.status(404).json({ message: "Ruimte niet gevonden" });
       return;
@@ -181,7 +166,7 @@ router.patch(
 );
 
 router.get("/floors/:id/plan", async (req, res): Promise<void> => {
-  const id = Number(req.params.id);
+    const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     res.status(400).json({ message: "Ongeldig id" });
     return;
@@ -218,6 +203,7 @@ router.get("/floors/:id/plan", async (req, res): Promise<void> => {
       code: r.code,
       functionType: r.functionType,
       areaM2: r.areaM2,
+      areaVvoM2: r.areaVvoM2,
       department: r.department,
       capacity: r.capacity,
       bookable: r.bookable,
@@ -226,21 +212,15 @@ router.get("/floors/:id/plan", async (req, res): Promise<void> => {
 });
 
 router.get("/buildings/:id", async (req, res): Promise<void> => {
-  const id = Number(req.params.id);
+    const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     res.status(400).json({ message: "Ongeldig id" });
     return;
   }
-  const [building] = await db
-    .select({
-      id: buildingsTable.id,
-      name: buildingsTable.name,
-      address: buildingsTable.address,
-      siteName: sitesTable.name,
-    })
-    .from(buildingsTable)
-    .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
-    .where(eq(buildingsTable.id, id));
+    const [building] = await db
+      .select({ id: buildingsTable.id })
+      .from(buildingsTable)
+      .where(eq(buildingsTable.id, id));
   if (!building) {
     res.status(404).json({ message: "Gebouw niet gevonden" });
     return;

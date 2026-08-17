@@ -10,6 +10,7 @@ import {
   useCreateBuildingDocument,
   useDeleteBuildingDocument,
   useGetCurrentUser,
+  useUpdateRoomDossier,
   getGetBuildingQueryKey,
   getGetFloorPlanQueryKey,
   getListBuildingDocumentsQueryKey,
@@ -25,6 +26,7 @@ import {
   Upload,
   Download,
   LayoutGrid,
+  Pencil,
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -180,20 +182,117 @@ const PALETTE = [
   "bg-teal-200 border-teal-400 text-teal-900",
 ];
 
-function Vlekkenplan({ floorId, colorBy }: { floorId: number; colorBy: "department" | "functionType" }) {
+function VlekEditDialog({
+  room,
+  floorId,
+  onClose,
+}: {
+  room: FloorPlanRoom;
+  floorId: number;
+  onClose: () => void;
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [department, setDepartment] = useState(room.department ?? "");
+  const [functionType, setFunctionType] = useState(room.functionType ?? "");
+  const update = useUpdateRoomDossier();
+
+  const submit = () => {
+    update.mutate(
+      {
+        id: room.id,
+        data: {
+          department: department.trim() === "" ? null : department.trim(),
+          functionType: functionType.trim() || undefined,
+        },
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: getGetFloorPlanQueryKey(floorId) });
+          toast({ title: "Ruimte bijgewerkt" });
+          onClose();
+        },
+        onError: () => toast({ title: "Bijwerken mislukt", variant: "destructive" }),
+      },
+    );
+  };
+
+  return (
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle className="flex items-center gap-2">
+          <Pencil className="h-4 w-4" /> {room.name} <span className="font-mono text-sm text-muted-foreground">({room.code})</span>
+        </DialogTitle>
+        <DialogDescription>
+          Wijzig afdeling of functie. Het vlekkenplan wordt direct bijgewerkt.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="vlek-dept">Afdeling</Label>
+          <Input
+            id="vlek-dept"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            placeholder="Bijv. Facilitair, ICT, HR"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="vlek-func">Functie</Label>
+          <Input
+            id="vlek-func"
+            value={functionType}
+            onChange={(e) => setFunctionType(e.target.value)}
+            placeholder="Bijv. Kantoor, Vergaderruimte"
+          />
+        </div>
+        <div className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground space-y-0.5">
+          <div>Oppervlakte: {room.areaM2 ?? "–"} m²</div>
+          {room.areaVvoM2 != null && <div>VVO: {room.areaVvoM2} m²</div>}
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose}>Annuleren</Button>
+        <Button onClick={submit} disabled={update.isPending}>
+          {update.isPending ? "Opslaan…" : "Opslaan"}
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+}
+
+function Vlekkenplan({
+  floorId,
+  colorBy,
+  canManage,
+}: {
+  floorId: number;
+  colorBy: "department" | "functionType";
+  canManage: boolean;
+}) {
   const [, setLocation] = useLocation();
+  const [editRoom, setEditRoom] = useState<FloorPlanRoom | null>(null);
   const { data: plan, isLoading } = useGetFloorPlan(floorId, {
     query: { queryKey: getGetFloorPlanQueryKey(floorId) },
   });
 
   const { colorMap, legend } = useMemo(() => {
     const map = new Map<string, string>();
+    const vvoByKey = new Map<string, number>();
     const rooms = plan?.rooms ?? [];
     for (const r of rooms) {
       const key = (colorBy === "department" ? r.department : r.functionType) ?? "Onbekend";
       if (!map.has(key)) map.set(key, PALETTE[map.size % PALETTE.length]!);
+      vvoByKey.set(key, (vvoByKey.get(key) ?? 0) + (r.areaVvoM2 ?? r.areaM2 ?? 0));
     }
-    return { colorMap: map, legend: Array.from(map.entries()) };
+    return {
+      colorMap: map,
+      legend: Array.from(map.entries()).map(([label, cls]) => ({
+        label,
+        cls,
+        vvo: vvoByKey.get(label) ?? 0,
+      })),
+    };
   }, [plan, colorBy]);
 
   if (isLoading) return <Skeleton className="h-48 w-full" />;
@@ -206,33 +305,50 @@ function Vlekkenplan({ floorId, colorBy }: { floorId: number; colorBy: "departme
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2 rounded-lg border bg-muted/30 p-3 min-h-[180px]" data-testid={`vlekkenplan-${floorId}`}>
-        {plan.rooms.map((r) => {
-          const share = (r.areaM2 ?? 0) / totalArea;
-          return (
-            <button
-              key={r.id}
-              onClick={() => setLocation(`/ruimtes/${r.id}`)}
-              className={cn(
-                "rounded-md border-2 p-2 text-left transition-transform hover:scale-[1.02] hover:shadow-md min-w-[90px]",
-                colorMap.get(keyOf(r)),
-              )}
-              style={{ flexGrow: Math.max(1, Math.round(share * 100)), flexBasis: `${Math.max(8, share * 100)}%` }}
-              title={`${r.name} (${r.code}) — ${r.areaM2 ?? "?"} m²`}
-              data-testid={`vlek-${r.code}`}
-            >
-              <div className="text-xs font-semibold truncate">{r.name}</div>
-              <div className="text-[10px] font-mono opacity-70">{r.code}</div>
-              <div className="text-[10px] opacity-80">{r.areaM2 ?? "?"} m² · {keyOf(r)}</div>
-            </button>
-          );
-        })}
-      </div>
-      <div className="flex flex-wrap gap-3">
-        {legend.map(([label, cls]) => (
+      <Dialog open={!!editRoom} onOpenChange={(open) => { if (!open) setEditRoom(null); }}>
+        <div
+          className="flex flex-wrap gap-2 rounded-lg border bg-muted/30 p-3 min-h-[180px]"
+          data-testid={`vlekkenplan-${floorId}`}
+        >
+          {plan.rooms.map((r) => {
+            const share = (r.areaM2 ?? 0) / totalArea;
+            return (
+              <button
+                key={r.id}
+                onClick={() => canManage ? setEditRoom(r) : setLocation(`/ruimtes/${r.id}`)}
+                className={cn(
+                  "rounded-md border-2 p-2 text-left transition-transform hover:scale-[1.02] hover:shadow-md min-w-[90px]",
+                  colorMap.get(keyOf(r)),
+                  canManage && "cursor-pointer",
+                )}
+                style={{ flexGrow: Math.max(1, Math.round(share * 100)), flexBasis: `${Math.max(8, share * 100)}%` }}
+                title={canManage ? `${r.name} — klik om afdeling/functie te wijzigen` : `${r.name} (${r.code}) — ${r.areaM2 ?? "?"} m²`}
+                data-testid={`vlek-${r.code}`}
+              >
+                <div className="text-xs font-semibold truncate">{r.name}</div>
+                <div className="text-[10px] font-mono opacity-70">{r.code}</div>
+                <div className="text-[10px] opacity-80">{r.areaM2 ?? "?"} m² · {keyOf(r)}</div>
+                {canManage && (
+                  <div className="text-[9px] opacity-50 mt-0.5 flex items-center gap-0.5">
+                    <Pencil className="h-2 w-2 inline" /> bewerken
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {editRoom && (
+          <VlekEditDialog room={editRoom} floorId={floorId} onClose={() => setEditRoom(null)} />
+        )}
+      </Dialog>
+      <div className="flex flex-wrap gap-x-4 gap-y-2">
+        {legend.map(({ label, cls, vvo }) => (
           <div key={label} className="flex items-center gap-1.5 text-xs">
-            <span className={cn("h-3 w-3 rounded-sm border-2 inline-block", cls)} />
+            <span className={cn("h-3 w-3 rounded-sm border-2 inline-block flex-shrink-0", cls)} />
             <span className="capitalize">{label}</span>
+            {vvo > 0 && (
+              <span className="text-muted-foreground">— {Math.round(vvo)} m² VVO</span>
+            )}
           </div>
         ))}
       </div>
@@ -327,7 +443,7 @@ export default function GebouwDetailPage({ id }: { id: string }) {
               </Button>
             ))}
           </div>
-          {activeFloorId != null && <Vlekkenplan floorId={activeFloorId} colorBy={colorBy} />}
+          {activeFloorId != null && <Vlekkenplan floorId={activeFloorId} colorBy={colorBy} canManage={canManage} />}
         </CardContent>
       </Card>
 
