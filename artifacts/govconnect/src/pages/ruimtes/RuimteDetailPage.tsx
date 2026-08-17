@@ -238,21 +238,27 @@ export default function RuimteDetailPage({ id }: { id: string }) {
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
-                    <Users className="h-4 w-4" /> Capaciteit
+                    <Users className="h-4 w-4" /> Bezetting
                   </dt>
-                  <dd className="font-medium text-base">{room.capacity || '-'} personen</dd>
+                  <dd className="font-medium text-base">{room.capacity != null ? `${room.capacity} personen` : "–"}</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
                     <LayoutGrid className="h-4 w-4" /> Functie
                   </dt>
-                  <dd className="font-medium text-base capitalize">{room.functionType}</dd>
+                  <dd className="font-medium text-base capitalize">{room.functionType || "–"}</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
                     <Layers className="h-4 w-4" /> Vloerafwerking
                   </dt>
-                  <dd className="font-medium text-base">{room.floorFinish || '-'}</dd>
+                  <dd className="font-medium text-base">{room.floorFinish || "–"}</dd>
+                </div>
+                <div className="space-y-1">
+                  <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
+                    <CalendarDays className="h-4 w-4" /> Boekbaarheid
+                  </dt>
+                  <dd className="font-medium text-base">{room.bookable ? "Boekbaar" : "Niet boekbaar"}</dd>
                 </div>
               </dl>
 
