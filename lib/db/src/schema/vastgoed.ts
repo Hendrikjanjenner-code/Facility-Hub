@@ -57,6 +57,9 @@ export const roomsTable = pgTable("rooms", {
   capacity: integer("capacity"),
   bookable: boolean("bookable").notNull().default(false),
   facilities: text("facilities").array().notNull().default([]),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const workplacesTable = pgTable("workplaces", {

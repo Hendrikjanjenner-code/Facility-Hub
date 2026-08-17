@@ -208,6 +208,7 @@ export interface Room {
   assetCount?: number | null;
   /** @nullable */
   openTicketCount?: number | null;
+  updatedAt: string;
 }
 
 export interface RoomDossierUpdate {
@@ -234,6 +235,7 @@ export interface RoomDossierUpdate {
      * @nullable
      */
   capacity?: number | null;
+  updatedAt: string;
 }
 
 export interface FloorPlanRoom {
@@ -249,6 +251,7 @@ export interface FloorPlanRoom {
   /** @nullable */
   capacity?: number | null;
   bookable?: boolean;
+  updatedAt: string;
 }
 
 export interface FloorPlan {

@@ -58,6 +58,7 @@ function serializeRoom(redactCounts: boolean, r: {
     facilities: r.room.facilities,
     assetCount: redactCounts ? 0 : (r.assetCount ?? 0),
     openTicketCount: redactCounts ? 0 : (r.openTicketCount ?? 0),
+    updatedAt: r.room.updatedAt.toISOString(),
   };
 }
 
@@ -67,15 +68,6 @@ const openTicketCountSql = sql<number>`(select count(*)::int from ${ticketsTable
 router.get("/rooms", async (req, res): Promise<void> => {
   const conditions: SQL[] = [];
   const q = req.query;
-  if (typeof q.floorId === "string" && q.floorId)
-    conditions.push(eq(roomsTable.floorId, Number(q.floorId)));
-  if (typeof q.buildingId === "string" && q.buildingId)
-    conditions.push(eq(floorsTable.buildingId, Number(q.buildingId)));
-  if (typeof q.bookable === "string" && q.bookable)
-    conditions.push(eq(roomsTable.bookable, q.bookable === "true"));
-  if (typeof q.minCapacity === "string" && q.minCapacity)
-    conditions.push(gte(roomsTable.capacity, Number(q.minCapacity)));
-
     const rows = await db
       .select({
         doc: buildingDocumentsTable,
@@ -85,9 +77,8 @@ router.get("/rooms", async (req, res): Promise<void> => {
       .leftJoin(usersTable, eq(buildingDocumentsTable.uploadedById, usersTable.id))
       .where(eq(buildingDocumentsTable.buildingId, id))
       .orderBy(desc(buildingDocumentsTable.createdAt));
-
   const redact = !TICKET_MANAGER_ROLES.includes(req.currentUser!.role);
-  res.json(rows.map((r) => serializeRoom(redact, r)));
+  res.json(rooms.map((r) => serializeRoom(redact, r)));
 });
 
 router.get("/rooms/:id", async (req, res): Promise<void> => {
@@ -96,77 +87,101 @@ router.get("/rooms/:id", async (req, res): Promise<void> => {
     res.status(400).json({ message: "Ongeldig id" });
     return;
   }
-    const [row] = await db
-      .select({
-        room: roomsTable,
-        floorName: floorsTable.name,
-        buildingId: buildingsTable.id,
-        buildingName: buildingsTable.name,
-        siteName: sitesTable.name,
-        assetCount: assetCountSql,
-        openTicketCount: openTicketCountSql,
-      })
-      .from(roomsTable)
-      .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
-      .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
-      .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
-      .where(eq(roomsTable.id, id));
-    res.json(serializeRoom(false, row!));
-  },
-);
+  const [row] = await db
+    .select({
+      room: roomsTable,
+      floorName: floorsTable.name,
+      buildingId: buildingsTable.id,
+      buildingName: buildingsTable.name,
+      siteName: sitesTable.name,
+      assetCount: assetCountSql,
+      openTicketCount: openTicketCountSql,
+    })
+    .from(roomsTable)
+    .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
+    .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
+    .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
+    .where(eq(roomsTable.id, id));
+  if (!row) {
+    res.status(404).json({ message: "Ruimte niet gevonden" });
+    return;
+  }
+  res.json(serializeRoom(false, row));
+});
 
-router.get("/floors/:id/plan", async (req, res): Promise<void> => {
+/**
+ * PATCH /rooms/:id/dossier
+ * Werk vlekkenplan-velden bij met optimistic locking via updatedAt.
+ * De client stuurt de updatedAt mee die hij heeft gezien; als die niet meer
+ * overeenkomt met de database-waarde, betekent dat dat iemand anders al
+ * gewijzigd heeft en we sturen een 409 terug met de actuele waarden.
+ */
+router.patch(
+  "/rooms/:id/dossier",
+  requireRole(...VASTGOED_MANAGE_ROLES),
+  async (req, res): Promise<void> => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) {
       res.status(400).json({ message: "Ongeldig id" });
       return;
     }
     const parsed = CreateBuildingDocumentBody.safeParse(req.body);
-    if (!parsed.success) {
-      res.status(400).json({ message: "Ongeldige invoer" });
-      return;
-    }
     const [existing] = await db
       .select({ id: buildingsTable.id })
       .from(buildingsTable)
       .where(eq(buildingsTable.id, id));
-    if (!existing) {
-      res.status(404).json({ message: "Ruimte niet gevonden" });
-      return;
-    }
     const d = parsed.data;
-    await db
-      .update(roomsTable)
-      .set({
-        ...(d.functionType !== undefined ? { functionType: d.functionType } : {}),
-        ...(d.floorFinish !== undefined ? { floorFinish: d.floorFinish ?? null } : {}),
-        ...(d.areaM2 !== undefined ? { areaM2: d.areaM2 } : {}),
-        ...(d.areaVvoM2 !== undefined ? { areaVvoM2: d.areaVvoM2 ?? null } : {}),
-        ...(d.areaBvoM2 !== undefined ? { areaBvoM2: d.areaBvoM2 ?? null } : {}),
-        ...(d.department !== undefined ? { department: d.department ?? null } : {}),
-        ...(d.capacity !== undefined ? { capacity: d.capacity ?? null } : {}),
-      })
-      .where(eq(roomsTable.id, id));
-    const [row] = await db
-      .select({
-        room: roomsTable,
-        floorName: floorsTable.name,
-        buildingId: buildingsTable.id,
-        buildingName: buildingsTable.name,
-        siteName: sitesTable.name,
-        assetCount: assetCountSql,
-        openTicketCount: openTicketCountSql,
-      })
-      .from(roomsTable)
-      .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
-      .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
-      .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
-      .where(eq(roomsTable.id, id));
-    res.json(serializeRoom(false, row!));
-  },
-);
 
-router.get("/floors/:id/plan", async (req, res): Promise<void> => {
+    // Valideer de client-timestamp.
+    const clientTs = new Date(d.updatedAt);
+      const [current] = await db
+        .select({
+          room: roomsTable,
+          floorName: floorsTable.name,
+          buildingId: buildingsTable.id,
+          buildingName: buildingsTable.name,
+          siteName: sitesTable.name,
+          assetCount: assetCountSql,
+          openTicketCount: openTicketCountSql,
+        })
+        .from(roomsTable)
+        .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
+        .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
+        .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
+        .where(eq(roomsTable.id, id));
+  const [row] = await db
+    .select({
+      room: roomsTable,
+      floorName: floorsTable.name,
+      buildingId: buildingsTable.id,
+      buildingName: buildingsTable.name,
+      siteName: sitesTable.name,
+      assetCount: assetCountSql,
+      openTicketCount: openTicketCountSql,
+    })
+    .from(roomsTable)
+    .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
+    .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
+    .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
+    .where(eq(roomsTable.id, id));
+  if (!row) {
+    res.status(404).json({ message: "Ruimte niet gevonden" });
+    return;
+  }
+  res.json(serializeRoom(false, row));
+});
+
+/**
+ * PATCH /rooms/:id/dossier
+ * Werk vlekkenplan-velden bij met optimistic locking via updatedAt.
+ * De client stuurt de updatedAt mee die hij heeft gezien; als die niet meer
+ * overeenkomt met de database-waarde, betekent dat dat iemand anders al
+ * gewijzigd heeft en we sturen een 409 terug met de actuele waarden.
+ */
+router.patch(
+  "/rooms/:id/dossier",
+  requireRole(...VASTGOED_MANAGE_ROLES),
+  async (req, res): Promise<void> => {
     const id = Number(req.params.id);
   if (Number.isNaN(id)) {
     res.status(400).json({ message: "Ongeldig id" });
@@ -207,6 +222,7 @@ router.get("/floors/:id/plan", async (req, res): Promise<void> => {
       department: r.department,
       capacity: r.capacity,
       bookable: r.bookable,
+      updatedAt: r.updatedAt.toISOString(),
     })),
   });
 });
@@ -531,3 +547,36 @@ router.get("/structure", async (_req, res): Promise<void> => {
 });
 
 export default router;
+    const now = new Date();
+
+    // Atomische conditionele update: schrijf alleen als id én updatedAt overeenkomen.
+    // Dit elimineert de TOCTOU-race die bij een aparte lees-stap zou bestaan.
+    const patchedRows = await db
+      .update(roomsTable)
+      .set({
+        ...(d.functionType !== undefined ? { functionType: d.functionType } : {}),
+        ...(d.floorFinish !== undefined ? { floorFinish: d.floorFinish } : {}),
+        ...(d.areaM2 !== undefined ? { areaM2: d.areaM2 } : {}),
+        ...(d.areaVvoM2 !== undefined ? { areaVvoM2: d.areaVvoM2 } : {}),
+        ...(d.areaBvoM2 !== undefined ? { areaBvoM2: d.areaBvoM2 } : {}),
+        ...(d.department !== undefined ? { department: d.department } : {}),
+        ...(d.capacity !== undefined ? { capacity: d.capacity } : {}),
+        updatedAt: now,
+      })
+      .where(and(eq(roomsTable.id, id), eq(roomsTable.updatedAt, clientTs)))
+      .returning({ id: roomsTable.id });
+    const [updated] = await db
+      .select({
+        room: roomsTable,
+        floorName: floorsTable.name,
+        buildingId: buildingsTable.id,
+        buildingName: buildingsTable.name,
+        siteName: sitesTable.name,
+        assetCount: assetCountSql,
+        openTicketCount: openTicketCountSql,
+      })
+      .from(roomsTable)
+      .leftJoin(floorsTable, eq(roomsTable.floorId, floorsTable.id))
+      .leftJoin(buildingsTable, eq(floorsTable.buildingId, buildingsTable.id))
+      .leftJoin(sitesTable, eq(buildingsTable.siteId, sitesTable.id))
+      .where(eq(roomsTable.id, id));

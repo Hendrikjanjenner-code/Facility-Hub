@@ -61,6 +61,7 @@ function DossierEditDialog({ room }: { room: Room }) {
           areaBvoM2: areaBvo === "" ? null : Number(areaBvo),
           department: department === "" ? null : department,
           functionType: functionType || undefined,
+          updatedAt: room.updatedAt,
         },
       },
       {
@@ -69,7 +70,20 @@ function DossierEditDialog({ room }: { room: Room }) {
           toast({ title: "Ruimtedossier bijgewerkt" });
           setOpen(false);
         },
-        onError: () => toast({ title: "Bijwerken mislukt", variant: "destructive" }),
+        onError: (error) => {
+          if (error.status === 409) {
+            queryClient.invalidateQueries({ queryKey: getGetRoomQueryKey(room.id) });
+            toast({
+              title: "Ruimte ondertussen gewijzigd",
+              description:
+                "Iemand anders heeft deze ruimte zojuist bewerkt. De dialoog is gesloten — open hem opnieuw om de actuele waarden te zien.",
+              variant: "destructive",
+            });
+            setOpen(false);
+          } else {
+            toast({ title: "Bijwerken mislukt", variant: "destructive" });
+          }
+        },
       },
     );
   };

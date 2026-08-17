@@ -374,7 +374,8 @@ export const UpdateRoomDossierBody = zod.object({
   "areaVvoM2": zod.number().min(updateRoomDossierBodyAreaVvoM2Min).nullish(),
   "areaBvoM2": zod.number().min(updateRoomDossierBodyAreaBvoM2Min).nullish(),
   "department": zod.string().nullish(),
-  "capacity": zod.int().min(updateRoomDossierBodyCapacityMin).nullish()
+  "capacity": zod.int().min(updateRoomDossierBodyCapacityMin).nullish(),
+  "updatedAt": zod.string()
 })
 
 export const UpdateRoomDossierResponse = zod.object({
@@ -396,7 +397,8 @@ export const UpdateRoomDossierResponse = zod.object({
   "bookable": zod.boolean(),
   "facilities": zod.array(zod.string()),
   "assetCount": zod.int().nullish(),
-  "openTicketCount": zod.int().nullish()
+  "openTicketCount": zod.int().nullish(),
+  "updatedAt": zod.string()
 })
 
 

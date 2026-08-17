@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { pool } from "@workspace/db";
 import { ensureContractExpiryNotifications } from "./routes/contracts";
 import { cleanupOrphanedDocumentUploads } from "./lib/orphanCleanup";
 
@@ -35,6 +36,16 @@ async function runOrphanCleanup() {
   } catch (err) {
     logger.error({ err }, "Fout bij wees-upload opruimroutine");
   }
+}
+
+// Idempotente startup-migratie: voeg updated_at toe aan rooms als die ontbreekt.
+// Nodig voor bestaande databases die vóór dit schema-veld zijn aangemaakt.
+try {
+  await pool.query(
+    `ALTER TABLE rooms ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`,
+  );
+} catch (err) {
+  logger.warn({ err }, "Startup-migratie rooms.updated_at mislukt; doorgaan");
 }
 
 app.listen(port, (err) => {

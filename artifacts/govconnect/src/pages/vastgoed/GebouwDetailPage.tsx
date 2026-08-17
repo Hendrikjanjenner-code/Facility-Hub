@@ -293,6 +293,7 @@ function VlekEditDialog({
         data: {
           department: department.trim() === "" ? null : department.trim(),
           functionType: functionType.trim() || undefined,
+          updatedAt: room.updatedAt,
         },
       },
       {
@@ -301,7 +302,20 @@ function VlekEditDialog({
           toast({ title: "Ruimte bijgewerkt" });
           onClose();
         },
-        onError: () => toast({ title: "Bijwerken mislukt", variant: "destructive" }),
+        onError: (error) => {
+          if (error.status === 409) {
+            queryClient.invalidateQueries({ queryKey: getGetFloorPlanQueryKey(floorId) });
+            toast({
+              title: "Ruimte ondertussen gewijzigd",
+              description:
+                "Iemand anders heeft dit vlekkenplan-item zojuist bewerkt. Sluit de dialoog en probeer het opnieuw.",
+              variant: "destructive",
+            });
+            onClose();
+          } else {
+            toast({ title: "Bijwerken mislukt", variant: "destructive" });
+          }
+        },
       },
     );
   };

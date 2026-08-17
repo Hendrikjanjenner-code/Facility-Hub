@@ -30,4 +30,5 @@ export interface RoomDossierUpdate {
      * @nullable
      */
   capacity?: number | null;
+  updatedAt: string;
 }

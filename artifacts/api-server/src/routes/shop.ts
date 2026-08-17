@@ -28,7 +28,7 @@ router.use("/budgets", requireRole("facilitair_manager", "beheerder"));
 const MANAGER_ROLES = ["facilitair_manager", "beheerder"];
 const SPENT_STATUSES = ["goedgekeurd", "besteld", "geleverd"];
 
-function serializeProduct(p: typeof shopProductsTable.$inferSelect) {
+function serializeProduct(p: typeof shopProductsTable.$inferSelect & { supplierName?: string | null }) {
   return {
     id: p.id,
     name: p.name,
@@ -39,6 +39,9 @@ function serializeProduct(p: typeof shopProductsTable.$inferSelect) {
     stock: p.stock,
     minStock: p.minStock,
     belowMinStock: p.stock < p.minStock,
+    active: p.active === 1,
+    supplierId: (p as any).supplierId ?? null,
+    supplierName: (p as any).supplierName ?? null,
   };
 }
 async function loadOrders(where?: SQL) {
@@ -222,6 +225,24 @@ async function notifyLowStock(p: typeof shopProductsTable.$inferSelect): Promise
     const p = byId.get(productId);
   const department = user.department ?? "Onbekend";
   const currentYear = new Date().getFullYear();
+
+  const [allBudgets, orders] = await Promise.all([
+    db.select().from(budgetsTable).orderBy(budgetsTable.department),
+    db
+      .select({
+        department: shopOrdersTable.department,
+        status: shopOrdersTable.status,
+        total: shopOrdersTable.totalAmount,
+        createdAt: shopOrdersTable.createdAt,
+      })
+      .from(shopOrdersTable)
+      .where(
+        and(
+          inArray(shopOrdersTable.status, [...SPENT_STATUSES, "ingediend"]),
+          gte(shopOrdersTable.createdAt, new Date(`${currentYear}-01-01T00:00:00Z`)),
+        ),
+      ),
+  ]);
   let order: typeof shopOrdersTable.$inferSelect;
 
       const [budgetRow] = await tx

@@ -17,4 +17,5 @@ export interface FloorPlanRoom {
   /** @nullable */
   capacity?: number | null;
   bookable?: boolean;
+  updatedAt: string;
 }
