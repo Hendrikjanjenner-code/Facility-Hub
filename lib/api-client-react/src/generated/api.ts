@@ -2316,6 +2316,11 @@ export const useUploadStorageDocument = <TError = ErrorType<ErrorEnvelope>,
       return useMutation(getUploadStorageDocumentMutationOptions(options));
     }
 
+export const getDeleteSiteUrl = (id: number,) => {
+
+
+  return `/api/sites/${id}`
+}
 export const getGetStructureUrl = () => {
 
 
@@ -6552,6 +6557,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type UpdateKnowledgeArticleMutationBody = BodyType<KnowledgeArticleUpdate>
     export type UpdateKnowledgeArticleMutationError = ErrorType<ApiMessage>
 
+    export type DeleteSiteMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSite>>>
+
 export const getDeleteKnowledgeArticleUrl = (id: number) => `/api/knowledge-articles/${id}`
 
     /**
@@ -6826,6 +6833,8 @@ export function useGetSatisfactionReport<TData = Awaited<ReturnType<typeof getSa
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+    export type DeleteSiteMutationError = ErrorType<ApiMessage>
+
 
 export const getDeleteKnowledgeArticleMutationOptions = <TError = ErrorType<ApiMessage>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKnowledgeArticle>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
@@ -6866,3 +6875,52 @@ export const deleteKnowledgeArticle = async (id: number, options?: Parameters<ty
     method: 'DELETE',
   });
 }
+
+/**
+ * @summary Verwijder een locatie inclusief alle gebouwen, documenten en storage-bestanden
+ */
+export const deleteSite = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteSiteUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+export const getDeleteSiteMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSite>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSite>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteSite'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSite>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteSite(id,requestOptions)
+        }
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    /**
+ * @summary Verwijder een locatie inclusief alle gebouwen, documenten en storage-bestanden
+ */
+export const useDeleteSite = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSite>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSite>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteSiteMutationOptions(options));
+    }

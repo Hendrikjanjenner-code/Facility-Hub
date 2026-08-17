@@ -868,6 +868,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
+  /sites/{id}:
+    delete:
+      operationId: deleteSite
+      tags:
+        - vastgoed
+      summary: Verwijder een locatie inclusief alle gebouwen, documenten en storage-bestanden
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Locatie verwijderd
+        '404':
+          description: Locatie niet gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /structure:
     get:
       operationId: getStructure

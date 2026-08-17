@@ -6,14 +6,23 @@ import {
   buildingsTable,
   floorsTable,
   roomsTable,
+  workplacesTable,
+  roomDossierHistoryTable,
   assetsTable,
   ticketsTable,
   buildingDocumentsTable,
   conditiemetingenTable,
   usersTable,
-  roomDossierHistoryTable,
+  bouwdelenTable,
+  mjopTakenTable,
+  mjopScenariosTable,
+  meterReadingsTable,
+  wasteRegistrationsTable,
+  reservationsTable,
+  keysTable,
+  keyDoorsTable,
 } from "@workspace/db";
-import { eq, and, gte, sql, notInArray, desc, ne, type SQL } from "drizzle-orm";
+import { eq, and, gte, sql, inArray, notInArray, desc, ne, type SQL } from "drizzle-orm";
 import {
   UpdateRoomDossierBody,
   CreateBuildingDocumentBody,
@@ -614,6 +623,148 @@ router.get("/floors/:id/dossier-history", requireRole(...VASTGOED_MANAGE_ROLES),
   })));
 });
 
+router.delete(
+  "/sites/:id",
+  requireRole(...VASTGOED_MANAGE_ROLES),
+  async (req, res): Promise<void> => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
+
+    const [site] = await db.select({ id: sitesTable.id }).from(sitesTable).where(eq(sitesTable.id, id));
+    if (!site) { res.status(404).json({ message: "Locatie niet gevonden" }); return; }
+
+    // 1. Verzamel alle building-, floor- en room-IDs onder deze locatie
+    const buildings = await db
+      .select({ id: buildingsTable.id })
+      .from(buildingsTable)
+      .where(eq(buildingsTable.siteId, id));
+    const buildingIds = buildings.map((b) => b.id);
+
+    if (buildingIds.length > 0) {
+      const floors = await db
+        .select({ id: floorsTable.id })
+        .from(floorsTable)
+        .where(inArray(floorsTable.buildingId, buildingIds));
+      const floorIds = floors.map((f) => f.id);
+
+      const rooms = floorIds.length > 0
+        ? await db.select({ id: roomsTable.id }).from(roomsTable).where(inArray(roomsTable.floorId, floorIds))
+        : [];
+      const roomIds = rooms.map((r) => r.id);
+
+      // 2. Verzamel alle te verwijderen storage-paden VÓÓR de DB-verwijdering.
+      //    isObjectPathReferenced controleert building_documents én conditiemetingen (JSONB),
+      //    dus de rijen moeten al weg zijn voordat we de check uitvoeren.
+
+      // 2a. Building-document paden
+      const docs = await db
+        .select({ id: buildingDocumentsTable.id, objectPath: buildingDocumentsTable.objectPath })
+        .from(buildingDocumentsTable)
+        .where(inArray(buildingDocumentsTable.buildingId, buildingIds));
+      const docPaths = docs.map((d) => d.objectPath);
+
+      // 2b. Conditiemeting-fotopaden uit JSONB (best effort: lege array bij fout)
+      const bouwdelen = await db
+        .select({ id: bouwdelenTable.id })
+        .from(bouwdelenTable)
+        .where(inArray(bouwdelenTable.buildingId, buildingIds));
+      const bouwdeelIds = bouwdelen.map((b) => b.id);
+
+      let conditionPhotoPaths: string[] = [];
+      if (bouwdeelIds.length > 0) {
+        const rows = await db.execute<{ photo_path: string }>(sql`
+          SELECT DISTINCT elem->>'photoPath' AS photo_path
+          FROM ${conditiemetingenTable},
+               jsonb_array_elements(${conditiemetingenTable.gebreken}) AS elem
+          WHERE ${conditiemetingenTable.bouwdeelId} = ANY(ARRAY[${sql.join(bouwdeelIds.map((bid) => sql`${bid}`), sql`, `)}]::int[])
+            AND elem->>'photoPath' IS NOT NULL
+        `);
+        conditionPhotoPaths = rows.rows.map((r) => r.photo_path);
+      }
+
+      // 3. Verwijder DB-records in de juiste FK-volgorde
+      //    3a. MJOP: taken, conditiemetingen, bouwdelen
+      if (bouwdeelIds.length > 0) {
+        await db.delete(mjopTakenTable).where(inArray(mjopTakenTable.bouwdeelId, bouwdeelIds));
+        await db.delete(conditiemetingenTable).where(inArray(conditiemetingenTable.bouwdeelId, bouwdeelIds));
+        await db.delete(bouwdelenTable).where(inArray(bouwdelenTable.id, bouwdeelIds));
+      }
+
+      // 3b. Building-documents
+      await db.delete(buildingDocumentsTable).where(inArray(buildingDocumentsTable.buildingId, buildingIds));
+
+      // 5. MJOP-scenario's: ontkoppel de buildingId (nullable)
+      await db
+        .update(mjopScenariosTable)
+        .set({ buildingId: null })
+        .where(inArray(mjopScenariosTable.buildingId, buildingIds));
+
+      // 6. Duurzaamheid: verwijder meterstanden en afvalregistraties (NOT NULL buildingId)
+      await db.delete(meterReadingsTable).where(inArray(meterReadingsTable.buildingId, buildingIds));
+      await db.delete(wasteRegistrationsTable).where(inArray(wasteRegistrationsTable.buildingId, buildingIds));
+
+      // 7. Ontkoppel sleutel-gerelateerde verwijzingen (nullable)
+      await db
+        .update(keysTable)
+        .set({ buildingId: null })
+        .where(inArray(keysTable.buildingId, buildingIds));
+      if (roomIds.length > 0) {
+        await db.update(keyDoorsTable).set({ roomId: null }).where(inArray(keyDoorsTable.roomId, roomIds));
+
+        // 8. Ontkoppel assets, tickets en reserveringen (nullable roomId/workplaceId)
+        await db.update(assetsTable).set({ roomId: null }).where(inArray(assetsTable.roomId, roomIds));
+        await db.update(ticketsTable).set({ roomId: null }).where(inArray(ticketsTable.roomId, roomIds));
+        await db.update(reservationsTable).set({ roomId: null }).where(inArray(reservationsTable.roomId, roomIds));
+      }
+
+      if (floorIds.length > 0) {
+        // Ontkoppel werkplek-reserveringen via workplaces
+        const workplaces = await db
+          .select({ id: workplacesTable.id })
+          .from(workplacesTable)
+          .where(inArray(workplacesTable.floorId, floorIds));
+        const workplaceIds = workplaces.map((w) => w.id);
+        if (workplaceIds.length > 0) {
+          await db
+            .update(reservationsTable)
+            .set({ workplaceId: null })
+            .where(inArray(reservationsTable.workplaceId, workplaceIds));
+        }
+      }
+
+      // 9. Verwijder kamer-dossierhistorie, werkplekken, kamers, verdiepingen en gebouwen
+      if (roomIds.length > 0) {
+        await db.delete(roomDossierHistoryTable).where(inArray(roomDossierHistoryTable.roomId, roomIds));
+        await db.delete(roomsTable).where(inArray(roomsTable.id, roomIds));
+      }
+      if (floorIds.length > 0) {
+        await db.delete(workplacesTable).where(inArray(workplacesTable.floorId, floorIds));
+        await db.delete(floorsTable).where(inArray(floorsTable.id, floorIds));
+      }
+      await db.delete(buildingsTable).where(inArray(buildingsTable.id, buildingIds));
+
+      // 10. Verwijder storage-bestanden NADAT alle DB-rijen weg zijn.
+      //     isObjectPathReferenced vindt nu geen rijen meer, dus de bestanden worden verwijderd.
+      const storageService = new ObjectStorageService();
+      const allStoragePaths = [...new Set([...docPaths, ...conditionPhotoPaths])];
+      for (const objectPath of allStoragePaths) {
+        try {
+          if (!(await isObjectPathReferenced(objectPath))) {
+            await storageService.deleteObject(objectPath);
+            req.log.info({ objectPath, siteId: id }, "Storage-bestand verwijderd bij verwijdering locatie");
+          }
+        } catch (err) {
+          req.log.warn({ err, objectPath, siteId: id }, "Kon storage-bestand niet verwijderen bij verwijdering locatie");
+        }
+      }
+    }
+
+    // 11. Verwijder de locatie zelf
+    await db.delete(sitesTable).where(eq(sitesTable.id, id));
+    req.log.info({ siteId: id, buildingCount: buildingIds.length }, "Locatie verwijderd");
+    res.status(204).end();
+  },
+);
 router.get("/structure", async (_req, res): Promise<void> => {
   const [orgs, sites, buildings, floors, roomCounts] = await Promise.all([
     db.select().from(organizationsTable),

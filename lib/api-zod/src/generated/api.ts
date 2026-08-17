@@ -964,7 +964,12 @@ export const UploadStorageDocumentResponse = zod.object({
   "objectPath": zod.string()
 })
 
-
+/**
+ * @summary Verwijder een locatie inclusief alle gebouwen, documenten en storage-bestanden
+ */
+export const DeleteSiteParams = zod.object({
+  "id": zod.coerce.number().int()
+})
 /**
  * @summary Full vastgoedstructuur (organisatie > vestiging > gebouw > verdieping)
  */
@@ -2667,9 +2672,6 @@ export const UpdateKnowledgeArticleParams = zod.object({
 })
 
 
-
-
-
 export const UpdateKnowledgeArticleBody = zod.object({
   "title": zod.string().min(1).optional(),
   "body": zod.string().min(1).optional(),
@@ -2825,3 +2827,5 @@ export const UpdateKeyIssueDueResponse = zod.object({
   "createdAt": zod.string()
 }))
 })
+
+export const DeleteSiteResponse = zod.void()
