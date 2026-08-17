@@ -10,8 +10,10 @@ import {
   buildingsTable,
   assetsTable,
   mjopTakenTable,
+  notificationsTable,
   type Ticket,
 } from "@workspace/db";
+
 import { eq, desc, and, ilike, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
@@ -315,16 +317,20 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
   if (data.title) update.title = data.title;
   if (data.description) update.description = data.description;
 
-  // Update the ticket and (when closing) the linked MJOP task atomically
+  const closingTicket =
+    data.status &&
+    data.status !== existing.status &&
+    (data.status === "gereed" || data.status === "gesloten");
+
+  // Update the ticket and (when closing) auto-complete linked MJOP tasks atomically.
+  // RETURNING ensures we only notify for rows actually transitioned in this request
+  // (prevents duplicate alerts from concurrent ticket-close requests).
+  // Notification rows are inserted inside the same transaction so a failure rolls everything back.
   await db.transaction(async (tx) => {
     await tx.update(ticketsTable).set(update).where(eq(ticketsTable.id, id));
 
-    if (
-      data.status &&
-      data.status !== existing.status &&
-      (data.status === "gereed" || data.status === "gesloten")
-    ) {
-      await tx
+    if (closingTicket) {
+      const completedTaken = await tx
         .update(mjopTakenTable)
         .set({ status: "afgerond" })
         .where(
@@ -335,7 +341,28 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
               eq(mjopTakenTable.status, "gepland"),
             ),
           ),
-        );
+        )
+        .returning();
+
+      if (completedTaken.length > 0) {
+        // Resolve beheerder recipients inside the transaction for atomicity
+        const beheerders = await tx
+          .select({ id: usersTable.id })
+          .from(usersTable)
+          .where(eq(usersTable.role, "beheerder"));
+
+        for (const taak of completedTaken) {
+          for (const u of beheerders) {
+            await tx.insert(notificationsTable).values({
+              userId: u.id,
+              title: `MJOP-taak automatisch afgerond`,
+              body: `"${taak.title}" is automatisch afgerond via melding ${existing.number}.`,
+              kind: "mjop",
+              linkPath: `/mjop/bouwdelen/${taak.bouwdeelId}`,
+            });
+          }
+        }
+      }
     }
   });
 
