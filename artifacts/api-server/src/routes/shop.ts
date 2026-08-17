@@ -640,6 +640,15 @@ router.post(
       });
     }
 
+    // Notify the requester that their order has been sent to the supplier.
+    await db.insert(notificationsTable).values({
+      userId: order.requesterId,
+      title: `Bestelling ${order.number} verstuurd naar leverancier`,
+      body: `Je bestelling ${order.number} is digitaal verstuurd naar ${supplier?.name ?? "de leverancier"}.`,
+      kind: "webshop",
+      linkPath: "/webshop",
+    });
+
     const [result] = await loadOrders(eq(shopOrdersTable.id, id));
     res.json(result);
   },
