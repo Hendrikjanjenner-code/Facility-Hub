@@ -151,12 +151,13 @@ const DOSSIER_FIELDS = [
   "areaBvoM2",
   "department",
   "capacity",
+  "bookable",
 ] as const;
 type DossierField = (typeof DOSSIER_FIELDS)[number];
 type DossierChange = {
   field: DossierField;
-  from: string | number | null;
-  to: string | number | null;
+  from: string | number | boolean | null;
+  to: string | number | boolean | null;
 };
 
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -165,16 +166,16 @@ async function applyDossierUpdateTx(
   tx: DbTransaction,
   roomId: number,
   current: typeof roomsTable.$inferSelect,
-  updates: Partial<Record<DossierField, string | number | null>>,
+  updates: Partial<Record<DossierField, string | number | boolean | null>>,
   changedById: number,
   isUndo: boolean,
 ): Promise<DossierChange[]> {
   const changes: DossierChange[] = [];
-  const set: Record<string, string | number | null | Date> = {};
+  const set: Record<string, string | number | boolean | null | Date> = {};
   for (const field of DOSSIER_FIELDS) {
     if (!(field in updates)) continue;
     const to = updates[field] ?? null;
-    const from = (current[field] ?? null) as string | number | null;
+    const from = (current[field] ?? null) as string | number | boolean | null;
     if (from === to) continue;
     set[field] = to;
     changes.push({ field, from, to });
@@ -264,7 +265,7 @@ router.post(
         .limit(1);
       if (!last) return { status: 404 as const, message: "Geen wijzigingen om ongedaan te maken" };
       if (last.isUndo) return { status: 409 as const, message: "Laatste wijziging is al ongedaan gemaakt" };
-      const updates: Partial<Record<DossierField, string | number | null>> = {};
+      const updates: Partial<Record<DossierField, string | number | boolean | null>> = {};
       for (const c of last.changes as DossierChange[]) updates[c.field] = c.from;
       await applyDossierUpdateTx(tx, id, current, updates, req.currentUser!.id, true);
       return { status: 200 as const };

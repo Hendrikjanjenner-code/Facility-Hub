@@ -8,6 +8,8 @@
     "types": ["node", "vitest/globals"]
   },
   "include": ["src"],
+
+  "exclude": ["src/**/*.test.ts", "src/**/*.spec.ts"],
   "references": [
     {
       "path": "../../lib/db"

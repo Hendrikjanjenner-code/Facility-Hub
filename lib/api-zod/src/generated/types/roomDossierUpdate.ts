@@ -30,5 +30,6 @@ export interface RoomDossierUpdate {
      * @nullable
      */
   capacity?: number | null;
+  bookable?: boolean;
   updatedAt: string;
 }

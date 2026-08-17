@@ -41,6 +41,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -55,6 +56,8 @@ function DossierEditDialog({ room }: { room: Room }) {
   const [areaBvo, setAreaBvo] = useState(room.areaBvoM2?.toString() ?? "");
   const [department, setDepartment] = useState(room.department ?? "");
   const [functionType, setFunctionType] = useState(room.functionType ?? "");
+  const [capacity, setCapacity] = useState(room.capacity?.toString() ?? "");
+  const [bookable, setBookable] = useState(room.bookable ?? false);
   const update = useUpdateRoomDossier();
 
   const submit = () => {
@@ -67,6 +70,8 @@ function DossierEditDialog({ room }: { room: Room }) {
           areaBvoM2: areaBvo === "" ? null : Number(areaBvo),
           department: department === "" ? null : department,
           functionType: functionType || undefined,
+          capacity: capacity === "" ? null : Number(capacity),
+          bookable,
           updatedAt: room.updatedAt ?? "",
         },
       },
@@ -128,6 +133,17 @@ function DossierEditDialog({ room }: { room: Room }) {
             <Label htmlFor="d-dept">Afdeling</Label>
             <Input id="d-dept" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Bijv. Burgerzaken" />
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="d-capacity">Bezetting (personen)</Label>
+            <Input id="d-capacity" type="number" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)} placeholder="Bijv. 12" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="d-bookable">Boekbaar</Label>
+            <div className="flex items-center gap-2 pt-1">
+              <Switch id="d-bookable" checked={bookable} onCheckedChange={setBookable} />
+              <span className="text-sm text-muted-foreground">{bookable ? "Ja" : "Nee"}</span>
+            </div>
+          </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Annuleren</Button>
@@ -145,7 +161,8 @@ const FIELD_LABELS: Record<string, string> = {
   areaVvoM2: "VVO (m²)",
   areaBvoM2: "BVO (m²)",
   department: "Afdeling",
-  capacity: "Capaciteit",
+  capacity: "Bezetting (personen)",
+  bookable: "Boekbaar",
 };
 export default function RuimteDetailPage({ id }: { id: string }) {
   const roomId = parseInt(id);
@@ -476,4 +493,3 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
     </Card>
   );
 }
-

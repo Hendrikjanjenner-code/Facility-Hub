@@ -214,6 +214,12 @@ export interface Room {
   openTicketCount?: number | null;
   updatedAt: string;
 }
+
+export interface UndoRoomDossierEntryResult {
+  room: Room;
+  skippedFields: string[];
+}
+
 export interface RoomDossierUpdate {
   /** @minLength 1 */
   functionType?: string;
@@ -238,13 +244,14 @@ export interface RoomDossierUpdate {
      * @nullable
      */
   capacity?: number | null;
+  bookable?: boolean;
   updatedAt: string;
 }
 
 export interface RoomDossierChange {
   field: string;
-  from?: string | number | null;
-  to?: string | number | null;
+  from?: string | number | boolean | null;
+  to?: string | number | boolean | null;
 }
 
 export interface RoomDossierHistoryEntry {
@@ -256,10 +263,7 @@ export interface RoomDossierHistoryEntry {
   isUndo: boolean;
   changes: RoomDossierChange[];
 }
-export interface UndoRoomDossierEntryResult {
-  room: Room;
-  skippedFields: string[];
-}
+
 export interface FloorDossierHistoryEntry {
   id: number;
   roomId: number;
@@ -387,8 +391,6 @@ export interface KeyIssueRecord {
   issuedByName?: string | null;
   issuedAt: string;
   /** @nullable */
-  dueAt?: string | null;
-  /** @nullable */
   returnedAt?: string | null;
   /** @nullable */
   dueAt?: string | null;
@@ -474,17 +476,11 @@ export interface KeyDoorInput {
 export interface KeyIssueInput {
   holderId: number;
   /** @nullable */
-  dueAt?: string | null;
-  /** @nullable */
   note?: string | null;
   /** @nullable */
   dueAt?: string | null;
 }
 
-export interface KeyIssueDueUpdate {
-  /** @nullable */
-  dueAt?: string | null;
-}
 export interface KeyLossInput {
   /**
      * @minimum 0
@@ -1064,25 +1060,6 @@ export interface MeterReading {
   registeredByName?: string | null;
 }
 
-export interface MeterReadingAuditEntry {
-  id: number;
-  meterReadingId: number;
-  /** correctie | verwijderd */
-  action: string;
-  /** @nullable */
-  changedById?: number | null;
-  /** @nullable */
-  changedByName?: string | null;
-  changedAt: string;
-  /** @nullable */
-  oldReadingDate?: string | null;
-  /** @nullable */
-  newReadingDate?: string | null;
-  /** @nullable */
-  oldValue?: number | null;
-  /** @nullable */
-  newValue?: number | null;
-}
 export interface MeterReadingInput {
   buildingId: number;
   meterType: string;
@@ -1429,17 +1406,7 @@ export interface SatisfactionResponseItem {
   comment?: string | null;
   submittedAt: string;
 }
-export interface SatisfactionReport {
-  totalResponses: number;
-  averageScore: number;
-  closedTickets: number;
-  /** Percentage of closed tickets with a satisfaction score (0-100) */
-  responseRate: number;
-  byScore: CountByKey[];
-  byCategory: SatisfactionByCategory[];
-  recentResponses: SatisfactionResponseItem[];
-  byCategory?: SatisfactionByCategory[];
-}
+
 export interface SatisfactionByCategory {
   categoryId: number;
   categoryName: string;
@@ -1448,6 +1415,18 @@ export interface SatisfactionByCategory {
   /** Percentage of closed tickets with a satisfaction score (0-100) */
   responseRate: number;
 }
+
+export interface SatisfactionReport {
+  totalResponses: number;
+  averageScore: number;
+  closedTickets: number;
+  /** Percentage of closed tickets with a satisfaction score (0-100) */
+  responseRate: number;
+  byScore: CountByKey[];
+  recentResponses: SatisfactionResponseItem[];
+  byCategory: SatisfactionByCategory[];
+}
+
 export interface KnowledgeArticleUpdate {
   /** @minLength 1 */
   title?: string;
@@ -1577,3 +1556,4 @@ export type SuggestKnowledgeArticlesParams = {
 q?: string;
 ticketCategoryId?: number;
 };
+

@@ -8,6 +8,6 @@
 
 export interface RoomDossierChange {
   field: string;
-  from?: string | number | null;
-  to?: string | number | null;
+  from?: string | number | boolean | null;
+  to?: string | number | boolean | null;
 }
