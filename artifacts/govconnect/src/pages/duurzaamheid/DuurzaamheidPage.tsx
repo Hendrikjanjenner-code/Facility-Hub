@@ -78,6 +78,13 @@ function parseCsv(text: string): { headers: string[]; rows: string[][] } {
   return { headers, rows: lines.slice(1).map((l) => l.split(sep).map((c) => c.trim())) };
 }
 
+/** Return the ISO date range for a quarter in a given year. */
+function getQuarterRange(year: number, q: 1 | 2 | 3 | 4): { from: string; to: string } {
+  const starts = ["01-01", "04-01", "07-01", "10-01"] as const;
+  const ends   = ["03-31", "06-30", "09-30", "12-31"] as const;
+  return { from: `${year}-${starts[q - 1]}`, to: `${year}-${ends[q - 1]}` };
+}
+
 /** Build a filename that reflects the active filters. */
 function buildExportFilename(buildingName: string | undefined, dateFrom: string, dateTo: string): string {
   const parts = ["duurzaamheid"];
@@ -291,6 +298,8 @@ export default function DuurzaamheidPage() {
     URL.revokeObjectURL(url);
   };
 
+  const currentYear = new Date().getFullYear();
+
   const hasActiveFilters = filterBuildingId || filterDateFrom || filterDateTo;
 
   const clearFilters = () => {
@@ -415,6 +424,31 @@ export default function DuurzaamheidPage() {
                     Exporteer CSV
                   </Button>
                 </div>
+              </div>
+
+              {/* Quarter shortcuts */}
+              <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                <span className="text-xs text-muted-foreground shrink-0 mr-1">Kwartaal:</span>
+                {[currentYear, currentYear - 1].flatMap((year) =>
+                  ([1, 2, 3, 4] as const).map((q) => {
+                    const range = getQuarterRange(year, q);
+                    const isActive = filterDateFrom === range.from && filterDateTo === range.to;
+                    return (
+                      <Button
+                        key={`${year}-Q${q}`}
+                        variant={isActive ? "default" : "outline"}
+                        size="sm"
+                        className="h-7 px-2.5 text-xs"
+                        onClick={() => {
+                          setFilterDateFrom(range.from);
+                          setFilterDateTo(range.to);
+                        }}
+                      >
+                        Q{q} {year}
+                      </Button>
+                    );
+                  })
+                )}
               </div>
 
               {/* Active filter badges */}
