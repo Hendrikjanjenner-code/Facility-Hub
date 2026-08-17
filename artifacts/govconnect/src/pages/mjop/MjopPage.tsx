@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -669,22 +669,57 @@ function NieuwBouwdeelDialog() {
   );
 }
 
-function NieuweTaakDialog() {
+interface NieuweTaakDialogPrefill {
+  bouwdeelId?: number;
+  taskType?: string;
+  plannedYear?: number;
+}
+
+export function NieuweTaakDialog({
+  prefill,
+  externalOpen,
+  onExternalOpenChange,
+}: {
+  prefill?: NieuweTaakDialogPrefill;
+  externalOpen?: boolean;
+  onExternalOpenChange?: (open: boolean) => void;
+} = {}) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const { data: bouwdelen } = useListBouwdelen();
   const createTaak = useCreateMjopTaak();
+
+  const isControlled = externalOpen !== undefined;
+  const open = isControlled ? externalOpen : internalOpen;
+  const setOpen = isControlled
+    ? (v: boolean) => onExternalOpenChange?.(v)
+    : setInternalOpen;
 
   const form = useForm<z.infer<typeof taakSchema>>({
     resolver: zodResolver(taakSchema),
     defaultValues: {
       title: "",
-      taskType: "onderhoud",
-      plannedYear: new Date().getFullYear() + 1,
+      taskType: prefill?.taskType ?? "onderhoud",
+      plannedYear: prefill?.plannedYear ?? new Date().getFullYear() + 1,
       estimatedCost: 0,
+      bouwdeelId: prefill?.bouwdeelId,
     },
   });
+
+  // Sync prefill into form whenever the dialog opens or prefill changes
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        title: "",
+        taskType: prefill?.taskType ?? "onderhoud",
+        plannedYear: prefill?.plannedYear ?? new Date().getFullYear() + 1,
+        estimatedCost: 0,
+        bouwdeelId: prefill?.bouwdeelId,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const onSubmit = (values: z.infer<typeof taakSchema>) => {
     createTaak.mutate(
@@ -705,12 +740,14 @@ function NieuweTaakDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">
-          <Plus className="mr-2 h-4 w-4" />
-          MJOP-taak
-        </Button>
-      </DialogTrigger>
+      {!isControlled && (
+        <DialogTrigger asChild>
+          <Button variant="outline">
+            <Plus className="mr-2 h-4 w-4" />
+            MJOP-taak
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Nieuwe MJOP-taak</DialogTitle>

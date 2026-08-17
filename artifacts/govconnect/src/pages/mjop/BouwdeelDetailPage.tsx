@@ -9,6 +9,7 @@ import {
   useGetCurrentUser,
   type Gebrek,
 } from "@workspace/api-client-react";
+import { NieuweTaakDialog } from "./MjopPage";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -422,6 +423,7 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
     type: string;
     message: string;
   } | null>(null);
+  const [mjopDialogOpen, setMjopDialogOpen] = useState(false);
 
   const canManage =
     user?.role === "facilitair_manager" || user?.role === "beheerder";
@@ -519,10 +521,7 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                 size="sm"
                 variant="outline"
                 className="border-amber-400 bg-white text-amber-900 hover:bg-amber-100"
-                onClick={() => {
-                  setMetingSuggestion(null);
-                  setLocation(`/mjop?bouwdeelId=${bouwdeelId}`);
-                }}
+                onClick={() => setMjopDialogOpen(true)}
               >
                 MJOP-taak aanmaken
               </Button>
@@ -538,6 +537,19 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
           </AlertDescription>
         </Alert>
       )}
+
+      <NieuweTaakDialog
+        externalOpen={mjopDialogOpen}
+        onExternalOpenChange={(v) => {
+          setMjopDialogOpen(v);
+          if (!v) setMetingSuggestion(null);
+        }}
+        prefill={{
+          bouwdeelId: bouwdeelId,
+          taskType: metingSuggestion?.type === "inspectie" ? "inspectie" : "onderhoud",
+          plannedYear: new Date().getFullYear() + 1,
+        }}
+      />
 
       <Card>
         <CardContent className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
