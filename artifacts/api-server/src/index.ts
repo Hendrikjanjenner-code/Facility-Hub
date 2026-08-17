@@ -1,7 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
-import { ensureContractExpiryNotifications } from "./routes/contracts";
+import { ensureContractExpiryNotifications, processEmailQueue } from "./routes/contracts";
 import { cleanupOrphanedDocumentUploads } from "./lib/orphanCleanup";
 import { checkOverdueKeys } from "./routes/keys";
 import { checkSlechteConditieZonderMjop } from "./routes/mjop";
@@ -77,6 +77,29 @@ try {
   logger.warn({ err }, "Startup-migratie key_issues.last_notified_at mislukt; doorgaan");
 }
 
+// E-mailwachtrij (outbox-patroon): tabel aanmaken als die nog niet bestaat.
+try {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS email_queue (
+      id              SERIAL PRIMARY KEY,
+      reference_key   TEXT        NOT NULL UNIQUE,
+      to_email        TEXT        NOT NULL,
+      to_name         TEXT        NOT NULL,
+      contract_name   TEXT        NOT NULL,
+      end_date        TEXT        NOT NULL,
+      supplier_name   TEXT        NOT NULL,
+      days_until_end  INTEGER     NOT NULL,
+      contracts_url   TEXT        NOT NULL,
+      attempts        INTEGER     NOT NULL DEFAULT 0,
+      last_attempt_at TIMESTAMPTZ,
+      sent_at         TIMESTAMPTZ,
+      created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+} catch (err) {
+  logger.warn({ err }, "Startup-migratie email_queue mislukt; doorgaan");
+}
+
 app.listen(port, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");
@@ -100,4 +123,15 @@ app.listen(port, (err) => {
   // Dagelijkse check voor te late sleuteluitgiftes met inleverdatum.
   void runOverdueKeysCheck();
   setInterval(() => void runOverdueKeysCheck(), MS_PER_DAY);
+
+  // E-mailwachtrij: direct verwerken bij start en daarna elk uur,
+  // zodat de exponentiële backoff (1u → 2u → 4u) daadwerkelijk gehaald kan worden.
+  void (async () => {
+    try { await processEmailQueue(); } catch (err) { logger.error({ err }, "Fout bij e-mailwachtrij verwerking"); }
+  })();
+  setInterval(() => {
+    void (async () => {
+      try { await processEmailQueue(); } catch (err) { logger.error({ err }, "Fout bij e-mailwachtrij verwerking"); }
+    })();
+  }, 60 * 60 * 1000); // elk uur
 });

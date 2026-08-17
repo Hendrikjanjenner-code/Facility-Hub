@@ -12,3 +12,4 @@ export * from "./mjop";
 export * from "./knowledge";
 export * from "./keys";
 export * from "./user-preferences";
+export * from "./email-queue";

@@ -38,17 +38,28 @@ export interface ContractExpiryEmailParams {
   contractsUrl: string;
 }
 
+/**
+ * Verstuurt één e-mailbericht voor een aflopend contract.
+ *
+ * Gooit een fout als de verzending mislukt zodat de aanroepende wachtrij-
+ * verwerker (processEmailQueue) de mislukking kan registreren en later opnieuw
+ * kan proberen.
+ *
+ * Wanneer SMTP_HOST niet is geconfigureerd wordt een fout gegooid met de
+ * eigenschap `smtpNotConfigured: true`; de wachtrij-verwerker houdt dan geen
+ * poging bij zodat de e-mail opnieuw wordt geprobeerd zodra SMTP beschikbaar is.
+ */
 export async function sendContractExpiryEmail(
   params: ContractExpiryEmailParams,
 ): Promise<void> {
   const transport = createTransport();
 
   if (!transport) {
-    logger.warn(
-      { to: params.toEmail, contract: params.contractName },
-      "SMTP_HOST niet geconfigureerd — e-mailnotificatie overgeslagen",
+    const err = Object.assign(
+      new Error("SMTP_HOST niet geconfigureerd"),
+      { smtpNotConfigured: true } as { smtpNotConfigured: true },
     );
-    return;
+    throw err;
   }
 
   const from =
