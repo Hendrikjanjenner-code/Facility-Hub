@@ -7,14 +7,21 @@ export async function notify(
   body: string,
   kind: string,
   linkPath?: string | null,
+  referenceKey?: string | null,
 ): Promise<void> {
-  await db.insert(notificationsTable).values({
+  const query = db.insert(notificationsTable).values({
     userId,
     title,
     body,
     kind,
     linkPath: linkPath ?? null,
+    referenceKey: referenceKey ?? null,
   });
+  if (referenceKey) {
+    await query.onConflictDoNothing();
+  } else {
+    await query;
+  }
 }
 
 export async function notifyRole(

@@ -350,14 +350,16 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
     );
   }
 
-  // Stuur een tevredenheidsverzoek wanneer de melding wordt gesloten
-  if (data.status === "gesloten" && existing.status !== "gesloten") {
+  // Stuur een tevredenheidsverzoek wanneer de melding wordt gesloten.
+  // De referenceKey zorgt dat dit bij heropenen + opnieuw sluiten slechts één keer verstuurd wordt.
+  if (data.status === "gesloten") {
     await notify(
       existing.reporterId,
       `Hoe tevreden bent u? – ${existing.number}`,
       `Melding "${existing.title}" is gesloten. Laat uw beoordeling achter.`,
       "satisfaction",
       `/meldingen/${id}?beoordelen=1`,
+      `satisfaction:${id}`,
     );
   }
   if (
