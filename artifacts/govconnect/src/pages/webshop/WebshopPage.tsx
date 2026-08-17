@@ -644,6 +644,18 @@ export default function WebshopPage() {
                           <span>Budget: {eur(b.amount)}</span>
                           {b.pending > 0 && <span>In aanvraag: {eur(b.pending)}</span>}
                         </div>
+                        {b.pending > 0 && (() => {
+                          const afterApproval = Math.round((b.remaining - b.pending) * 100) / 100;
+                          return (
+                            <div className={cn(
+                              "flex items-center justify-between text-xs border-t pt-2 font-medium",
+                              afterApproval < 0 ? "text-destructive" : "text-muted-foreground",
+                            )}>
+                              <span>Na goedkeuring alle open aanvragen</span>
+                              <span>{eur(afterApproval)}</span>
+                            </div>
+                          );
+                        })()}
                         <div className="border-t pt-2">
                           <p className="text-xs text-muted-foreground mb-1.5">Bij budgetoverschrijding:</p>
                           <div className="flex gap-2">
