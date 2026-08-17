@@ -159,6 +159,20 @@ export default function WebshopPage() {
   };
 
   const changeQty = (productId: number, delta: number) => {
+    if (delta > 0 && myBudget && myBudget.overBudgetPolicy === "blokkeren") {
+      const line = cart.find((l) => l.productId === productId);
+      if (line) {
+        const newTotal = cartTotal + line.price * delta;
+        if (newTotal > myBudget.remaining) {
+          toast({
+            title: "Hoeveelheid niet verhoogd",
+            description: `Verhogen overschrijdt het resterende budget (${eur(myBudget.remaining)}). Het tekort wordt ${eur(newTotal - myBudget.remaining)}. Neem contact op met je manager om het budget aan te passen.`,
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
     setCart((prev) =>
       prev
         .map((l) => (l.productId === productId ? { ...l, quantity: Math.min(l.stock, l.quantity + delta) } : l))
@@ -294,7 +308,24 @@ export default function WebshopPage() {
                       <div className="flex items-center gap-1">
                         <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeQty(l.productId, -1)}><Minus className="h-3 w-3" /></Button>
                         <span className="w-6 text-center text-sm">{l.quantity}</span>
-                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeQty(l.productId, 1)} disabled={l.quantity >= l.stock}><Plus className="h-3 w-3" /></Button>
+                        {(() => {
+                          const wouldBlock =
+                            myBudget &&
+                            myBudget.overBudgetPolicy === "blokkeren" &&
+                            cartTotal + l.price > myBudget.remaining;
+                          return (
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className={cn("h-7 w-7", wouldBlock && "border-orange-400 text-orange-500 hover:border-orange-500 hover:text-orange-600")}
+                              onClick={() => changeQty(l.productId, 1)}
+                              disabled={l.quantity >= l.stock}
+                              title={wouldBlock ? "Verhogen overschrijdt het budget" : undefined}
+                            >
+                              {wouldBlock ? <AlertTriangle className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+                            </Button>
+                          );
+                        })()}
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => changeQty(l.productId, -l.quantity)}><Trash2 className="h-3 w-3" /></Button>
                       </div>
                     </div>
