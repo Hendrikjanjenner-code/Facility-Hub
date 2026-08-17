@@ -303,9 +303,36 @@ export default function WebshopPage() {
               </div>
               <SheetFooter className="flex-col gap-3 sm:flex-col">
                 {myBudget && (
-                  <div className="w-full text-xs text-muted-foreground border rounded-md p-3 space-y-1">
+                  <div className="w-full text-xs text-muted-foreground border rounded-md p-3 space-y-2">
                     <div className="flex justify-between"><span>Budget {myBudget.department} ({myBudget.year})</span><span>{eur(myBudget.amount)}</span></div>
-                    <div className="flex justify-between"><span>Resterend</span><span className={cn(cartTotal > myBudget.remaining && "text-destructive font-medium")}>{eur(myBudget.remaining)}</span></div>
+                    <div className="flex justify-between"><span>Resterend budget</span><span className={cn(cartTotal > myBudget.remaining && "text-destructive font-medium")}>{eur(myBudget.remaining)}</span></div>
+                    {cart.length > 0 && (() => {
+                      const pct = myBudget.remaining > 0 ? Math.min((cartTotal / myBudget.remaining) * 100, 100) : 100;
+                      const overBudget = cartTotal > myBudget.remaining;
+                      const nearBudget = !overBudget && cartTotal > myBudget.remaining * 0.8;
+                      const barColor = overBudget ? "bg-red-500" : nearBudget ? "bg-amber-500" : "bg-green-500";
+                      const labelColor = overBudget ? "text-destructive font-medium" : nearBudget ? "text-amber-600 font-medium" : "";
+                      return (
+                        <div className="space-y-1 pt-0.5">
+                          <div className="flex justify-between">
+                            <span>Winkelmandje</span>
+                            <span className={cn(labelColor)}>{eur(cartTotal)}</span>
+                          </div>
+                          <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+                            <div
+                              className={cn("h-full rounded-full transition-all duration-300", barColor)}
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          {!overBudget && (
+                            <p className={cn(nearBudget ? "text-amber-600" : "text-muted-foreground")}>
+                              {nearBudget ? "Bijna op budget — " : ""}
+                              Nog {eur(myBudget.remaining - cartTotal)} beschikbaar na indienen.
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
                     {cartTotal > myBudget.remaining && !isBlocked && <p className="text-amber-600">Let op: deze bestelling overschrijdt het resterende budget.</p>}
                   </div>
                 )}
