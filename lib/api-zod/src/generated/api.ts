@@ -125,7 +125,6 @@ export const ListTicketsResponse = zod.array(ListTicketsResponseItem)
  */
 
 
-
 export const CreateTicketBody = zod.object({
   "title": zod.string().min(1),
   "description": zod.string(),
@@ -255,8 +254,6 @@ export const CreateTicketCommentParams = zod.object({
 })
 
 
-
-
 export const CreateTicketCommentBody = zod.object({
   "body": zod.string().min(1)
 })
@@ -321,8 +318,7 @@ export const ListRoomsResponseItem = zod.object({
   "bookable": zod.boolean(),
   "facilities": zod.array(zod.string()),
   "assetCount": zod.int().nullish(),
-  "openTicketCount": zod.int().nullish(),
-  "updatedAt": zod.coerce.date()
+  "openTicketCount": zod.int().nullish()
 })
 export const ListRoomsResponse = zod.array(ListRoomsResponseItem)
 
@@ -350,8 +346,7 @@ export const GetRoomResponse = zod.object({
   "bookable": zod.boolean(),
   "facilities": zod.array(zod.string()),
   "assetCount": zod.int().nullish(),
-  "openTicketCount": zod.int().nullish(),
-  "updatedAt": zod.coerce.date()
+  "openTicketCount": zod.int().nullish()
 })
 
 
@@ -370,7 +365,6 @@ export const updateRoomDossierBodyAreaVvoM2Min = 0;
 export const updateRoomDossierBodyAreaBvoM2Min = 0;
 
 export const updateRoomDossierBodyCapacityMin = 0;
-
 
 
 export const UpdateRoomDossierBody = zod.object({
@@ -404,60 +398,7 @@ export const UpdateRoomDossierResponse = zod.object({
   "facilities": zod.array(zod.string()),
   "assetCount": zod.int().nullish(),
   "openTicketCount": zod.int().nullish(),
-  "updatedAt": zod.coerce.date()
-})
-
-
-/**
- * @summary Wijzigingshistorie van het ruimtedossier (facilitair_manager / beheerder)
- */
-export const ListRoomDossierHistoryParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const ListRoomDossierHistoryResponseItem = zod.object({
-  "id": zod.int(),
-  "roomId": zod.int(),
-  "changedByName": zod.string().nullish(),
-  "changedAt": zod.coerce.date(),
-  "isUndo": zod.boolean(),
-  "changes": zod.array(zod.object({
-  "field": zod.string(),
-  "from": zod.union([zod.string(),zod.number(),zod.null()]).optional(),
-  "to": zod.union([zod.string(),zod.number(),zod.null()]).optional()
-}))
-})
-export const ListRoomDossierHistoryResponse = zod.array(ListRoomDossierHistoryResponseItem)
-
-
-/**
- * @summary Maak de laatste dossierwijziging ongedaan (facilitair_manager / beheerder)
- */
-export const UndoRoomDossierChangeParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const UndoRoomDossierChangeResponse = zod.object({
-  "id": zod.int(),
-  "name": zod.string(),
-  "code": zod.string(),
-  "floorId": zod.int(),
-  "floorName": zod.string().nullish(),
-  "buildingId": zod.int().nullish(),
-  "buildingName": zod.string().nullish(),
-  "siteName": zod.string().nullish(),
-  "functionType": zod.string(),
-  "areaM2": zod.number(),
-  "areaVvoM2": zod.number().nullish(),
-  "areaBvoM2": zod.number().nullish(),
-  "department": zod.string().nullish(),
-  "floorFinish": zod.string().nullish(),
-  "capacity": zod.int().nullish(),
-  "bookable": zod.boolean(),
-  "facilities": zod.array(zod.string()),
-  "assetCount": zod.int().nullish(),
-  "openTicketCount": zod.int().nullish(),
-  "updatedAt": zod.coerce.date()
+  "updatedAt": zod.string()
 })
 
 
@@ -480,8 +421,6 @@ export const GetFloorPlanResponse = zod.object({
   "code": zod.string(),
   "functionType": zod.string(),
   "areaM2": zod.number(),
-  "updatedAt": zod.coerce.date(),
-  "areaVvoM2": zod.number().nullish(),
   "department": zod.string().nullish(),
   "capacity": zod.int().nullish(),
   "bookable": zod.boolean().optional()
@@ -542,9 +481,7 @@ export const CreateBuildingDocumentParams = zod.object({
 })
 
 
-
 export const createBuildingDocumentBodySizeBytesMin = 0;
-
 
 
 export const CreateBuildingDocumentBody = zod.object({
@@ -610,7 +547,6 @@ export const ListKeysResponse = zod.array(ListKeysResponseItem)
 
 
 export const createKeyBodyReplacementCostMin = 0;
-
 
 
 export const CreateKeyBody = zod.object({
@@ -703,7 +639,6 @@ export const UpdateKeyParams = zod.object({
 export const updateKeyBodyReplacementCostMin = 0;
 
 
-
 export const UpdateKeyBody = zod.object({
   "description": zod.string().min(1).optional(),
   "buildingId": zod.int().nullish(),
@@ -734,8 +669,6 @@ export const UpdateKeyResponse = zod.object({
 export const CreateKeyDoorParams = zod.object({
   "id": zod.coerce.number().int()
 })
-
-
 
 
 export const CreateKeyDoorBody = zod.object({
@@ -885,7 +818,6 @@ export const ReportKeyLossParams = zod.object({
 export const reportKeyLossBodyChargeAmountMin = 0;
 
 
-
 export const ReportKeyLossBody = zod.object({
   "chargeAmount": zod.number().min(reportKeyLossBodyChargeAmountMin).nullish(),
   "note": zod.string().nullish()
@@ -1010,9 +942,6 @@ export const ListReservationsResponseItem = zod.object({
   "createdAt": zod.string()
 })
 export const ListReservationsResponse = zod.array(ListReservationsResponseItem)
-
-
-
 
 
 export const CreateReservationBody = zod.object({
@@ -1170,40 +1099,6 @@ export const ListCateringItemsResponseItem = zod.object({
 export const ListCateringItemsResponse = zod.array(ListCateringItemsResponseItem)
 
 
-/**
- * @summary Dagelijks cateringoverzicht voor de cateraar
- */
-export const GetCateringDailySummaryQueryParams = zod.object({
-  "date": zod.coerce.string().optional()
-})
-
-export const GetCateringDailySummaryResponse = zod.object({
-  "date": zod.string(),
-  "reservations": zod.array(zod.object({
-  "id": zod.int(),
-  "title": zod.string(),
-  "roomName": zod.string().nullish(),
-  "buildingName": zod.string().nullish(),
-  "startTime": zod.string(),
-  "endTime": zod.string(),
-  "attendees": zod.int().nullish(),
-  "status": zod.string(),
-  "items": zod.array(zod.object({
-  "id": zod.int(),
-  "cateringItemId": zod.int(),
-  "itemName": zod.string().nullish(),
-  "quantity": zod.int(),
-  "unitPrice": zod.number()
-}))
-})),
-  "totals": zod.array(zod.object({
-  "cateringItemId": zod.int(),
-  "itemName": zod.string(),
-  "totalQuantity": zod.int()
-}))
-})
-
-
 export const ListVisitorsQueryParams = zod.object({
   "date": zod.coerce.string().optional(),
   "status": zod.coerce.string().optional()
@@ -1225,9 +1120,6 @@ export const ListVisitorsResponseItem = zod.object({
   "createdAt": zod.string()
 })
 export const ListVisitorsResponse = zod.array(ListVisitorsResponseItem)
-
-
-
 
 
 export const CreateVisitorBody = zod.object({
@@ -1306,10 +1198,6 @@ export const ListAssetsResponseItem = zod.object({
   "openTicketCount": zod.int().nullish()
 })
 export const ListAssetsResponse = zod.array(ListAssetsResponseItem)
-
-
-
-
 
 
 export const CreateAssetBody = zod.object({
@@ -1456,10 +1344,6 @@ export const ListSuppliersResponseItem = zod.object({
 export const ListSuppliersResponse = zod.array(ListSuppliersResponseItem)
 
 
-
-
-
-
 export const CreateSupplierBody = zod.object({
   "name": zod.string().min(1),
   "category": zod.string().min(1),
@@ -1511,10 +1395,6 @@ export const ListContractsResponseItem = zod.object({
   "createdAt": zod.string()
 })
 export const ListContractsResponse = zod.array(ListContractsResponseItem)
-
-
-
-
 
 
 export const CreateContractBody = zod.object({
@@ -1583,213 +1463,12 @@ export const UpdateContractResponse = zod.object({
   "createdAt": zod.string()
 })
 
-
 /**
  * @summary List PDF documents in the contract vault
  */
 export const ListContractDocumentsParams = zod.object({
   "id": zod.coerce.number().int()
 })
-
-export const ListContractDocumentsResponseItem = zod.object({
-  "id": zod.int(),
-  "contractId": zod.int(),
-  "fileName": zod.string(),
-  "objectPath": zod.string(),
-  "uploadedById": zod.int().nullish(),
-  "uploadedByName": zod.string().nullish(),
-  "createdAt": zod.string()
-})
-export const ListContractDocumentsResponse = zod.array(ListContractDocumentsResponseItem)
-
-
-/**
- * @summary Register a document after uploading via /storage/document-uploads
- */
-export const CreateContractDocumentParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-
-
-
-
-export const CreateContractDocumentBody = zod.object({
-  "fileName": zod.string().min(1),
-  "objectPath": zod.string().min(1)
-})
-
-export const CreateContractDocumentResponse = zod.object({
-  "id": zod.int(),
-  "contractId": zod.int(),
-  "fileName": zod.string(),
-  "objectPath": zod.string(),
-  "uploadedById": zod.int().nullish(),
-  "uploadedByName": zod.string().nullish(),
-  "createdAt": zod.string()
-})
-
-
-/**
- * @summary Remove a document from the contract vault
- */
-export const DeleteContractDocumentParams = zod.object({
-  "id": zod.coerce.number().int(),
-  "docId": zod.coerce.number().int()
-})
-
-export const DeleteContractDocumentResponse = zod.void()
-
-
-/**
- * @summary List reviews for a supplier with average score
- */
-export const ListSupplierReviewsParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const ListSupplierReviewsResponse = zod.object({
-  "averageScore": zod.number().nullable(),
-  "reviews": zod.array(zod.object({
-  "id": zod.int(),
-  "supplierId": zod.int(),
-  "reviewerId": zod.int().nullish(),
-  "reviewerName": zod.string().nullish(),
-  "year": zod.int(),
-  "score": zod.int().describe('1–5'),
-  "comment": zod.string().nullish(),
-  "createdAt": zod.string()
-}))
-})
-
-
-/**
- * @summary Add a yearly review for a supplier
- */
-export const CreateSupplierReviewParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const createSupplierReviewBodyScoreMax = 5;
-
-
-
-export const CreateSupplierReviewBody = zod.object({
-  "year": zod.int(),
-  "score": zod.int().min(1).max(createSupplierReviewBodyScoreMax),
-  "comment": zod.string().nullish()
-})
-
-export const CreateSupplierReviewResponse = zod.object({
-  "id": zod.int(),
-  "supplierId": zod.int(),
-  "reviewerId": zod.int().nullish(),
-  "reviewerName": zod.string().nullish(),
-  "year": zod.int(),
-  "score": zod.int().describe('1–5'),
-  "comment": zod.string().nullish(),
-  "createdAt": zod.string()
-})
-
-
-/**
- * @summary Get the current auto-approval threshold amount
- */
-export const GetApprovalThresholdResponse = zod.object({
-  "thresholdAmount": zod.number().describe('Bestellingen op\/onder dit bedrag worden direct goedgekeurd (0 = altijd manager)')
-})
-
-
-/**
- * @summary Update the auto-approval threshold (manager only)
- */
-export const updateApprovalThresholdBodyThresholdAmountMin = 0;
-
-
-
-export const UpdateApprovalThresholdBody = zod.object({
-  "thresholdAmount": zod.number().min(updateApprovalThresholdBodyThresholdAmountMin)
-})
-
-export const UpdateApprovalThresholdResponse = zod.object({
-  "thresholdAmount": zod.number().describe('Bestellingen op\/onder dit bedrag worden direct goedgekeurd (0 = altijd manager)')
-})
-
-
-/**
- * @summary Mark order as sent to supplier (sets supplierStatus=verstuurd)
- */
-export const SendOrderToSupplierParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const SendOrderToSupplierBody = zod.object({
-  "supplierId": zod.int()
-})
-
-export const SendOrderToSupplierResponse = zod.object({
-  "id": zod.int(),
-  "number": zod.string(),
-  "requesterId": zod.int(),
-  "requesterName": zod.string().nullish(),
-  "department": zod.string(),
-  "status": zod.string().describe('ingediend | goedgekeurd | afgekeurd | besteld | geleverd'),
-  "totalAmount": zod.number(),
-  "budgetExceeded": zod.boolean().describe('true als de bestelling het resterende afdelingsbudget overschreed op moment van indienen'),
-  "approverId": zod.int().nullish(),
-  "approverName": zod.string().nullish(),
-  "decisionNote": zod.string().nullish(),
-  "supplierId": zod.int().nullish(),
-  "supplierName": zod.string().nullish(),
-  "supplierStatus": zod.string().nullish().describe('null | verstuurd | verwerkt'),
-  "sentToSupplierAt": zod.string().nullish(),
-  "lines": zod.array(zod.object({
-  "id": zod.int(),
-  "productId": zod.int(),
-  "productName": zod.string().nullish(),
-  "quantity": zod.int(),
-  "unitPrice": zod.number()
-})),
-  "createdAt": zod.string(),
-  "decidedAt": zod.string().nullish()
-})
-
-
-/**
- * @summary Supplier marks order as processed/delivered
- */
-export const SupplierMarkDeliveredParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const SupplierMarkDeliveredResponse = zod.object({
-  "id": zod.int(),
-  "number": zod.string(),
-  "requesterId": zod.int(),
-  "requesterName": zod.string().nullish(),
-  "department": zod.string(),
-  "status": zod.string().describe('ingediend | goedgekeurd | afgekeurd | besteld | geleverd'),
-  "totalAmount": zod.number(),
-  "budgetExceeded": zod.boolean().describe('true als de bestelling het resterende afdelingsbudget overschreed op moment van indienen'),
-  "approverId": zod.int().nullish(),
-  "approverName": zod.string().nullish(),
-  "decisionNote": zod.string().nullish(),
-  "supplierId": zod.int().nullish(),
-  "supplierName": zod.string().nullish(),
-  "supplierStatus": zod.string().nullish().describe('null | verstuurd | verwerkt'),
-  "sentToSupplierAt": zod.string().nullish(),
-  "lines": zod.array(zod.object({
-  "id": zod.int(),
-  "productId": zod.int(),
-  "productName": zod.string().nullish(),
-  "quantity": zod.int(),
-  "unitPrice": zod.number()
-})),
-  "createdAt": zod.string(),
-  "decidedAt": zod.string().nullish()
-})
-
-
 /**
  * @summary List webshop products (incl. voorraadstatus)
  */
@@ -1813,10 +1492,6 @@ export const ListShopProductsResponseItem = zod.object({
   "supplierName": zod.string().nullish()
 })
 export const ListShopProductsResponse = zod.array(ListShopProductsResponseItem)
-
-
-
-
 
 
 export const CreateShopProductBody = zod.object({
@@ -1915,8 +1590,6 @@ export const ListShopOrdersResponse = zod.array(ListShopOrdersResponseItem)
 /**
  * @summary Place order from cart (starts approval flow)
  */
-
-
 
 
 export const CreateShopOrderBody = zod.object({
@@ -2021,6 +1694,13 @@ export const UpdateBudgetPolicyBody = zod.object({
   "overBudgetPolicy": zod.enum(['markeren', 'blokkeren'])
 })
 
+/**
+ * @summary Add a yearly review for a supplier
+ */
+export const CreateSupplierReviewParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
 export const UpdateBudgetPolicyResponse = zod.object({
   "id": zod.int(),
   "department": zod.string(),
@@ -2073,54 +1753,6 @@ export const CreateMeterReadingResponse = zod.object({
   "registeredById": zod.int().nullish(),
   "registeredByName": zod.string().nullish()
 })
-
-
-/**
- * @summary Correct a meter reading (value and/or date)
- */
-export const UpdateMeterReadingParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const updateMeterReadingBodyValueMin = 0;
-
-
-
-export const UpdateMeterReadingBody = zod.object({
-  "readingDate": zod.string().optional(),
-  "value": zod.number().min(updateMeterReadingBodyValueMin).optional()
-})
-
-export const UpdateMeterReadingResponse = zod.object({
-  "id": zod.int(),
-  "buildingId": zod.int(),
-  "buildingName": zod.string().nullish(),
-  "meterType": zod.string().describe('elektriciteit | gas | water'),
-  "readingDate": zod.string(),
-  "value": zod.number(),
-  "unit": zod.string(),
-  "source": zod.string(),
-  "registeredById": zod.int().nullish(),
-  "registeredByName": zod.string().nullish()
-})
-
-
-/**
- * @summary Delete a meter reading
- */
-export const DeleteMeterReadingParams = zod.object({
-  "id": zod.coerce.number().int()
-})
-
-export const DeleteMeterReadingResponse = zod.void()
-
-
-/**
- * @summary Bulk import meter readings (parsed CSV rows)
- */
-
-
-
 export const ImportMeterReadingsBody = zod.object({
   "rows": zod.array(zod.object({
   "buildingId": zod.int(),
@@ -2239,9 +1871,6 @@ export const ListBouwdelenResponse = zod.array(ListBouwdelenResponseItem)
  */
 
 
-
-
-
 export const CreateBouwdeelBody = zod.object({
   "code": zod.string().min(1),
   "name": zod.string().min(1),
@@ -2339,7 +1968,6 @@ export const CreateConditiemetingParams = zod.object({
 export const createConditiemetingBodyScoreMax = 6;
 
 
-
 export const CreateConditiemetingBody = zod.object({
   "score": zod.int().min(1).max(createConditiemetingBodyScoreMax),
   "toelichting": zod.string().nullish(),
@@ -2396,10 +2024,6 @@ export const ListMjopTakenResponseItem = zod.object({
 export const ListMjopTakenResponse = zod.array(ListMjopTakenResponseItem)
 
 
-
-
-
-
 export const CreateMjopTaakBody = zod.object({
   "bouwdeelId": zod.int(),
   "title": zod.string().min(1),
@@ -2430,8 +2054,6 @@ export const CreateMjopTaakResponse = zod.object({
 export const UpdateMjopTaakParams = zod.object({
   "id": zod.coerce.number().int()
 })
-
-
 
 
 export const UpdateMjopTaakBody = zod.object({
@@ -2559,8 +2181,6 @@ export const ListKnowledgeArticlesResponse = zod.array(ListKnowledgeArticlesResp
  */
 
 
-
-
 export const CreateKnowledgeArticleBody = zod.object({
   "title": zod.string().min(1),
   "body": zod.string().min(1),
@@ -2610,7 +2230,6 @@ export const SubmitTicketSatisfactionParams = zod.object({
 })
 
 export const submitTicketSatisfactionBodyScoreMax = 5;
-
 
 
 export const SubmitTicketSatisfactionBody = zod.object({
@@ -2666,3 +2285,177 @@ export const GetSatisfactionReportResponse = zod.object({
 })
 
 
+export const SendOrderToSupplierResponse = zod.object({
+  "id": zod.int(),
+  "number": zod.string(),
+  "requesterId": zod.int(),
+  "requesterName": zod.string().nullish(),
+  "department": zod.string(),
+  "status": zod.string().describe('ingediend | goedgekeurd | afgekeurd | besteld | geleverd'),
+  "totalAmount": zod.number(),
+  "budgetExceeded": zod.boolean().describe('true als de bestelling het resterende afdelingsbudget overschreed op moment van indienen'),
+  "approverId": zod.int().nullish(),
+  "approverName": zod.string().nullish(),
+  "decisionNote": zod.string().nullish(),
+  "supplierId": zod.int().nullish(),
+  "supplierName": zod.string().nullish(),
+  "supplierStatus": zod.string().nullish().describe('null | verstuurd | verwerkt'),
+  "sentToSupplierAt": zod.string().nullish(),
+  "lines": zod.array(zod.object({
+  "id": zod.int(),
+  "productId": zod.int(),
+  "productName": zod.string().nullish(),
+  "quantity": zod.int(),
+  "unitPrice": zod.number()
+})),
+  "createdAt": zod.string(),
+  "decidedAt": zod.string().nullish()
+})
+
+export const ListContractDocumentsResponseItem = zod.object({
+  "id": zod.int(),
+  "contractId": zod.int(),
+  "fileName": zod.string(),
+  "objectPath": zod.string(),
+  "uploadedById": zod.int().nullish(),
+  "uploadedByName": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+/**
+ * @summary Get the current auto-approval threshold amount
+ */
+export const GetApprovalThresholdResponse = zod.object({
+  "thresholdAmount": zod.number().describe('Bestellingen op\/onder dit bedrag worden direct goedgekeurd (0 = altijd manager)')
+})
+
+export const CreateSupplierReviewBody = zod.object({
+  "year": zod.int(),
+  "score": zod.int().min(1).max(5),
+  "comment": zod.string().nullish()
+})
+
+/**
+ * @summary Register a document after uploading via /storage/document-uploads
+ */
+export const CreateContractDocumentParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UpdateApprovalThresholdResponse = zod.object({
+  "thresholdAmount": zod.number().describe('Bestellingen op\/onder dit bedrag worden direct goedgekeurd (0 = altijd manager)')
+})
+
+export const ListContractDocumentsResponse = zod.array(ListContractDocumentsResponseItem)
+
+export const UpdateApprovalThresholdBody = zod.object({
+  "thresholdAmount": zod.number().min(0)
+})
+
+export const ListSupplierReviewsResponse = zod.object({
+  "averageScore": zod.number().nullable(),
+  "reviews": zod.array(zod.object({
+  "id": zod.int(),
+  "supplierId": zod.int(),
+  "reviewerId": zod.int().nullish(),
+  "reviewerName": zod.string().nullish(),
+  "year": zod.int(),
+  "score": zod.int().describe('1–5'),
+  "comment": zod.string().nullish(),
+  "createdAt": zod.string()
+}))
+})
+
+export const CreateContractDocumentResponse = zod.object({
+  "id": zod.int(),
+  "contractId": zod.int(),
+  "fileName": zod.string(),
+  "objectPath": zod.string(),
+  "uploadedById": zod.int().nullish(),
+  "uploadedByName": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+export const CreateSupplierReviewResponse = zod.object({
+  "id": zod.int(),
+  "supplierId": zod.int(),
+  "reviewerId": zod.int().nullish(),
+  "reviewerName": zod.string().nullish(),
+  "year": zod.int(),
+  "score": zod.int().describe('1–5'),
+  "comment": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+
+export const CreateContractDocumentBody = zod.object({
+  "fileName": zod.string().min(1),
+  "objectPath": zod.string().min(1)
+})
+
+/**
+ * @summary Mark order as sent to supplier (sets supplierStatus=verstuurd)
+ */
+export const SendOrderToSupplierParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+/**
+ * @summary List reviews for a supplier with average score
+ */
+export const ListSupplierReviewsParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const createSupplierReviewBodyScoreMax = 5;
+/**
+ * @summary Update the auto-approval threshold (manager only)
+ */
+export const updateApprovalThresholdBodyThresholdAmountMin = 0;
+
+export const DeleteContractDocumentResponse = zod.void()
+
+export const SendOrderToSupplierBody = zod.object({
+  "supplierId": zod.int()
+})
+
+export const SupplierMarkDeliveredResponse = zod.object({
+  "id": zod.int(),
+  "number": zod.string(),
+  "requesterId": zod.int(),
+  "requesterName": zod.string().nullish(),
+  "department": zod.string(),
+  "status": zod.string().describe('ingediend | goedgekeurd | afgekeurd | besteld | geleverd'),
+  "totalAmount": zod.number(),
+  "budgetExceeded": zod.boolean().describe('true als de bestelling het resterende afdelingsbudget overschreed op moment van indienen'),
+  "approverId": zod.int().nullish(),
+  "approverName": zod.string().nullish(),
+  "decisionNote": zod.string().nullish(),
+  "supplierId": zod.int().nullish(),
+  "supplierName": zod.string().nullish(),
+  "supplierStatus": zod.string().nullish().describe('null | verstuurd | verwerkt'),
+  "sentToSupplierAt": zod.string().nullish(),
+  "lines": zod.array(zod.object({
+  "id": zod.int(),
+  "productId": zod.int(),
+  "productName": zod.string().nullish(),
+  "quantity": zod.int(),
+  "unitPrice": zod.number()
+})),
+  "createdAt": zod.string(),
+  "decidedAt": zod.string().nullish()
+})
+
+/**
+ * @summary Remove a document from the contract vault
+ */
+export const DeleteContractDocumentParams = zod.object({
+  "id": zod.coerce.number().int(),
+  "docId": zod.coerce.number().int()
+})
+
+/**
+ * @summary Supplier marks order as processed/delivered
+ */
+export const SupplierMarkDeliveredParams = zod.object({
+  "id": zod.coerce.number().int()
+})

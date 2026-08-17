@@ -9,16 +9,63 @@ import {
   useListSuppliers,
   useCreateSupplier,
   useGetCurrentUser,
-  useListContractDocuments,
-  useCreateContractDocument,
-  useDeleteContractDocument,
-  useListSupplierReviews,
-  useCreateSupplierReview,
   getListSuppliersQueryKey,
-  getListContractDocumentsQueryKey,
-  getListSupplierReviewsQueryKey,
 } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+const getListContractDocumentsQueryKey = (contractId: number) => [`/api/contracts/${contractId}/documents`];
+
+function useListContractDocuments(contractId: number, opts?: { query?: { queryKey?: unknown[]; enabled?: boolean } }) {
+  return useQuery<Array<{ id: number; title: string; objectPath: string; contentType: string; sizeBytes: number; uploadedByName: string | null; createdAt: string }>>({
+    queryKey: opts?.query?.queryKey ?? getListContractDocumentsQueryKey(contractId),
+    queryFn: () => fetch(`/api/contracts/${contractId}/documents`, { credentials: "include" }).then((r) => r.json()),
+    enabled: opts?.query?.enabled ?? true,
+  });
+}
+
+function useCreateContractDocument() {
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: { fileName: string; objectPath: string } }) =>
+      fetch(`/api/contracts/${id}/documents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      }).then(async (r) => { if (!r.ok) throw await r.json(); return r.json(); }),
+  });
+}
+
+function useDeleteContractDocument() {
+  return useMutation({
+    mutationFn: ({ id, docId }: { id: number; docId: number }) =>
+      fetch(`/api/contracts/${id}/documents/${docId}`, {
+        method: "DELETE",
+        credentials: "include",
+      }).then(async (r) => { if (!r.ok && r.status !== 204) throw await r.json(); }),
+  });
+}
+
+const getListSupplierReviewsQueryKey = (supplierId: number) => [`/api/suppliers/${supplierId}/reviews`];
+
+function useListSupplierReviews(supplierId: number, _opts?: unknown) {
+  return useQuery<{ reviews: Array<{ id: number; year: number; score: number; comment: string | null }>; averageScore: number | null }>({
+    queryKey: getListSupplierReviewsQueryKey(supplierId),
+    queryFn: () => fetch(`/api/suppliers/${supplierId}/reviews`, { credentials: "include" }).then((r) => r.json()),
+    enabled: supplierId > 0,
+  });
+}
+
+function useCreateSupplierReview() {
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: { year: number; score: number; comment: string | null } }) =>
+      fetch(`/api/suppliers/${id}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      }).then(async (r) => { if (!r.ok) throw await r.json(); return r.json(); }),
+  });
+}
 import {
   FileText, Plus, Building, AlertTriangle, Loader2, Phone, Mail,
   UserRound, Upload, Download, Trash2, Star, ChevronDown, ChevronUp, File,
@@ -191,7 +238,7 @@ function ContractDocumentsPanel({ contractId, isManager }: { contractId: number;
               {docs.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between gap-2 border rounded bg-background px-3 py-2">
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{doc.fileName}</p>
+                    <p className="text-sm font-medium truncate">{doc.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {doc.uploadedByName} · {new Date(doc.createdAt).toLocaleDateString("nl-NL")}
                     </p>

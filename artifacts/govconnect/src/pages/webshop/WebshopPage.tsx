@@ -7,15 +7,11 @@ import {
   useListBudgets,
   useUpdateBudgetPolicy,
   useGetCurrentUser,
-  useGetApprovalThreshold,
-  useUpdateApprovalThreshold,
-  useSendOrderToSupplier,
-  useSupplierMarkDelivered,
   useListSuppliers,
   getListBudgetsQueryKey,
   getListSuppliersQueryKey,
 } from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ShoppingCart, Search, Plus, Minus, Trash2, Loader2, PackageCheck,
   CheckCircle2, XCircle, Wallet, ClipboardList, AlertTriangle, Send,
@@ -86,24 +82,53 @@ export default function WebshopPage() {
   });
   const { data: orders } = useListShopOrders();
   const { data: budgets } = useListBudgets({
-    query: { queryKey: getListBudgetsQueryKey(), enabled: isManager },
+    query: { queryKey: getListBudgetsQueryKey() },
   });
-  const { data: threshold } = useGetApprovalThreshold();
+  const { data: threshold } = useQuery<{ thresholdAmount: number }>({
+    queryKey: ["/api/shop/approval-threshold"],
+    queryFn: () => fetch("/api/shop/approval-threshold", { credentials: "include" }).then((r) => r.json()),
+    enabled: isManager,
+  });
   const { data: suppliers } = useListSuppliers({
     query: { queryKey: getListSuppliersQueryKey(), enabled: isManager },
   });
   const createOrder = useCreateShopOrder();
   const updateOrder = useUpdateShopOrder();
   const updatePolicy = useUpdateBudgetPolicy();
-  const sendToSupplier = useSendOrderToSupplier();
-  const markDelivered = useSupplierMarkDelivered();
-  const updateThreshold = useUpdateApprovalThreshold();
+  const sendToSupplier = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: { supplierId: number } }) =>
+      fetch(`/api/shop/orders/${id}/send-to-supplier`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      }).then(async (r) => { if (!r.ok) throw { data: await r.json() }; return r.json(); }),
+  });
+  const markDelivered = useMutation({
+    mutationFn: ({ id }: { id: number }) =>
+      fetch(`/api/shop/orders/${id}/mark-delivered`, {
+        method: "POST",
+        credentials: "include",
+      }).then(async (r) => { if (!r.ok) throw { data: await r.json() }; return r.json(); }),
+  });
+  const updateThreshold = useMutation({
+    mutationFn: ({ data }: { data: { thresholdAmount: number } }) =>
+      fetch("/api/shop/approval-threshold", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      }).then(async (r) => { if (!r.ok) throw await r.json(); return r.json(); }),
+  });
 
   const categories = Array.from(new Set(products?.map((p) => p.category) || []));
   const cartTotal = cart.reduce((s, l) => s + l.price * l.quantity, 0);
   const cartCount = cart.reduce((s, l) => s + l.quantity, 0);
   const currentYear = new Date().getFullYear();
   const myBudget = budgets?.find((b) => b.department === user?.department && b.year === currentYear);
+
+  const budgetShortfall = myBudget ? cartTotal - myBudget.remaining : 0;
+  const isBlocked = !!(myBudget && myBudget.overBudgetPolicy === "blokkeren" && cartTotal > myBudget.remaining);
 
   const addToCart = (p: { id: number; name: string; unit: string; price: number; stock: number }) => {
     setCart((prev) => {
@@ -265,7 +290,19 @@ export default function WebshopPage() {
                   <div className="w-full text-xs text-muted-foreground border rounded-md p-3 space-y-1">
                     <div className="flex justify-between"><span>Budget {myBudget.department} ({myBudget.year})</span><span>{eur(myBudget.amount)}</span></div>
                     <div className="flex justify-between"><span>Resterend</span><span className={cn(cartTotal > myBudget.remaining && "text-destructive font-medium")}>{eur(myBudget.remaining)}</span></div>
-                    {cartTotal > myBudget.remaining && <p className="text-destructive">Let op: deze bestelling overschrijdt het resterende budget.</p>}
+                    {cartTotal > myBudget.remaining && !isBlocked && <p className="text-amber-600">Let op: deze bestelling overschrijdt het resterende budget.</p>}
+                  </div>
+                )}
+                {isBlocked && (
+                  <div className="w-full rounded-md border border-destructive/40 bg-destructive/10 p-3 space-y-1.5">
+                    <div className="flex items-center gap-2 text-destructive font-semibold text-sm">
+                      <ShieldAlert className="h-4 w-4 shrink-0" />
+                      Bestelling geblokkeerd
+                    </div>
+                    <p className="text-xs text-destructive leading-snug">
+                      Het resterende budget is onvoldoende voor deze bestelling. Het tekort bedraagt <strong>{eur(budgetShortfall)}</strong>.
+                      Neem contact op met je manager om het budget te verhogen of het beleid aan te passen.
+                    </p>
                   </div>
                 )}
                 {threshold && threshold.thresholdAmount > 0 && cartTotal <= threshold.thresholdAmount && (
@@ -277,7 +314,7 @@ export default function WebshopPage() {
                 <div className="w-full flex items-center justify-between font-semibold">
                   <span>Totaal</span><span>{eur(cartTotal)}</span>
                 </div>
-                <Button className="w-full" disabled={!cart.length || createOrder.isPending} onClick={placeOrder}>
+                <Button className="w-full" disabled={!cart.length || createOrder.isPending || isBlocked} onClick={placeOrder}>
                   {createOrder.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {threshold && threshold.thresholdAmount > 0 && cartTotal <= threshold.thresholdAmount
                     ? "Bestelling plaatsen (automatisch goedgekeurd)"
