@@ -29,9 +29,9 @@ vi.mock("@/hooks/use-toast", () => ({
 
 import { PendingUploadBanner } from "./PendingUploadBanner";
 import {
-  setPendingUpload,
+  addPendingUpload,
   clearPendingUpload,
-  pendingUploadKey,
+  pendingUploadEntryKey,
 } from "@/lib/pending-upload-helpers";
 
 // ---------------------------------------------------------------------------
@@ -40,6 +40,7 @@ import {
 
 const BUILDING_ID = 42;
 const OBJECT_PATH = "/objects/uploads/test-file.pdf";
+const OBJECT_PATH_2 = "/objects/uploads/second-file.pdf";
 
 const PENDING_ENTRY = {
   objectPath: OBJECT_PATH,
@@ -47,6 +48,14 @@ const PENDING_ENTRY = {
   sizeBytes: 1024,
   title: "Testdocument",
   category: "overig",
+} as const;
+
+const PENDING_ENTRY_2 = {
+  objectPath: OBJECT_PATH_2,
+  contentType: "application/pdf",
+  sizeBytes: 2048,
+  title: "Tweede document",
+  category: "bouwtekening",
 } as const;
 
 function makeQueryClient() {
@@ -87,10 +96,11 @@ describe("PendingUploadBanner", () => {
 
   // ── 1. localStorage entry is written after a successful storage upload ──
 
-  it("setPendingUpload writes the entry to localStorage", () => {
-    setPendingUpload(BUILDING_ID, PENDING_ENTRY);
+  it("addPendingUpload writes the entry to its own localStorage key", () => {
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
 
-    const raw = localStorage.getItem(pendingUploadKey(BUILDING_ID));
+    const key = pendingUploadEntryKey(BUILDING_ID, OBJECT_PATH);
+    const raw = localStorage.getItem(key);
     expect(raw).not.toBeNull();
     const parsed = JSON.parse(raw!);
     expect(parsed).toMatchObject({
@@ -100,17 +110,31 @@ describe("PendingUploadBanner", () => {
     });
   });
 
-  // ── 2. Banner is NOT shown when there is no pending entry ───────────────
+  // ── 2. Two concurrent uploads get independent keys (no overwrite) ───────
+
+  it("two uploads for the same building get independent keys and neither overwrites the other", () => {
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY_2);
+
+    const key1 = pendingUploadEntryKey(BUILDING_ID, OBJECT_PATH);
+    const key2 = pendingUploadEntryKey(BUILDING_ID, OBJECT_PATH_2);
+
+    expect(key1).not.toBe(key2);
+    expect(localStorage.getItem(key1)).not.toBeNull();
+    expect(localStorage.getItem(key2)).not.toBeNull();
+  });
+
+  // ── 3. Banner is NOT shown when there is no pending entry ───────────────
 
   it("renders nothing when localStorage has no pending entry", () => {
     const { container } = renderBanner([]);
     expect(container).toBeEmptyDOMElement();
   });
 
-  // ── 3. Banner IS shown when objectPath is absent from the document list ─
+  // ── 4. Banner IS shown when objectPath is absent from the document list ─
 
   it("shows the recovery banner when the pending objectPath is not in documents", async () => {
-    setPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
 
     renderBanner([]); // empty document list → path not saved yet
 
@@ -123,10 +147,24 @@ describe("PendingUploadBanner", () => {
     expect(screen.getByText(/Testdocument/)).toBeInTheDocument();
   });
 
-  // ── 4. Banner is hidden when objectPath already appears in documents ────
+  // ── 5. Two orphaned uploads produce two banners ─────────────────────────
+
+  it("shows two banners when two pending uploads exist", async () => {
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY_2);
+
+    renderBanner([]);
+
+    await waitFor(() => {
+      const banners = screen.getAllByTestId("pending-upload-banner");
+      expect(banners).toHaveLength(2);
+    });
+  });
+
+  // ── 6. Banner is hidden when objectPath already appears in documents ────
 
   it("does NOT show the banner when the objectPath is already registered", async () => {
-    setPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
 
     // Simulate the document having been persisted (e.g. saved from another tab)
     renderBanner([{ objectPath: OBJECT_PATH }]);
@@ -139,11 +177,23 @@ describe("PendingUploadBanner", () => {
     ).not.toBeInTheDocument();
   });
 
-  // ── 5. Clicking "Opnieuw proberen" reveals the retry form ───────────────
+  // ── 7. Dismissing one banner leaves the other intact ────────────────────
+
+  it("clearing one entry does not affect other pending uploads", () => {
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY_2);
+
+    clearPendingUpload(BUILDING_ID, OBJECT_PATH);
+
+    expect(localStorage.getItem(pendingUploadEntryKey(BUILDING_ID, OBJECT_PATH))).toBeNull();
+    expect(localStorage.getItem(pendingUploadEntryKey(BUILDING_ID, OBJECT_PATH_2))).not.toBeNull();
+  });
+
+  // ── 8. Clicking "Opnieuw proberen" reveals the retry form ───────────────
 
   it("reveals the retry form when the user clicks Opnieuw proberen", async () => {
     const user = userEvent.setup();
-    setPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
     renderBanner([]);
 
     await waitFor(() =>
@@ -158,7 +208,7 @@ describe("PendingUploadBanner", () => {
     ).toBeInTheDocument();
   });
 
-  // ── 6. "Alsnog opslaan" calls createBuildingDocument with correct args ──
+  // ── 9. "Alsnog opslaan" calls createBuildingDocument with correct args ──
 
   it("calls createBuildingDocument with the pending entry data on retry", async () => {
     const user = userEvent.setup();
@@ -169,7 +219,7 @@ describe("PendingUploadBanner", () => {
       callbacks?.onSettled?.();
     });
 
-    setPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
     renderBanner([]);
 
     await waitFor(() =>
@@ -187,7 +237,7 @@ describe("PendingUploadBanner", () => {
     expect(mutateArgs.data.category).toBe("overig");
   });
 
-  // ── 7. localStorage is cleared after a successful retry ─────────────────
+  // ── 10. localStorage is cleared after a successful retry ─────────────────
 
   it("clears localStorage when createBuildingDocument succeeds", async () => {
     const user = userEvent.setup();
@@ -197,7 +247,7 @@ describe("PendingUploadBanner", () => {
       callbacks?.onSettled?.();
     });
 
-    setPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
     renderBanner([]);
 
     await waitFor(() =>
@@ -208,11 +258,13 @@ describe("PendingUploadBanner", () => {
     await user.click(screen.getByRole("button", { name: /alsnog opslaan/i }));
 
     await waitFor(() => {
-      expect(localStorage.getItem(pendingUploadKey(BUILDING_ID))).toBeNull();
+      expect(
+        localStorage.getItem(pendingUploadEntryKey(BUILDING_ID, OBJECT_PATH)),
+      ).toBeNull();
     });
   });
 
-  // ── 8. Banner disappears from the DOM after a successful retry ──────────
+  // ── 11. Banner disappears from the DOM after a successful retry ──────────
 
   it("hides the banner after a successful retry save", async () => {
     const user = userEvent.setup();
@@ -222,7 +274,7 @@ describe("PendingUploadBanner", () => {
       callbacks?.onSettled?.();
     });
 
-    setPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
     renderBanner([]);
 
     await waitFor(() =>
@@ -239,7 +291,7 @@ describe("PendingUploadBanner", () => {
     });
   });
 
-  // ── 9. localStorage survives when createBuildingDocument fails ──────────
+  // ── 12. localStorage survives when createBuildingDocument fails ──────────
 
   it("keeps the localStorage entry when the retry save fails", async () => {
     const user = userEvent.setup();
@@ -249,7 +301,7 @@ describe("PendingUploadBanner", () => {
       callbacks?.onSettled?.();
     });
 
-    setPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
     renderBanner([]);
 
     await waitFor(() =>
@@ -262,16 +314,22 @@ describe("PendingUploadBanner", () => {
     await waitFor(() => expect(mockMutate).toHaveBeenCalledOnce());
 
     // Entry must still be in localStorage so the banner can reappear on reload
-    expect(localStorage.getItem(pendingUploadKey(BUILDING_ID))).not.toBeNull();
+    expect(
+      localStorage.getItem(pendingUploadEntryKey(BUILDING_ID, OBJECT_PATH)),
+    ).not.toBeNull();
   });
 
-  // ── 10. clearPendingUpload removes the localStorage key ─────────────────
+  // ── 13. clearPendingUpload removes the correct localStorage key ──────────
 
-  it("clearPendingUpload removes the entry from localStorage", () => {
-    setPendingUpload(BUILDING_ID, PENDING_ENTRY);
-    expect(localStorage.getItem(pendingUploadKey(BUILDING_ID))).not.toBeNull();
+  it("clearPendingUpload removes only the target entry from localStorage", () => {
+    addPendingUpload(BUILDING_ID, PENDING_ENTRY);
+    expect(
+      localStorage.getItem(pendingUploadEntryKey(BUILDING_ID, OBJECT_PATH)),
+    ).not.toBeNull();
 
-    clearPendingUpload(BUILDING_ID);
-    expect(localStorage.getItem(pendingUploadKey(BUILDING_ID))).toBeNull();
+    clearPendingUpload(BUILDING_ID, OBJECT_PATH);
+    expect(
+      localStorage.getItem(pendingUploadEntryKey(BUILDING_ID, OBJECT_PATH)),
+    ).toBeNull();
   });
 });

@@ -56,7 +56,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
-  setPendingUpload,
+  addPendingUpload,
   clearPendingUpload,
 } from "@/lib/pending-upload-helpers";
 import { PendingUploadBanner } from "@/components/vastgoed/PendingUploadBanner";
@@ -124,7 +124,7 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
       // de marker staan zodat de herstelbanner hem bij het volgende bezoek toont.
       const deleted = await tryDeleteOrphan(pendingObjectPath);
       if (deleted) {
-        clearPendingUpload(buildingId);
+        clearPendingUpload(buildingId, pendingObjectPath);
       }
       // Als deleted false is: localStorage-marker blijft bewaard voor de banner.
     }
@@ -150,7 +150,7 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
       {
         onSuccess: async (newDoc) => {
           // Upload succesvol opgeslagen – wis de localStorage-marker.
-          clearPendingUpload(buildingId);
+          clearPendingUpload(buildingId, objectPath);
 
           // Voeg het nieuwe document direct toe aan de cache zodat het meteen
           // zichtbaar is — ook bij een trage verbinding.
@@ -233,7 +233,7 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
       // als de sessie wegvalt vóór het opslaan van het record.
       setPendingObjectPath(objectPath);
       setPendingMeta(meta);
-      setPendingUpload(buildingId, {
+      addPendingUpload(buildingId, {
         objectPath,
         contentType: meta.contentType,
         sizeBytes: meta.sizeBytes,
@@ -828,3 +828,4 @@ export default function GebouwDetailPage({ id }: { id: string }) {
     </div>
   );
 }
+
