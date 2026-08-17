@@ -786,6 +786,7 @@ export const IssueKeyParams = zod.object({
 
 export const IssueKeyBody = zod.object({
   "holderId": zod.int(),
+  "dueAt": zod.string().nullish(),
   "note": zod.string().nullish()
 })
 

@@ -391,6 +391,8 @@ export interface KeyIssueRecord {
   /** @nullable */
   returnedAt?: string | null;
   /** @nullable */
+  dueAt?: string | null;
+  /** @nullable */
   note?: string | null;
 }
 
@@ -471,6 +473,8 @@ export interface KeyDoorInput {
 
 export interface KeyIssueInput {
   holderId: number;
+  /** @nullable */
+  dueAt?: string | null;
   /** @nullable */
   note?: string | null;
   /** @nullable */
@@ -1432,6 +1436,7 @@ export interface SatisfactionReport {
   /** Percentage of closed tickets with a satisfaction score (0-100) */
   responseRate: number;
   byScore: CountByKey[];
+  byCategory: SatisfactionByCategory[];
   recentResponses: SatisfactionResponseItem[];
   byCategory?: SatisfactionByCategory[];
 }

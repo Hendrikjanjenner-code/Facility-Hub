@@ -16,6 +16,7 @@ export interface SatisfactionReport {
   /** Percentage of closed tickets with a satisfaction score (0-100) */
   responseRate: number;
   byScore: CountByKey[];
+  byCategory: SatisfactionByCategory[];
   recentResponses: SatisfactionResponseItem[];
   byCategory?: SatisfactionByCategory[];
 }

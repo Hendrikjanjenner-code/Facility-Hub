@@ -335,6 +335,11 @@
     break-inside: avoid;
   }
 
+  /* Hide cancelled reservations by default; shown only when the user opts in */
+  .hide-cancelled-print .catering-card--cancelled {
+    display: none !important;
+  }
+
   /* Print header — show only during print */
   .print-header {
     display: block !important;

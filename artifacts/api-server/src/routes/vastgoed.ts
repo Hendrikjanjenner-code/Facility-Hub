@@ -201,7 +201,7 @@ router.patch(
     const outcome = await db.transaction(async (tx) => {
       const [current] = await tx.select().from(roomsTable).where(eq(roomsTable.id, id)).for("update");
       if (!current) return { status: 404 as const };
-      if (current.updatedAt.getTime() !== clientTs.getTime()) return { status: 409 as const };
+      if (current.updatedAt.getTime() !== clientTs.getTime()) return { status: 409 as const, conflictId: id };
       const updates: Partial<Record<DossierField, string | number | null>> = {};
       for (const field of DOSSIER_FIELDS) {
         const v = (d as Record<string, unknown>)[field];
@@ -211,13 +211,17 @@ router.patch(
       return { status: 200 as const };
     });
     if (outcome.status === 404) { res.status(404).json({ message: "Ruimte niet gevonden" }); return; }
-    const row = await selectRoomRow(id);
-    if (!row) { res.status(404).json({ message: "Ruimte niet gevonden" }); return; }
     if (outcome.status === 409) {
-      res.status(409).json({ message: "Conflicterende wijziging gedetecteerd", current: serializeRoom(false, row) });
+      const currentRow = await selectRoomRow(outcome.conflictId);
+      res.status(409).json({
+        message: "De ruimte is ondertussen gewijzigd door een andere gebruiker. Vernieuw de pagina en probeer opnieuw.",
+        current: currentRow ? serializeRoom(false, currentRow) : null,
+      });
       return;
     }
-    res.json(serializeRoom(false, row));
+    const row = await selectRoomRow(id);
+    if (!row) { res.status(404).json({ message: "Ruimte niet gevonden" }); return; }
+    res.status(200).json(serializeRoom(false, row));
   },
 );
 

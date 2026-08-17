@@ -8,24 +8,37 @@
 
 export interface KeySummary {
   id: number;
+
   code: string;
+
   type: string;
+
   description: string;
+
   status: string;
   /** @nullable */
+
   buildingId?: number | null;
   /** @nullable */
+
   buildingName?: string | null;
   /** @nullable */
+
   replacementCost?: number | null;
+
   doorCount: number;
   /** @nullable */
+
   currentHolderId?: number | null;
   /** @nullable */
+
   currentHolderName?: string | null;
   /** @nullable */
+
   issuedAt?: string | null;
   /** @nullable */
-  dueAt?: Date | null;
+
+  dueAt?: string | null;
+
   createdAt: string;
 }

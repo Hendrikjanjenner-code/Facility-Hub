@@ -67,6 +67,7 @@ async function fetchDailySummary(dateStr: string): Promise<DailySummary> {
 export default function CateringPage() {
   const [date, setDate] = useState<Date>(new Date());
   const [printDate, setPrintDate] = useState<Date>(new Date());
+  const [showCancelledInPrint, setShowCancelledInPrint] = useState(false);
 
   const dateStr = format(date, "yyyy-MM-dd");
   const printDateStr = format(printDate, "yyyy-MM-dd");
@@ -120,6 +121,13 @@ export default function CateringPage() {
 
   const activePrintSummary = printSummary ?? null;
 
+  // Filter cancelled from the print section based on user preference
+  const printReservations = activePrintSummary
+    ? showCancelledInPrint
+      ? activePrintSummary.reservations
+      : activePrintSummary.reservations.filter((r) => r.status !== "geannuleerd")
+    : [];
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Print-only header — hidden on screen, shown when printing */}
@@ -133,13 +141,13 @@ export default function CateringPage() {
       </div>
 
       {/* Print-only content for the selected print date */}
-      {activePrintSummary && activePrintSummary.reservations.length > 0 && (
+      {printReservations.length > 0 && (
         <div className="print-only hidden">
           {/* Totals */}
           <div className="mb-4">
             <h2 className="text-base font-semibold mb-2">Totalen voor de dag</h2>
             <div className="grid grid-cols-3 gap-2">
-              {activePrintSummary.totals.map((total) => (
+              {activePrintSummary!.totals.map((total) => (
                 <div
                   key={total.cateringItemId}
                   className="flex items-center justify-between p-2 border rounded"
@@ -153,11 +161,11 @@ export default function CateringPage() {
 
           {/* Reservations */}
           <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">
-            {activePrintSummary.reservations.length} reservering
-            {activePrintSummary.reservations.length !== 1 ? "en" : ""} met catering
+            {printReservations.length} reservering
+            {printReservations.length !== 1 ? "en" : ""} met catering
           </h2>
           <div className="space-y-3">
-            {activePrintSummary.reservations.map((reservation) => (
+            {printReservations.map((reservation) => (
               <div
                 key={reservation.id}
                 className="border-l-4 border-l-gray-800 pl-3 py-1"
@@ -209,7 +217,7 @@ export default function CateringPage() {
         </div>
       )}
 
-      {activePrintSummary && activePrintSummary.reservations.length === 0 && (
+      {activePrintSummary && printReservations.length === 0 && (
         <div className="print-only hidden">
           <p className="text-sm text-gray-600">
             Geen cateringbestellingen voor{" "}
@@ -247,6 +255,17 @@ export default function CateringPage() {
               Vandaag
             </Button>
           )}
+
+          {/* Cancelled toggle */}
+          <label className="flex items-center gap-1.5 text-sm text-muted-foreground cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showCancelledInPrint}
+              onChange={(e) => setShowCancelledInPrint(e.target.checked)}
+              className="rounded border-input"
+            />
+            Geannuleerd meeprinten
+          </label>
 
           {/* Print date picker + print button */}
           <div
@@ -355,7 +374,7 @@ export default function CateringPage() {
                     className={cn(
                       "catering-card border-l-4 transition-colors",
                       reservation.status === "geannuleerd"
-                        ? "border-l-red-400 opacity-60"
+                        ? "catering-card--cancelled border-l-red-400 opacity-60"
                         : delivered
                         ? "border-l-green-500 bg-green-50/40 dark:bg-green-950/20"
                         : "border-l-primary"

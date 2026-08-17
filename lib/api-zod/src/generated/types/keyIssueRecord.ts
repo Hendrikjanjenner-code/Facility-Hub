@@ -20,5 +20,7 @@ export interface KeyIssueRecord {
   /** @nullable */
   returnedAt?: string | null;
   /** @nullable */
+  dueAt?: string | null;
+  /** @nullable */
   note?: string | null;
 }
