@@ -12,6 +12,7 @@ import {
   usersTable,
   ticketsTable,
   ticketCategoriesTable,
+  mjopTaakGeschiedenisTable,
   notificationsTable,
   type Bouwdeel,
   type MjopTaak,
@@ -444,9 +445,70 @@ router.patch(
     if (data.estimatedCost !== undefined)
       update.estimatedCost = data.estimatedCost;
     if (data.status) update.status = data.status;
-    await db.update(mjopTakenTable).set(update).where(eq(mjopTakenTable.id, id));
+
+    const statusChanged = data.status && data.status !== existing.status;
+
+    await db.transaction(async (tx) => {
+      await tx.update(mjopTakenTable).set(update).where(eq(mjopTakenTable.id, id));
+
+      if (statusChanged) {
+        await tx.insert(mjopTaakGeschiedenisTable).values({
+          taakId: id,
+          oudStatus: existing.status,
+          nieuwStatus: data.status!,
+          gewijzigdDoor: req.currentUser!.id,
+          ticketId: null,
+          reden: null,
+        });
+      }
+    });
+
     const [full] = await fetchTaken(eq(mjopTakenTable.id, id));
     res.json(full);
+  },
+);
+
+router.get(
+  "/mjop-taken/:id/geschiedenis",
+  async (req, res): Promise<void> => {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Ongeldig id" });
+      return;
+    }
+    const [taak] = await db
+      .select()
+      .from(mjopTakenTable)
+      .where(eq(mjopTakenTable.id, id));
+    if (!taak) {
+      res.status(404).json({ message: "MJOP-taak niet gevonden" });
+      return;
+    }
+    const rows = await db
+      .select({
+        g: mjopTaakGeschiedenisTable,
+        gebruikerNaam: usersTable.name,
+        ticketNumber: ticketsTable.number,
+      })
+      .from(mjopTaakGeschiedenisTable)
+      .leftJoin(usersTable, eq(mjopTaakGeschiedenisTable.gewijzigdDoor, usersTable.id))
+      .leftJoin(ticketsTable, eq(mjopTaakGeschiedenisTable.ticketId, ticketsTable.id))
+      .where(eq(mjopTaakGeschiedenisTable.taakId, id))
+      .orderBy(mjopTaakGeschiedenisTable.gewijzigdOp);
+    res.json(
+      rows.map((r) => ({
+        id: r.g.id,
+        taakId: r.g.taakId,
+        oudStatus: r.g.oudStatus,
+        nieuwStatus: r.g.nieuwStatus,
+        gewijzigdDoor: r.g.gewijzigdDoor,
+        gebruikerNaam: r.gebruikerNaam ?? null,
+        ticketId: r.g.ticketId,
+        ticketNumber: r.ticketNumber ?? null,
+        reden: r.g.reden,
+        gewijzigdOp: r.g.gewijzigdOp.toISOString(),
+      })),
+    );
   },
 );
 

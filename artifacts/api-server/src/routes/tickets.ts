@@ -10,10 +10,10 @@ import {
   buildingsTable,
   assetsTable,
   mjopTakenTable,
+  mjopTaakGeschiedenisTable,
   notificationsTable,
   type Ticket,
 } from "@workspace/db";
-
 import { eq, desc, and, ilike, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import {
@@ -23,7 +23,6 @@ import {
 } from "@workspace/api-zod";
 import { requireAuth, TICKET_MANAGER_ROLES } from "../lib/auth";
 import { notify } from "../lib/notify";
-
 const router: IRouter = Router();
 router.use(requireAuth);
 
@@ -176,8 +175,8 @@ router.get("/tickets/:id", async (req, res): Promise<void> => {
 });
 
 router.post("/tickets", async (req, res): Promise<void> => {
-  const parsed = CreateTicketBody.safeParse(req.body);
-  if (!parsed.success) {
+  const parsed = CreateTicketCommentBody.safeParse(req.body);
+  if (Number.isNaN(id) || !parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
   }
@@ -248,7 +247,7 @@ router.post("/tickets", async (req, res): Promise<void> => {
     `/meldingen/${created!.id}`,
   );
 
-  const [full] = await fetchTickets(eq(ticketsTable.id, created!.id));
+  const [full] = await fetchTickets(eq(ticketsTable.id, id));
   res.status(201).json(full);
 });
 
@@ -263,7 +262,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 router.patch("/tickets/:id", async (req, res): Promise<void> => {
   const id = Number(req.params.id);
-  const parsed = UpdateTicketBody.safeParse(req.body);
+  const parsed = CreateTicketCommentBody.safeParse(req.body);
   if (Number.isNaN(id) || !parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
@@ -303,6 +302,16 @@ router.patch("/tickets/:id", async (req, res): Promise<void> => {
   }
 
   const update: Partial<typeof ticketsTable.$inferInsert> = {};
+
+      const linkedTaken = await tx
+        .select({ id: mjopTakenTable.id, status: mjopTakenTable.status })
+        .from(mjopTakenTable)
+        .where(
+          and(
+            eq(mjopTakenTable.ticketId, id),
+            sql`${mjopTakenTable.status} != 'afgerond'`,
+          ),
+        );
   if (data.status) update.status = data.status;
   if (data.priority) {
     update.priority = data.priority;

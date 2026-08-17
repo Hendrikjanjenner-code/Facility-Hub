@@ -102,8 +102,25 @@ export const mjopScenariosTable = pgTable("mjop_scenarios", {
     .defaultNow(),
 });
 
+// Statusgeschiedenis van een MJOP-taak: registreert elke statuswijziging met oorzaak
+export const mjopTaakGeschiedenisTable = pgTable("mjop_taak_geschiedenis", {
+  id: serial("id").primaryKey(),
+  taakId: integer("taak_id")
+    .notNull()
+    .references(() => mjopTakenTable.id, { onDelete: "cascade" }),
+  oudStatus: text("oud_status").notNull(),
+  nieuwStatus: text("nieuw_status").notNull(),
+  gewijzigdDoor: integer("gewijzigd_door").references(() => usersTable.id), // null = systeem
+  ticketId: integer("ticket_id").references(() => ticketsTable.id), // trigger via ticketsluiting
+  reden: text("reden"), // optionele toelichting
+  gewijzigdOp: timestamp("gewijzigd_op", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export type Bouwdeel = typeof bouwdelenTable.$inferSelect;
 export type Conditiemeting = typeof conditiemetingenTable.$inferSelect;
 export type MjopTaak = typeof mjopTakenTable.$inferSelect;
 export type KostenKengetal = typeof kostenKengetallenTable.$inferSelect;
 export type MjopScenario = typeof mjopScenariosTable.$inferSelect;
+export type MjopTaakGeschiedenis = typeof mjopTaakGeschiedenisTable.$inferSelect;
