@@ -15,9 +15,16 @@ localPort = 21238
 run = "pnpm --filter @workspace/site run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/site", "run", "build" ]
 serve = "static"
 publicDir = "artifacts/site/dist/public"
+
+[services.production.build]
+args = [ "pnpm", "--filter", "@workspace/site", "run", "build" ]
+
+[services.production.build.env]
+NODE_ENV = "production"
+PORT = "21238"
+BASE_PATH = "/site/"
 
 [[services.production.rewrites]]
 from = "/*"

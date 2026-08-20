@@ -16,9 +16,16 @@ localPort = 8090
 run = "pnpm --filter @workspace/govconnect-video run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/govconnect-video", "run", "build" ]
 serve = "static"
 publicDir = "artifacts/govconnect-video/dist/public"
+
+[services.production.build]
+args = [ "pnpm", "--filter", "@workspace/govconnect-video", "run", "build" ]
+
+[services.production.build.env]
+NODE_ENV = "production"
+PORT = "8090"
+BASE_PATH = "/__video/"
 
 [[services.production.rewrites]]
 from = "/*"

@@ -15,9 +15,16 @@ localPort = 22384
 run = "pnpm --filter @workspace/govconnect run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/govconnect", "run", "build" ]
 serve = "static"
 publicDir = "artifacts/govconnect/dist/public"
+
+[services.production.build]
+args = [ "pnpm", "--filter", "@workspace/govconnect", "run", "build" ]
+
+[services.production.build.env]
+NODE_ENV = "production"
+PORT = "22384"
+BASE_PATH = "/"
 
 [[services.production.rewrites]]
 from = "/*"
