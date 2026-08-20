@@ -1,0 +1,107 @@
+{
+  "title": "Struttura immobiliare",
+  "subtitle": "Panoramica di organizzazione, sedi, edifici e piani.",
+  "tree": {
+    "title": "Albero della struttura",
+    "description": "Naviga la gerarchia per visualizzare i locali.",
+    "buildingDossier": "Fascicolo edificio",
+    "showRooms": "Mostra locali",
+    "floorLevel": "{{name}} (Livello {{level}})",
+    "siteCity": "{{name}} ({{city}})",
+    "roomCount_one": "{{count}} locale",
+    "roomCount_other": "{{count}} locali"
+  },
+  "detail": {
+    "notFound": "Edificio non trovato.",
+    "addressFallback": "-",
+    "stats": {
+      "floors": "Piani",
+      "rooms": "Locali",
+      "totalArea": "Superficie totale"
+    },
+    "vlekkenplan": {
+      "title": "Piano occupazione",
+      "description": "Layout schematico per piano, dimensione del blocco in base alla superficie.",
+      "colorByDepartment": "Colore per reparto",
+      "colorByFunction": "Colore per funzione",
+      "noRooms": "Nessun locale su questo piano.",
+      "filterPlaceholder": "Cerca per reparto, funzione o nome del locale…",
+      "clearFilter": "Cancella filtro",
+      "noMatches": "Nessun locale trovato per questa ricerca.",
+      "matchCount_one": "{{matched}} di {{count}} locale evidenziato",
+      "matchCount_other": "{{matched}} di {{count}} locali evidenziati",
+      "unknown": "Sconosciuto",
+      "tileManageHint": "{{name}} — clicca per modificare reparto/funzione",
+      "tileDetailHint": "{{name}} ({{code}}) — clicca per i dettagli",
+      "edit": "modifica",
+      "popover": {
+        "department": "Reparto",
+        "function": "Funzione",
+        "area": "Superficie",
+        "capacity": "Occupazione",
+        "persons": "{{count}} persone",
+        "goToRoom": "Vai alla pagina del locale"
+      },
+      "legendVvo": "— {{area}} m² SUN"
+    },
+    "vlekEdit": {
+      "description": "Modifica reparto o funzione. Il piano occupazione viene aggiornato immediatamente.",
+      "department": "Reparto",
+      "departmentPlaceholder": "Es. Servizi generali, IT, HR",
+      "function": "Funzione",
+      "functionPlaceholder": "Es. Ufficio, Sala riunioni",
+      "area": "Superficie: {{area}} m²",
+      "saving": "Salvataggio…"
+    },
+    "history": {
+      "title": "Riorganizzazioni recenti",
+      "empty": "Nessuna riorganizzazione recente su questo piano.",
+      "undone": "Annullato",
+      "by": "Da: {{name}}",
+      "unknown": "Sconosciuto"
+    },
+    "documents": {
+      "title": "Documenti dell'edificio",
+      "description": "Contratti di locazione, disegni costruttivi ed etichette energetiche.",
+      "upload": "Carica documento",
+      "empty": "Nessun documento ancora caricato.",
+      "download": "Scarica",
+      "delete": "Elimina",
+      "unknownUploader": "Sconosciuto",
+      "dialog": {
+        "title": "Carica documento dell'edificio",
+        "description": "PDF o immagine, massimo 15 MB.",
+        "titleLabel": "Titolo",
+        "titlePlaceholder": "Es. Contratto di locazione 2026",
+        "category": "Categoria",
+        "file": "File",
+        "busy": "In corso...",
+        "retry": "Riprova",
+        "uploadBtn": "Carica"
+      },
+      "categories": {
+        "huurcontract": "Contratto di locazione",
+        "bouwtekening": "Disegno costruttivo",
+        "energielabel": "Etichetta energetica",
+        "overig": "Altro"
+      },
+      "toast": {
+        "titleRequired": "Inserisci un titolo",
+        "chooseFile": "Scegli un file",
+        "tooLarge": "Il file è troppo grande (max 15 MB)",
+        "uploadFailed": "Caricamento non riuscito",
+        "added": "Documento aggiunto",
+        "refreshFailed": "Documento salvato, ma l'aggiornamento dell'elenco non è riuscito.",
+        "saveFailed": "Il file è stato caricato ma non è stato possibile salvarlo. Controlla la connessione e riprova.",
+        "deleted": "Documento eliminato",
+        "deleteFailed": "Eliminazione non riuscita"
+      }
+    },
+    "toast": {
+      "roomUpdated": "Locale aggiornato",
+      "roomChangedConflict": "Locale modificato nel frattempo",
+      "roomChangedConflictDesc": "Qualcun altro ha appena modificato questo elemento del piano occupazione. Chiudi la finestra e riprova.",
+      "updateFailed": "Aggiornamento non riuscito"
+    }
+  }
+}

@@ -10,7 +10,7 @@ import { logger } from "./logger";
  *   SMTP_SECURE – "true" voor TLS op poort 465
  *   SMTP_USER   – gebruikersnaam
  *   SMTP_PASS   – wachtwoord
- *   SMTP_FROM   – afzendadres, standaard "GovConnect <noreply@govconnect.nl>"
+ *   SMTP_FROM   – afzendadres, standaard "LetShare4gov <noreply@letshare4gov.nl>"
  */
 
 function createTransport() {
@@ -63,7 +63,7 @@ export async function sendContractExpiryEmail(
   }
 
   const from =
-    process.env["SMTP_FROM"] ?? "GovConnect <noreply@govconnect.nl>";
+    process.env["SMTP_FROM"] ?? "LetShare4gov <noreply@letshare4gov.nl>";
 
   const subject = `Urgent: contract "${params.contractName}" eindigt over ${params.daysUntilEnd} dag(en)`;
 
@@ -80,7 +80,7 @@ export async function sendContractExpiryEmail(
     `Bekijk en verleng het contract via:`,
     params.contractsUrl,
     "",
-    "Dit is een automatische melding van GovConnect.",
+    "Dit is een automatische melding van LetShare4gov.",
   ].join("\n");
 
   const html = `
@@ -116,7 +116,7 @@ export async function sendContractExpiryEmail(
     </a>
   </p>
   <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0"/>
-  <p style="font-size:12px;color:#666">Dit is een automatische melding van GovConnect. Reageer niet op dit e-mailadres.</p>
+  <p style="font-size:12px;color:#666">Dit is een automatische melding van LetShare4gov. Reageer niet op dit e-mailadres.</p>
 </body>
 </html>`;
 

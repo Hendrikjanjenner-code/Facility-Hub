@@ -1,0 +1,107 @@
+{
+  "title": "Gayrimenkul yapısı",
+  "subtitle": "Organizasyon, tesisler, binalar ve katlara genel bakış.",
+  "tree": {
+    "title": "Yapı ağacı",
+    "description": "Odaları görüntülemek için hiyerarşide gezinin.",
+    "buildingDossier": "Bina dosyası",
+    "showRooms": "Odaları göster",
+    "floorLevel": "{{name}} (Seviye {{level}})",
+    "siteCity": "{{name}} ({{city}})",
+    "roomCount_one": "{{count}} oda",
+    "roomCount_other": "{{count}} oda"
+  },
+  "detail": {
+    "notFound": "Bina bulunamadı.",
+    "addressFallback": "-",
+    "stats": {
+      "floors": "Katlar",
+      "rooms": "Odalar",
+      "totalArea": "Toplam alan"
+    },
+    "vlekkenplan": {
+      "title": "Yerleşim planı",
+      "description": "Kat bazında şematik düzen, blok boyutu alana göre.",
+      "colorByDepartment": "Departmana göre renk",
+      "colorByFunction": "Fonksiyona göre renk",
+      "noRooms": "Bu katta oda yok.",
+      "filterPlaceholder": "Departman, fonksiyon veya oda adına göre ara…",
+      "clearFilter": "Filtreyi temizle",
+      "noMatches": "Bu arama için oda bulunamadı.",
+      "matchCount_one": "{{count}} odanın {{matched}} tanesi vurgulandı",
+      "matchCount_other": "{{count}} odanın {{matched}} tanesi vurgulandı",
+      "unknown": "Bilinmiyor",
+      "tileManageHint": "{{name}} — departman/fonksiyon değiştirmek için tıklayın",
+      "tileDetailHint": "{{name}} ({{code}}) — ayrıntılar için tıklayın",
+      "edit": "düzenle",
+      "popover": {
+        "department": "Departman",
+        "function": "Fonksiyon",
+        "area": "Alan",
+        "capacity": "Doluluk",
+        "persons": "{{count}} kişi",
+        "goToRoom": "Oda sayfasına git"
+      },
+      "legendVvo": "— {{area}} m² net alan"
+    },
+    "vlekEdit": {
+      "description": "Departman veya fonksiyonu değiştirin. Yerleşim planı anında güncellenir.",
+      "department": "Departman",
+      "departmentPlaceholder": "Örn. Tesis yönetimi, BT, İK",
+      "function": "Fonksiyon",
+      "functionPlaceholder": "Örn. Ofis, Toplantı odası",
+      "area": "Alan: {{area}} m²",
+      "saving": "Kaydediliyor…"
+    },
+    "history": {
+      "title": "Son yeniden düzenlemeler",
+      "empty": "Bu katta yakın zamanda yeniden düzenleme yok.",
+      "undone": "Geri alındı",
+      "by": "Yapan: {{name}}",
+      "unknown": "Bilinmiyor"
+    },
+    "documents": {
+      "title": "Bina belgeleri",
+      "description": "Kira sözleşmeleri, inşaat çizimleri ve enerji etiketleri.",
+      "upload": "Belge yükle",
+      "empty": "Henüz belge yüklenmedi.",
+      "download": "İndir",
+      "delete": "Sil",
+      "unknownUploader": "Bilinmiyor",
+      "dialog": {
+        "title": "Bina belgesi yükle",
+        "description": "PDF veya görsel, en fazla 15 MB.",
+        "titleLabel": "Başlık",
+        "titlePlaceholder": "Örn. Kira sözleşmesi 2026",
+        "category": "Kategori",
+        "file": "Dosya",
+        "busy": "İşleniyor...",
+        "retry": "Tekrar dene",
+        "uploadBtn": "Yükle"
+      },
+      "categories": {
+        "huurcontract": "Kira sözleşmesi",
+        "bouwtekening": "İnşaat çizimi",
+        "energielabel": "Enerji etiketi",
+        "overig": "Diğer"
+      },
+      "toast": {
+        "titleRequired": "Bir başlık girin",
+        "chooseFile": "Bir dosya seçin",
+        "tooLarge": "Dosya çok büyük (en fazla 15 MB)",
+        "uploadFailed": "Yükleme başarısız",
+        "added": "Belge eklendi",
+        "refreshFailed": "Belge kaydedildi, ancak liste yenilenemedi.",
+        "saveFailed": "Dosya yüklendi ancak kaydedilemedi. Bağlantınızı kontrol edip tekrar deneyin.",
+        "deleted": "Belge silindi",
+        "deleteFailed": "Silme başarısız"
+      }
+    },
+    "toast": {
+      "roomUpdated": "Oda güncellendi",
+      "roomChangedConflict": "Oda bu sırada değiştirildi",
+      "roomChangedConflictDesc": "Başka biri bu yerleşim planı öğesini az önce düzenledi. Pencereyi kapatıp tekrar deneyin.",
+      "updateFailed": "Güncelleme başarısız"
+    }
+  }
+}

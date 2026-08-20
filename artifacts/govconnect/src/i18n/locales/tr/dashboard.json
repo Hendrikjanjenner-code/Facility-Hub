@@ -1,0 +1,41 @@
+{
+  "title": "Genel bakış",
+  "welcome": "Tekrar hoş geldiniz, {{name}}",
+  "subtitle": "İşte bugüne ait tesis genel bakışınız.",
+  "newTicket": "Yeni bildirim",
+  "stats": {
+    "myOpenTickets": "Açık bildirimlerim",
+    "openTickets": "Açık bildirimler",
+    "inProgress": "Şu anda işleniyor",
+    "slaAtRisk": "SLA risk altında",
+    "slaAtRiskDesc": "4 saat içinde veya süresi geçmiş",
+    "myReservations": "Rezervasyonlarım",
+    "reservationsToday": "Bugünkü rezervasyonlar",
+    "roomsAndCatering": "Odalar ve ikram",
+    "workplaceBookings": "Çalışma alanı rezervasyonları",
+    "forToday": "Bugün için",
+    "visitors": "Ziyaretçiler",
+    "presentExpected": "Mevcut / Beklenen",
+    "totalAssets": "Toplam varlık",
+    "registeredInSystem": "Sistemde kayıtlı",
+    "poorCondition": "Kötü durumdaki bileşenler",
+    "poorConditionDesc": "Puan ≥ 4 (orta ila çok kötü)"
+  },
+  "charts": {
+    "ticketsByStatus": "Duruma göre bildirimler",
+    "ticketsByStatusDesc": "Tüm aktif bildirimlere genel bakış",
+    "priorityDistribution": "Öncelik dağılımı",
+    "priorityDistributionDesc": "Açık bildirimler"
+  },
+  "satisfaction": {
+    "title": "Müşteri memnuniyeti",
+    "average": "Ortalama {{score}}/5 — ",
+    "summary": "{{closed}} kapalı bildirimden {{responses}} tanesi değerlendirildi (%{{rate}} yanıt oranı)",
+    "noRatings": "Henüz değerlendirme alınmadı.",
+    "lowestResponseRate": "Kategoriye göre en düşük yanıt oranı"
+  },
+  "activity": {
+    "title": "Son etkinlik",
+    "empty": "Son etkinlik yok"
+  }
+}

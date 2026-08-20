@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
   useGetRoom, 
@@ -48,6 +49,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getTicketStatusColor, getReservationStatusColor } from "@/lib/status-helpers";
 
 function DossierEditDialog({ room }: { room: Room }) {
+  const { t } = useTranslation("ruimtes");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -79,21 +81,20 @@ function DossierEditDialog({ room }: { room: Room }) {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetRoomQueryKey(room.id) });
           queryClient.invalidateQueries({ queryKey: getListRoomDossierHistoryQueryKey(room.id) });
-          toast({ title: "Ruimtedossier bijgewerkt" });
+          toast({ title: t("detail.toast.dossierUpdated") });
           setOpen(false);
         },
         onError: (error) => {
           if (error.status === 409) {
             queryClient.invalidateQueries({ queryKey: getGetRoomQueryKey(room.id) });
             toast({
-              title: "Ruimte ondertussen gewijzigd",
-              description:
-                "Iemand anders heeft deze ruimte zojuist bewerkt. De dialoog is gesloten — open hem opnieuw om de actuele waarden te zien.",
+              title: t("detail.toast.roomChangedConflict"),
+              description: t("detail.toast.roomChangedConflictDesc"),
               variant: "destructive",
             });
             setOpen(false);
           } else {
-            toast({ title: "Bijwerken mislukt", variant: "destructive" });
+            toast({ title: t("detail.toast.updateFailed"), variant: "destructive" });
           }
         },
       },
@@ -104,67 +105,58 @@ function DossierEditDialog({ room }: { room: Room }) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
-          <Pencil className="h-3.5 w-3.5 mr-1.5" /> Bewerken
+          <Pencil className="h-3.5 w-3.5 mr-1.5" /> {t("detail.dossier.edit")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Ruimtedossier bewerken</DialogTitle>
-          <DialogDescription>Pas oppervlaktes, functie en afdeling van {room.name} aan.</DialogDescription>
+          <DialogTitle>{t("detail.editDialog.title")}</DialogTitle>
+          <DialogDescription>{t("detail.editDialog.description", { name: room.name })}</DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label htmlFor="d-area">Oppervlakte (m²)</Label>
+            <Label htmlFor="d-area">{t("detail.editDialog.area")}</Label>
             <Input id="d-area" type="number" min={0} value={areaM2} onChange={(e) => setAreaM2(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="d-func">Functie</Label>
+            <Label htmlFor="d-func">{t("detail.editDialog.function")}</Label>
             <Input id="d-func" value={functionType} onChange={(e) => setFunctionType(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="d-vvo">VVO (m²)</Label>
+            <Label htmlFor="d-vvo">{t("detail.editDialog.vvo")}</Label>
             <Input id="d-vvo" type="number" min={0} value={areaVvo} onChange={(e) => setAreaVvo(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="d-bvo">BVO (m²)</Label>
+            <Label htmlFor="d-bvo">{t("detail.editDialog.bvo")}</Label>
             <Input id="d-bvo" type="number" min={0} value={areaBvo} onChange={(e) => setAreaBvo(e.target.value)} />
           </div>
           <div className="space-y-1.5 col-span-2">
-            <Label htmlFor="d-dept">Afdeling</Label>
-            <Input id="d-dept" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder="Bijv. Burgerzaken" />
+            <Label htmlFor="d-dept">{t("detail.editDialog.department")}</Label>
+            <Input id="d-dept" value={department} onChange={(e) => setDepartment(e.target.value)} placeholder={t("detail.editDialog.departmentPlaceholder")} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="d-capacity">Bezetting (personen)</Label>
-            <Input id="d-capacity" type="number" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)} placeholder="Bijv. 12" />
+            <Label htmlFor="d-capacity">{t("detail.editDialog.capacity")}</Label>
+            <Input id="d-capacity" type="number" min={0} value={capacity} onChange={(e) => setCapacity(e.target.value)} placeholder={t("detail.editDialog.capacityPlaceholder")} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="d-bookable">Boekbaar</Label>
+            <Label htmlFor="d-bookable">{t("detail.editDialog.bookable")}</Label>
             <div className="flex items-center gap-2 pt-1">
               <Switch id="d-bookable" checked={bookable} onCheckedChange={setBookable} />
-              <span className="text-sm text-muted-foreground">{bookable ? "Ja" : "Nee"}</span>
+              <span className="text-sm text-muted-foreground">{bookable ? t("detail.editDialog.yes") : t("detail.editDialog.no")}</span>
             </div>
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Annuleren</Button>
-          <Button onClick={submit} disabled={update.isPending}>Opslaan</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>{t("common.cancel", { ns: "common" })}</Button>
+          <Button onClick={submit} disabled={update.isPending}>{t("common.save", { ns: "common" })}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-const FIELD_LABELS: Record<string, string> = {
-  functionType: "Functie",
-  floorFinish: "Vloerafwerking",
-  areaM2: "Oppervlakte (m²)",
-  areaVvoM2: "VVO (m²)",
-  areaBvoM2: "BVO (m²)",
-  department: "Afdeling",
-  capacity: "Bezetting (personen)",
-  bookable: "Boekbaar",
-};
 export default function RuimteDetailPage({ id }: { id: string }) {
+  const { t } = useTranslation("ruimtes");
   const roomId = parseInt(id);
   const [, setLocation] = useLocation();
 
@@ -192,7 +184,7 @@ export default function RuimteDetailPage({ id }: { id: string }) {
   }
 
   if (!room) {
-    return <div>Ruimte niet gevonden.</div>;
+    return <div>{t("detail.notFound")}</div>;
   }
 
   // Client side filter just in case the API search doesn't filter perfectly
@@ -208,7 +200,7 @@ export default function RuimteDetailPage({ id }: { id: string }) {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight">{room.name}</h1>
             <Badge variant="outline" className="font-mono bg-background">{room.code}</Badge>
-            {room.bookable && <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-transparent">Boekbaar</Badge>}
+            {room.bookable && <Badge className="bg-green-100 text-green-800 hover:bg-green-100 border-transparent">{t("detail.bookableBadge")}</Badge>}
           </div>
           <p className="text-muted-foreground text-sm flex items-center gap-2 mt-1">
             <MapPin className="h-3.5 w-3.5" />
@@ -223,7 +215,7 @@ export default function RuimteDetailPage({ id }: { id: string }) {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <Info className="h-5 w-5" /> Ruimtedossier
+                  <Info className="h-5 w-5" /> {t("detail.dossier.title")}
                 </CardTitle>
                 {canEdit && <DossierEditDialog key={room.id} room={room} />}
               </div>
@@ -232,51 +224,51 @@ export default function RuimteDetailPage({ id }: { id: string }) {
               <dl className="grid grid-cols-2 sm:grid-cols-3 gap-6 text-sm">
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
-                    <Maximize className="h-4 w-4" /> Oppervlakte
+                    <Maximize className="h-4 w-4" /> {t("detail.dossier.area")}
                   </dt>
                   <dd className="font-medium text-base">{room.areaM2} m²</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
-                    <Maximize className="h-4 w-4" /> VVO
+                    <Maximize className="h-4 w-4" /> {t("detail.dossier.vvo")}
                   </dt>
                   <dd className="font-medium text-base">{room.areaVvoM2 != null ? `${room.areaVvoM2} m²` : "-"}</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
-                    <Maximize className="h-4 w-4" /> BVO
+                    <Maximize className="h-4 w-4" /> {t("detail.dossier.bvo")}
                   </dt>
                   <dd className="font-medium text-base">{room.areaBvoM2 != null ? `${room.areaBvoM2} m²` : "-"}</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
-                    <Briefcase className="h-4 w-4" /> Afdeling
+                    <Briefcase className="h-4 w-4" /> {t("detail.dossier.department")}
                   </dt>
                   <dd className="font-medium text-base">{room.department || "-"}</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
-                    <Users className="h-4 w-4" /> Bezetting
+                    <Users className="h-4 w-4" /> {t("detail.dossier.capacity")}
                   </dt>
-                  <dd className="font-medium text-base">{room.capacity != null ? `${room.capacity} personen` : "–"}</dd>
+                  <dd className="font-medium text-base">{room.capacity != null ? t("detail.dossier.capacityValue", { count: room.capacity }) : "–"}</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
-                    <LayoutGrid className="h-4 w-4" /> Functie
+                    <LayoutGrid className="h-4 w-4" /> {t("detail.dossier.function")}
                   </dt>
                   <dd className="font-medium text-base capitalize">{room.functionType || "–"}</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
-                    <Layers className="h-4 w-4" /> Vloerafwerking
+                    <Layers className="h-4 w-4" /> {t("detail.dossier.floorFinish")}
                   </dt>
                   <dd className="font-medium text-base">{room.floorFinish || "–"}</dd>
                 </div>
                 <div className="space-y-1">
                   <dt className="text-muted-foreground font-medium flex items-center gap-1.5">
-                    <CalendarDays className="h-4 w-4" /> Boekbaarheid
+                    <CalendarDays className="h-4 w-4" /> {t("detail.dossier.bookability")}
                   </dt>
-                  <dd className="font-medium text-base">{room.bookable ? "Boekbaar" : "Niet boekbaar"}</dd>
+                  <dd className="font-medium text-base">{room.bookable ? t("detail.dossier.bookable") : t("detail.dossier.notBookable")}</dd>
                 </div>
               </dl>
 
@@ -284,7 +276,7 @@ export default function RuimteDetailPage({ id }: { id: string }) {
                 <>
                   <Separator className="my-6" />
                   <div>
-                    <h4 className="font-medium mb-3">Faciliteiten</h4>
+                    <h4 className="font-medium mb-3">{t("detail.dossier.facilities")}</h4>
                     <div className="flex flex-wrap gap-2">
                       {room.facilities.map(f => (
                         <Badge key={f} variant="secondary" className="font-normal">{f}</Badge>
@@ -299,17 +291,17 @@ export default function RuimteDetailPage({ id }: { id: string }) {
           <Tabs defaultValue="assets" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="assets">
-                <PcCase className="h-4 w-4 mr-2" /> Assets ({assets?.length || 0})
+                <PcCase className="h-4 w-4 mr-2" /> {t("detail.tabs.assets", { count: assets?.length || 0 })}
               </TabsTrigger>
               <TabsTrigger value="tickets">
-                <Ticket className="h-4 w-4 mr-2" /> Open meldingen ({roomTickets.length})
+                <Ticket className="h-4 w-4 mr-2" /> {t("detail.tabs.tickets", { count: roomTickets.length })}
               </TabsTrigger>
             </TabsList>
             <TabsContent value="assets" className="mt-4">
               <Card>
                 <div className="divide-y">
                   {!assets?.length ? (
-                    <div className="p-8 text-center text-muted-foreground text-sm">Geen assets gekoppeld aan deze ruimte.</div>
+                    <div className="p-8 text-center text-muted-foreground text-sm">{t("detail.tabs.noAssets")}</div>
                   ) : (
                     assets.map(asset => (
                       <div key={asset.id} className="p-4 flex items-center justify-between hover:bg-muted/50 cursor-pointer" onClick={() => setLocation(`/assets/${asset.id}`)}>
@@ -328,14 +320,14 @@ export default function RuimteDetailPage({ id }: { id: string }) {
               <Card>
                 <div className="divide-y">
                   {!roomTickets?.length ? (
-                    <div className="p-8 text-center text-muted-foreground text-sm">Geen openstaande meldingen.</div>
+                    <div className="p-8 text-center text-muted-foreground text-sm">{t("detail.tabs.noTickets")}</div>
                   ) : (
                     roomTickets.map(ticket => (
                       <div key={ticket.id} className="p-4 flex items-center justify-between hover:bg-muted/50 cursor-pointer" onClick={() => setLocation(`/meldingen/${ticket.id}`)}>
                         <div className="flex-1 min-w-0 pr-4">
                           <div className="font-medium text-sm truncate">{ticket.title}</div>
                           <div className="text-xs text-muted-foreground mt-0.5">
-                            {format(new Date(ticket.createdAt), "d MMM", { locale: nl })} • {ticket.categoryName}
+                            {format(new Date(ticket.createdAt), "d MMM", { locale: getDateFnsLocale() })} • {ticket.categoryName}
                           </div>
                         </div>
                         <Badge variant="secondary" className={getTicketStatusColor(ticket.status)}>{ticket.status}</Badge>
@@ -355,13 +347,13 @@ export default function RuimteDetailPage({ id }: { id: string }) {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <CalendarDays className="h-4 w-4" /> Reserveringen Vandaag
+                  <CalendarDays className="h-4 w-4" /> {t("detail.reservations.title")}
                 </CardTitle>
-                <CardDescription>{format(new Date(), "EEEE d MMMM", { locale: nl })}</CardDescription>
+                <CardDescription>{format(new Date(), "EEEE d MMMM", { locale: getDateFnsLocale() })}</CardDescription>
               </CardHeader>
               <CardContent>
                 {!reservations?.length ? (
-                  <p className="text-sm text-muted-foreground">Geen reserveringen voor vandaag.</p>
+                  <p className="text-sm text-muted-foreground">{t("detail.reservations.empty")}</p>
                 ) : (
                   <div className="space-y-3">
                     {reservations.map(res => (
@@ -380,7 +372,7 @@ export default function RuimteDetailPage({ id }: { id: string }) {
                 )}
                 
                 <Button className="w-full mt-4" variant="outline" onClick={() => setLocation("/reserveringen")}>
-                  Naar planbord
+                  {t("detail.reservations.toPlanboard")}
                 </Button>
               </CardContent>
             </Card>
@@ -391,11 +383,13 @@ export default function RuimteDetailPage({ id }: { id: string }) {
   );
 }
 
-function formatValue(v: string | number | null | undefined) {
-  return v === null || v === undefined || v === "" ? "leeg" : String(v);
+function formatValue(v: string | number | null | undefined, emptyLabel: string) {
+  return v === null || v === undefined || v === "" ? emptyLabel : String(v);
 }
 
 function DossierHistoryCard({ roomId }: { roomId: number }) {
+  const { t } = useTranslation("ruimtes");
+  const fieldLabel = (f: string) => t(`detail.fields.${f}`, f);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: history, isLoading } = useListRoomDossierHistory(roomId, {
@@ -414,20 +408,20 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
           queryClient.invalidateQueries({ queryKey: getListRoomDossierHistoryQueryKey(roomId) });
           if (result.skippedFields.length > 0) {
             const labels = result.skippedFields
-              .map((f) => FIELD_LABELS[f] ?? f)
+              .map((f) => fieldLabel(f))
               .join(", ");
             toast({
-              title: "Wijziging gedeeltelijk teruggedraaid",
-              description: `Overgeslagen (later opnieuw gewijzigd): ${labels}.`,
+              title: t("detail.toast.partialUndo"),
+              description: t("detail.toast.partialUndoDesc", { fields: labels }),
             });
           } else {
-            toast({ title: "Wijziging ongedaan gemaakt" });
+            toast({ title: t("detail.toast.undone") });
           }
         },
         onError: (err: unknown) => {
           const msg = (err as { message?: string })?.message;
           toast({
-            title: "Ongedaan maken mislukt",
+            title: t("detail.toast.undoFailed"),
             description: msg ?? undefined,
             variant: "destructive",
           });
@@ -441,27 +435,27 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <History className="h-5 w-5" /> Wijzigingshistorie
+          <History className="h-5 w-5" /> {t("detail.history.title")}
         </CardTitle>
-        <CardDescription>Herindelingen en dossierwijzigingen van deze ruimte.</CardDescription>
+        <CardDescription>{t("detail.history.description")}</CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <Skeleton className="h-16 w-full" />
         ) : !history?.length ? (
-          <p className="text-sm text-muted-foreground">Nog geen wijzigingen geregistreerd.</p>
+          <p className="text-sm text-muted-foreground">{t("detail.history.empty")}</p>
         ) : (
           <div className="space-y-3">
             {history.map((entry) => (
               <div key={entry.id} className="text-sm border rounded-lg p-3 bg-muted/30">
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium">{entry.changedByName ?? "Onbekend"}</span>
+                    <span className="font-medium">{entry.changedByName ?? t("detail.history.unknown")}</span>
                     {entry.isUndo && (
-                      <Badge variant="secondary" className="text-[10px]">Teruggedraaid</Badge>
+                      <Badge variant="secondary" className="text-[10px]">{t("detail.history.reverted")}</Badge>
                     )}
                     <span className="text-xs text-muted-foreground">
-                      {format(new Date(entry.changedAt as string), "d MMM yyyy HH:mm", { locale: nl })}
+                      {format(new Date(entry.changedAt as string), "d MMM yyyy HH:mm", { locale: getDateFnsLocale() })}
                     </span>
                   </div>
                   {!entry.isUndo && (
@@ -473,15 +467,15 @@ function DossierHistoryCard({ roomId }: { roomId: number }) {
                       onClick={() => doUndo(entry.id)}
                     >
                       <Undo2 className="h-3 w-3 mr-1" />
-                      Terugdraaien
+                      {t("detail.history.undo")}
                     </Button>
                   )}
                 </div>
                 <ul className="space-y-0.5 text-muted-foreground">
                   {(entry.changes as { field: string; from: string | number | null; to: string | number | null }[]).map((c, i) => (
                     <li key={i}>
-                      <span className="text-foreground">{FIELD_LABELS[c.field] ?? c.field}</span>
-                      : {formatValue(c.from)} → {formatValue(c.to)}
+                      <span className="text-foreground">{fieldLabel(c.field)}</span>
+                      : {formatValue(c.from, t("detail.history.emptyValue"))} → {formatValue(c.to, t("detail.history.emptyValue"))}
                     </li>
                   ))}
                 </ul>

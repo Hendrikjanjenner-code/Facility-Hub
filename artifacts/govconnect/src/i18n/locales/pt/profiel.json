@@ -1,0 +1,37 @@
+{
+  "title": "O meu perfil",
+  "subtitle": "Faça a gestão das suas definições pessoais.",
+  "account": {
+    "title": "Dados da conta",
+    "name": "Nome",
+    "email": "Endereço de e-mail",
+    "role": "Função",
+    "department": "Departamento"
+  },
+  "alerts": {
+    "title": "Alertas de expiração",
+    "description": "Escolha como pretende ser notificado quando um contrato estiver prestes a expirar."
+  },
+  "options": {
+    "inapp_only": {
+      "label": "Apenas na aplicação",
+      "description": "Recebe notificações apenas dentro da aplicação, sem e-mails."
+    },
+    "email": {
+      "label": "Apenas e-mail",
+      "description": "Recebe apenas um e-mail para avisos críticos de contrato, sem notificação na aplicação."
+    },
+    "all": {
+      "label": "Na aplicação e e-mail (predefinição)",
+      "description": "Recebe tanto uma notificação na aplicação como um e-mail para avisos críticos de contrato."
+    }
+  },
+  "save": "Guardar",
+  "saving": "A guardar…",
+  "toast": {
+    "savedTitle": "Preferências guardadas",
+    "savedDescription": "As suas definições de notificação foram atualizadas.",
+    "errorTitle": "Erro",
+    "errorDescription": "Não foi possível guardar as preferências. Tente novamente."
+  }
+}

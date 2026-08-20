@@ -1,0 +1,42 @@
+{
+  "title": "Panel de recepción",
+  "subtitle": "Visitantes esperados el {{date}}.",
+  "register": "Registrar visitante",
+  "dialog": {
+    "title": "Registrar nuevo visitante",
+    "description": "Registre un visitante para hoy. La credencial se genera al instante.",
+    "name": "Nombre del visitante",
+    "namePlaceholder": "Nombre completo",
+    "company": "Empresa (Opcional)",
+    "companyPlaceholder": "Nombre de la empresa",
+    "email": "Correo electrónico (Opcional)",
+    "emailPlaceholder": "Correo electrónico",
+    "host": "Anfitrión",
+    "hostPlaceholder": "Elegir empleado",
+    "expectedArrival": "Llegada prevista",
+    "submit": "Registrar"
+  },
+  "searchPlaceholder": "Buscar visitante...",
+  "empty": "No se encontraron visitantes para hoy.",
+  "expected": "Previsto: {{time}}",
+  "hostLabel": "Anfitrión: ",
+  "checkedIn": "Entrada: {{time}}",
+  "checkedOut": "Salida: {{time}}",
+  "checkIn": "Registrar entrada",
+  "checkOut": "Registrar salida",
+  "visitDone": "Visita finalizada",
+  "toast": {
+    "registered": "Visitante registrado",
+    "statusChanged": "El visitante está ahora {{status}}"
+  },
+  "validation": {
+    "nameRequired": "El nombre es obligatorio",
+    "emailInvalid": "Correo electrónico no válido",
+    "timeInvalid": "Formato no válido (HH:MM)"
+  },
+  "status": {
+    "verwacht": "previsto",
+    "aanwezig": "presente",
+    "vertrokken": "salió"
+  }
+}

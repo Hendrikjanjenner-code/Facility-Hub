@@ -1,0 +1,42 @@
+{
+  "title": "Cruscotto reception",
+  "subtitle": "Visitatori attesi il {{date}}.",
+  "register": "Registra visitatore",
+  "dialog": {
+    "title": "Registra nuovo visitatore",
+    "description": "Registra un visitatore per oggi. Il badge viene generato immediatamente.",
+    "name": "Nome visitatore",
+    "namePlaceholder": "Nome completo",
+    "company": "Azienda (Facoltativo)",
+    "companyPlaceholder": "Nome azienda",
+    "email": "Indirizzo e-mail (Facoltativo)",
+    "emailPlaceholder": "E-mail",
+    "host": "Referente",
+    "hostPlaceholder": "Scegli collaboratore",
+    "expectedArrival": "Arrivo previsto",
+    "submit": "Registra"
+  },
+  "searchPlaceholder": "Cerca visitatore...",
+  "empty": "Nessun visitatore trovato per oggi.",
+  "expected": "Previsto: {{time}}",
+  "hostLabel": "Referente: ",
+  "checkedIn": "Entrata: {{time}}",
+  "checkedOut": "Uscita: {{time}}",
+  "checkIn": "Check-in",
+  "checkOut": "Check-out",
+  "visitDone": "Visita completata",
+  "toast": {
+    "registered": "Visitatore registrato",
+    "statusChanged": "Il visitatore è ora {{status}}"
+  },
+  "validation": {
+    "nameRequired": "Il nome è obbligatorio",
+    "emailInvalid": "Indirizzo e-mail non valido",
+    "timeInvalid": "Formato non valido (HH:MM)"
+  },
+  "status": {
+    "verwacht": "atteso",
+    "aanwezig": "presente",
+    "vertrokken": "uscito"
+  }
+}

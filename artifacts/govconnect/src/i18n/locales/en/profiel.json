@@ -1,0 +1,37 @@
+{
+  "title": "My profile",
+  "subtitle": "Manage your personal settings.",
+  "account": {
+    "title": "Account details",
+    "name": "Name",
+    "email": "Email address",
+    "role": "Role",
+    "department": "Department"
+  },
+  "alerts": {
+    "title": "Expiry alerts",
+    "description": "Choose how you want to be notified when a contract is about to expire."
+  },
+  "options": {
+    "inapp_only": {
+      "label": "In-app only",
+      "description": "You only receive notifications within the application, no emails."
+    },
+    "email": {
+      "label": "Email only",
+      "description": "You only receive an email for critical contract warnings, no in-app notification."
+    },
+    "all": {
+      "label": "In-app and email (default)",
+      "description": "You receive both an in-app notification and an email for critical contract warnings."
+    }
+  },
+  "save": "Save",
+  "saving": "Saving…",
+  "toast": {
+    "savedTitle": "Preferences saved",
+    "savedDescription": "Your notification settings have been updated.",
+    "errorTitle": "Error",
+    "errorDescription": "Could not save preferences. Please try again."
+  }
+}

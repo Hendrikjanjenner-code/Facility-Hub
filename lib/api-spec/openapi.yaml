@@ -63,6 +63,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiMessage'
+  /auth/guest-login:
+    post:
+      operationId: guestLogin
+      tags:
+        - auth
+      summary: Log in as a read-only guest with the shared guest password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuestLoginInput'
+      responses:
+        '200':
+          description: Logged in as guest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid guest password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiMessage'
   /auth/logout:
     post:
       operationId: logout
@@ -2677,6 +2702,13 @@ components:
           type: string
       required:
         - email
+        - password
+    GuestLoginInput:
+      type: object
+      properties:
+        password:
+          type: string
+      required:
         - password
     DemoAccount:
       type: object

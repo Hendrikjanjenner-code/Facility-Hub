@@ -1,0 +1,128 @@
+{
+  "title": "Webshop",
+  "subtitleSupplier": "Orders sent to you.",
+  "subtitle": "Order office supplies and facility products with budget monitoring.",
+  "cart": {
+    "button": "Cart",
+    "title": "Cart",
+    "empty": "Your cart is empty.",
+    "pricePerUnit": "{{price}} per {{unit}}",
+    "increaseExceeds": "Increasing exceeds the budget",
+    "budgetLabel": "Budget {{department}} ({{year}})",
+    "remaining": "Remaining budget",
+    "cartLabel": "Cart",
+    "nearBudgetPrefix": "Almost at budget — ",
+    "availableAfter": "{{amount}} still available after submitting.",
+    "exceedsWarning": "Note: this order exceeds the remaining budget.",
+    "blockedTitle": "Order blocked",
+    "blockedBody": "The remaining budget is insufficient for this order. The shortfall is <1>{{amount}}</1>. Contact your manager to increase the budget or adjust the policy.",
+    "underThreshold": "Below threshold of {{amount}} — will be approved automatically",
+    "total": "Total",
+    "submitAuto": "Place order (automatically approved)",
+    "submit": "Submit order for approval"
+  },
+  "supplierPortal": {
+    "title": "Orders for you",
+    "empty": "No orders sent yet.",
+    "markDelivered": "Mark as delivered"
+  },
+  "supplierStatus": {
+    "verstuurd": "Sent",
+    "verwerkt": "Processed"
+  },
+  "table": {
+    "order": "Order",
+    "items": "Items",
+    "amount": "Amount",
+    "status": "Status",
+    "action": "Action",
+    "requester": "Requester",
+    "budgetEffect": "Budget effect",
+    "supplier": "Supplier",
+    "lineItem": "{{quantity}}× {{name}}"
+  },
+  "tabs": {
+    "catalog": "Catalogue",
+    "ordersManager": "Orders & approval",
+    "ordersMine": "My orders",
+    "budgets": "Budgets"
+  },
+  "catalog": {
+    "searchPlaceholder": "Search the catalogue...",
+    "allCategories": "All categories",
+    "notInStock": "Out of stock",
+    "inStock": "{{stock}} {{unit}} in stock",
+    "addToCart": "Add to cart"
+  },
+  "orders": {
+    "empty": "No orders yet",
+    "remaining": "Remaining: {{amount}}",
+    "overBudget": "Over budget",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approvalBlocked": "Approval blocked by budget policy",
+    "markOrdered": "Mark ordered",
+    "send": "Send",
+    "delivered": "Delivered",
+    "processed": "Processed"
+  },
+  "budgets": {
+    "thresholdTitle": "Approval threshold",
+    "adjust": "Adjust",
+    "thresholdDescription": "Orders up to and including <1>{{amount}}</1> are approved automatically without manager review.",
+    "thresholdZeroNote": " (Threshold at €0 = manager approval always required)",
+    "spent": "Spent: {{amount}}",
+    "remaining": "Remaining: {{amount}}",
+    "budget": "Budget: {{amount}}",
+    "pending": "Pending: {{amount}}",
+    "afterApproval": "After approving all open requests",
+    "onOverBudget": "When over budget:",
+    "mark": "Mark",
+    "block": "Block"
+  },
+  "reject": {
+    "title": "Reject order",
+    "placeholder": "Reason for rejection (optional)",
+    "confirm": "Reject"
+  },
+  "send": {
+    "title": "Send to supplier",
+    "chooseSupplier": "Choose supplier",
+    "selectPlaceholder": "Select supplier",
+    "confirm": "Send"
+  },
+  "threshold": {
+    "title": "Set approval threshold",
+    "label": "Maximum amount for automatic approval (€)",
+    "placeholder": "e.g. 50",
+    "help": "Orders up to and including this amount are approved immediately. Set to 0 to disable automatic approval."
+  },
+  "status": {
+    "ingediend": "Submitted",
+    "goedgekeurd": "Approved",
+    "afgekeurd": "Rejected",
+    "besteld": "Ordered",
+    "geleverd": "Delivered"
+  },
+  "toast": {
+    "addedToCart": "{{name}} added to cart",
+    "budgetExceededDescription": "⚠️ Your cart exceeds the remaining budget ({{amount}}). Ordering is blocked until the budget is adjusted.",
+    "qtyNotIncreased": "Quantity not increased",
+    "qtyExceedsDescription": "Increasing exceeds the remaining budget ({{remaining}}). The shortfall becomes {{shortfall}}. Contact your manager to adjust the budget.",
+    "orderAutoApproved": "Order {{number}} approved automatically",
+    "orderSubmitted": "Order {{number}} submitted",
+    "autoApprovedDescription": "Order below threshold of {{amount}}, approved immediately.",
+    "submittedDescription": "Your order is awaiting approval.",
+    "orderFailed": "Ordering failed",
+    "orderStatusChanged": "Order {{status}}",
+    "actionFailed": "Action failed",
+    "sentToSupplier": "Order sent to supplier",
+    "sendFailed": "Sending failed",
+    "markedProcessed": "Order marked as processed",
+    "failed": "Failed",
+    "thresholdSet": "Approval threshold set to {{amount}}",
+    "saveFailed": "Saving failed",
+    "policyMark": "{{department}}: policy set to mark",
+    "policyBlock": "{{department}}: policy set to block"
+  }
+}

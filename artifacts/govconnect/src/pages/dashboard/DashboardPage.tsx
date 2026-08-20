@@ -19,7 +19,8 @@ import {
   Cell
 } from "recharts";
 import { formatDistanceToNow } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { 
   Ticket, 
   AlertTriangle, 
@@ -81,6 +82,7 @@ function StatCard({
 }
 
 export default function DashboardPage() {
+  const { t } = useTranslation("dashboard");
   const [, setLocation] = useLocation();
   const { data: user } = useGetCurrentUser();
   const { data: summary, isLoading: isSummaryLoading } = useGetDashboardSummary();
@@ -93,7 +95,7 @@ export default function DashboardPage() {
   if (isSummaryLoading || !user) {
     return (
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">Overzicht</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[1,2,3,4].map(i => <Skeleton key={i} className="h-32 rounded-xl" />)}
         </div>
@@ -111,15 +113,15 @@ export default function DashboardPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Welkom terug, {user.name.split(' ')[0]}</h1>
-          <p className="text-muted-foreground">Hier is uw facilitaire overzicht voor vandaag.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("welcome", { name: user.name.split(' ')[0] })}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         
         {user.role === 'eindgebruiker' && (
           <div className="flex gap-2">
             <Button onClick={() => setLocation("/meldingen/nieuw")}>
               <Ticket className="mr-2 h-4 w-4" />
-              Nieuwe melding
+              {t("newTicket")}
             </Button>
           </div>
         )}
@@ -130,66 +132,66 @@ export default function DashboardPage() {
         
         {(user.role === 'eindgebruiker' || user.role === 'servicedesk' || user.role === 'facilitair_manager' || user.role === 'beheerder') && (
           <StatCard 
-            title={user.role === 'eindgebruiker' ? "Mijn open meldingen" : "Open meldingen"} 
+            title={user.role === 'eindgebruiker' ? t("stats.myOpenTickets") : t("stats.openTickets")} 
             value={user.role === 'eindgebruiker' ? summary.myOpenTickets : summary.openTickets} 
             icon={Ticket} 
-            description="Momenteel in behandeling" 
+            description={t("stats.inProgress")} 
           />
         )}
 
         {(user.role === 'servicedesk' || user.role === 'facilitair_manager' || user.role === 'beheerder') && (
           <StatCard 
-            title="SLA in gevaar" 
+            title={t("stats.slaAtRisk")} 
             value={summary.slaAtRisk} 
             icon={AlertTriangle} 
             danger={true}
-            description="Binnen 4 uur of verlopen" 
+            description={t("stats.slaAtRiskDesc")} 
           />
         )}
 
         {(user.role !== 'servicedesk' && user.role !== 'leverancier') && (
           <StatCard 
-            title={user.role === 'eindgebruiker' ? "Mijn reserveringen" : "Reserveringen vandaag"} 
+            title={user.role === 'eindgebruiker' ? t("stats.myReservations") : t("stats.reservationsToday")} 
             value={user.role === 'eindgebruiker' ? summary.myReservationsToday : summary.reservationsToday} 
             icon={CalendarDays} 
-            description="Ruimtes & catering" 
+            description={t("stats.roomsAndCatering")} 
           />
         )}
 
         {(user.role === 'eindgebruiker' || user.role === 'facilitair_manager' || user.role === 'beheerder') && (
           <StatCard 
-            title="Werkplekboekingen" 
+            title={t("stats.workplaceBookings")} 
             value={summary.workplaceBookingsToday} 
             icon={Monitor} 
-            description="Voor vandaag" 
+            description={t("stats.forToday")} 
           />
         )}
 
         {(user.role === 'receptie' || user.role === 'facilitair_manager' || user.role === 'beheerder') && (
           <StatCard 
-            title="Bezoekers" 
+            title={t("stats.visitors")} 
             value={`${summary.visitorsPresent} / ${summary.visitorsExpectedToday}`} 
             icon={Users} 
-            description="Aanwezig / Verwacht" 
+            description={t("stats.presentExpected")} 
           />
         )}
         
         {(user.role === 'beheerder') && (
           <StatCard 
-            title="Totaal assets" 
+            title={t("stats.totalAssets")} 
             value={summary.assetCount} 
             icon={Building2} 
-            description="Geregistreerd in systeem" 
+            description={t("stats.registeredInSystem")} 
           />
         )}
 
         {(user.role === 'facilitair_manager' || user.role === 'beheerder') && (
           <StatCard
-            title="Bouwdelen slechte conditie"
+            title={t("stats.poorCondition")}
             value={summary.mjopSlechteConditie ?? 0}
             icon={Wrench}
             danger={true}
-            description="Score ≥ 4 (matig t/m zeer slecht)"
+            description={t("stats.poorConditionDesc")}
             onClick={() => setLocation("/mjop?filter=slechteConditie")}
           />
         )}
@@ -200,8 +202,8 @@ export default function DashboardPage() {
           <>
             <Card className="col-span-4">
               <CardHeader>
-                <CardTitle>Meldingen per status</CardTitle>
-                <CardDescription>Overzicht van alle actieve meldingen</CardDescription>
+                <CardTitle>{t("charts.ticketsByStatus")}</CardTitle>
+                <CardDescription>{t("charts.ticketsByStatusDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="pl-2">
                 <div className="h-[300px]">
@@ -233,8 +235,8 @@ export default function DashboardPage() {
 
             <Card className="col-span-3">
               <CardHeader>
-                <CardTitle>Prioriteitsverdeling</CardTitle>
-                <CardDescription>Openstaande meldingen</CardDescription>
+                <CardTitle>{t("charts.priorityDistribution")}</CardTitle>
+                <CardDescription>{t("charts.priorityDistributionDesc")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[300px]">
@@ -273,20 +275,23 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Star className="h-5 w-5 text-yellow-400" />
-                Klanttevredenheid
+                {t("satisfaction.title")}
               </CardTitle>
               <CardDescription>
                 {satisfactionReport.totalResponses > 0
-                  ? <>Gemiddeld {satisfactionReport.averageScore?.toFixed(1) ?? "—"}/5 &mdash; </>
+                  ? t("satisfaction.average", { score: satisfactionReport.averageScore?.toFixed(1) ?? "—" })
                   : null}
-                {satisfactionReport.totalResponses} van de {satisfactionReport.closedTickets} gesloten meldingen beoordeeld
-                {" "}({satisfactionReport.responseRate ?? 0}% responsrate)
+                {t("satisfaction.summary", {
+                  responses: satisfactionReport.totalResponses,
+                  closed: satisfactionReport.closedTickets,
+                  rate: satisfactionReport.responseRate ?? 0,
+                })}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {satisfactionReport.totalResponses === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">
-                  Nog geen beoordelingen ontvangen.
+                  {t("satisfaction.noRatings")}
                 </p>
               ) : null}
               {[5,4,3,2,1].map((score) => {
@@ -320,7 +325,7 @@ export default function DashboardPage() {
                 return (
                   <div className="pt-3 border-t space-y-2">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Laagste responsrate per categorie
+                      {t("satisfaction.lowestResponseRate")}
                     </p>
                     {bottom3.map((cat) => (
                       <div key={cat.categoryId} className="flex items-center gap-2 text-sm">
@@ -360,7 +365,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              Recente activiteit
+              {t("activity.title")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -369,7 +374,7 @@ export default function DashboardPage() {
                 {[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full" />)}
               </div>
             ) : !activity?.length ? (
-              <div className="text-center py-8 text-muted-foreground">Geen recente activiteit</div>
+              <div className="text-center py-8 text-muted-foreground">{t("activity.empty")}</div>
             ) : (
               <div className="space-y-6">
                 {activity.map((item) => (
@@ -380,7 +385,7 @@ export default function DashboardPage() {
                         <p className="text-sm text-muted-foreground">{item.subtitle}</p>
                       )}
                       <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: nl })}
+                        {formatDistanceToNow(new Date(item.timestamp), { addSuffix: true, locale: getDateFnsLocale() })}
                       </p>
                     </div>
                     {item.linkPath && (

@@ -1,0 +1,57 @@
+{
+  "title": "Voorraadbeheer",
+  "subtitle": "Voorraadniveaus van de webshop met minimumvoorraad-alerts.",
+  "addProduct": "Product toevoegen",
+  "newProduct": "Nieuw product",
+  "newProductDescription": "Voeg een product toe aan de webshopcatalogus.",
+  "fields": {
+    "name": "Naam",
+    "category": "Categorie",
+    "categoryPlaceholder": "Kies categorie",
+    "description": "Omschrijving (optioneel)",
+    "price": "Prijs (€)",
+    "unit": "Eenheid",
+    "stock": "Voorraad",
+    "minStock": "Min. voorraad"
+  },
+  "category": {
+    "kantoorartikelen": "Kantoorartikelen",
+    "ict": "ICT",
+    "meubilair": "Meubilair",
+    "facilitair": "Facilitair",
+    "overig": "Overig"
+  },
+  "alerts_one": "{{count}} product zit onder de minimumvoorraad: {{names}}.",
+  "alerts_other": "{{count}} producten zitten onder de minimumvoorraad: {{names}}.",
+  "onlyAlerts": "Alleen producten onder minimumvoorraad",
+  "emptyAlerts": "Geen voorraad-alerts",
+  "emptyProducts": "Geen producten",
+  "table": {
+    "product": "Product",
+    "category": "Categorie",
+    "price": "Prijs",
+    "stock": "Voorraad",
+    "minimum": "Minimum",
+    "status": "Status",
+    "action": "Actie"
+  },
+  "status": {
+    "belowMin": "Onder minimum",
+    "onTarget": "Op peil"
+  },
+  "update": "Bijwerken",
+  "updateStock": "Voorraad bijwerken",
+  "currentStock": "Actuele voorraad",
+  "minStockLabel": "Minimumvoorraad",
+  "toast": {
+    "added": "Product toegevoegd",
+    "saveFailed": "Opslaan mislukt",
+    "stockUpdated": "Voorraad bijgewerkt",
+    "updateFailed": "Bijwerken mislukt"
+  },
+  "validation": {
+    "nameRequired": "Naam is verplicht",
+    "categoryRequired": "Categorie is verplicht",
+    "priceRequired": "Prijs is verplicht"
+  }
+}

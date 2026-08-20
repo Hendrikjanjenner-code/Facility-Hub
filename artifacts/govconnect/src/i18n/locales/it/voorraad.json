@@ -1,0 +1,57 @@
+{
+  "title": "Gestione scorte",
+  "subtitle": "Livelli di scorte del negozio online con avvisi di scorta minima.",
+  "addProduct": "Aggiungi prodotto",
+  "newProduct": "Nuovo prodotto",
+  "newProductDescription": "Aggiungi un prodotto al catalogo del negozio online.",
+  "fields": {
+    "name": "Nome",
+    "category": "Categoria",
+    "categoryPlaceholder": "Scegli categoria",
+    "description": "Descrizione (facoltativo)",
+    "price": "Prezzo (€)",
+    "unit": "Unità",
+    "stock": "Scorte",
+    "minStock": "Scorta min."
+  },
+  "category": {
+    "kantoorartikelen": "Materiale per ufficio",
+    "ict": "IT",
+    "meubilair": "Arredamento",
+    "facilitair": "Servizi",
+    "overig": "Altro"
+  },
+  "alerts_one": "{{count}} prodotto è sotto la scorta minima: {{names}}.",
+  "alerts_other": "{{count}} prodotti sono sotto la scorta minima: {{names}}.",
+  "onlyAlerts": "Solo prodotti sotto la scorta minima",
+  "emptyAlerts": "Nessun avviso di scorta",
+  "emptyProducts": "Nessun prodotto",
+  "table": {
+    "product": "Prodotto",
+    "category": "Categoria",
+    "price": "Prezzo",
+    "stock": "Scorte",
+    "minimum": "Minimo",
+    "status": "Stato",
+    "action": "Azione"
+  },
+  "status": {
+    "belowMin": "Sotto il minimo",
+    "onTarget": "Nella norma"
+  },
+  "update": "Aggiorna",
+  "updateStock": "Aggiorna scorte",
+  "currentStock": "Scorte attuali",
+  "minStockLabel": "Scorta minima",
+  "toast": {
+    "added": "Prodotto aggiunto",
+    "saveFailed": "Salvataggio non riuscito",
+    "stockUpdated": "Scorte aggiornate",
+    "updateFailed": "Aggiornamento non riuscito"
+  },
+  "validation": {
+    "nameRequired": "Il nome è obbligatorio",
+    "categoryRequired": "La categoria è obbligatoria",
+    "priceRequired": "Il prezzo è obbligatorio"
+  }
+}

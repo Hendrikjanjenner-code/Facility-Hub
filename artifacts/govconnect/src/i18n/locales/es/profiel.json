@@ -1,0 +1,37 @@
+{
+  "title": "Mi perfil",
+  "subtitle": "Gestione su configuración personal.",
+  "account": {
+    "title": "Datos de la cuenta",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "role": "Rol",
+    "department": "Departamento"
+  },
+  "alerts": {
+    "title": "Alertas de vencimiento",
+    "description": "Elija cómo desea recibir avisos cuando un contrato esté a punto de vencer."
+  },
+  "options": {
+    "inapp_only": {
+      "label": "Solo en la app",
+      "description": "Solo recibe notificaciones dentro de la aplicación, sin correos electrónicos."
+    },
+    "email": {
+      "label": "Solo correo electrónico",
+      "description": "Solo recibe un correo electrónico para avisos críticos de contratos, sin notificación en la app."
+    },
+    "all": {
+      "label": "En la app y correo (predeterminado)",
+      "description": "Recibe tanto una notificación en la app como un correo electrónico para avisos críticos de contratos."
+    }
+  },
+  "save": "Guardar",
+  "saving": "Guardando…",
+  "toast": {
+    "savedTitle": "Preferencias guardadas",
+    "savedDescription": "Se ha actualizado su configuración de notificaciones.",
+    "errorTitle": "Error",
+    "errorDescription": "No se pudieron guardar las preferencias. Inténtelo de nuevo."
+  }
+}

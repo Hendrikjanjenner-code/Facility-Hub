@@ -1,0 +1,53 @@
+{
+  "title": "Base de conhecimento",
+  "subtitle": "Respostas a perguntas frequentes sobre instalações.",
+  "newArticle": "Novo artigo",
+  "searchPlaceholder": "Pesquisar na base de conhecimento...",
+  "all": "Tudo",
+  "noLinkedCategories": "Nenhuma categoria de tickets associada",
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "emptyTitle": "Nenhum artigo encontrado",
+  "emptyNoResults": "Sem resultados para \"{{query}}\"",
+  "emptyNone": "Ainda não foram criados artigos na base de conhecimento.",
+  "deleteDialog": {
+    "title": "Eliminar artigo",
+    "confirm": "Tem a certeza de que pretende eliminar permanentemente <0>\"{{title}}\"</0>? Esta ação não pode ser anulada.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "form": {
+    "editTitle": "Editar artigo",
+    "newTitle": "Novo artigo da base de conhecimento",
+    "titleLabel": "Título",
+    "titlePlaceholder": "Título curto e claro",
+    "categoryLabel": "Categoria",
+    "bodyLabel": "Conteúdo",
+    "bodyPlaceholder": "Forneça uma explicação clara ou instruções passo a passo...",
+    "tagsLabel": "Etiquetas (separadas por vírgula)",
+    "tagsPlaceholder": "ex.: aquecimento, avaria, clima",
+    "linkLabel": "Associar a categorias de tickets",
+    "linkHelp": "Este artigo aparece automaticamente como sugestão quando o autor escolhe uma destas categorias.",
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  },
+  "toast": {
+    "deleted": "Artigo eliminado",
+    "deleteError": "Não foi possível eliminar o artigo.",
+    "updated": "Artigo atualizado",
+    "updateError": "Não foi possível atualizar o artigo.",
+    "created": "Artigo criado",
+    "createError": "Não foi possível criar o artigo.",
+    "errorTitle": "Erro"
+  },
+  "categories": {
+    "algemeen": "Geral",
+    "klimaat": "Climatização",
+    "schoonmaak": "Limpeza",
+    "technisch": "Técnico",
+    "sanitair": "Sanitário",
+    "veiligheid": "Segurança",
+    "reserveringen": "Reservas",
+    "catering": "Catering"
+  }
+}

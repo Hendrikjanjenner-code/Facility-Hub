@@ -10,6 +10,8 @@ import {
   useCreateReservation,
   useGetCurrentUser
 } from "@workspace/api-client-react";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { Loader2, Plus, Trash2, CalendarIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,11 +40,11 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 
 const schema = z.object({
-  title: z.string().min(3, "Titel moet minimaal 3 karakters bevatten"),
-  roomId: z.number({ required_error: "Kies een ruimte" }),
-  date: z.date({ required_error: "Kies een datum" }),
-  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Ongeldig formaat (HH:MM)"),
-  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Ongeldig formaat (HH:MM)"),
+  title: z.string().min(3),
+  roomId: z.number(),
+  date: z.date(),
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
   attendees: z.number().min(1).optional().nullable(),
   setupBufferMin: z.number().min(0).default(0),
   cleanupBufferMin: z.number().min(0).default(0),
@@ -50,15 +52,30 @@ const schema = z.object({
     cateringItemId: z.number(),
     quantity: z.number().min(1)
   })).optional()
-}).refine(data => {
-  const start = parseInt(data.startTime.replace(':', ''));
-  const end = parseInt(data.endTime.replace(':', ''));
-  return end > start;
-}, { message: "Eindtijd moet na starttijd zijn", path: ["endTime"] });
+});
 
 type FormValues = z.infer<typeof schema>;
 
 export function NewReservationDialog({ open, onOpenChange }: { open: boolean, onOpenChange: (o: boolean) => void }) {
+  const { t } = useTranslation("reserveringen");
+  const validatedSchema = z.object({
+    title: z.string().min(3, t("new.validation.titleMin")),
+    roomId: z.number({ required_error: t("new.validation.roomRequired") }),
+    date: z.date({ required_error: t("new.validation.dateRequired") }),
+    startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, t("new.validation.timeFormat")),
+    endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, t("new.validation.timeFormat")),
+    attendees: z.number().min(1).optional().nullable(),
+    setupBufferMin: z.number().min(0).default(0),
+    cleanupBufferMin: z.number().min(0).default(0),
+    cateringOrders: z.array(z.object({
+      cateringItemId: z.number(),
+      quantity: z.number().min(1)
+    })).optional()
+  }).refine(data => {
+    const start = parseInt(data.startTime.replace(':', ''));
+    const end = parseInt(data.endTime.replace(':', ''));
+    return end > start;
+  }, { message: t("new.validation.endAfterStart"), path: ["endTime"] });
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { data: user } = useGetCurrentUser();
@@ -67,7 +84,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
   const createReservation = useCreateReservation();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(validatedSchema),
     defaultValues: {
       title: "",
       startTime: "09:00",
@@ -94,7 +111,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
 
     createReservation.mutate({ data: payload }, {
       onSuccess: (res) => {
-        toast({ title: "Reservering aangemaakt" });
+        toast({ title: t("new.toastCreated") });
         onOpenChange(false);
         setLocation(`/reserveringen/${res.id}`);
       },
@@ -102,14 +119,14 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
         if (err?.status === 409) {
           toast({ 
             variant: "destructive", 
-            title: "Conflict", 
-            description: "Deze ruimte is al geboekt op het gekozen tijdstip (inclusief buffertijden)." 
+            title: t("new.toastConflictTitle"), 
+            description: t("new.toastConflictDesc") 
           });
         } else {
           toast({ 
             variant: "destructive", 
-            title: "Fout", 
-            description: "Kon reservering niet aanmaken." 
+            title: t("new.toastErrorTitle"), 
+            description: t("new.toastErrorDesc") 
           });
         }
       }
@@ -122,9 +139,9 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nieuwe reservering</DialogTitle>
+          <DialogTitle>{t("new.title")}</DialogTitle>
           <DialogDescription>
-            Boek een ruimte en bestel optioneel catering.
+            {t("new.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -136,9 +153,9 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                 name="title"
                 render={({ field }) => (
                   <FormItem className="sm:col-span-2">
-                    <FormLabel>Titel overleg</FormLabel>
+                    <FormLabel>{t("new.meetingTitle")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Bijv. Maandelijkse afdelingsoverleg" {...field} />
+                      <Input placeholder={t("new.meetingTitlePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -150,17 +167,17 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                 name="roomId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Ruimte</FormLabel>
+                    <FormLabel>{t("new.room")}</FormLabel>
                     <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString() || ""}>
                       <FormControl>
                         <SelectTrigger disabled={isRoomsLoading}>
-                          <SelectValue placeholder="Kies ruimte" />
+                          <SelectValue placeholder={t("new.roomPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {rooms?.map((r) => (
                           <SelectItem key={r.id} value={r.id.toString()}>
-                            {r.name} ({r.capacity}p)
+                            {t("new.roomOption", { name: r.name, capacity: r.capacity })}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -175,7 +192,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                 name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col pt-2">
-                    <FormLabel>Datum</FormLabel>
+                    <FormLabel>{t("new.date")}</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -187,9 +204,9 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                             )}
                           >
                             {field.value ? (
-                              format(field.value, "d MMMM yyyy")
+                              format(field.value, "d MMMM yyyy", { locale: getDateFnsLocale() })
                             ) : (
-                              <span>Kies datum</span>
+                              <span>{t("new.datePlaceholder")}</span>
                             )}
                             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                           </Button>
@@ -218,7 +235,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                   name="startTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Starttijd</FormLabel>
+                      <FormLabel>{t("new.startTime")}</FormLabel>
                       <FormControl>
                         <Input type="time" {...field} />
                       </FormControl>
@@ -231,7 +248,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                   name="endTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Eindtijd</FormLabel>
+                      <FormLabel>{t("new.endTime")}</FormLabel>
                       <FormControl>
                         <Input type="time" {...field} />
                       </FormControl>
@@ -246,7 +263,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                 name="attendees"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Aantal personen</FormLabel>
+                    <FormLabel>{t("new.attendees")}</FormLabel>
                     <FormControl>
                       <Input type="number" min={1} {...field} onChange={e => field.onChange(parseInt(e.target.value))} value={field.value || ''} />
                     </FormControl>
@@ -261,7 +278,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                   name="setupBufferMin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Opbouwtijd (minuten)</FormLabel>
+                      <FormLabel>{t("new.setupBuffer")}</FormLabel>
                       <FormControl>
                         <Input type="number" min={0} step={15} {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
                       </FormControl>
@@ -273,7 +290,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                   name="cleanupBufferMin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Schoonmaaktijd (minuten)</FormLabel>
+                      <FormLabel>{t("new.cleanupBuffer")}</FormLabel>
                       <FormControl>
                         <Input type="number" min={0} step={15} {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
                       </FormControl>
@@ -287,7 +304,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
 
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-medium">Catering (Optioneel)</h3>
+                <h3 className="font-medium">{t("new.cateringOptional")}</h3>
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -297,12 +314,12 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                     form.setValue("cateringOrders", [...current, { cateringItemId: 0, quantity: 1 }]);
                   }}
                 >
-                  <Plus className="h-4 w-4 mr-1" /> Toevoegen
+                  <Plus className="h-4 w-4 mr-1" /> {t("new.add")}
                 </Button>
               </div>
 
               {cateringOrders.length === 0 ? (
-                <p className="text-sm text-muted-foreground italic">Geen catering geselecteerd.</p>
+                <p className="text-sm text-muted-foreground italic">{t("new.noCatering")}</p>
               ) : (
                 <div className="space-y-3">
                   {cateringOrders.map((order, index) => (
@@ -317,7 +334,7 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
                           }}
                         >
                           <SelectTrigger>
-                            <SelectValue placeholder="Kies item" />
+                            <SelectValue placeholder={t("new.chooseItem")} />
                           </SelectTrigger>
                           <SelectContent>
                             {cateringItems?.map(item => (
@@ -360,10 +377,10 @@ export function NewReservationDialog({ open, onOpenChange }: { open: boolean, on
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Annuleren</Button>
+              <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>{t("common.cancel", { ns: "common" })}</Button>
               <Button type="submit" disabled={createReservation.isPending}>
                 {createReservation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Reserveren
+                {t("new.submit")}
               </Button>
             </DialogFooter>
           </form>

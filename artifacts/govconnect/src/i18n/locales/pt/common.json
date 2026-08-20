@@ -1,0 +1,63 @@
+{
+  "brand": "LetShare4gov",
+  "nav": {
+    "dashboard": "Painel",
+    "meldingen": "Ocorrências",
+    "reserveringen": "Reservas",
+    "werkplekken": "Postos de trabalho",
+    "bezoekers": "Visitantes",
+    "vastgoed": "Imóveis",
+    "ruimtes": "Salas",
+    "sleutelbeheer": "Gestão de chaves",
+    "assets": "Ativos",
+    "contracten": "Contratos",
+    "webshop": "Loja online",
+    "voorraad": "Stock",
+    "duurzaamheid": "Sustentabilidade",
+    "mjop": "Plano de manutenção",
+    "catering": "Catering",
+    "kennisbank": "Base de conhecimento"
+  },
+  "shell": {
+    "notifications": "Notificações",
+    "markAllRead": "Marcar tudo como lido",
+    "noNotifications": "Sem notificações",
+    "role": "Função",
+    "settings": "Definições",
+    "logout": "Terminar sessão",
+    "language": "Idioma",
+    "guestReadOnly": "Modo convidado – apenas leitura"
+  },
+  "login": {
+    "title": "Iniciar sessão",
+    "subtitle": "Introduza as suas credenciais para aceder ao painel.",
+    "email": "Endereço de e-mail",
+    "emailPlaceholder": "nome@organizacao.pt",
+    "password": "Palavra-passe",
+    "submit": "Entrar",
+    "failed": "Falha ao iniciar sessão. Verifique os seus dados.",
+    "demo": "Contas de demonstração (login com 1 clique)",
+    "tagline": "O cockpit diário para a gestão de instalações públicas.",
+    "taglineSub": "Rápido, claro e fiável. Concebido para organizações públicas gerirem ocorrências, reservas e imóveis sem esforço.",
+    "copyright": "Todos os direitos reservados.",
+    "emailInvalid": "Endereço de e-mail inválido",
+    "passwordRequired": "A palavra-passe é obrigatória",
+    "guestLink": "Acesso de convidado"
+  },
+  "guest": {
+    "title": "Acesso de convidado",
+    "subtitle": "Introduza a palavra-passe de convidado para ver o LetShare4gov como convidado (apenas leitura).",
+    "password": "Palavra-passe de convidado",
+    "submit": "Ver como convidado",
+    "failed": "Palavra-passe inválida.",
+    "backToLogin": "Voltar ao início de sessão"
+  },
+  "common": {
+    "loading": "A carregar…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "back": "Voltar",
+    "search": "Pesquisar",
+    "error": "Ocorreu um erro"
+  }
+}

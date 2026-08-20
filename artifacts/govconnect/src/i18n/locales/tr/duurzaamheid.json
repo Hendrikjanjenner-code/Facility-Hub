@@ -1,0 +1,133 @@
+{
+  "title": "Sürdürülebilirlik",
+  "subtitle": "Elektrik, gaz ve su tüketimi ile atık kaydı ve raporlar.",
+  "importCsv": "CSV içe aktar",
+  "meterType": {
+    "elektriciteit": "Elektrik",
+    "gas": "Gaz",
+    "water": "Su"
+  },
+  "wasteCategory": {
+    "restafval": "Karışık atık",
+    "papier": "Kâğıt",
+    "gft": "Organik atık",
+    "plastic": "Plastik",
+    "glas": "Cam",
+    "chemisch": "Kimyasal"
+  },
+  "tabs": {
+    "report": "Rapor",
+    "meters": "Sayaç okumaları",
+    "waste": "Atık kaydı"
+  },
+  "filter": {
+    "label": "Filtrele",
+    "building": "Bina",
+    "allBuildings": "Tüm binalar",
+    "from": "Başlangıç",
+    "to": "Bitiş (dahil)",
+    "clear": "Filtreleri temizle",
+    "exportCsv": "CSV dışa aktar",
+    "exportEmptyTitle": "Seçilen filtreler için dışa aktarılacak veri yok",
+    "quarter": "Çeyrek:",
+    "badgeBuilding": "Bina: {{value}}",
+    "badgeFrom": "Başlangıç: {{value}}",
+    "badgeTo": "Bitiş: {{value}}"
+  },
+  "empty": {
+    "title": "Bu bina ve dönem için veri yok",
+    "hintPrefix": "Filtreleri değiştirin veya ",
+    "hintLink": "tüm filtreleri temizleyin",
+    "hintSuffix": " böylece mevcut tüm veriler gösterilir."
+  },
+  "charts": {
+    "monthlyUsage": "Aylık tüketim",
+    "monthlyUsageDescription": "Elektrik (kWh), gaz ve su (m³) — tüm binalar",
+    "electricity": "Elektrik (kWh)",
+    "gas": "Gaz (m³)",
+    "water": "Su (m³)",
+    "wasteByCategory": "Kategoriye göre atık",
+    "wasteByCategoryDescription": "Toplam kayıtlı ağırlık (kg)",
+    "wasteByMonth": "Aya göre atık",
+    "wasteByMonthDescription": "Aylık kategori başına ağırlık (kg)"
+  },
+  "meters": {
+    "csvFormat": "CSV formatı:",
+    "csvExample": "— örn.",
+    "addReading": "Sayaç okuması gir",
+    "registerTitle": "Sayaç okumasını kaydet",
+    "registerDescription": "Kümülatif sayaç okumasını girin.",
+    "building": "Bina",
+    "buildingPlaceholder": "Bina seçin",
+    "type": "Sayaç türü",
+    "typePlaceholder": "Tür seçin",
+    "date": "Tarih",
+    "reading": "Okuma",
+    "readingWithUnit": "Okuma ({{unit}})",
+    "correctTitle": "Sayaç okumasını düzelt",
+    "deleteTitle": "Sayaç okuması silinsin mi?",
+    "deleteBody": "{{building}} için {{date}} tarihli {{value}} {{unit}} okuması kalıcı olarak silinecek. Tüketim hesaplamaları hemen yeniden hesaplanır.",
+    "table": {
+      "date": "Tarih",
+      "building": "Bina",
+      "type": "Tür",
+      "reading": "Okuma",
+      "source": "Kaynak",
+      "registeredBy": "Kaydeden"
+    },
+    "source": {
+      "csvImport": "CSV içe aktarma",
+      "manual": "Manuel"
+    }
+  },
+  "waste": {
+    "add": "Atık kaydet",
+    "title": "Atık kaydı",
+    "description": "Toplanan atığı kategoriye göre kaydedin.",
+    "building": "Bina",
+    "buildingPlaceholder": "Bina seçin",
+    "category": "Kategori",
+    "categoryPlaceholder": "Kategori seçin",
+    "date": "Tarih",
+    "weight": "Ağırlık (kg)",
+    "correctTitle": "Atık kaydını düzelt",
+    "deleteTitle": "Atık kaydı silinsin mi?",
+    "deleteBody": "{{building}} için {{date}} tarihli {{weight}} kg {{category}} kalıcı olarak silinecek. Raporlar ve dışa aktarmalar hemen yeniden hesaplanır.",
+    "table": {
+      "date": "Tarih",
+      "building": "Bina",
+      "category": "Kategori",
+      "weight": "Ağırlık",
+      "registeredBy": "Kaydeden"
+    }
+  },
+  "actions": {
+    "correct": "Düzelt",
+    "delete": "Sil"
+  },
+  "validation": {
+    "buildingRequired": "Bir bina seçin",
+    "meterTypeRequired": "Bir sayaç türü seçin",
+    "dateRequired": "Tarih zorunludur",
+    "readingRequired": "Okuma zorunludur",
+    "categoryRequired": "Bir kategori seçin",
+    "weightRequired": "Ağırlık zorunludur"
+  },
+  "toast": {
+    "invalidCsvTitle": "Geçersiz CSV formatı",
+    "invalidCsvDescription": "Beklenen sütunlar: gebouw;type;datum;stand (tarih YYYY-AA-GG olarak).",
+    "noValidRows": "CSV dosyasında geçerli satır bulunamadı",
+    "importDone": "CSV içe aktarma tamamlandı",
+    "importUnmatched": "{{message}} ({{count}} satır tanınmadı)",
+    "importFailed": "İçe aktarma başarısız",
+    "wasteCorrected": "Atık kaydı düzeltildi",
+    "correctFailed": "Düzeltme başarısız",
+    "wasteDeleted": "Atık kaydı silindi",
+    "deleteFailed": "Silme başarısız",
+    "readingCorrected": "Sayaç okuması düzeltildi",
+    "readingDeleted": "Sayaç okuması silindi",
+    "readingRegistered": "Sayaç okuması kaydedildi",
+    "saveFailed": "Kaydetme başarısız",
+    "wasteSaved": "Atık kaydı kaydedildi"
+  }
+}

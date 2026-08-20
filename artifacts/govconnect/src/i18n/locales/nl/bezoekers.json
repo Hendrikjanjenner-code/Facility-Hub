@@ -1,0 +1,42 @@
+{
+  "title": "Receptiedashboard",
+  "subtitle": "Bezoekers verwacht op {{date}}.",
+  "register": "Bezoeker aanmelden",
+  "dialog": {
+    "title": "Nieuwe bezoeker aanmelden",
+    "description": "Meld een bezoeker aan voor vandaag. De badge wordt direct gegenereerd.",
+    "name": "Naam bezoeker",
+    "namePlaceholder": "Volledige naam",
+    "company": "Bedrijf (Optioneel)",
+    "companyPlaceholder": "Bedrijfsnaam",
+    "email": "E-mailadres (Optioneel)",
+    "emailPlaceholder": "E-mail",
+    "host": "Ontvanger (Host)",
+    "hostPlaceholder": "Kies medewerker",
+    "expectedArrival": "Verwachte aankomst",
+    "submit": "Aanmelden"
+  },
+  "searchPlaceholder": "Zoek bezoeker...",
+  "empty": "Geen bezoekers gevonden voor vandaag.",
+  "expected": "Verwacht: {{time}}",
+  "hostLabel": "Host: ",
+  "checkedIn": "In: {{time}}",
+  "checkedOut": "Uit: {{time}}",
+  "checkIn": "Inchecken",
+  "checkOut": "Uitchecken",
+  "visitDone": "Bezoek afgerond",
+  "toast": {
+    "registered": "Bezoeker aangemeld",
+    "statusChanged": "Bezoeker is nu {{status}}"
+  },
+  "validation": {
+    "nameRequired": "Naam is verplicht",
+    "emailInvalid": "Ongeldig e-mailadres",
+    "timeInvalid": "Ongeldig formaat (HH:MM)"
+  },
+  "status": {
+    "verwacht": "verwacht",
+    "aanwezig": "aanwezig",
+    "vertrokken": "vertrokken"
+  }
+}

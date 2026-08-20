@@ -3,7 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { 
   useListVisitors, 
   useUpdateVisitor,
@@ -53,18 +54,28 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getVisitorStatusColor } from "@/lib/status-helpers";
 
-const schema = z.object({
-  name: z.string().min(2, "Naam is verplicht"),
+const makeSchema = (t: (k: string) => string) => z.object({
+  name: z.string().min(2, t("validation.nameRequired")),
   company: z.string().optional(),
-  email: z.string().email("Ongeldig e-mailadres").optional().or(z.literal("")),
+  email: z.string().email(t("validation.emailInvalid")).optional().or(z.literal("")),
   hostId: z.number().optional(),
-  expectedArrival: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Ongeldig formaat (HH:MM)"),
+  expectedArrival: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, t("validation.timeInvalid")),
 });
+
+type BezoekerFormValues = {
+  name: string;
+  company?: string;
+  email?: string;
+  hostId?: number;
+  expectedArrival: string;
+};
 
 // Alleen deze rollen mogen een andere host kiezen (en de medewerkerslijst opvragen)
 const HOST_PICKER_ROLES = ["receptie", "facilitair_manager", "beheerder"];
 
 export default function BezoekersPage() {
+  const { t } = useTranslation("bezoekers");
+  const schema = makeSchema(t);
   const { data: user } = useGetCurrentUser();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -81,7 +92,7 @@ export default function BezoekersPage() {
   const updateVisitor = useUpdateVisitor();
   const createVisitor = useCreateVisitor();
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<BezoekerFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
@@ -91,7 +102,7 @@ export default function BezoekersPage() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof schema>) => {
+  const onSubmit = (values: BezoekerFormValues) => {
     createVisitor.mutate({ 
       data: {
         ...values,
@@ -99,7 +110,7 @@ export default function BezoekersPage() {
       } 
     }, {
       onSuccess: () => {
-        toast({ title: "Bezoeker aangemeld" });
+        toast({ title: t("toast.registered") });
         setIsNewDialogOpen(false);
         form.reset();
         queryClient.invalidateQueries({ queryKey: ["/api/visitors"] });
@@ -110,7 +121,7 @@ export default function BezoekersPage() {
   const handleStatusChange = (id: number, status: string) => {
     updateVisitor.mutate({ id, data: { status } }, {
       onSuccess: () => {
-        toast({ title: `Bezoeker is nu ${status}` });
+        toast({ title: t("toast.statusChanged", { status: t(`status.${status}`, status) }) });
         queryClient.invalidateQueries({ queryKey: ["/api/visitors"] });
       }
     });
@@ -125,22 +136,22 @@ export default function BezoekersPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Receptiedashboard</h1>
-          <p className="text-muted-foreground">Bezoekers verwacht op {format(new Date(), "d MMMM yyyy", { locale: nl })}.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle", { date: format(new Date(), "d MMMM yyyy", { locale: getDateFnsLocale() }) })}</p>
         </div>
         
         <Dialog open={isNewDialogOpen} onOpenChange={setIsNewDialogOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Bezoeker aanmelden
+              {t("register")}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Nieuwe bezoeker aanmelden</DialogTitle>
+              <DialogTitle>{t("dialog.title")}</DialogTitle>
               <DialogDescription>
-                Meld een bezoeker aan voor vandaag. De badge wordt direct gegenereerd.
+                {t("dialog.description")}
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
@@ -150,9 +161,9 @@ export default function BezoekersPage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Naam bezoeker</FormLabel>
+                      <FormLabel>{t("dialog.name")}</FormLabel>
                       <FormControl>
-                        <Input placeholder="Volledige naam" {...field} />
+                        <Input placeholder={t("dialog.namePlaceholder")} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -164,9 +175,9 @@ export default function BezoekersPage() {
                     name="company"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Bedrijf (Optioneel)</FormLabel>
+                        <FormLabel>{t("dialog.company")}</FormLabel>
                         <FormControl>
-                          <Input placeholder="Bedrijfsnaam" {...field} />
+                          <Input placeholder={t("dialog.companyPlaceholder")} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -177,9 +188,9 @@ export default function BezoekersPage() {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>E-mailadres (Optioneel)</FormLabel>
+                        <FormLabel>{t("dialog.email")}</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="E-mail" {...field} />
+                          <Input type="email" placeholder={t("dialog.emailPlaceholder")} {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -193,11 +204,11 @@ export default function BezoekersPage() {
                       name="hostId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Ontvanger (Host)</FormLabel>
+                          <FormLabel>{t("dialog.host")}</FormLabel>
                           <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString() || ""}>
                             <FormControl>
                               <SelectTrigger disabled={isUsersLoading}>
-                                <SelectValue placeholder="Kies medewerker" />
+                                <SelectValue placeholder={t("dialog.hostPlaceholder")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
@@ -212,7 +223,7 @@ export default function BezoekersPage() {
                     />
                   ) : (
                     <FormItem>
-                      <FormLabel>Ontvanger (Host)</FormLabel>
+                      <FormLabel>{t("dialog.host")}</FormLabel>
                       <Input value={user?.name ?? ""} disabled />
                     </FormItem>
                   )}
@@ -221,7 +232,7 @@ export default function BezoekersPage() {
                     name="expectedArrival"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Verwachte aankomst</FormLabel>
+                        <FormLabel>{t("dialog.expectedArrival")}</FormLabel>
                         <FormControl>
                           <Input type="time" {...field} />
                         </FormControl>
@@ -231,10 +242,10 @@ export default function BezoekersPage() {
                   />
                 </div>
                 <DialogFooter className="pt-4">
-                  <Button type="button" variant="ghost" onClick={() => setIsNewDialogOpen(false)}>Annuleren</Button>
+                  <Button type="button" variant="ghost" onClick={() => setIsNewDialogOpen(false)}>{t("common.cancel", { ns: "common" })}</Button>
                   <Button type="submit" disabled={createVisitor.isPending}>
                     {createVisitor.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Aanmelden
+                    {t("dialog.submit")}
                   </Button>
                 </DialogFooter>
               </form>
@@ -247,7 +258,7 @@ export default function BezoekersPage() {
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Zoek bezoeker..." 
+            placeholder={t("searchPlaceholder")} 
             className="pl-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -260,7 +271,7 @@ export default function BezoekersPage() {
           [1,2,3,4,5,6].map(i => <Skeleton key={i} className="h-48 w-full rounded-xl" />)
         ) : !filteredVisitors?.length ? (
           <div className="col-span-full p-12 text-center border-2 border-dashed rounded-xl text-muted-foreground">
-            Geen bezoekers gevonden voor vandaag.
+            {t("empty")}
           </div>
         ) : (
           filteredVisitors.map((visitor) => (
@@ -277,7 +288,7 @@ export default function BezoekersPage() {
                   </div>
                 </div>
                 <Badge variant="secondary" className={getVisitorStatusColor(visitor.status)}>
-                  {visitor.status}
+                  {t(`status.${visitor.status}`, visitor.status)}
                 </Badge>
               </div>
               
@@ -285,17 +296,17 @@ export default function BezoekersPage() {
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span>Verwacht: {visitor.expectedArrival}</span>
+                    <span>{t("expected", { time: visitor.expectedArrival })}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <UserIcon className="h-4 w-4 text-muted-foreground" />
-                    <span>Host: <span className="font-medium">{visitor.hostName}</span></span>
+                    <span>{t("hostLabel")}<span className="font-medium">{visitor.hostName}</span></span>
                   </div>
                   
                   {visitor.status !== 'verwacht' && (
                     <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded-md mt-2 space-y-1">
-                      {visitor.checkedInAt && <div>In: {format(new Date(visitor.checkedInAt), "HH:mm")}</div>}
-                      {visitor.checkedOutAt && <div>Uit: {format(new Date(visitor.checkedOutAt), "HH:mm")}</div>}
+                      {visitor.checkedInAt && <div>{t("checkedIn", { time: format(new Date(visitor.checkedInAt), "HH:mm") })}</div>}
+                      {visitor.checkedOutAt && <div>{t("checkedOut", { time: format(new Date(visitor.checkedOutAt), "HH:mm") })}</div>}
                     </div>
                   )}
                 </div>
@@ -307,7 +318,7 @@ export default function BezoekersPage() {
                       onClick={() => handleStatusChange(visitor.id, 'aanwezig')}
                       disabled={updateVisitor.isPending}
                     >
-                      <CheckCircle2 className="mr-2 h-4 w-4" /> Inchecken
+                      <CheckCircle2 className="mr-2 h-4 w-4" /> {t("checkIn")}
                     </Button>
                   )}
                   {visitor.status === 'aanwezig' && (
@@ -317,12 +328,12 @@ export default function BezoekersPage() {
                       onClick={() => handleStatusChange(visitor.id, 'vertrokken')}
                       disabled={updateVisitor.isPending}
                     >
-                      <LogOut className="mr-2 h-4 w-4" /> Uitchecken
+                      <LogOut className="mr-2 h-4 w-4" /> {t("checkOut")}
                     </Button>
                   )}
                   {visitor.status === 'vertrokken' && (
                     <Button variant="secondary" className="w-full" disabled>
-                      Bezoek afgerond
+                      {t("visitDone")}
                     </Button>
                   )}
                 </div>

@@ -1,0 +1,42 @@
+{
+  "title": "Resepsiyon panosu",
+  "subtitle": "{{date}} tarihinde beklenen ziyaretçiler.",
+  "register": "Ziyaretçi kaydet",
+  "dialog": {
+    "title": "Yeni ziyaretçi kaydet",
+    "description": "Bugün için bir ziyaretçi kaydedin. Kart anında oluşturulur.",
+    "name": "Ziyaretçi adı",
+    "namePlaceholder": "Tam ad",
+    "company": "Şirket (İsteğe bağlı)",
+    "companyPlaceholder": "Şirket adı",
+    "email": "E-posta adresi (İsteğe bağlı)",
+    "emailPlaceholder": "E-posta",
+    "host": "Karşılayan",
+    "hostPlaceholder": "Çalışan seçin",
+    "expectedArrival": "Beklenen varış",
+    "submit": "Kaydet"
+  },
+  "searchPlaceholder": "Ziyaretçi ara...",
+  "empty": "Bugün için ziyaretçi bulunamadı.",
+  "expected": "Beklenen: {{time}}",
+  "hostLabel": "Karşılayan: ",
+  "checkedIn": "Giriş: {{time}}",
+  "checkedOut": "Çıkış: {{time}}",
+  "checkIn": "Giriş yap",
+  "checkOut": "Çıkış yap",
+  "visitDone": "Ziyaret tamamlandı",
+  "toast": {
+    "registered": "Ziyaretçi kaydedildi",
+    "statusChanged": "Ziyaretçi artık {{status}}"
+  },
+  "validation": {
+    "nameRequired": "Ad zorunludur",
+    "emailInvalid": "Geçersiz e-posta adresi",
+    "timeInvalid": "Geçersiz biçim (SS:DD)"
+  },
+  "status": {
+    "verwacht": "bekleniyor",
+    "aanwezig": "mevcut",
+    "vertrokken": "ayrıldı"
+  }
+}

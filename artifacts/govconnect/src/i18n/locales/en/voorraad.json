@@ -1,0 +1,57 @@
+{
+  "title": "Stock management",
+  "subtitle": "Webshop stock levels with minimum-stock alerts.",
+  "addProduct": "Add product",
+  "newProduct": "New product",
+  "newProductDescription": "Add a product to the webshop catalogue.",
+  "fields": {
+    "name": "Name",
+    "category": "Category",
+    "categoryPlaceholder": "Choose category",
+    "description": "Description (optional)",
+    "price": "Price (€)",
+    "unit": "Unit",
+    "stock": "Stock",
+    "minStock": "Min. stock"
+  },
+  "category": {
+    "kantoorartikelen": "Office supplies",
+    "ict": "IT",
+    "meubilair": "Furniture",
+    "facilitair": "Facilities",
+    "overig": "Other"
+  },
+  "alerts_one": "{{count}} product is below the minimum stock: {{names}}.",
+  "alerts_other": "{{count}} products are below the minimum stock: {{names}}.",
+  "onlyAlerts": "Only products below minimum stock",
+  "emptyAlerts": "No stock alerts",
+  "emptyProducts": "No products",
+  "table": {
+    "product": "Product",
+    "category": "Category",
+    "price": "Price",
+    "stock": "Stock",
+    "minimum": "Minimum",
+    "status": "Status",
+    "action": "Action"
+  },
+  "status": {
+    "belowMin": "Below minimum",
+    "onTarget": "On target"
+  },
+  "update": "Update",
+  "updateStock": "Update stock",
+  "currentStock": "Current stock",
+  "minStockLabel": "Minimum stock",
+  "toast": {
+    "added": "Product added",
+    "saveFailed": "Saving failed",
+    "stockUpdated": "Stock updated",
+    "updateFailed": "Update failed"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "categoryRequired": "Category is required",
+    "priceRequired": "Price is required"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "brand": "LetShare4gov",
+  "nav": {
+    "dashboard": "Panel",
+    "meldingen": "Incidencias",
+    "reserveringen": "Reservas",
+    "werkplekken": "Puestos de trabajo",
+    "bezoekers": "Visitantes",
+    "vastgoed": "Inmuebles",
+    "ruimtes": "Salas",
+    "sleutelbeheer": "Gestión de llaves",
+    "assets": "Activos",
+    "contracten": "Contratos",
+    "webshop": "Tienda online",
+    "voorraad": "Inventario",
+    "duurzaamheid": "Sostenibilidad",
+    "mjop": "Plan de mantenimiento",
+    "catering": "Catering",
+    "kennisbank": "Base de conocimiento"
+  },
+  "shell": {
+    "notifications": "Notificaciones",
+    "markAllRead": "Marcar todo como leído",
+    "noNotifications": "Sin notificaciones",
+    "role": "Rol",
+    "settings": "Ajustes",
+    "logout": "Cerrar sesión",
+    "language": "Idioma",
+    "guestReadOnly": "Modo invitado – solo lectura"
+  },
+  "login": {
+    "title": "Iniciar sesión",
+    "subtitle": "Introduzca sus credenciales para acceder a su panel.",
+    "email": "Correo electrónico",
+    "emailPlaceholder": "nombre@organizacion.es",
+    "password": "Contraseña",
+    "submit": "Entrar",
+    "failed": "Error al iniciar sesión. Compruebe sus datos.",
+    "demo": "Cuentas de demostración (acceso con 1 clic)",
+    "tagline": "El panel diario para la gestión de instalaciones públicas.",
+    "taglineSub": "Rápido, claro y fiable. Diseñado para que las organizaciones públicas gestionen incidencias, reservas e inmuebles sin esfuerzo.",
+    "copyright": "Todos los derechos reservados.",
+    "emailInvalid": "Correo electrónico no válido",
+    "passwordRequired": "La contraseña es obligatoria",
+    "guestLink": "Acceso como invitado"
+  },
+  "guest": {
+    "title": "Acceso de invitado",
+    "subtitle": "Introduzca la contraseña de invitado para ver LetShare4gov como invitado (solo lectura).",
+    "password": "Contraseña de invitado",
+    "submit": "Ver como invitado",
+    "failed": "Contraseña no válida.",
+    "backToLogin": "Volver al inicio de sesión"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "back": "Atrás",
+    "search": "Buscar",
+    "error": "Algo ha salido mal"
+  }
+}

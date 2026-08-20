@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { useGetStructure } from "@workspace/api-client-react";
 import { 
   Building2, 
@@ -67,6 +68,7 @@ function TreeNode({
 }
 
 export default function VastgoedPage() {
+  const { t } = useTranslation("vastgoed");
   const [, setLocation] = useLocation();
   const { data: structure, isLoading } = useGetStructure();
 
@@ -74,7 +76,7 @@ export default function VastgoedPage() {
     return (
       <div className="space-y-6 max-w-4xl mx-auto">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Vastgoedstructuur</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <Skeleton className="h-4 w-64 mt-2" />
         </div>
         <Card>
@@ -94,20 +96,20 @@ export default function VastgoedPage() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Vastgoedstructuur</h1>
-        <p className="text-muted-foreground">Overzicht van organisatie, vestigingen, gebouwen en verdiepingen.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Structuurboom</CardTitle>
-          <CardDescription>Navigeer door de hiërarchie om ruimtes te bekijken.</CardDescription>
+          <CardTitle>{t("tree.title")}</CardTitle>
+          <CardDescription>{t("tree.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           {structure.map(org => (
           <TreeNode key={org.id} label={org.name} icon={Building2} defaultExpanded>
             {org.sites.map(site => (
-              <TreeNode key={site.id} label={`${site.name} (${site.city})`} icon={Map} defaultExpanded>
+              <TreeNode key={site.id} label={t("tree.siteCity", { name: site.name, city: site.city })} icon={Map} defaultExpanded>
                 {site.buildings.map(building => (
                   <TreeNode 
                     key={building.id} 
@@ -121,16 +123,16 @@ export default function VastgoedPage() {
                         onClick={() => setLocation(`/gebouwen/${building.id}`)}
                         data-testid={`link-gebouw-${building.id}`}
                       >
-                        <ExternalLink className="mr-1 h-3 w-3" /> Gebouwdossier
+                        <ExternalLink className="mr-1 h-3 w-3" /> {t("tree.buildingDossier")}
                       </Button>
                     }
                   >
                     {building.floors.map(floor => (
                       <TreeNode 
                         key={floor.id} 
-                        label={`${floor.name} (Niveau ${floor.level})`} 
+                        label={t("tree.floorLevel", { name: floor.name, level: floor.level })} 
                         icon={Layers}
-                        badge={<Badge variant="secondary" className="text-[10px] ml-2 font-normal">{floor.roomCount} ruimtes</Badge>}
+                        badge={<Badge variant="secondary" className="text-[10px] ml-2 font-normal">{t("tree.roomCount", { count: floor.roomCount })}</Badge>}
                         action={
                           <Button 
                             variant="ghost" 
@@ -138,7 +140,7 @@ export default function VastgoedPage() {
                             className="h-7 text-xs"
                             onClick={() => setLocation(`/ruimtes?floorId=${floor.id}`)}
                           >
-                            <DoorOpen className="mr-1 h-3 w-3" /> Toon ruimtes
+                            <DoorOpen className="mr-1 h-3 w-3" /> {t("tree.showRooms")}
                           </Button>
                         }
                       />

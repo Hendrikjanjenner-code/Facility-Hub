@@ -1,0 +1,92 @@
+{
+  "title": "Locali",
+  "subtitle": "Registro di tutti i locali dell'organizzazione.",
+  "searchPlaceholder": "Cerca per nome, codice o funzione...",
+  "allBuildings": "Tutti gli edifici",
+  "allFloors": "Tutti i piani",
+  "bookable": "Prenotabile",
+  "empty": {
+    "title": "Nessun locale trovato",
+    "description": "Modifica i filtri o controlla il termine di ricerca."
+  },
+  "areaM2": "{{area}} m²",
+  "persons": "{{count}} pers.",
+  "openTickets_one": "{{count}} segnalazione",
+  "openTickets_other": "{{count}} segnalazione/i",
+  "assetCount": "{{count}} asset",
+  "detail": {
+    "notFound": "Locale non trovato.",
+    "bookableBadge": "Prenotabile",
+    "dossier": {
+      "title": "Fascicolo locale",
+      "edit": "Modifica",
+      "area": "Superficie",
+      "vvo": "SUN",
+      "bvo": "SLC",
+      "department": "Reparto",
+      "capacity": "Occupazione",
+      "capacityValue": "{{count}} persone",
+      "function": "Funzione",
+      "floorFinish": "Finitura del pavimento",
+      "bookability": "Prenotabilità",
+      "bookable": "Prenotabile",
+      "notBookable": "Non prenotabile",
+      "facilities": "Servizi"
+    },
+    "editDialog": {
+      "title": "Modifica fascicolo locale",
+      "description": "Modifica le superfici, la funzione e il reparto di {{name}}.",
+      "area": "Superficie (m²)",
+      "function": "Funzione",
+      "vvo": "SUN (m²)",
+      "bvo": "SLC (m²)",
+      "department": "Reparto",
+      "departmentPlaceholder": "Es. Servizi al cittadino",
+      "capacity": "Occupazione (persone)",
+      "capacityPlaceholder": "Es. 12",
+      "bookable": "Prenotabile",
+      "yes": "Sì",
+      "no": "No"
+    },
+    "tabs": {
+      "assets": "Asset ({{count}})",
+      "tickets": "Segnalazioni aperte ({{count}})",
+      "noAssets": "Nessun asset collegato a questo locale.",
+      "noTickets": "Nessuna segnalazione aperta."
+    },
+    "reservations": {
+      "title": "Prenotazioni di oggi",
+      "empty": "Nessuna prenotazione per oggi.",
+      "toPlanboard": "Vai al planning"
+    },
+    "history": {
+      "title": "Cronologia modifiche",
+      "description": "Riorganizzazioni e modifiche al fascicolo di questo locale.",
+      "empty": "Nessuna modifica ancora registrata.",
+      "unknown": "Sconosciuto",
+      "reverted": "Annullato",
+      "undo": "Annulla",
+      "emptyValue": "vuoto"
+    },
+    "toast": {
+      "dossierUpdated": "Fascicolo locale aggiornato",
+      "roomChangedConflict": "Locale modificato nel frattempo",
+      "roomChangedConflictDesc": "Qualcun altro ha appena modificato questo locale. La finestra è stata chiusa — riaprila per vedere i valori attuali.",
+      "updateFailed": "Aggiornamento non riuscito",
+      "partialUndo": "Modifica annullata parzialmente",
+      "partialUndoDesc": "Saltati (modificati di nuovo in seguito): {{fields}}.",
+      "undone": "Modifica annullata",
+      "undoFailed": "Annullamento non riuscito"
+    },
+    "fields": {
+      "functionType": "Funzione",
+      "floorFinish": "Finitura del pavimento",
+      "areaM2": "Superficie (m²)",
+      "areaVvoM2": "SUN (m²)",
+      "areaBvoM2": "SLC (m²)",
+      "department": "Reparto",
+      "capacity": "Occupazione (persone)",
+      "bookable": "Prenotabile"
+    }
+  }
+}

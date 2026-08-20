@@ -38,6 +38,26 @@ export const LoginResponse = zod.object({
 
 
 /**
+ * @summary Log in as a read-only guest with the shared guest password
+ */
+export const GuestLoginBody = zod.object({
+  "password": zod.string()
+})
+
+export const guestLoginResponseNotificationPreferenceDefault = `all`;
+
+export const GuestLoginResponse = zod.object({
+  "id": zod.int(),
+  "email": zod.string(),
+  "name": zod.string(),
+  "role": zod.string().describe('eindgebruiker | servicedesk | facilitair_manager | cateraar | receptie | beheerder | leverancier'),
+  "department": zod.string().nullish(),
+  "avatarColor": zod.string().nullish(),
+  "notificationPreference": zod.string().default(guestLoginResponseNotificationPreferenceDefault).describe('inapp_only | email | all')
+})
+
+
+/**
  * @summary Log out
  */
 export const LogoutResponse = zod.object({

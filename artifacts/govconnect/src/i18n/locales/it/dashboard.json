@@ -1,0 +1,41 @@
+{
+  "title": "Panoramica",
+  "welcome": "Bentornato, {{name}}",
+  "subtitle": "Ecco la tua panoramica delle strutture per oggi.",
+  "newTicket": "Nuova segnalazione",
+  "stats": {
+    "myOpenTickets": "Le mie segnalazioni aperte",
+    "openTickets": "Segnalazioni aperte",
+    "inProgress": "Attualmente in gestione",
+    "slaAtRisk": "SLA a rischio",
+    "slaAtRiskDesc": "Entro 4 ore o scaduto",
+    "myReservations": "Le mie prenotazioni",
+    "reservationsToday": "Prenotazioni di oggi",
+    "roomsAndCatering": "Sale e catering",
+    "workplaceBookings": "Prenotazioni postazioni",
+    "forToday": "Per oggi",
+    "visitors": "Visitatori",
+    "presentExpected": "Presenti / Attesi",
+    "totalAssets": "Totale asset",
+    "registeredInSystem": "Registrati nel sistema",
+    "poorCondition": "Componenti in cattive condizioni",
+    "poorConditionDesc": "Punteggio ≥ 4 (da discreto a pessimo)"
+  },
+  "charts": {
+    "ticketsByStatus": "Segnalazioni per stato",
+    "ticketsByStatusDesc": "Panoramica di tutte le segnalazioni attive",
+    "priorityDistribution": "Distribuzione delle priorità",
+    "priorityDistributionDesc": "Segnalazioni aperte"
+  },
+  "satisfaction": {
+    "title": "Soddisfazione del cliente",
+    "average": "Media {{score}}/5 — ",
+    "summary": "{{responses}} di {{closed}} segnalazioni chiuse valutate ({{rate}}% di tasso di risposta)",
+    "noRatings": "Nessuna valutazione ricevuta finora.",
+    "lowestResponseRate": "Tasso di risposta più basso per categoria"
+  },
+  "activity": {
+    "title": "Attività recente",
+    "empty": "Nessuna attività recente"
+  }
+}

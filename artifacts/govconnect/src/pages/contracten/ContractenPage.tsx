@@ -12,6 +12,8 @@ import {
   getListSuppliersQueryKey,
 } from "@workspace/api-client-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { getIntlLocale } from "@/i18n";
 
 const getListContractDocumentsQueryKey = (contractId: number) => [`/api/contracts/${contractId}/documents`];
 
@@ -93,25 +95,29 @@ const BASE_URL = import.meta.env.BASE_URL ?? "/";
 
 const SUPPLIER_CATEGORIES = ["techniek", "schoonmaak", "catering", "groenvoorziening", "beveiliging", "overig"];
 
-const contractSchema = z.object({
-  name: z.string().min(2, "Naam is verplicht"),
-  supplierId: z.number({ message: "Kies een leverancier" }),
-  category: z.string().min(2, "Categorie is verplicht"),
+type TFn = (key: string) => string;
+
+const makeContractSchema = (t: TFn) => z.object({
+  name: z.string().min(2, t("validation.nameRequired")),
+  supplierId: z.number({ message: t("validation.supplierRequired") }),
+  category: z.string().min(2, t("validation.categoryRequired")),
   description: z.string().optional(),
-  startDate: z.string().min(10, "Startdatum is verplicht"),
-  endDate: z.string().min(10, "Einddatum is verplicht"),
+  startDate: z.string().min(10, t("validation.startDateRequired")),
+  endDate: z.string().min(10, t("validation.endDateRequired")),
   noticePeriodDays: z.coerce.number().int().min(0),
   annualValue: z.coerce.number().optional(),
 });
+type ContractSchema = ReturnType<typeof makeContractSchema>;
 
-const supplierSchema = z.object({
-  name: z.string().min(2, "Naam is verplicht"),
-  category: z.string().min(2, "Categorie is verplicht"),
+const makeSupplierSchema = (t: TFn) => z.object({
+  name: z.string().min(2, t("validation.nameRequired")),
+  category: z.string().min(2, t("validation.categoryRequired")),
   contactName: z.string().optional(),
-  email: z.string().email("Ongeldig e-mailadres").optional().or(z.literal("")),
+  email: z.string().email(t("validation.emailInvalid")).optional().or(z.literal("")),
   phone: z.string().optional(),
   kvkNumber: z.string().optional(),
 });
+type SupplierSchema = ReturnType<typeof makeSupplierSchema>;
 
 const reviewSchema = z.object({
   year: z.coerce.number().int().min(2000).max(2099),
@@ -128,8 +134,8 @@ function contractStatusBadge(status: string) {
   }
 }
 
-const eur = (v: number) => v.toLocaleString("nl-NL", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
-const nlDate = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
+const eur = (v: number) => v.toLocaleString(getIntlLocale(), { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+const nlDate = (d: string) => new Date(d + "T00:00:00").toLocaleDateString(getIntlLocale(), { day: "numeric", month: "short", year: "numeric" });
 
 function StarRating({ score, max = 5 }: { score: number; max?: number }) {
   return (
@@ -147,6 +153,7 @@ function StarRating({ score, max = 5 }: { score: number; max?: number }) {
 // ── Contract documents panel ──────────────────────────────────────────────────
 
 function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contractId: number; isManager: boolean; isSupplier?: boolean }) {
+  const { t } = useTranslation("contracten");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -171,7 +178,7 @@ function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contrac
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error((err as any).error ?? "Upload mislukt");
+        throw new Error((err as any).error ?? t("toast.uploadFailed"));
       }
       const { objectPath } = await res.json();
 
@@ -180,15 +187,15 @@ function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contrac
         { id: contractId, data: { fileName: file.name, objectPath } },
         {
           onSuccess: () => {
-            toast({ title: "Document geüpload" });
+            toast({ title: t("toast.documentUploaded") });
             queryClient.invalidateQueries({ queryKey: getListContractDocumentsQueryKey(contractId) });
           },
-          onError: () => toast({ title: "Registratie mislukt", variant: "destructive" }),
+          onError: () => toast({ title: t("toast.registrationFailed"), variant: "destructive" }),
           onSettled: () => setUploading(false),
         },
       );
     } catch (e: any) {
-      toast({ title: e.message ?? "Upload mislukt", variant: "destructive" });
+      toast({ title: e.message ?? t("toast.uploadFailed"), variant: "destructive" });
       setUploading(false);
     }
   };
@@ -203,10 +210,10 @@ function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contrac
       { id: contractId, docId },
       {
         onSuccess: () => {
-          toast({ title: "Document verwijderd" });
+          toast({ title: t("toast.documentDeleted") });
           queryClient.invalidateQueries({ queryKey: getListContractDocumentsQueryKey(contractId) });
         },
-        onError: () => toast({ title: "Verwijderen mislukt", variant: "destructive" }),
+        onError: () => toast({ title: t("toast.deleteFailed"), variant: "destructive" }),
       },
     );
   };
@@ -219,7 +226,7 @@ function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contrac
       >
         <span className="flex items-center gap-2">
           <File className="h-4 w-4 text-muted-foreground" />
-          {isSupplier ? "Gedeelde documenten" : "Digitale kluis"}
+          {isSupplier ? t("documents.shared") : t("documents.vault")}
           {docs && docs.length > 0 && (
             <Badge variant="secondary" className="text-xs">{docs.length}</Badge>
           )}
@@ -232,7 +239,7 @@ function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contrac
           {isLoading ? (
             <Skeleton className="h-8 w-full" />
           ) : !docs?.length ? (
-            <p className="text-xs text-muted-foreground py-2">Nog geen documenten geüpload.</p>
+            <p className="text-xs text-muted-foreground py-2">{t("documents.empty")}</p>
           ) : (
             <div className="space-y-1">
               {docs.map((doc) => (
@@ -240,7 +247,7 @@ function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contrac
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium truncate">{doc.fileName}</p>
                     <p className="text-xs text-muted-foreground">
-                      {doc.uploadedByName} · {new Date(doc.createdAt).toLocaleDateString("nl-NL")}
+                      {doc.uploadedByName} · {new Date(doc.createdAt).toLocaleDateString(getIntlLocale())}
                     </p>
                   </div>
                   <div className="flex gap-1">
@@ -294,7 +301,7 @@ function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contrac
                 ) : (
                   <Upload className="mr-2 h-4 w-4" />
                 )}
-                PDF uploaden
+                {t("documents.upload")}
               </Button>
             </>
           )}
@@ -307,6 +314,7 @@ function ContractDocumentsPanel({ contractId, isManager, isSupplier }: { contrac
 // ── Supplier reviews panel ────────────────────────────────────────────────────
 
 function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; isManager: boolean }) {
+  const { t } = useTranslation("contracten");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -328,13 +336,13 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
       { id: supplierId, data: { year: values.year, score: values.score, comment: values.comment || null } },
       {
         onSuccess: () => {
-          toast({ title: "Beoordeling opgeslagen" });
+          toast({ title: t("toast.reviewSaved") });
           setOpen(false);
           form.reset();
           queryClient.invalidateQueries({ queryKey: getListSupplierReviewsQueryKey(supplierId) });
         },
         onError: (err: any) => {
-          const msg = err?.message ?? "Opslaan mislukt";
+          const msg = err?.message ?? t("toast.saveFailed");
           setReviewError(msg);
         },
       },
@@ -346,10 +354,10 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
-          <span className="text-xs font-medium">Beoordelingen</span>
+          <span className="text-xs font-medium">{t("reviews.title")}</span>
           {data?.averageScore != null && (
             <span className="text-xs text-muted-foreground">
-              gem. {data.averageScore.toFixed(1)} / 5
+              {t("reviews.average", { score: data.averageScore.toFixed(1) })}
             </span>
           )}
         </div>
@@ -357,13 +365,13 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) { setReviewError(null); form.reset(); } }}>
             <DialogTrigger asChild>
               <Button size="sm" variant="ghost" className="h-6 px-2 text-xs">
-                <Plus className="h-3 w-3 mr-1" />Beoordelen
+                <Plus className="h-3 w-3 mr-1" />{t("reviews.add")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-sm">
               <DialogHeader>
-                <DialogTitle>Leverancier beoordelen</DialogTitle>
-                <DialogDescription>Jaarlijkse evaluatie (1–5 sterren)</DialogDescription>
+                <DialogTitle>{t("reviews.dialogTitle")}</DialogTitle>
+                <DialogDescription>{t("reviews.dialogDescription")}</DialogDescription>
               </DialogHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -373,14 +381,14 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
                   <div className="grid grid-cols-2 gap-4">
                     <FormField control={form.control} name="year" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Jaar</FormLabel>
+                        <FormLabel>{t("reviews.year")}</FormLabel>
                         <FormControl><Input type="number" {...field} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )} />
                     <FormField control={form.control} name="score" render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Score (1–5)</FormLabel>
+                        <FormLabel>{t("reviews.score")}</FormLabel>
                         <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString()}>
                           <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                           <SelectContent>
@@ -397,15 +405,15 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
                   </div>
                   <FormField control={form.control} name="comment" render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Toelichting (optioneel)</FormLabel>
-                      <FormControl><Textarea rows={3} placeholder="Geef een toelichting op de score..." {...field} /></FormControl>
+                      <FormLabel>{t("reviews.comment")}</FormLabel>
+                      <FormControl><Textarea rows={3} placeholder={t("reviews.commentPlaceholder")} {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
                   <DialogFooter>
-                    <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Annuleren</Button>
+                    <Button type="button" variant="ghost" onClick={() => setOpen(false)}>{t("common.cancel", { ns: "common" })}</Button>
                     <Button type="submit" disabled={createReview.isPending}>
-                      {createReview.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Opslaan
+                      {createReview.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("common.save", { ns: "common" })}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -418,7 +426,7 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
       {isLoading ? (
         <Skeleton className="h-8 w-full" />
       ) : !data?.reviews.length ? (
-        <p className="text-xs text-muted-foreground">Nog geen beoordelingen.</p>
+        <p className="text-xs text-muted-foreground">{t("reviews.empty")}</p>
       ) : (
         <div className="space-y-1.5">
           {data.reviews.slice(0, 3).map((r) => (
@@ -439,6 +447,7 @@ function SupplierReviewsPanel({ supplierId, isManager }: { supplierId: number; i
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ContractenPage() {
+  const { t } = useTranslation("contracten");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: user } = useGetCurrentUser();
@@ -455,45 +464,47 @@ export default function ContractenPage() {
   const updateContract = useUpdateContract();
   const createSupplier = useCreateSupplier();
 
-  const contractForm = useForm<z.input<typeof contractSchema>, any, z.output<typeof contractSchema>>({
+  const contractSchema = makeContractSchema(t);
+  const supplierSchema = makeSupplierSchema(t);
+  const contractForm = useForm<z.input<ContractSchema>, any, z.output<ContractSchema>>({
     resolver: zodResolver(contractSchema),
     defaultValues: { name: "", category: "", description: "", startDate: "", endDate: "", noticePeriodDays: 90 },
   });
-  const supplierForm = useForm<z.infer<typeof supplierSchema>>({
+  const supplierForm = useForm<z.infer<SupplierSchema>>({
     resolver: zodResolver(supplierSchema),
     defaultValues: { name: "", category: "", contactName: "", email: "", phone: "", kvkNumber: "" },
   });
 
   const expiringCount = contracts?.filter((c) => c.expiringSoon).length ?? 0;
 
-  const onSubmitContract = (values: z.output<typeof contractSchema>) => {
+  const onSubmitContract = (values: z.output<ContractSchema>) => {
     createContract.mutate({ data: values as any }, {
       onSuccess: () => {
-        toast({ title: "Contract toegevoegd" });
+        toast({ title: t("toast.contractAdded") });
         setContractDialogOpen(false);
         contractForm.reset();
         queryClient.invalidateQueries({ queryKey: ["/api/contracts"] });
       },
-      onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+      onError: () => toast({ title: t("toast.saveFailed"), variant: "destructive" }),
     });
   };
 
-  const onSubmitSupplier = (values: z.infer<typeof supplierSchema>) => {
+  const onSubmitSupplier = (values: z.infer<SupplierSchema>) => {
     createSupplier.mutate({ data: { ...values, email: values.email || null } as any }, {
       onSuccess: () => {
-        toast({ title: "Leverancier toegevoegd" });
+        toast({ title: t("toast.supplierAdded") });
         setSupplierDialogOpen(false);
         supplierForm.reset();
         queryClient.invalidateQueries({ queryKey: ["/api/suppliers"] });
       },
-      onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+      onError: () => toast({ title: t("toast.saveFailed"), variant: "destructive" }),
     });
   };
 
   const terminate = (id: number) => {
     updateContract.mutate({ id, data: { status: "opgezegd" } }, {
       onSuccess: () => {
-        toast({ title: "Contract opgezegd" });
+        toast({ title: t("toast.contractTerminated") });
         queryClient.invalidateQueries({ queryKey: ["/api/contracts"] });
       },
     });
@@ -503,11 +514,11 @@ export default function ContractenPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Contracten & Inkoop</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
             {user?.role === "leverancier"
-              ? "Uw lopende contracten met de gemeente."
-              : "Contractenkluis met einddatum-bewaking en leveranciersregister."}
+              ? t("subtitleSupplier")
+              : t("subtitle")}
           </p>
         </div>
       </div>
@@ -516,15 +527,15 @@ export default function ContractenPage() {
         <div className="flex items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-900">
           <AlertTriangle className="h-5 w-5 flex-shrink-0" />
           <p className="text-sm font-medium">
-            {expiringCount} {expiringCount === 1 ? "contract valt" : "contracten vallen"} binnen de opzegtermijn — actie vereist.
+            {t("expiring", { count: expiringCount })}
           </p>
         </div>
       )}
 
       <Tabs defaultValue="contracten">
         <TabsList>
-          <TabsTrigger value="contracten">Contracten</TabsTrigger>
-          {isManager && <TabsTrigger value="leveranciers">Leveranciers</TabsTrigger>}
+          <TabsTrigger value="contracten">{t("tabs.contracts")}</TabsTrigger>
+          {isManager && <TabsTrigger value="leveranciers">{t("tabs.suppliers")}</TabsTrigger>}
         </TabsList>
 
         {/* ── Contracten tab ── */}
@@ -533,24 +544,24 @@ export default function ContractenPage() {
             <div className="flex justify-end">
               <Dialog open={contractDialogOpen} onOpenChange={setContractDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button><Plus className="mr-2 h-4 w-4" />Contract toevoegen</Button>
+                  <Button><Plus className="mr-2 h-4 w-4" />{t("contracts.add")}</Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>Nieuw contract</DialogTitle>
-                    <DialogDescription>Leg een contract vast in de contractenkluis.</DialogDescription>
+                    <DialogTitle>{t("contracts.newTitle")}</DialogTitle>
+                    <DialogDescription>{t("contracts.newDescription")}</DialogDescription>
                   </DialogHeader>
                   <Form {...contractForm}>
                     <form onSubmit={contractForm.handleSubmit(onSubmitContract)} className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={contractForm.control} name="name" render={({ field }) => (
-                          <FormItem><FormLabel>Naam</FormLabel><FormControl><Input placeholder="Bijv. Onderhoud liften" {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("contractFields.name")}</FormLabel><FormControl><Input placeholder={t("contractFields.namePlaceholder")} {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={contractForm.control} name="supplierId" render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Leverancier</FormLabel>
+                            <FormLabel>{t("contractFields.supplier")}</FormLabel>
                             <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString() || ""}>
-                              <FormControl><SelectTrigger><SelectValue placeholder="Kies leverancier" /></SelectTrigger></FormControl>
+                              <FormControl><SelectTrigger><SelectValue placeholder={t("contractFields.supplierPlaceholder")} /></SelectTrigger></FormControl>
                               <SelectContent>
                                 {suppliers?.map((s) => <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>)}
                               </SelectContent>
@@ -562,38 +573,38 @@ export default function ContractenPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={contractForm.control} name="category" render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Categorie</FormLabel>
+                            <FormLabel>{t("contractFields.category")}</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl><SelectTrigger><SelectValue placeholder="Kies categorie" /></SelectTrigger></FormControl>
+                              <FormControl><SelectTrigger><SelectValue placeholder={t("contractFields.categoryPlaceholder")} /></SelectTrigger></FormControl>
                               <SelectContent>
-                                {SUPPLIER_CATEGORIES.map((c) => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}
+                                {SUPPLIER_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{t(`category.${c}`)}</SelectItem>)}
                               </SelectContent>
                             </Select>
                             <FormMessage />
                           </FormItem>
                         )} />
                         <FormField control={contractForm.control} name="annualValue" render={({ field }) => (
-                          <FormItem><FormLabel>Jaarwaarde (€)</FormLabel><FormControl><Input type="number" step="100" {...field} value={(field.value as any) ?? ""} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("contractFields.annualValue")}</FormLabel><FormControl><Input type="number" step="100" {...field} value={(field.value as any) ?? ""} /></FormControl><FormMessage /></FormItem>
                         )} />
                       </div>
                       <div className="grid grid-cols-3 gap-4">
                         <FormField control={contractForm.control} name="startDate" render={({ field }) => (
-                          <FormItem><FormLabel>Startdatum</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("contractFields.startDate")}</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={contractForm.control} name="endDate" render={({ field }) => (
-                          <FormItem><FormLabel>Einddatum</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("contractFields.endDate")}</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={contractForm.control} name="noticePeriodDays" render={({ field }) => (
-                          <FormItem><FormLabel>Opzegtermijn (dagen)</FormLabel><FormControl><Input type="number" {...field} value={(field.value as any) ?? 90} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("contractFields.noticePeriod")}</FormLabel><FormControl><Input type="number" {...field} value={(field.value as any) ?? 90} /></FormControl><FormMessage /></FormItem>
                         )} />
                       </div>
                       <FormField control={contractForm.control} name="description" render={({ field }) => (
-                        <FormItem><FormLabel>Omschrijving (optioneel)</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>{t("contractFields.description")}</FormLabel><FormControl><Textarea rows={2} {...field} /></FormControl><FormMessage /></FormItem>
                       )} />
                       <DialogFooter>
-                        <Button type="button" variant="ghost" onClick={() => setContractDialogOpen(false)}>Annuleren</Button>
+                        <Button type="button" variant="ghost" onClick={() => setContractDialogOpen(false)}>{t("common.cancel", { ns: "common" })}</Button>
                         <Button type="submit" disabled={createContract.isPending}>
-                          {createContract.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Opslaan
+                          {createContract.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("common.save", { ns: "common" })}
                         </Button>
                       </DialogFooter>
                     </form>
@@ -608,7 +619,7 @@ export default function ContractenPage() {
           ) : !contracts?.length ? (
             <div className="text-center py-24 bg-card rounded-lg border border-dashed flex flex-col items-center">
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">Geen contracten</h3>
+              <h3 className="text-lg font-medium">{t("contracts.empty")}</h3>
             </div>
           ) : (
             <div className="space-y-3">
@@ -621,24 +632,24 @@ export default function ContractenPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex flex-wrap items-center gap-2 mb-1">
                             <span className="font-semibold">{c.name}</span>
-                            <Badge variant="secondary" className={cn("capitalize border-transparent text-xs", contractStatusBadge(c.status))}>{c.status}</Badge>
-                            <span className="text-xs text-muted-foreground capitalize">{c.category}</span>
+                            <Badge variant="secondary" className={cn("border-transparent text-xs", contractStatusBadge(c.status))}>{t(`status.${c.status}`, { defaultValue: c.status })}</Badge>
+                            <span className="text-xs text-muted-foreground">{t(`category.${c.category}`, { defaultValue: c.category })}</span>
                           </div>
                           <div className="text-sm text-muted-foreground">
                             {c.supplierName} · {nlDate(c.startDate)} — {nlDate(c.endDate)}
-                            {c.annualValue != null && ` · ${eur(c.annualValue)}/jaar`}
+                            {c.annualValue != null && ` · ${t("contracts.perYear", { value: eur(c.annualValue) })}`}
                           </div>
                           {c.status === "actief" && (
                             <div className={cn("text-xs mt-1", c.expiringSoon ? "text-amber-700 font-medium" : "text-muted-foreground")}>
                               {c.expiringSoon && <AlertTriangle className="inline h-3 w-3 mr-1" />}
-                              nog {c.daysUntilEnd} dagen{c.expiringSoon ? ` (opzegtermijn ${c.noticePeriodDays} dgn)` : ""}
+                              {t("contracts.daysRemaining", { count: c.daysUntilEnd })}{c.expiringSoon ? t("contracts.noticeSuffix", { days: c.noticePeriodDays }) : ""}
                             </div>
                           )}
                         </div>
                         <div className="flex gap-2 items-center shrink-0">
                           {isManager && c.status === "actief" && (
                             <Button variant="outline" size="sm" onClick={() => terminate(c.id)} disabled={updateContract.isPending}>
-                              Opzeggen
+                              {t("contracts.terminate")}
                             </Button>
                           )}
                           <Button
@@ -673,26 +684,26 @@ export default function ContractenPage() {
             <div className="flex justify-end">
               <Dialog open={supplierDialogOpen} onOpenChange={setSupplierDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button><Plus className="mr-2 h-4 w-4" />Leverancier toevoegen</Button>
+                  <Button><Plus className="mr-2 h-4 w-4" />{t("suppliers.add")}</Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Nieuwe leverancier</DialogTitle>
-                    <DialogDescription>Registreer een leverancier in het register.</DialogDescription>
+                    <DialogTitle>{t("suppliers.newTitle")}</DialogTitle>
+                    <DialogDescription>{t("suppliers.newDescription")}</DialogDescription>
                   </DialogHeader>
                   <Form {...supplierForm}>
                     <form onSubmit={supplierForm.handleSubmit(onSubmitSupplier)} className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={supplierForm.control} name="name" render={({ field }) => (
-                          <FormItem><FormLabel>Bedrijfsnaam</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("supplierFields.name")}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={supplierForm.control} name="category" render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Categorie</FormLabel>
+                            <FormLabel>{t("supplierFields.category")}</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl><SelectTrigger><SelectValue placeholder="Kies categorie" /></SelectTrigger></FormControl>
+                              <FormControl><SelectTrigger><SelectValue placeholder={t("supplierFields.categoryPlaceholder")} /></SelectTrigger></FormControl>
                               <SelectContent>
-                                {SUPPLIER_CATEGORIES.map((c) => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}
+                                {SUPPLIER_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{t(`category.${c}`)}</SelectItem>)}
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -701,24 +712,24 @@ export default function ContractenPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={supplierForm.control} name="contactName" render={({ field }) => (
-                          <FormItem><FormLabel>Contactpersoon</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("supplierFields.contactName")}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={supplierForm.control} name="kvkNumber" render={({ field }) => (
-                          <FormItem><FormLabel>KvK-nummer</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("supplierFields.kvkNumber")}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <FormField control={supplierForm.control} name="email" render={({ field }) => (
-                          <FormItem><FormLabel>E-mail</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("supplierFields.email")}</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={supplierForm.control} name="phone" render={({ field }) => (
-                          <FormItem><FormLabel>Telefoon</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                          <FormItem><FormLabel>{t("supplierFields.phone")}</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                       </div>
                       <DialogFooter>
-                        <Button type="button" variant="ghost" onClick={() => setSupplierDialogOpen(false)}>Annuleren</Button>
+                        <Button type="button" variant="ghost" onClick={() => setSupplierDialogOpen(false)}>{t("common.cancel", { ns: "common" })}</Button>
                         <Button type="submit" disabled={createSupplier.isPending}>
-                          {createSupplier.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Opslaan
+                          {createSupplier.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("common.save", { ns: "common" })}
                         </Button>
                       </DialogFooter>
                     </form>
@@ -735,7 +746,7 @@ export default function ContractenPage() {
                       <CardTitle className="text-base flex items-center gap-2">
                         <Building className="h-4 w-4 text-primary" />{s.name}
                       </CardTitle>
-                      <Badge variant="secondary" className="capitalize">{s.category}</Badge>
+                      <Badge variant="secondary">{t(`category.${s.category}`, { defaultValue: s.category })}</Badge>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-1.5 text-sm text-muted-foreground">
@@ -743,8 +754,8 @@ export default function ContractenPage() {
                     {s.email && <div className="flex items-center gap-2"><Mail className="h-3.5 w-3.5" />{s.email}</div>}
                     {s.phone && <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5" />{s.phone}</div>}
                     <div className="pt-1 flex items-center justify-between">
-                      <span className="text-xs">{s.contractCount} {s.contractCount === 1 ? "contract" : "contracten"}</span>
-                      {s.userName && <Badge variant="outline" className="text-xs">Portaal: {s.userName}</Badge>}
+                      <span className="text-xs">{t("suppliers.contractCount", { count: s.contractCount })}</span>
+                      {s.userName && <Badge variant="outline" className="text-xs">{t("suppliers.portal", { name: s.userName })}</Badge>}
                     </div>
                     <SupplierReviewsPanel supplierId={s.id} isManager={isManager} />
                   </CardContent>

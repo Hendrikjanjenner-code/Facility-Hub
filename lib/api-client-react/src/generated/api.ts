@@ -49,6 +49,7 @@ import type {
   FloorPlan,
   GetCateringDailySummaryParams,
   GetSustainabilityReportParams,
+  GuestLoginInput,
   HealthStatus,
   ImportResult,
   JaarplanningEntry,
@@ -306,6 +307,77 @@ export const useLogin = <TError = ErrorType<ApiMessage>,
         TContext
       > => {
       return useMutation(getLoginMutationOptions(options));
+    }
+
+export const getGuestLoginUrl = () => {
+
+
+
+
+  return `/api/auth/guest-login`
+}
+
+/**
+ * @summary Log in as a read-only guest with the shared guest password
+ */
+export const guestLogin = async (guestLoginInput: GuestLoginInput, options?: Parameters<typeof customFetch>[1]): Promise<User> => {
+
+  return customFetch<User>(getGuestLoginUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(guestLoginInput)
+  }
+);}
+
+
+
+
+
+export const getGuestLoginMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof guestLogin>>, TError,{data: BodyType<GuestLoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof guestLogin>>, TError,{data: BodyType<GuestLoginInput>}, TContext> => {
+
+const mutationKey = ['guestLogin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof guestLogin>>, {data: BodyType<GuestLoginInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  guestLogin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GuestLoginMutationResult = NonNullable<Awaited<ReturnType<typeof guestLogin>>>
+    export type GuestLoginMutationBody = BodyType<GuestLoginInput>
+    export type GuestLoginMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Log in as a read-only guest with the shared guest password
+ */
+export const useGuestLogin = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof guestLogin>>, TError,{data: BodyType<GuestLoginInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof guestLogin>>,
+        TError,
+        {data: BodyType<GuestLoginInput>},
+        TContext
+      > => {
+      return useMutation(getGuestLoginMutationOptions(options));
     }
 
 export const getLogoutUrl = () => {

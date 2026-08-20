@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { db, usersTable } from "@workspace/db";
-import { eq, asc } from "drizzle-orm";
+import { eq, ne, asc } from "drizzle-orm";
 import { LoginBody } from "@workspace/api-zod";
 import {
   SESSION_COOKIE,
@@ -10,7 +10,8 @@ import {
   requireRole,
   toPublicUser,
 } from "../lib/auth";
-import { verifyPassword } from "../lib/password";
+import { verifyPassword, hashPassword } from "../lib/password";
+import { timingSafeEqual, randomBytes } from "node:crypto";
 
 const isProduction = process.env.NODE_ENV === "production";
 // One-click demo accounts are a development/demo feature; in production they
@@ -70,12 +71,88 @@ router.post("/auth/login", loginLimiter, async (req, res): Promise<void> => {
     secure: isProduction,
     maxAge: 1000 * 60 * 60 * 24 * 7,
   });
+  // Een eerdere gastsessie mag een normale login nooit alleen-lezen houden.
+  res.clearCookie(GUEST_COOKIE);
   res.json(toPublicUser(user));
 });
 
 router.post("/auth/logout", (_req, res): void => {
   res.clearCookie(SESSION_COOKIE);
+  res.clearCookie(GUEST_COOKIE);
   res.json({ message: "Uitgelogd" });
+});
+
+// ── Gasttoegang (alleen-lezen) ────────────────────────────────────────────────
+// Een gedeeld gastwachtwoord geeft toegang tot een alleen-lezen gastaccount.
+// Schrijfacties worden geblokkeerd door de guestReadOnly-middleware in app.ts.
+
+export const GUEST_COOKIE = "gc_guest";
+export const GUEST_EMAIL = "gast@letshare4gov.nl";
+
+// In productie is een expliciet geconfigureerd gastwachtwoord verplicht;
+// zonder GUEST_ACCESS_PASSWORD blijft gasttoegang daar uitgeschakeld.
+const GUEST_PASSWORD =
+  process.env["GUEST_ACCESS_PASSWORD"] ?? (isProduction ? null : "LetShare4gov");
+
+const guestLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 10,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  keyGenerator: (req) => ipKeyGenerator(req.ip ?? ""),
+  skipSuccessfulRequests: true,
+  message: { message: "Te veel pogingen. Probeer het later opnieuw." },
+});
+
+function safeEqual(a: string, b: string): boolean {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ba.length !== bb.length) {
+    // Compare against self to keep timing uniform, then fail.
+    timingSafeEqual(ba, ba);
+    return false;
+  }
+  return timingSafeEqual(ba, bb);
+}
+
+router.post("/auth/guest-login", guestLoginLimiter, async (req, res): Promise<void> => {
+  if (!GUEST_PASSWORD) {
+    res.status(403).json({ message: "Gasttoegang is niet geconfigureerd" });
+    return;
+  }
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  if (!password || !safeEqual(password, GUEST_PASSWORD)) {
+    res.status(401).json({ message: "Ongeldig wachtwoord" });
+    return;
+  }
+  let [guest] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.email, GUEST_EMAIL));
+  if (!guest) {
+    // Onbruikbaar willekeurig wachtwoord: inloggen via het normale formulier kan niet.
+    [guest] = await db
+      .insert(usersTable)
+      .values({
+        email: GUEST_EMAIL,
+        password: hashPassword(randomBytes(32).toString("hex")),
+        name: "Gast",
+        role: "eindgebruiker",
+        department: "Gasttoegang",
+        avatarColor: "#64748b",
+      })
+      .returning();
+  }
+  const cookieOpts = {
+    signed: true,
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: isProduction,
+    maxAge: 1000 * 60 * 60 * 24,
+  };
+  res.cookie(SESSION_COOKIE, String(guest!.id), cookieOpts);
+  res.cookie(GUEST_COOKIE, "1", cookieOpts);
+  res.json(toPublicUser(guest!));
 });
 
 router.get("/auth/me", async (req, res): Promise<void> => {
@@ -99,6 +176,7 @@ router.get("/auth/demo-accounts", async (_req, res): Promise<void> => {
       role: usersTable.role,
     })
     .from(usersTable)
+    .where(ne(usersTable.email, GUEST_EMAIL))
     .orderBy(asc(usersTable.name));
   const seen = new Set<string>();
   const accounts: { id: number; name: string; role: string; roleLabel: string }[] = [];

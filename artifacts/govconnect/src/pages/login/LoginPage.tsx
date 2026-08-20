@@ -9,6 +9,8 @@ import {
   useGetCurrentUser 
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { Link } from "wouter";
 import { Building2, ArrowRight, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -23,15 +25,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 
-const loginSchema = z.object({
-  email: z.string().email("Ongeldig e-mailadres"),
-  password: z.string().min(1, "Wachtwoord is verplicht"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues = { email: string; password: string };
 
 export default function LoginPage() {
+  const { t } = useTranslation();
+  const loginSchema = z.object({
+    email: z.string().email(t("login.emailInvalid")),
+    password: z.string().min(1, t("login.passwordRequired")),
+  });
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { data: user, isLoading: isLoadingUser } = useGetCurrentUser();
@@ -75,31 +78,34 @@ export default function LoginPage() {
         <div>
           <div className="flex items-center gap-2 font-bold text-2xl mb-12">
             <Building2 className="h-8 w-8" />
-            <span>GovConnect 2.0</span>
+            <span>{t("brand")}</span>
           </div>
           <h1 className="text-4xl font-bold leading-tight max-w-md mb-6">
-            De dagelijkse cockpit voor facilitair Nederland.
+            {t("login.tagline")}
           </h1>
           <p className="text-primary-foreground/80 text-lg max-w-md">
-            Snel, overzichtelijk en betrouwbaar. Ontworpen voor overheidsorganisaties om meldingen, reserveringen en vastgoed moeiteloos te beheren.
+            {t("login.taglineSub")}
           </p>
         </div>
         <div className="text-sm text-primary-foreground/60">
-          &copy; {new Date().getFullYear()} GovConnect. Alle rechten voorbehouden.
+          &copy; {new Date().getFullYear()} LetShare4gov. {t("login.copyright")}
         </div>
       </div>
       
-      <div className="flex flex-col justify-center p-8 md:p-12 lg:p-24 bg-background">
+      <div className="relative flex flex-col justify-center p-8 md:p-12 lg:p-24 bg-background">
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+          <LanguageSwitcher variant="outline" />
+        </div>
         <div className="md:hidden flex items-center gap-2 font-bold text-2xl text-primary mb-8">
           <Building2 className="h-8 w-8" />
-          <span>GovConnect</span>
+          <span>{t("brand")}</span>
         </div>
 
         <div className="mx-auto w-full max-w-md space-y-8">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold tracking-tight">Inloggen</h2>
+            <h2 className="text-3xl font-bold tracking-tight">{t("login.title")}</h2>
             <p className="text-muted-foreground">
-              Voer uw inloggegevens in om toegang te krijgen tot uw dashboard.
+              {t("login.subtitle")}
             </p>
           </div>
 
@@ -110,9 +116,9 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>E-mailadres</FormLabel>
+                    <FormLabel>{t("login.email")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="naam@organisatie.nl" {...field} />
+                      <Input placeholder={t("login.emailPlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,7 +129,7 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Wachtwoord</FormLabel>
+                    <FormLabel>{t("login.password")}</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••••" {...field} />
                     </FormControl>
@@ -134,7 +140,7 @@ export default function LoginPage() {
 
               {loginMutation.isError && (
                 <div className="p-3 text-sm text-destructive bg-destructive/10 rounded-md border border-destructive/20">
-                  {loginMutation.error?.message || "Inloggen mislukt. Controleer uw gegevens."}
+                  {loginMutation.error?.message || t("login.failed")}
                 </div>
               )}
 
@@ -142,10 +148,16 @@ export default function LoginPage() {
                 {loginMutation.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : null}
-                Inloggen
+                {t("login.submit")}
               </Button>
             </form>
           </Form>
+
+          <p className="text-sm text-center text-muted-foreground">
+            <Link href="/gast" className="underline underline-offset-4 hover:text-primary">
+              {t("login.guestLink")}
+            </Link>
+          </p>
 
           {demoAccounts && demoAccounts.length > 0 && (
             <div className="mt-12 space-y-4">
@@ -155,7 +167,7 @@ export default function LoginPage() {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">
-                    Demo accounts (1-klik login)
+                    {t("login.demo")}
                   </span>
                 </div>
               </div>

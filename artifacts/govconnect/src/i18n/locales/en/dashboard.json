@@ -1,0 +1,41 @@
+{
+  "title": "Overview",
+  "welcome": "Welcome back, {{name}}",
+  "subtitle": "Here is your facility overview for today.",
+  "newTicket": "New ticket",
+  "stats": {
+    "myOpenTickets": "My open tickets",
+    "openTickets": "Open tickets",
+    "inProgress": "Currently in progress",
+    "slaAtRisk": "SLA at risk",
+    "slaAtRiskDesc": "Within 4 hours or overdue",
+    "myReservations": "My reservations",
+    "reservationsToday": "Reservations today",
+    "roomsAndCatering": "Rooms & catering",
+    "workplaceBookings": "Workplace bookings",
+    "forToday": "For today",
+    "visitors": "Visitors",
+    "presentExpected": "Present / Expected",
+    "totalAssets": "Total assets",
+    "registeredInSystem": "Registered in the system",
+    "poorCondition": "Components in poor condition",
+    "poorConditionDesc": "Score ≥ 4 (fair to very poor)"
+  },
+  "charts": {
+    "ticketsByStatus": "Tickets by status",
+    "ticketsByStatusDesc": "Overview of all active tickets",
+    "priorityDistribution": "Priority distribution",
+    "priorityDistributionDesc": "Open tickets"
+  },
+  "satisfaction": {
+    "title": "Customer satisfaction",
+    "average": "Average {{score}}/5 — ",
+    "summary": "{{responses}} of {{closed}} closed tickets rated ({{rate}}% response rate)",
+    "noRatings": "No ratings received yet.",
+    "lowestResponseRate": "Lowest response rate by category"
+  },
+  "activity": {
+    "title": "Recent activity",
+    "empty": "No recent activity"
+  }
+}

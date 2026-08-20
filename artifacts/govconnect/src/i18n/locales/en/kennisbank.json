@@ -1,0 +1,53 @@
+{
+  "title": "Knowledge base",
+  "subtitle": "Answers to frequently asked facility questions.",
+  "newArticle": "New article",
+  "searchPlaceholder": "Search the knowledge base...",
+  "all": "All",
+  "noLinkedCategories": "No ticket categories linked",
+  "edit": "Edit",
+  "delete": "Delete",
+  "emptyTitle": "No articles found",
+  "emptyNoResults": "No results for \"{{query}}\"",
+  "emptyNone": "No knowledge base articles have been created yet.",
+  "deleteDialog": {
+    "title": "Delete article",
+    "confirm": "Are you sure you want to permanently delete <0>\"{{title}}\"</0>? This cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete"
+  },
+  "form": {
+    "editTitle": "Edit article",
+    "newTitle": "New knowledge base article",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Short, clear title",
+    "categoryLabel": "Category",
+    "bodyLabel": "Content",
+    "bodyPlaceholder": "Provide a clear explanation or step-by-step instructions...",
+    "tagsLabel": "Tags (comma separated)",
+    "tagsPlaceholder": "e.g. heating, fault, climate",
+    "linkLabel": "Link to ticket categories",
+    "linkHelp": "This article automatically appears as a suggestion when a reporter chooses one of these categories.",
+    "cancel": "Cancel",
+    "save": "Save"
+  },
+  "toast": {
+    "deleted": "Article deleted",
+    "deleteError": "Could not delete article.",
+    "updated": "Article updated",
+    "updateError": "Could not update article.",
+    "created": "Article created",
+    "createError": "Could not create article.",
+    "errorTitle": "Error"
+  },
+  "categories": {
+    "algemeen": "General",
+    "klimaat": "Climate",
+    "schoonmaak": "Cleaning",
+    "technisch": "Technical",
+    "sanitair": "Sanitary",
+    "veiligheid": "Safety",
+    "reserveringen": "Reservations",
+    "catering": "Catering"
+  }
+}

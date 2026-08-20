@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useListKnowledgeArticles, useCreateKnowledgeArticle, useUpdateKnowledgeArticle, useDeleteKnowledgeArticle, useGetCurrentUser, useListTicketCategories, getListKnowledgeArticlesQueryKey, KnowledgeArticle, TicketCategory } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation, Trans } from "react-i18next";
 import { BookOpen, Search, Plus, Tag, ChevronDown, ChevronUp, Loader2, Pencil, Bell, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ function ArticleCard({
   onDelete: (article: KnowledgeArticle) => void;
   ticketCategories: TicketCategory[];
 }) {
+  const { t } = useTranslation("kennisbank");
   const [expanded, setExpanded] = useState(false);
 
   const linkedCategories = ticketCategories.filter((tc) =>
@@ -57,7 +59,7 @@ function ArticleCard({
             <CardTitle className="text-base leading-snug">{article.title}</CardTitle>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <Badge variant="secondary" className="capitalize text-[11px] h-4 px-1.5">
-                {article.category}
+                {t(`categories.${article.category}`, { defaultValue: article.category })}
               </Badge>
               {article.tags.slice(0, 3).map((tag) => (
                 <span key={tag} className="text-[10px] text-muted-foreground flex items-center gap-0.5">
@@ -82,7 +84,7 @@ function ArticleCard({
                 </>
               ) : (
                 <span className="text-[10px] text-muted-foreground/60 italic">
-                  Geen meldingscategorieën gekoppeld
+                  {t("noLinkedCategories")}
                 </span>
               )}
             </div>
@@ -95,7 +97,7 @@ function ArticleCard({
                   size="icon"
                   className="h-7 w-7"
                   onClick={(e) => { e.stopPropagation(); onEdit(article); }}
-                  title="Bewerken"
+                  title={t("edit")}
                 >
                   <Pencil className="h-3.5 w-3.5" />
                 </Button>
@@ -104,7 +106,7 @@ function ArticleCard({
                   size="icon"
                   className="h-7 w-7 text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={(e) => { e.stopPropagation(); onDelete(article); }}
-                  title="Verwijderen"
+                  title={t("delete")}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -136,6 +138,7 @@ function DeleteConfirmDialog({
   open: boolean;
   onOpenChange: (o: boolean) => void;
 }) {
+  const { t } = useTranslation("kennisbank");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const deleteArticle = useDeleteKnowledgeArticle();
@@ -145,11 +148,11 @@ function DeleteConfirmDialog({
       { id: article.id },
       {
         onSuccess: () => {
-          toast({ title: "Artikel verwijderd" });
+          toast({ title: t("toast.deleted") });
           queryClient.invalidateQueries({ queryKey: ["/api/knowledge-articles"] });
           onOpenChange(false);
         },
-        onError: () => toast({ variant: "destructive", title: "Fout", description: "Kon artikel niet verwijderen." }),
+        onError: () => toast({ variant: "destructive", title: t("toast.errorTitle"), description: t("toast.deleteError") }),
       },
     );
   };
@@ -158,18 +161,18 @@ function DeleteConfirmDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Artikel verwijderen</DialogTitle>
+          <DialogTitle>{t("deleteDialog.title")}</DialogTitle>
           <DialogDescription>
-            Weet je zeker dat je <strong>"{article.title}"</strong> permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.
+            <Trans i18nKey="deleteDialog.confirm" ns="kennisbank" values={{ title: article.title }} components={[<strong key="0" />]} />
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={deleteArticle.isPending}>
-            Annuleren
+            {t("deleteDialog.cancel")}
           </Button>
           <Button variant="destructive" onClick={handleConfirm} disabled={deleteArticle.isPending}>
             {deleteArticle.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Verwijderen
+            {t("deleteDialog.delete")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -187,6 +190,7 @@ function ArticleFormDialog({
   article?: KnowledgeArticle;
 }) {
   const isEdit = !!article;
+  const { t } = useTranslation("kennisbank");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const create = useCreateKnowledgeArticle();
@@ -219,11 +223,11 @@ function ArticleFormDialog({
         { id: article.id, data: payload },
         {
           onSuccess: () => {
-            toast({ title: "Artikel bijgewerkt" });
+            toast({ title: t("toast.updated") });
             queryClient.invalidateQueries({ queryKey: ["/api/knowledge-articles"] });
             onOpenChange(false);
           },
-          onError: () => toast({ variant: "destructive", title: "Fout", description: "Kon artikel niet bijwerken." }),
+          onError: () => toast({ variant: "destructive", title: t("toast.errorTitle"), description: t("toast.updateError") }),
         },
       );
     } else {
@@ -231,11 +235,11 @@ function ArticleFormDialog({
         { data: payload },
         {
           onSuccess: () => {
-            toast({ title: "Artikel aangemaakt" });
+            toast({ title: t("toast.created") });
             queryClient.invalidateQueries({ queryKey: ["/api/knowledge-articles"] });
             onOpenChange(false);
           },
-          onError: () => toast({ variant: "destructive", title: "Fout", description: "Kon artikel niet aanmaken." }),
+          onError: () => toast({ variant: "destructive", title: t("toast.errorTitle"), description: t("toast.createError") }),
         },
       );
     }
@@ -245,43 +249,43 @@ function ArticleFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Artikel bewerken" : "Nieuw kennisbankartikel"}</DialogTitle>
+          <DialogTitle>{isEdit ? t("form.editTitle") : t("form.newTitle")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Titel</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Korte, duidelijke titel" />
+            <Label>{t("form.titleLabel")}</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("form.titlePlaceholder")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Categorie</Label>
+            <Label>{t("form.categoryLabel")}</Label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               {CATEGORIES.map((c) => (
-                <option key={c} value={c} className="capitalize">{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                <option key={c} value={c} className="capitalize">{t(`categories.${c}`, { defaultValue: c })}</option>
               ))}
             </select>
           </div>
           <div className="space-y-1.5">
-            <Label>Inhoud</Label>
+            <Label>{t("form.bodyLabel")}</Label>
             <Textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
-              placeholder="Geef een duidelijke uitleg of stap-voor-stap instructie..."
+              placeholder={t("form.bodyPlaceholder")}
               className="min-h-[140px]"
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Tags (komma gescheiden)</Label>
-            <Input value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} placeholder="bijv. verwarming, storing, klimaat" />
+            <Label>{t("form.tagsLabel")}</Label>
+            <Input value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} placeholder={t("form.tagsPlaceholder")} />
           </div>
           {ticketCategories && ticketCategories.length > 0 && (
             <div className="space-y-1.5">
-              <Label>Koppel aan meldingscategorieën</Label>
+              <Label>{t("form.linkLabel")}</Label>
               <p className="text-xs text-muted-foreground">
-                Dit artikel verschijnt automatisch als suggestie wanneer een melder een van deze categorieën kiest.
+                {t("form.linkHelp")}
               </p>
               <div className="rounded-md border p-3 space-y-2 max-h-40 overflow-y-auto">
                 {ticketCategories.map((tc) => (
@@ -298,10 +302,10 @@ function ArticleFormDialog({
           )}
         </div>
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>Annuleren</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>{t("form.cancel")}</Button>
           <Button onClick={handleSubmit} disabled={isPending || !title.trim() || !body.trim()}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Opslaan
+            {t("form.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -310,6 +314,7 @@ function ArticleFormDialog({
 }
 
 export default function KennisbankPage() {
+  const { t } = useTranslation("kennisbank");
   const { data: user } = useGetCurrentUser();
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -330,13 +335,13 @@ export default function KennisbankPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Kennisbank</h1>
-          <p className="text-muted-foreground">Antwoorden op veelgestelde facilitaire vragen.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         {canCreate && (
           <Button onClick={() => setNewDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Nieuw artikel
+            {t("newArticle")}
           </Button>
         )}
       </div>
@@ -347,7 +352,7 @@ export default function KennisbankPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             className="pl-9"
-            placeholder="Zoek in kennisbank..."
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -358,7 +363,7 @@ export default function KennisbankPage() {
             size="sm"
             onClick={() => setSelectedCategory("")}
           >
-            Alles
+            {t("all")}
           </Button>
           {CATEGORIES.map((c) => (
             <Button
@@ -368,7 +373,7 @@ export default function KennisbankPage() {
               className="capitalize"
               onClick={() => setSelectedCategory(c === selectedCategory ? "" : c)}
             >
-              {c}
+              {t(`categories.${c}`, { defaultValue: c })}
             </Button>
           ))}
         </div>
@@ -382,9 +387,9 @@ export default function KennisbankPage() {
       ) : !articles?.length ? (
         <div className="text-center py-24 bg-card rounded-lg border border-dashed flex flex-col items-center justify-center">
           <BookOpen className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">Geen artikelen gevonden</h3>
+          <h3 className="text-lg font-medium">{t("emptyTitle")}</h3>
           <p className="text-sm text-muted-foreground">
-            {search ? `Geen resultaten voor "${search}"` : "Er zijn nog geen kennisbankar artikelen aangemaakt."}
+            {search ? t("emptyNoResults", { query: search }) : t("emptyNone")}
           </p>
         </div>
       ) : (

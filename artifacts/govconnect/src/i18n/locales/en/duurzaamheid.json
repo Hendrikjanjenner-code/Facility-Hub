@@ -1,0 +1,133 @@
+{
+  "title": "Sustainability",
+  "subtitle": "Electricity, gas and water usage plus waste registration and reports.",
+  "importCsv": "Import CSV",
+  "meterType": {
+    "elektriciteit": "Electricity",
+    "gas": "Gas",
+    "water": "Water"
+  },
+  "wasteCategory": {
+    "restafval": "Residual waste",
+    "papier": "Paper",
+    "gft": "Organic waste",
+    "plastic": "Plastic",
+    "glas": "Glass",
+    "chemisch": "Chemical"
+  },
+  "tabs": {
+    "report": "Report",
+    "meters": "Meter readings",
+    "waste": "Waste registration"
+  },
+  "filter": {
+    "label": "Filter by",
+    "building": "Building",
+    "allBuildings": "All buildings",
+    "from": "From",
+    "to": "Up to and including",
+    "clear": "Clear filters",
+    "exportCsv": "Export CSV",
+    "exportEmptyTitle": "No data to export for the selected filters",
+    "quarter": "Quarter:",
+    "badgeBuilding": "Building: {{value}}",
+    "badgeFrom": "From: {{value}}",
+    "badgeTo": "To: {{value}}"
+  },
+  "empty": {
+    "title": "No data for this building and period",
+    "hintPrefix": "Adjust the filters or ",
+    "hintLink": "clear all filters",
+    "hintSuffix": " to show all available data."
+  },
+  "charts": {
+    "monthlyUsage": "Monthly usage",
+    "monthlyUsageDescription": "Electricity (kWh), gas and water (m³) — all buildings",
+    "electricity": "Electricity (kWh)",
+    "gas": "Gas (m³)",
+    "water": "Water (m³)",
+    "wasteByCategory": "Waste by category",
+    "wasteByCategoryDescription": "Total registered weight (kg)",
+    "wasteByMonth": "Waste by month",
+    "wasteByMonthDescription": "Weight per category per month (kg)"
+  },
+  "meters": {
+    "csvFormat": "CSV format:",
+    "csvExample": "— e.g.",
+    "addReading": "Enter meter reading",
+    "registerTitle": "Register meter reading",
+    "registerDescription": "Enter the cumulative meter reading.",
+    "building": "Building",
+    "buildingPlaceholder": "Choose building",
+    "type": "Meter type",
+    "typePlaceholder": "Choose type",
+    "date": "Date",
+    "reading": "Reading",
+    "readingWithUnit": "Reading ({{unit}})",
+    "correctTitle": "Correct meter reading",
+    "deleteTitle": "Delete meter reading?",
+    "deleteBody": "The reading of {{value}} {{unit}} on {{date}} for {{building}} will be permanently deleted. Usage calculations will be recalculated immediately.",
+    "table": {
+      "date": "Date",
+      "building": "Building",
+      "type": "Type",
+      "reading": "Reading",
+      "source": "Source",
+      "registeredBy": "Registered by"
+    },
+    "source": {
+      "csvImport": "CSV import",
+      "manual": "Manual"
+    }
+  },
+  "waste": {
+    "add": "Register waste",
+    "title": "Waste registration",
+    "description": "Register collected waste per category.",
+    "building": "Building",
+    "buildingPlaceholder": "Choose building",
+    "category": "Category",
+    "categoryPlaceholder": "Choose category",
+    "date": "Date",
+    "weight": "Weight (kg)",
+    "correctTitle": "Correct waste registration",
+    "deleteTitle": "Delete waste registration?",
+    "deleteBody": "{{weight}} kg {{category}} on {{date}} for {{building}} will be permanently deleted. Reports and exports will be recalculated immediately.",
+    "table": {
+      "date": "Date",
+      "building": "Building",
+      "category": "Category",
+      "weight": "Weight",
+      "registeredBy": "Registered by"
+    }
+  },
+  "actions": {
+    "correct": "Correct",
+    "delete": "Delete"
+  },
+  "validation": {
+    "buildingRequired": "Choose a building",
+    "meterTypeRequired": "Choose a meter type",
+    "dateRequired": "Date is required",
+    "readingRequired": "Reading is required",
+    "categoryRequired": "Choose a category",
+    "weightRequired": "Weight is required"
+  },
+  "toast": {
+    "invalidCsvTitle": "Invalid CSV format",
+    "invalidCsvDescription": "Expected columns: gebouw;type;datum;stand (date as YYYY-MM-DD).",
+    "noValidRows": "No valid rows found in the CSV file",
+    "importDone": "CSV import completed",
+    "importUnmatched": "{{message}} ({{count}} rows not recognised)",
+    "importFailed": "Import failed",
+    "wasteCorrected": "Waste registration corrected",
+    "correctFailed": "Correction failed",
+    "wasteDeleted": "Waste registration deleted",
+    "deleteFailed": "Deletion failed",
+    "readingCorrected": "Meter reading corrected",
+    "readingDeleted": "Meter reading deleted",
+    "readingRegistered": "Meter reading registered",
+    "saveFailed": "Saving failed",
+    "wasteSaved": "Waste registration saved"
+  }
+}

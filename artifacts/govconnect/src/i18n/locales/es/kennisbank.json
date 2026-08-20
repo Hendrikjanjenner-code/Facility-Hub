@@ -1,0 +1,53 @@
+{
+  "title": "Base de conocimiento",
+  "subtitle": "Respuestas a preguntas frecuentes sobre instalaciones.",
+  "newArticle": "Nuevo artículo",
+  "searchPlaceholder": "Buscar en la base de conocimiento...",
+  "all": "Todo",
+  "noLinkedCategories": "Ninguna categoría de tickets vinculada",
+  "edit": "Editar",
+  "delete": "Eliminar",
+  "emptyTitle": "No se encontraron artículos",
+  "emptyNoResults": "Sin resultados para \"{{query}}\"",
+  "emptyNone": "Aún no se han creado artículos en la base de conocimiento.",
+  "deleteDialog": {
+    "title": "Eliminar artículo",
+    "confirm": "¿Seguro que desea eliminar permanentemente <0>\"{{title}}\"</0>? Esta acción no se puede deshacer.",
+    "cancel": "Cancelar",
+    "delete": "Eliminar"
+  },
+  "form": {
+    "editTitle": "Editar artículo",
+    "newTitle": "Nuevo artículo de la base de conocimiento",
+    "titleLabel": "Título",
+    "titlePlaceholder": "Título breve y claro",
+    "categoryLabel": "Categoría",
+    "bodyLabel": "Contenido",
+    "bodyPlaceholder": "Proporcione una explicación clara o instrucciones paso a paso...",
+    "tagsLabel": "Etiquetas (separadas por comas)",
+    "tagsPlaceholder": "p. ej. calefacción, avería, clima",
+    "linkLabel": "Vincular a categorías de tickets",
+    "linkHelp": "Este artículo aparece automáticamente como sugerencia cuando el informante elige una de estas categorías.",
+    "cancel": "Cancelar",
+    "save": "Guardar"
+  },
+  "toast": {
+    "deleted": "Artículo eliminado",
+    "deleteError": "No se pudo eliminar el artículo.",
+    "updated": "Artículo actualizado",
+    "updateError": "No se pudo actualizar el artículo.",
+    "created": "Artículo creado",
+    "createError": "No se pudo crear el artículo.",
+    "errorTitle": "Error"
+  },
+  "categories": {
+    "algemeen": "General",
+    "klimaat": "Climatización",
+    "schoonmaak": "Limpieza",
+    "technisch": "Técnico",
+    "sanitair": "Sanitario",
+    "veiligheid": "Seguridad",
+    "reserveringen": "Reservas",
+    "catering": "Catering"
+  }
+}

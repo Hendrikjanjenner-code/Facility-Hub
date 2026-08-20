@@ -1,0 +1,145 @@
+{
+  "title": "Key and pass management",
+  "subtitle": "Register, key plan, issuance and loss procedure.",
+  "newKey": "New key or pass",
+  "stats": {
+    "inRegister": "In register",
+    "issued": "Issued",
+    "overdue": "Returned late"
+  },
+  "searchPlaceholder": "Search by code, description or holder...",
+  "filters": {
+    "allTypes": "All types",
+    "keys": "Keys",
+    "passes": "Passes",
+    "allStatuses": "All statuses",
+    "overdueBadge": "Late"
+  },
+  "type": {
+    "sleutel": "Key",
+    "pas": "Pass"
+  },
+  "status": {
+    "beschikbaar": "Available",
+    "uitgegeven": "Issued",
+    "vermist": "Lost",
+    "geblokkeerd": "Blocked"
+  },
+  "table": {
+    "code": "Code",
+    "type": "Type",
+    "description": "Description",
+    "building": "Building",
+    "doors": "Doors",
+    "status": "Status",
+    "currentHolder": "Current holder",
+    "dueBy": "Return by",
+    "empty": "No keys found.",
+    "overdue": "late"
+  },
+  "newDialog": {
+    "title": "Register new key or pass",
+    "description": "Add a key or access pass to the register.",
+    "code": "Code",
+    "codePlaceholder": "e.g. SL-005",
+    "type": "Type",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "e.g. Archive room key",
+    "building": "Building",
+    "none": "None / N/A",
+    "replacementCost": "Replacement cost (€)",
+    "add": "Add"
+  },
+  "toast": {
+    "codeDescRequired": "Enter a code and description",
+    "added": "Key added",
+    "addFailed": "Failed to add"
+  },
+  "detail": {
+    "notFound": "Key not found.",
+    "replacementCostLabel": "Replacement cost {{cost}}",
+    "issue": "Issue",
+    "block": "Block",
+    "takeBack": "Take back",
+    "makeAvailable": "Make available again",
+    "reportLost": "Report lost",
+    "actionFailed": "Action failed",
+    "issueDialog": {
+      "title": "Issue key",
+      "description": "Register who {{code}} is issued to.",
+      "employee": "Employee",
+      "employeePlaceholder": "Choose employee",
+      "dueDate": "Return date (optional)",
+      "dueDateHint": "e.g. for visitor passes or temporary keys.",
+      "note": "Note (optional)",
+      "confirm": "Issue"
+    },
+    "lossDialog": {
+      "title": "Start loss procedure",
+      "description": "The key is registered as lost, a service desk ticket is created automatically and the costs are charged{{holder}}.",
+      "descriptionHolder": " to {{name}}",
+      "charge": "Cost settlement (€)",
+      "chargeHint": "Leave empty = replacement cost from the register.",
+      "note": "Explanation",
+      "confirm": "Report lost"
+    },
+    "toast": {
+      "issued": "Key issued",
+      "blocked": "Key blocked",
+      "returned": "Key taken back",
+      "available": "Key available again",
+      "lossStarted": "Loss procedure started",
+      "lossStartedDesc": "A service desk ticket has been created.",
+      "dueUpdated": "Return date updated",
+      "doorAdded": "Door added",
+      "doorRemoved": "Door removed"
+    },
+    "issuedBanner": {
+      "issuedTo": "Issued to ",
+      "since": " since {{date}}",
+      "overdue": "• Return date passed:",
+      "dueBy": "• Return by:",
+      "overdueBadge": "late",
+      "editDueDate": "Change return date"
+    },
+    "dueDialog": {
+      "title": "Change return date",
+      "description": "Adjust the return date for {{name}}. Leave empty to remove the date.",
+      "label": "Return date",
+      "hint": "Leave empty to remove the return date."
+    },
+    "keyPlan": {
+      "title": "Key plan",
+      "description": "Doors and cylinders this {{type}} opens.",
+      "addDoor": "Door",
+      "empty": "No doors linked yet.",
+      "doorDialog": {
+        "title": "Add door to key plan",
+        "description": "Description",
+        "descriptionPlaceholder": "e.g. Cylinder C-06, archive door",
+        "room": "Room (optional)",
+        "none": "None / N/A",
+        "add": "Add"
+      }
+    },
+    "issueHistory": {
+      "title": "Issuance history",
+      "description": "Who used or is using this {{type}}.",
+      "empty": "Not yet issued.",
+      "unknown": "Unknown",
+      "returned": "Taken back",
+      "inUse": "In use",
+      "issuedBy": "• issued by {{name}}",
+      "dueBy": "• return by {{date}}",
+      "overdue": " ⚠ late"
+    },
+    "lossReports": {
+      "title": "Loss reports",
+      "reportedOn": "Reported on {{date}}",
+      "lastHolder": "• last holder: ",
+      "reportedBy": "Reported by {{name}}. ",
+      "viewTicket": "View ticket {{number}}"
+    },
+    "createdOn": "Created on {{date}}."
+  }
+}

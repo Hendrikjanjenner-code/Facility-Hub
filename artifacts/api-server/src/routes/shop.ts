@@ -195,7 +195,7 @@ router.post(
   "/shop/products",
   requireRole(...MANAGER_ROLES),
   async (req, res): Promise<void> => {
-    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
+    const parsed = CreateShopProductBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
@@ -227,16 +227,23 @@ router.patch(
       res.status(400).json({ message: "Ongeldig id" });
       return;
     }
-    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
+    const parsed = UpdateShopProductBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
     }
     const d = parsed.data;
     const [updated] = await db
-      .update(budgetsTable)
-      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
-      .where(eq(budgetsTable.id, id))
+      .update(shopProductsTable)
+      .set({
+        ...(d.name !== undefined ? { name: d.name } : {}),
+        ...(d.description !== undefined ? { description: d.description } : {}),
+        ...(d.price !== undefined ? { price: d.price } : {}),
+        ...(d.stock !== undefined ? { stock: d.stock } : {}),
+        ...(d.minStock !== undefined ? { minStock: d.minStock } : {}),
+        ...(d.supplierId !== undefined ? { supplierId: d.supplierId } : {}),
+      } as any)
+      .where(eq(shopProductsTable.id, id))
       .returning();
     if (!updated) {
       res.status(404).json({ message: "Product niet gevonden" });
@@ -271,7 +278,7 @@ router.get("/shop/orders", async (req, res): Promise<void> => {
 });
 
 router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Promise<void> => {
-    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
+    const parsed = CreateShopOrderBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
@@ -454,7 +461,7 @@ router.post("/shop/orders", requireRole(...internalRoles), async (req, res): Pro
     }
   }
 
-    const [result] = await loadOrders(eq(shopOrdersTable.id, id));
+  const [result] = await loadOrders(eq(shopOrdersTable.id, createdOrder.id));
   res.status(201).json(result);
 });
 
@@ -473,7 +480,7 @@ router.patch(
       res.status(400).json({ message: "Ongeldig id" });
       return;
     }
-    const parsed = UpdateBudgetPolicyBody.safeParse(req.body);
+    const parsed = UpdateShopOrderBody.safeParse(req.body);
     if (!parsed.success) {
       res.status(400).json({ message: "Ongeldige invoer" });
       return;
@@ -618,11 +625,11 @@ router.patch(
   },
 );
 
-// ── Supplier marks order as delivered ────────────────────────────────────────
+// ── Manager sends order to supplier ──────────────────────────────────────────
 
 router.post(
-  "/shop/orders/:id/supplier-delivered",
-  requireRole("leverancier", ...MANAGER_ROLES),
+  "/shop/orders/:id/send-to-supplier",
+  requireRole(...MANAGER_ROLES),
   async (req, res): Promise<void> => {
     const id = Number(req.params.id);
     if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
@@ -696,9 +703,9 @@ router.post(
     }
 
     const [updated] = await db
-      .update(budgetsTable)
-      .set({ overBudgetPolicy: parsed.data.overBudgetPolicy })
-      .where(eq(budgetsTable.id, id))
+      .update(shopOrdersTable)
+      .set({ supplierStatus: "verwerkt" } as any)
+      .where(and(eq(shopOrdersTable.id, id), eq((shopOrdersTable as any).supplierStatus, "verstuurd")))
       .returning();
     if (!updated) {
       res.status(409).json({ message: "Bestelling is al verwerkt of de status is gewijzigd" });

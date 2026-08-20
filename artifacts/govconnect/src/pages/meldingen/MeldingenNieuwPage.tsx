@@ -13,6 +13,7 @@ import {
   Room,
   KnowledgeArticle
 } from "@workspace/api-client-react";
+import { useTranslation } from "react-i18next";
 import { Ticket, ArrowLeft, Loader2, Info, BookOpen, ChevronDown, ChevronUp } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,15 +34,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
-const baseSchema = z.object({
-  categoryId: z.number({ required_error: "Kies een categorie" }),
-  title: z.string().min(3, "Titel moet minimaal 3 karakters bevatten"),
-  description: z.string().min(10, "Beschrijving moet minimaal 10 karakters bevatten"),
-  roomId: z.number().optional().nullable(),
-  formData: z.record(z.any()).optional(),
-});
-
 export default function MeldingenNieuwPage() {
+  const { t } = useTranslation("meldingen");
+  const baseSchema = z.object({
+    categoryId: z.number({ required_error: t("new.validation.categoryRequired") }),
+    title: z.string().min(3, t("new.validation.titleMin")),
+    description: z.string().min(10, t("new.validation.descriptionMin")),
+    roomId: z.number().optional().nullable(),
+    formData: z.record(z.any()).optional(),
+  });
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { data: categories, isLoading: isCategoriesLoading } = useListTicketCategories();
@@ -109,16 +110,16 @@ export default function MeldingenNieuwPage() {
     createTicket.mutate({ data: payload }, {
       onSuccess: (newTicket) => {
         toast({
-          title: "Melding aangemaakt",
-          description: `Uw melding is geregistreerd met nummer ${newTicket.number}`,
+          title: t("new.toastCreatedTitle"),
+          description: t("new.toastCreatedDesc", { number: newTicket.number }),
         });
         setLocation(`/meldingen/${newTicket.id}`);
       },
       onError: () => {
         toast({
           variant: "destructive",
-          title: "Fout",
-          description: "Er is een fout opgetreden bij het aanmaken van de melding.",
+          title: t("new.toastErrorTitle"),
+          description: t("new.toastErrorDesc"),
         });
       }
     });
@@ -140,20 +141,20 @@ export default function MeldingenNieuwPage() {
                 {field.type === 'text' || field.type === 'number' || field.type === 'date' ? (
                   <Input 
                     type={field.type} 
-                    placeholder={`Vul ${field.label.toLowerCase()} in`} 
+                    placeholder={t("new.fieldPlaceholder", { label: field.label.toLowerCase() })} 
                     {...formField} 
                     value={formField.value || ''}
                   />
                 ) : field.type === 'textarea' ? (
                   <Textarea 
-                    placeholder={`Vul ${field.label.toLowerCase()} in`} 
+                    placeholder={t("new.fieldPlaceholder", { label: field.label.toLowerCase() })} 
                     {...formField} 
                     value={formField.value || ''}
                   />
                 ) : field.type === 'select' ? (
                   <Select onValueChange={formField.onChange} defaultValue={formField.value}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Maak een keuze" />
+                      <SelectValue placeholder={t("new.makeChoice")} />
                     </SelectTrigger>
                     <SelectContent>
                       {field.options?.map((opt: string) => (
@@ -188,8 +189,8 @@ export default function MeldingenNieuwPage() {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Nieuwe melding</h1>
-          <p className="text-muted-foreground">Registreer een facilitair probleem of verzoek.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("new.title")}</h1>
+          <p className="text-muted-foreground">{t("new.subtitle")}</p>
         </div>
       </div>
 
@@ -197,8 +198,8 @@ export default function MeldingenNieuwPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Categorisatie</CardTitle>
-              <CardDescription>Kies het type melding zodat we deze naar het juiste team kunnen sturen.</CardDescription>
+              <CardTitle>{t("new.categorisation")}</CardTitle>
+              <CardDescription>{t("new.categorisationDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <FormField
@@ -206,14 +207,14 @@ export default function MeldingenNieuwPage() {
                 name="categoryId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categorie</FormLabel>
+                    <FormLabel>{t("new.category")}</FormLabel>
                     <Select 
                       onValueChange={(v) => field.onChange(parseInt(v))} 
                       value={field.value?.toString() || ""}
                     >
                       <FormControl>
                         <SelectTrigger disabled={isCategoriesLoading}>
-                          <SelectValue placeholder="Selecteer een categorie" />
+                          <SelectValue placeholder={t("new.categoryPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -231,10 +232,10 @@ export default function MeldingenNieuwPage() {
                 <div className="mt-4 p-4 bg-muted/50 rounded-lg flex gap-4 items-start">
                   <Info className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                   <div className="space-y-1 text-sm">
-                    <p className="font-medium text-foreground">Verwachte afhandeling</p>
+                    <p className="font-medium text-foreground">{t("new.expectedHandling")}</p>
                     <p className="text-muted-foreground">
-                      Uw melding wordt automatisch doorgezet naar: <span className="font-medium capitalize">{selectedCategory.routeToRole.replace('_', ' ')}</span>.
-                      Standaard prioriteit: <Badge variant="outline" className="ml-1 scale-90">{selectedCategory.defaultPriority}</Badge>
+                      {t("new.routedTo")}<span className="font-medium capitalize">{selectedCategory.routeToRole.replace('_', ' ')}</span>.
+                      {" "}{t("new.defaultPriority")}<Badge variant="outline" className="ml-1 scale-90">{selectedCategory.defaultPriority}</Badge>
                     </p>
                   </div>
                 </div>
@@ -246,8 +247,8 @@ export default function MeldingenNieuwPage() {
             <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
               <Card>
                 <CardHeader>
-                  <CardTitle>Melding details</CardTitle>
-                  <CardDescription>Omschrijf de melding zo duidelijk mogelijk.</CardDescription>
+                  <CardTitle>{t("new.detailsTitle")}</CardTitle>
+                  <CardDescription>{t("new.detailsDesc")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <FormField
@@ -255,10 +256,10 @@ export default function MeldingenNieuwPage() {
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Titel</FormLabel>
+                        <FormLabel>{t("new.titleLabel")}</FormLabel>
                         <FormControl>
                           <Input
-                            placeholder="Korte en duidelijke omschrijving"
+                            placeholder={t("new.titlePlaceholder")}
                             {...field}
                             onChange={(e) => {
                               field.onChange(e);
@@ -276,7 +277,7 @@ export default function MeldingenNieuwPage() {
                     <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
                       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                         <BookOpen className="h-4 w-4 text-primary" />
-                        <span>Mogelijk relevant uit de kennisbank</span>
+                        <span>{t("new.suggestionsTitle")}</span>
                       </div>
                       <div className="space-y-2">
                         {suggestions.map((s: KnowledgeArticle) => (
@@ -302,7 +303,7 @@ export default function MeldingenNieuwPage() {
                         ))}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Staat uw antwoord er niet bij? Dien dan hieronder uw melding in.
+                        {t("new.suggestionsHint")}
                       </p>
                     </div>
                   )}
@@ -312,10 +313,10 @@ export default function MeldingenNieuwPage() {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Uitgebreide omschrijving</FormLabel>
+                        <FormLabel>{t("new.descriptionLabel")}</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="Beschrijf het probleem of verzoek in detail..." 
+                            placeholder={t("new.descriptionPlaceholder")} 
                             className="min-h-[120px]"
                             {...field} 
                           />
@@ -330,18 +331,18 @@ export default function MeldingenNieuwPage() {
                     name="roomId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Locatie (Ruimte)</FormLabel>
+                        <FormLabel>{t("new.roomLabel")}</FormLabel>
                         <Select 
                           onValueChange={(v) => field.onChange(parseInt(v))} 
                           value={field.value?.toString() || "none"}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Geen specifieke ruimte" />
+                              <SelectValue placeholder={t("new.roomPlaceholder")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="none">Geen specifieke ruimte</SelectItem>
+                            <SelectItem value="none">{t("new.roomPlaceholder")}</SelectItem>
                             {rooms?.map((room) => (
                               <SelectItem key={room.id} value={room.id.toString()}>
                                 {room.name} ({room.code}) - {room.buildingName}
@@ -349,7 +350,7 @@ export default function MeldingenNieuwPage() {
                             ))}
                           </SelectContent>
                         </Select>
-                        <FormDescription>Optioneel, als de melding aan een ruimte gekoppeld is.</FormDescription>
+                        <FormDescription>{t("new.roomDescription")}</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -360,8 +361,8 @@ export default function MeldingenNieuwPage() {
               {selectedCategory.formFields?.length > 0 && (
                 <Card>
                   <CardHeader>
-                    <CardTitle>Specifieke informatie</CardTitle>
-                    <CardDescription>Aanvullende vragen voor deze categorie.</CardDescription>
+                    <CardTitle>{t("new.specificInfoTitle")}</CardTitle>
+                    <CardDescription>{t("new.specificInfoDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {selectedCategory.formFields.map(renderDynamicField)}
@@ -371,11 +372,11 @@ export default function MeldingenNieuwPage() {
 
               <div className="flex justify-end gap-4">
                 <Button type="button" variant="outline" onClick={() => setLocation("/meldingen")}>
-                  Annuleren
+                  {t("common.cancel", { ns: "common" })}
                 </Button>
                 <Button type="submit" disabled={createTicket.isPending}>
                   {createTicket.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Melding indienen
+                  {t("new.submit")}
                 </Button>
               </div>
             </div>

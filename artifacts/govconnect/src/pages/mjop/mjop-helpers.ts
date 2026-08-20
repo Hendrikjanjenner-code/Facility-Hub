@@ -87,22 +87,19 @@ export function deriveNen2767Score(
   return 6;
 }
 
-export function scoreLabel(score: number): string {
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+export function scoreLabel(score: number, t: TFunc): string {
   switch (score) {
     case 1:
-      return "Uitstekend";
     case 2:
-      return "Goed";
     case 3:
-      return "Redelijk";
     case 4:
-      return "Matig";
     case 5:
-      return "Slecht";
     case 6:
-      return "Zeer slecht";
+      return t(`score.${score}`);
     default:
-      return "Onbekend";
+      return t("score.unknown");
   }
 }
 
@@ -125,14 +122,12 @@ export function scoreColor(score: number): string {
   }
 }
 
-export function taakStatusLabel(status: string): string {
+export function taakStatusLabel(status: string, t: TFunc): string {
   switch (status) {
     case "gepland":
-      return "Gepland";
     case "in_uitvoering":
-      return "In uitvoering";
     case "afgerond":
-      return "Afgerond";
+      return t(`taakStatus.${status}`);
     default:
       return status;
   }

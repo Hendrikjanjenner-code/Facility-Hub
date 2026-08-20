@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "wouter";
 import {
   useGetBouwdeel,
@@ -53,6 +54,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { getIntlLocale } from "@/i18n";
 import {
   scoreColor,
   scoreLabel,
@@ -77,6 +79,7 @@ function NieuweMetingDialog({
   bouwdeelId: number;
   onBadScore?: (suggestion: { type: string; message: string }) => void;
 }) {
+  const { t } = useTranslation("mjop");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -117,7 +120,7 @@ function NieuweMetingDialog({
 
   const uploadPhoto = async (i: number, file: File) => {
     if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "Bestand is te groot (max 10 MB)", variant: "destructive" });
+      toast({ title: t("meting.fileTooLarge"), variant: "destructive" });
       return;
     }
     updateGebrek(i, { uploading: true });
@@ -130,15 +133,15 @@ function NieuweMetingDialog({
       });
       if (!resp.ok) {
         const err = (await resp.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(err?.error ?? "Upload mislukt");
+        throw new Error(err?.error ?? t("meting.uploadFailed"));
       }
       const { objectPath } = (await resp.json()) as { objectPath: string };
       updateGebrek(i, { photoPath: objectPath, uploading: false });
-      toast({ title: "Foto geüpload" });
+      toast({ title: t("meting.photoUploaded") });
     } catch (e) {
       updateGebrek(i, { uploading: false });
       toast({
-        title: e instanceof Error ? e.message : "Foto uploaden mislukt",
+        title: e instanceof Error ? e.message : t("meting.photoUploadFailed"),
         variant: "destructive",
       });
     }
@@ -163,7 +166,7 @@ function NieuweMetingDialog({
       },
       {
         onSuccess: (meting) => {
-          toast({ title: "Conditiemeting vastgelegd" });
+          toast({ title: t("meting.toastSuccess") });
           setOpen(false);
           reset();
           queryClient.invalidateQueries({
@@ -178,7 +181,7 @@ function NieuweMetingDialog({
           }
         },
         onError: () =>
-          toast({ title: "Vastleggen mislukt", variant: "destructive" }),
+          toast({ title: t("meting.toastError"), variant: "destructive" }),
       },
     );
   };
@@ -188,15 +191,14 @@ function NieuweMetingDialog({
       <DialogTrigger asChild>
         <Button>
           <ClipboardCheck className="mr-2 h-4 w-4" />
-          Conditiemeting
+          {t("meting.trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nieuwe conditiemeting (NEN 2767)</DialogTitle>
+          <DialogTitle>{t("meting.title")}</DialogTitle>
           <DialogDescription>
-            Registreer gebreken met ernst, omvang en intensiteit. De score wordt
-            automatisch afgeleid; u kunt hem handmatig overschrijven.
+            {t("meting.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -204,7 +206,7 @@ function NieuweMetingDialog({
           <div className="rounded-lg border bg-muted/40 p-3 flex items-center gap-4">
             <div className="flex-1">
               <div className="text-xs font-medium text-muted-foreground mb-1">
-                Afgeleide conditiescore (NEN 2767)
+                {t("meting.derivedScore")}
               </div>
               <div className="flex items-center gap-2">
                 {scoreAfgeleid ? (
@@ -212,31 +214,31 @@ function NieuweMetingDialog({
                     variant="secondary"
                     className={cn("border-transparent font-bold text-base px-3 py-1", scoreColor(scoreAfgeleid))}
                   >
-                    {scoreAfgeleid} — {scoreLabel(scoreAfgeleid)}
+                    {t("meting.scoreLabel", { score: scoreAfgeleid, label: scoreLabel(scoreAfgeleid, t) })}
                   </Badge>
                 ) : (
                   <Badge variant="outline" className="text-base px-3 py-1">
-                    {gebreken.length === 0 ? "Geen gebreken → score 1" : "Vul gebreken in"}
+                    {gebreken.length === 0 ? t("meting.noGebrekenScore") : t("meting.fillGebreken")}
                   </Badge>
                 )}
                 {effectiveScore !== scoreAfgeleid && scoreOverride !== "__auto__" && (
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <Info className="h-3 w-3" /> overschreven
+                    <Info className="h-3 w-3" /> {t("meting.overridden")}
                   </span>
                 )}
               </div>
             </div>
             <div className="space-y-1 min-w-[140px]">
-              <Label className="text-xs">Handmatige override</Label>
+              <Label className="text-xs">{t("meting.manualOverride")}</Label>
               <Select value={scoreOverride} onValueChange={setScoreOverride}>
                 <SelectTrigger className="h-8">
-                  <SelectValue placeholder="Automatisch" />
+                  <SelectValue placeholder={t("meting.automatic")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__auto__">Automatisch</SelectItem>
+                  <SelectItem value="__auto__">{t("meting.automatic")}</SelectItem>
                   {[1, 2, 3, 4, 5, 6].map((s) => (
                     <SelectItem key={s} value={String(s)}>
-                      {s} — {scoreLabel(s)}
+                      {t("meting.scoreLabel", { score: s, label: scoreLabel(s, t) })}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -245,26 +247,26 @@ function NieuweMetingDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Toelichting (optioneel)</Label>
+            <Label>{t("meting.toelichting")}</Label>
             <Textarea
               rows={2}
               value={toelichting}
               onChange={(e) => setToelichting(e.target.value)}
-              placeholder="Algemene bevindingen van de inspectie"
+              placeholder={t("meting.toelichtingPlaceholder")}
             />
           </div>
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Gebreken</Label>
+              <Label>{t("meting.gebreken")}</Label>
               <Button type="button" variant="outline" size="sm" onClick={addGebrek}>
                 <Plus className="mr-1.5 h-3.5 w-3.5" />
-                Gebrek toevoegen
+                {t("meting.addGebrek")}
               </Button>
             </div>
             {gebreken.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                Geen gebreken geregistreerd — score wordt 1 (uitstekend).
+                {t("meting.noGebreken")}
               </p>
             )}
             {gebreken.map((g, i) => (
@@ -272,7 +274,7 @@ function NieuweMetingDialog({
                 <div className="flex items-start gap-2">
                   <Input
                     className="flex-1"
-                    placeholder="Omschrijving van het gebrek"
+                    placeholder={t("meting.gebrekPlaceholder")}
                     value={g.description}
                     onChange={(e) => updateGebrek(i, { description: e.target.value })}
                   />
@@ -287,7 +289,7 @@ function NieuweMetingDialog({
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Ernst</Label>
+                    <Label className="text-xs text-muted-foreground">{t("meting.ernst")}</Label>
                     <Select
                       value={g.ernst}
                       onValueChange={(v) => updateGebrek(i, { ernst: v })}
@@ -298,20 +300,20 @@ function NieuweMetingDialog({
                       <SelectContent>
                         {ERNST_OPTIES.map((e) => (
                           <SelectItem key={e} value={e} className="capitalize">
-                            {e}
+                            {t(`ernst.${e}`, { defaultValue: e })}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Omvang</Label>
+                    <Label className="text-xs text-muted-foreground">{t("meting.omvang")}</Label>
                     <Select
                       value={g.omvang ?? ""}
                       onValueChange={(v) => updateGebrek(i, { omvang: v })}
                     >
                       <SelectTrigger className="h-8">
-                        <SelectValue placeholder="Omvang" />
+                        <SelectValue placeholder={t("meting.omvangPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {OMVANG_OPTIES.map((o) => (
@@ -323,7 +325,7 @@ function NieuweMetingDialog({
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Intensiteit</Label>
+                    <Label className="text-xs text-muted-foreground">{t("meting.intensiteit")}</Label>
                     <Select
                       value={g.intensiteit ?? "midden"}
                       onValueChange={(v) => updateGebrek(i, { intensiteit: v })}
@@ -334,7 +336,7 @@ function NieuweMetingDialog({
                       <SelectContent>
                         {INTENSITEIT_OPTIES.map((it) => (
                           <SelectItem key={it} value={it} className="capitalize">
-                            {it}
+                            {t(`intensiteit.${it}`, { defaultValue: it })}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -356,7 +358,7 @@ function NieuweMetingDialog({
                     ) : (
                       <Camera className="mr-1.5 h-3.5 w-3.5" />
                     )}
-                    {g.photoPath ? "Foto vervangen" : "Foto uploaden"}
+                    {g.photoPath ? t("meting.replacePhoto") : t("meting.uploadPhoto")}
                   </Button>
                   <input
                     id={`gebrek-foto-${i}`}
@@ -373,7 +375,7 @@ function NieuweMetingDialog({
                     <div className="relative inline-block">
                       <img
                         src={`${API_BASE}/storage${g.photoPath}`}
-                        alt="Foto van gebrek"
+                        alt={t("meting.photoAlt")}
                         className="h-16 rounded-md border object-cover"
                       />
                       <button
@@ -392,7 +394,7 @@ function NieuweMetingDialog({
         </div>
         <DialogFooter className="pt-2">
           <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-            Annuleren
+            {t("meting.cancel")}
           </Button>
           <Button
             onClick={onSubmit}
@@ -401,7 +403,7 @@ function NieuweMetingDialog({
             {createMeting.isPending && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            Vastleggen
+            {t("meting.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -410,6 +412,7 @@ function NieuweMetingDialog({
 }
 
 export default function BouwdeelDetailPage({ id }: { id: string }) {
+  const { t } = useTranslation("mjop");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -434,13 +437,13 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
       {
         onSuccess: (taak) => {
           toast({
-            title: "Melding aangemaakt",
-            description: `Servicedesk-ticket ${taak.ticketNumber ?? ""} is aangemaakt.`,
+            title: t("toastMeldingCreated"),
+            description: t("toastMeldingDescription", { ticket: taak.ticketNumber ?? "" }),
           });
           queryClient.invalidateQueries({ queryKey: ["/api/mjop-taken"] });
         },
         onError: () =>
-          toast({ title: "Omzetten mislukt", variant: "destructive" }),
+          toast({ title: t("toastConvertError"), variant: "destructive" }),
       },
     );
   };
@@ -458,9 +461,9 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
   if (!bouwdeel) {
     return (
       <div className="text-center py-24">
-        <h3 className="text-lg font-medium">Bouwdeel niet gevonden</h3>
+        <h3 className="text-lg font-medium">{t("detail.notFound")}</h3>
         <Button variant="link" onClick={() => setLocation("/mjop")}>
-          Terug naar MJOP
+          {t("detail.backToMjop")}
         </Button>
       </div>
     );
@@ -486,11 +489,10 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                     scoreColor(bouwdeel.laatsteScore),
                   )}
                 >
-                  Conditie {bouwdeel.laatsteScore} —{" "}
-                  {scoreLabel(bouwdeel.laatsteScore)}
+                  {t("detail.conditie", { score: bouwdeel.laatsteScore, label: scoreLabel(bouwdeel.laatsteScore, t) })}
                 </Badge>
               ) : (
-                <Badge variant="outline">Niet gemeten</Badge>
+                <Badge variant="outline">{t("page.notMeasured")}</Badge>
               )}
             </h1>
             <p className="text-muted-foreground font-mono text-sm">
@@ -523,7 +525,7 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                 className="border-amber-400 bg-white text-amber-900 hover:bg-amber-100"
                 onClick={() => setMjopDialogOpen(true)}
               >
-                MJOP-taak aanmaken
+                {t("detail.createMjopTaak")}
               </Button>
               <Button
                 size="sm"
@@ -555,7 +557,7 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
         <CardContent className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
             <div className="text-muted-foreground flex items-center gap-1.5">
-              <Building2 className="h-3.5 w-3.5" /> Locatie
+              <Building2 className="h-3.5 w-3.5" /> {t("detail.locatie")}
             </div>
             <div className="font-medium mt-1">
               {bouwdeel.buildingName}
@@ -565,23 +567,22 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
           </div>
           <div>
             <div className="text-muted-foreground flex items-center gap-1.5">
-              <Wrench className="h-3.5 w-3.5" /> Categorie & materiaal
+              <Wrench className="h-3.5 w-3.5" /> {t("detail.categorieMateriaal")}
             </div>
             <div className="font-medium mt-1 capitalize">
-              {bouwdeel.category}
+              {t(`categories.${bouwdeel.category}`, { defaultValue: bouwdeel.category })}
               {bouwdeel.material ? ` • ${bouwdeel.material}` : ""}
             </div>
           </div>
           <div>
-            <div className="text-muted-foreground">Levenscyclus</div>
+            <div className="text-muted-foreground">{t("detail.levenscyclus")}</div>
             <div className="font-medium mt-1">
-              {bouwdeel.installYear} — {endOfLife} ({bouwdeel.expectedLifespanYears}{" "}
-              jaar)
+              {t("detail.lifespanYears", { from: bouwdeel.installYear, to: endOfLife, years: bouwdeel.expectedLifespanYears })}
             </div>
           </div>
           <div>
             <div className="text-muted-foreground flex items-center gap-1.5">
-              <Euro className="h-3.5 w-3.5" /> Vervangingskosten
+              <Euro className="h-3.5 w-3.5" /> {t("detail.vervangingskosten")}
             </div>
             <div className="font-medium mt-1">{euro(bouwdeel.replacementCost)}</div>
           </div>
@@ -592,13 +593,13 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
-              Conditiemetingen (NEN 2767)
+              {t("detail.metingenTitle")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {!metingen?.length ? (
               <p className="text-sm text-muted-foreground py-6 text-center">
-                Nog geen conditiemetingen vastgelegd.
+                {t("detail.noMetingen")}
               </p>
             ) : (
               metingen.map((m) => (
@@ -612,21 +613,21 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                           scoreColor(m.score),
                         )}
                       >
-                        Score {m.score} — {scoreLabel(m.score)}
+                        {t("detail.scoreLine", { score: m.score, label: scoreLabel(m.score, t) })}
                       </Badge>
                       {m.scoreOverride && m.scoreAfgeleid && m.scoreOverride !== m.scoreAfgeleid && (
                         <span className="text-xs text-muted-foreground">
-                          (afgeleid: {m.scoreAfgeleid}, handmatig overschreven)
+                          {t("detail.derivedOverridden", { score: m.scoreAfgeleid })}
                         </span>
                       )}
                       {!m.scoreOverride && m.scoreAfgeleid && (
                         <span className="text-xs text-muted-foreground">
-                          (automatisch afgeleid)
+                          {t("detail.autoDerived")}
                         </span>
                       )}
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(m.measuredAt).toLocaleDateString("nl-NL", {
+                      {new Date(m.measuredAt).toLocaleDateString(getIntlLocale(), {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
@@ -640,7 +641,7 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                   {m.gebreken.length > 0 && (
                     <div className="space-y-2">
                       <div className="text-xs font-medium text-muted-foreground uppercase">
-                        Gebreken
+                        {t("detail.gebreken")}
                       </div>
                       {m.gebreken.map((g, i) => (
                         <div
@@ -657,16 +658,16 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                                   ernstColor(g.ernst),
                                 )}
                               >
-                                {g.ernst}
+                                {t(`ernst.${g.ernst}`, { defaultValue: g.ernst })}
                               </Badge>
                               {g.omvang && (
                                 <Badge variant="outline" className="text-xs">
-                                  Omvang: {g.omvang}
+                                  {t("detail.omvang", { value: g.omvang })}
                                 </Badge>
                               )}
                               {g.intensiteit && (
                                 <Badge variant="outline" className="text-xs">
-                                  Intensiteit: {g.intensiteit}
+                                  {t("detail.intensiteit", { value: t(`intensiteit.${g.intensiteit}`, { defaultValue: g.intensiteit }) })}
                                 </Badge>
                               )}
                             </div>
@@ -674,7 +675,7 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                           {g.photoPath && (
                             <img
                               src={`${API_BASE}/storage${g.photoPath}`}
-                              alt="Foto"
+                              alt={t("detail.photoAlt")}
                               className="h-16 w-16 rounded object-cover border flex-shrink-0"
                             />
                           )}
@@ -690,43 +691,43 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">MJOP-taken</CardTitle>
+            <CardTitle className="text-base">{t("detail.takenTitle")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {!taken?.length ? (
               <p className="text-sm text-muted-foreground py-6 text-center">
-                Geen taken gepland voor dit bouwdeel.
+                {t("detail.noTaken")}
               </p>
             ) : (
-              taken.map((t) => (
-                <div key={t.id} className="rounded-lg border p-3 space-y-2">
+              taken.map((tk) => (
+                <div key={tk.id} className="rounded-lg border p-3 space-y-2">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-medium text-sm">{t.title}</p>
-                      {t.description && (
-                        <p className="text-xs text-muted-foreground">{t.description}</p>
+                      <p className="font-medium text-sm">{tk.title}</p>
+                      {tk.description && (
+                        <p className="text-xs text-muted-foreground">{tk.description}</p>
                       )}
                     </div>
                     <Badge
                       variant="secondary"
-                      className={cn("border-transparent text-xs", taakStatusColor(t.status))}
+                      className={cn("border-transparent text-xs", taakStatusColor(tk.status))}
                     >
-                      {taakStatusLabel(t.status)}
+                      {taakStatusLabel(tk.status, t)}
                     </Badge>
                   </div>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    <span className="capitalize">{t.taskType}</span>
-                    <span>{t.plannedYear}</span>
-                    <span className="font-medium text-foreground">{euro(t.estimatedCost)}</span>
-                    {t.ticketId ? (
+                    <span className="capitalize">{t(`taakTypes.${tk.taskType}`, { defaultValue: tk.taskType })}</span>
+                    <span>{tk.plannedYear}</span>
+                    <span className="font-medium text-foreground">{euro(tk.estimatedCost)}</span>
+                    {tk.ticketId ? (
                       <Button
                         variant="link"
                         size="sm"
                         className="h-auto p-0 text-xs"
-                        onClick={() => setLocation(`/meldingen/${t.ticketId}`)}
+                        onClick={() => setLocation(`/meldingen/${tk.ticketId}`)}
                       >
                         <Ticket className="mr-1 h-3 w-3" />
-                        {t.ticketNumber}
+                        {tk.ticketNumber}
                       </Button>
                     ) : canManage ? (
                       <Button
@@ -734,10 +735,10 @@ export default function BouwdeelDetailPage({ id }: { id: string }) {
                         size="sm"
                         className="h-6 text-xs px-2"
                         disabled={convert.isPending}
-                        onClick={() => onConvert(t.id)}
+                        onClick={() => onConvert(tk.id)}
                       >
                         <Ticket className="mr-1 h-3 w-3" />
-                        Naar melding
+                        {t("taken.toMelding")}
                       </Button>
                     ) : null}
                   </div>

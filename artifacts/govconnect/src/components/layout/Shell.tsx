@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { 
   useGetCurrentUser, 
   useLogout, 
@@ -33,6 +34,8 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { getIntlLocale } from "@/i18n";
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -59,97 +62,97 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    title: "Dashboard",
+    title: "nav.dashboard",
     href: "/",
     icon: LayoutDashboard,
     roles: ["eindgebruiker", "servicedesk", "facilitair_manager", "cateraar", "receptie", "beheerder", "leverancier"]
   },
   {
-    title: "Meldingen",
+    title: "nav.meldingen",
     href: "/meldingen",
     icon: Ticket,
     roles: ["eindgebruiker", "servicedesk", "facilitair_manager", "beheerder", "leverancier"]
   },
   {
-    title: "Reserveringen",
+    title: "nav.reserveringen",
     href: "/reserveringen",
     icon: CalendarDays,
     roles: ["eindgebruiker", "facilitair_manager", "cateraar", "receptie", "beheerder"]
   },
   {
-    title: "Werkplekken",
+    title: "nav.werkplekken",
     href: "/werkplekken",
     icon: Monitor,
     roles: ["eindgebruiker", "facilitair_manager", "beheerder"]
   },
   {
-    title: "Bezoekers",
+    title: "nav.bezoekers",
     href: "/bezoekers",
     icon: Users,
     roles: ["eindgebruiker", "facilitair_manager", "receptie", "beheerder"]
   },
   {
-    title: "Vastgoed",
+    title: "nav.vastgoed",
     href: "/vastgoed",
     icon: Building2,
     roles: ["facilitair_manager", "beheerder"]
   },
   {
-    title: "Ruimtes",
+    title: "nav.ruimtes",
     href: "/ruimtes",
     icon: DoorOpen,
     roles: ["servicedesk", "facilitair_manager", "beheerder"]
   },
   {
-    title: "Sleutelbeheer",
+    title: "nav.sleutelbeheer",
     href: "/sleutelbeheer",
     icon: KeyRound,
     roles: ["facilitair_manager", "beheerder", "receptie"]
   },
   {
-    title: "Assets",
+    title: "nav.assets",
     href: "/assets",
     icon: PcCase,
     roles: ["servicedesk", "facilitair_manager", "beheerder"]
   },
   {
-    title: "Contracten",
+    title: "nav.contracten",
     href: "/contracten",
     icon: FileText,
     roles: ["facilitair_manager", "beheerder", "leverancier"]
   },
   {
-    title: "Webshop",
+    title: "nav.webshop",
     href: "/webshop",
     icon: ShoppingCart,
     roles: ["eindgebruiker", "servicedesk", "facilitair_manager", "cateraar", "receptie", "beheerder"]
   },
   {
-    title: "Voorraad",
+    title: "nav.voorraad",
     href: "/voorraad",
     icon: Boxes,
     roles: ["servicedesk", "facilitair_manager", "beheerder"]
   },
   {
-    title: "Duurzaamheid",
+    title: "nav.duurzaamheid",
     href: "/duurzaamheid",
     icon: Leaf,
     roles: ["servicedesk", "facilitair_manager", "beheerder"]
   },
   {
-    title: "MJOP",
+    title: "nav.mjop",
     href: "/mjop",
     icon: Wrench,
     roles: ["facilitair_manager", "beheerder"]
   },
   {
-    title: "Catering",
+    title: "nav.catering",
     href: "/catering",
     icon: UtensilsCrossed,
     roles: ["cateraar", "facilitair_manager", "beheerder"]
   },
   {
-    title: "Kennisbank",
+    title: "nav.kennisbank",
     href: "/kennisbank",
     icon: BookOpen,
     roles: ["eindgebruiker", "servicedesk", "facilitair_manager", "cateraar", "receptie", "beheerder", "leverancier"]
@@ -157,6 +160,7 @@ const navItems: NavItem[] = [
 ];
 
 function NotificationsDropdown() {
+  const { t } = useTranslation();
   const { data: notifications } = useListNotifications();
   const unreadCount = notifications?.filter(n => !n.read).length || 0;
   const markRead = useMarkNotificationRead();
@@ -193,18 +197,18 @@ function NotificationsDropdown() {
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between p-4 border-b">
-          <h4 className="font-semibold text-sm">Notificaties</h4>
+          <h4 className="font-semibold text-sm">{t("shell.notifications")}</h4>
           {unreadCount > 0 && (
             <Button variant="ghost" size="sm" className="h-auto p-0 text-xs" onClick={handleMarkAllRead}>
               <Check className="mr-1 h-3 w-3" />
-              Alles gelezen
+              {t("shell.markAllRead")}
             </Button>
           )}
         </div>
         <ScrollArea className="h-80">
           {!notifications?.length ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
-              Geen notificaties
+              {t("shell.noNotifications")}
             </div>
           ) : (
             <div className="flex flex-col">
@@ -226,7 +230,7 @@ function NotificationsDropdown() {
                       <p className="text-sm font-medium leading-none">{n.title}</p>
                       <p className="text-sm text-muted-foreground line-clamp-2">{n.body}</p>
                       <span className="text-xs text-muted-foreground mt-1">
-                        {new Date(n.createdAt).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(n.createdAt).toLocaleDateString(getIntlLocale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
                   </div>
@@ -241,6 +245,7 @@ function NotificationsDropdown() {
 }
 
 function UserMenu({ user }: { user: User }) {
+  const { t } = useTranslation();
   const logout = useLogout();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
@@ -276,17 +281,17 @@ function UserMenu({ user }: { user: User }) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="px-2 py-1.5 text-xs text-muted-foreground">
-          Rol: <span className="font-medium text-foreground capitalize">{user.role.replace('_', ' ')}</span>
+          {t("shell.role")}: <span className="font-medium text-foreground capitalize">{user.role.replace('_', ' ')}</span>
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => setLocation("/profiel")} className="cursor-pointer">
           <Settings className="mr-2 h-4 w-4" />
-          <span>Instellingen</span>
+          <span>{t("shell.settings")}</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Uitloggen</span>
+          <span>{t("shell.logout")}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -294,6 +299,7 @@ function UserMenu({ user }: { user: User }) {
 }
 
 export function Shell({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const [location] = useLocation();
   const { data: user } = useGetCurrentUser();
 
@@ -308,7 +314,7 @@ export function Shell({ children }: { children: ReactNode }) {
         <div className="flex h-14 items-center border-b px-6">
           <div className="flex items-center gap-2 font-bold text-lg tracking-tight text-primary">
             <Building2 className="h-5 w-5" />
-            <span>GovConnect</span>
+            <span>{t("brand")}</span>
           </div>
         </div>
         <div className="flex-1 overflow-auto py-4">
@@ -324,7 +330,7 @@ export function Shell({ children }: { children: ReactNode }) {
                     )}
                   >
                     <item.icon className={cn("h-4 w-4", active ? "text-primary" : "text-muted-foreground")} />
-                    {item.title}
+                    {t(item.title)}
                   </div>
                 </Link>
               );
@@ -345,10 +351,11 @@ export function Shell({ children }: { children: ReactNode }) {
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 md:px-6 sticky top-0 z-10">
           <div className="md:hidden flex-1 flex items-center gap-2 font-bold text-lg text-primary">
             <Building2 className="h-5 w-5" />
-            <span>GovConnect</span>
+            <span>{t("brand")}</span>
           </div>
           <div className="flex-1 hidden md:block" />
           <div className="flex items-center gap-4">
+            <LanguageSwitcher />
             <NotificationsDropdown />
             <div className="md:hidden">
               <UserMenu user={user} />

@@ -1,0 +1,102 @@
+{
+  "title": "Contratos e Compras",
+  "subtitleSupplier": "Os seus contratos ativos com o município.",
+  "subtitle": "Cofre de contratos com monitorização de datas de fim e registo de fornecedores.",
+  "expiring_one": "{{count}} contrato está dentro do prazo de rescisão — ação necessária.",
+  "expiring_other": "{{count}} contratos estão dentro do prazo de rescisão — ação necessária.",
+  "tabs": {
+    "contracts": "Contratos",
+    "suppliers": "Fornecedores"
+  },
+  "category": {
+    "techniek": "Técnica",
+    "schoonmaak": "Limpeza",
+    "catering": "Catering",
+    "groenvoorziening": "Jardinagem",
+    "beveiliging": "Segurança",
+    "overig": "Outros"
+  },
+  "status": {
+    "actief": "Ativo",
+    "verlopen": "Expirado",
+    "opgezegd": "Rescindido"
+  },
+  "contracts": {
+    "add": "Adicionar contrato",
+    "newTitle": "Novo contrato",
+    "newDescription": "Registe um contrato no cofre de contratos.",
+    "empty": "Sem contratos",
+    "terminate": "Rescindir",
+    "perYear": "{{value}}/ano",
+    "daysRemaining": "faltam {{count}} dias",
+    "noticeSuffix": " (prazo de rescisão {{days}} dias)"
+  },
+  "contractFields": {
+    "name": "Nome",
+    "namePlaceholder": "Ex.: Manutenção de elevadores",
+    "supplier": "Fornecedor",
+    "supplierPlaceholder": "Escolher fornecedor",
+    "category": "Categoria",
+    "categoryPlaceholder": "Escolher categoria",
+    "annualValue": "Valor anual (€)",
+    "startDate": "Data de início",
+    "endDate": "Data de fim",
+    "noticePeriod": "Prazo de rescisão (dias)",
+    "description": "Descrição (opcional)"
+  },
+  "suppliers": {
+    "add": "Adicionar fornecedor",
+    "newTitle": "Novo fornecedor",
+    "newDescription": "Registe um fornecedor no registo.",
+    "contractCount_one": "{{count}} contrato",
+    "contractCount_other": "{{count}} contratos",
+    "portal": "Portal: {{name}}"
+  },
+  "supplierFields": {
+    "name": "Nome da empresa",
+    "category": "Categoria",
+    "categoryPlaceholder": "Escolher categoria",
+    "contactName": "Pessoa de contacto",
+    "kvkNumber": "Número da Câmara de Comércio",
+    "email": "E-mail",
+    "phone": "Telefone"
+  },
+  "documents": {
+    "shared": "Documentos partilhados",
+    "vault": "Cofre digital",
+    "empty": "Ainda não foram carregados documentos.",
+    "upload": "Carregar PDF"
+  },
+  "reviews": {
+    "title": "Avaliações",
+    "average": "méd. {{score}} / 5",
+    "add": "Avaliar",
+    "dialogTitle": "Avaliar fornecedor",
+    "dialogDescription": "Avaliação anual (1–5 estrelas)",
+    "empty": "Ainda sem avaliações.",
+    "year": "Ano",
+    "score": "Pontuação (1–5)",
+    "comment": "Comentário (opcional)",
+    "commentPlaceholder": "Explique a pontuação..."
+  },
+  "validation": {
+    "nameRequired": "O nome é obrigatório",
+    "supplierRequired": "Escolha um fornecedor",
+    "categoryRequired": "A categoria é obrigatória",
+    "startDateRequired": "A data de início é obrigatória",
+    "endDateRequired": "A data de fim é obrigatória",
+    "emailInvalid": "Endereço de e-mail inválido"
+  },
+  "toast": {
+    "documentUploaded": "Documento carregado",
+    "registrationFailed": "Falha no registo",
+    "uploadFailed": "Falha no carregamento",
+    "documentDeleted": "Documento eliminado",
+    "deleteFailed": "Falha ao eliminar",
+    "reviewSaved": "Avaliação guardada",
+    "saveFailed": "Falha ao guardar",
+    "contractAdded": "Contrato adicionado",
+    "supplierAdded": "Fornecedor adicionado",
+    "contractTerminated": "Contrato rescindido"
+  }
+}

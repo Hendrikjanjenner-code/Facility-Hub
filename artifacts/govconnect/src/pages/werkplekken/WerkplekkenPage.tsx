@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { 
   useListWorkplaces, 
   useGetStructure,
@@ -23,6 +24,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 export default function WerkplekkenPage() {
+  const { t } = useTranslation("werkplekken");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: user } = useGetCurrentUser();
@@ -48,7 +50,7 @@ export default function WerkplekkenPage() {
     createReservation.mutate({
       data: {
         kind: "workplace",
-        title: `Werkplek ${workplaceName}`,
+        title: t("workplaceTitle", { name: workplaceName }),
         workplaceId,
         date: dateStr,
         startTime: "08:00",
@@ -56,14 +58,14 @@ export default function WerkplekkenPage() {
       }
     }, {
       onSuccess: () => {
-        toast({ title: "Werkplek geboekt", description: `Voor ${format(date, "d MMMM yyyy", { locale: nl })}` });
+        toast({ title: t("toastBookedTitle"), description: t("toastBookedDesc", { date: format(date, "d MMMM yyyy", { locale: getDateFnsLocale() }) }) });
         queryClient.invalidateQueries({ queryKey: ["/api/workplaces"] });
       },
       onError: (err: any) => {
         if (err?.status === 409) {
-          toast({ variant: "destructive", title: "Conflict", description: "Deze werkplek is inmiddels al geboekt." });
+          toast({ variant: "destructive", title: t("toastConflictTitle"), description: t("toastConflictDesc") });
         } else {
-          toast({ variant: "destructive", title: "Fout", description: "Kon werkplek niet boeken." });
+          toast({ variant: "destructive", title: t("toastErrorTitle"), description: t("toastErrorDesc") });
         }
       }
     });
@@ -79,8 +81,8 @@ export default function WerkplekkenPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Werkplekken</h1>
-        <p className="text-muted-foreground">Boek een flexplek op kantoor.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Collega zoeken */}
@@ -90,7 +92,7 @@ export default function WerkplekkenPage() {
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             className="pl-8"
-            placeholder="Zoek collega op naam..."
+            placeholder={t("colleagueSearchPlaceholder")}
             value={colleagueSearch}
             onChange={(e) => setColleagueSearch(e.target.value)}
           />
@@ -98,8 +100,8 @@ export default function WerkplekkenPage() {
         {collegaResults !== undefined && (
           <span className="text-sm text-muted-foreground">
             {collegaResults.length === 0
-              ? "Geen werkplek gevonden"
-              : `${collegaResults.length} werkplek${collegaResults.length !== 1 ? "ken" : ""} gevonden`}
+              ? t("noColleagueFound")
+              : t("colleagueFound", { count: collegaResults.length })}
           </span>
         )}
       </div>
@@ -122,7 +124,7 @@ export default function WerkplekkenPage() {
               </div>
               <div className="ml-auto flex items-center gap-1.5 text-xs text-green-600">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Ingeboekt
+                {t("bookedIn")}
               </div>
             </div>
           ))}
@@ -141,7 +143,7 @@ export default function WerkplekkenPage() {
                 )}
               >
                 <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "EEEE d MMMM", { locale: nl }) : <span>Kies datum</span>}
+                {date ? format(date, "EEEE d MMMM", { locale: getDateFnsLocale() }) : <span>{t("chooseDate")}</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -159,10 +161,10 @@ export default function WerkplekkenPage() {
         <div className="flex-1 max-w-[280px]">
           <Select value={floorId?.toString() || "all"} onValueChange={(v) => setFloorId(v === "all" ? undefined : parseInt(v))}>
             <SelectTrigger disabled={isStructureLoading}>
-              <SelectValue placeholder="Alle verdiepingen" />
+              <SelectValue placeholder={t("allFloors")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle verdiepingen</SelectItem>
+              <SelectItem value="all">{t("allFloors")}</SelectItem>
               {allFloors.map(f => (
                 <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>
               ))}
@@ -178,8 +180,8 @@ export default function WerkplekkenPage() {
       ) : !workplaces?.length ? (
         <div className="text-center py-24 bg-card rounded-lg border border-dashed flex flex-col items-center justify-center">
           <Monitor className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">Geen werkplekken gevonden</h3>
-          <p className="text-sm text-muted-foreground">Probeer een andere verdieping of datum.</p>
+          <h3 className="text-lg font-medium">{t("emptyTitle")}</h3>
+          <p className="text-sm text-muted-foreground">{t("emptyDesc")}</p>
         </div>
       ) : (
         <div className="space-y-8">
@@ -191,7 +193,7 @@ export default function WerkplekkenPage() {
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-primary" />
                   <h2 className="text-xl font-semibold capitalize">{zone}</h2>
-                  <Badge variant="secondary" className="ml-2">{zoneWorkplaces.filter(w => w.available).length} beschikbaar</Badge>
+                  <Badge variant="secondary" className="ml-2">{t("available", { count: zoneWorkplaces.filter(w => w.available).length })}</Badge>
                 </div>
                 
                 <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -224,7 +226,7 @@ export default function WerkplekkenPage() {
 
                         {!wp.available && wp.bookedByName && (
                           <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] flex flex-col items-center justify-center p-2">
-                            <span className="text-xs font-medium text-foreground">Geboekt door:</span>
+                            <span className="text-xs font-medium text-foreground">{t("bookedBy")}</span>
                             <span className="text-xs text-muted-foreground text-center truncate w-full px-2">{wp.bookedByName}</span>
                           </div>
                         )}

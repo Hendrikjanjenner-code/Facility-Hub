@@ -1,0 +1,145 @@
+{
+  "title": "Sleutel- en pasbeheer",
+  "subtitle": "Register, sleutelplan, uitgifte en verliesprocedure.",
+  "newKey": "Nieuwe sleutel of pas",
+  "stats": {
+    "inRegister": "In register",
+    "issued": "Uitgegeven",
+    "overdue": "Te laat ingeleverd"
+  },
+  "searchPlaceholder": "Zoek op code, omschrijving of houder...",
+  "filters": {
+    "allTypes": "Alle types",
+    "keys": "Sleutels",
+    "passes": "Passen",
+    "allStatuses": "Alle statussen",
+    "overdueBadge": "Te laat"
+  },
+  "type": {
+    "sleutel": "Sleutel",
+    "pas": "Pas"
+  },
+  "status": {
+    "beschikbaar": "Beschikbaar",
+    "uitgegeven": "Uitgegeven",
+    "vermist": "Vermist",
+    "geblokkeerd": "Geblokkeerd"
+  },
+  "table": {
+    "code": "Code",
+    "type": "Type",
+    "description": "Omschrijving",
+    "building": "Gebouw",
+    "doors": "Deuren",
+    "status": "Status",
+    "currentHolder": "Huidige houder",
+    "dueBy": "Inleveren voor",
+    "empty": "Geen sleutels gevonden.",
+    "overdue": "te laat"
+  },
+  "newDialog": {
+    "title": "Nieuwe sleutel of pas registreren",
+    "description": "Voeg een sleutel of toegangspas toe aan het register.",
+    "code": "Code",
+    "codePlaceholder": "Bijv. SL-005",
+    "type": "Type",
+    "descriptionLabel": "Omschrijving",
+    "descriptionPlaceholder": "Bijv. Sleutel archiefruimte",
+    "building": "Gebouw",
+    "none": "Geen / n.v.t.",
+    "replacementCost": "Vervangingskosten (€)",
+    "add": "Toevoegen"
+  },
+  "toast": {
+    "codeDescRequired": "Vul code en omschrijving in",
+    "added": "Sleutel toegevoegd",
+    "addFailed": "Toevoegen mislukt"
+  },
+  "detail": {
+    "notFound": "Sleutel niet gevonden.",
+    "replacementCostLabel": "Vervangingskosten {{cost}}",
+    "issue": "Uitgeven",
+    "block": "Blokkeren",
+    "takeBack": "Innemen",
+    "makeAvailable": "Weer beschikbaar",
+    "reportLost": "Vermist melden",
+    "actionFailed": "Actie mislukt",
+    "issueDialog": {
+      "title": "Sleutel uitgeven",
+      "description": "Registreer aan wie {{code}} wordt uitgegeven.",
+      "employee": "Medewerker",
+      "employeePlaceholder": "Kies medewerker",
+      "dueDate": "Inleverdatum (optioneel)",
+      "dueDateHint": "Bijv. voor bezoekerspassen of tijdelijke sleutels.",
+      "note": "Notitie (optioneel)",
+      "confirm": "Uitgeven"
+    },
+    "lossDialog": {
+      "title": "Verliesprocedure starten",
+      "description": "De sleutel wordt als vermist geregistreerd, er wordt automatisch een servicedesk-melding aangemaakt en de kosten worden verrekend{{holder}}.",
+      "descriptionHolder": " met {{name}}",
+      "charge": "Kostenverrekening (€)",
+      "chargeHint": "Leeg laten = vervangingskosten uit het register.",
+      "note": "Toelichting",
+      "confirm": "Vermist melden"
+    },
+    "toast": {
+      "issued": "Sleutel uitgegeven",
+      "blocked": "Sleutel geblokkeerd",
+      "returned": "Sleutel ingenomen",
+      "available": "Sleutel weer beschikbaar",
+      "lossStarted": "Verliesprocedure gestart",
+      "lossStartedDesc": "Er is een servicedesk-melding aangemaakt.",
+      "dueUpdated": "Inleverdatum bijgewerkt",
+      "doorAdded": "Deur toegevoegd",
+      "doorRemoved": "Deur verwijderd"
+    },
+    "issuedBanner": {
+      "issuedTo": "Uitgegeven aan ",
+      "since": " sinds {{date}}",
+      "overdue": "• Inleverdatum verstreken:",
+      "dueBy": "• Inleveren voor:",
+      "overdueBadge": "te laat",
+      "editDueDate": "Inleverdatum aanpassen"
+    },
+    "dueDialog": {
+      "title": "Inleverdatum aanpassen",
+      "description": "Pas de inleverdatum voor {{name}} aan. Laat leeg om de datum te verwijderen.",
+      "label": "Inleverdatum",
+      "hint": "Leeg laten om de inleverdatum te verwijderen."
+    },
+    "keyPlan": {
+      "title": "Sleutelplan",
+      "description": "Deuren en cilinders die deze {{type}} opent.",
+      "addDoor": "Deur",
+      "empty": "Nog geen deuren gekoppeld.",
+      "doorDialog": {
+        "title": "Deur toevoegen aan sleutelplan",
+        "description": "Omschrijving",
+        "descriptionPlaceholder": "Bijv. Cilinder C-06, archiefdeur",
+        "room": "Ruimte (optioneel)",
+        "none": "Geen / n.v.t.",
+        "add": "Toevoegen"
+      }
+    },
+    "issueHistory": {
+      "title": "Uitgiftehistorie",
+      "description": "Wie deze {{type}} in gebruik had of heeft.",
+      "empty": "Nog niet uitgegeven.",
+      "unknown": "Onbekend",
+      "returned": "Ingenomen",
+      "inUse": "In gebruik",
+      "issuedBy": "• uitgegeven door {{name}}",
+      "dueBy": "• inleveren voor {{date}}",
+      "overdue": " ⚠ te laat"
+    },
+    "lossReports": {
+      "title": "Verliesmeldingen",
+      "reportedOn": "Gemeld op {{date}}",
+      "lastHolder": "• laatste houder: ",
+      "reportedBy": "Gemeld door {{name}}. ",
+      "viewTicket": "Melding {{number}} bekijken"
+    },
+    "createdOn": "Aangemaakt op {{date}}."
+  }
+}

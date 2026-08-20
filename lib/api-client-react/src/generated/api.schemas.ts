@@ -22,6 +22,10 @@ export interface LoginInput {
   password: string;
 }
 
+export interface GuestLoginInput {
+  password: string;
+}
+
 export interface DemoAccount {
   email: string;
   name: string;

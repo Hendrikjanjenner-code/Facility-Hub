@@ -1,0 +1,70 @@
+{
+  "title": "Assets",
+  "subtitle": "Manage equipment, furniture and inventory.",
+  "addAsset": "Add asset",
+  "searchPlaceholder": "Search by name or code...",
+  "allCategories": "All categories",
+  "status": {
+    "in_gebruik": "In use",
+    "in_onderhoud": "In maintenance",
+    "defect": "Faulty",
+    "afgeschreven": "Written off"
+  },
+  "dialog": {
+    "title": "Register new asset",
+    "description": "Add a new object to the property register.",
+    "name": "Name",
+    "namePlaceholder": "e.g. Ergonomic office chair",
+    "code": "Asset code",
+    "codePlaceholder": "e.g. INV-2026-001",
+    "category": "Category",
+    "categoryPlaceholder": "e.g. Furniture",
+    "status": "Status",
+    "statusPlaceholder": "Choose status",
+    "brand": "Brand (optional)",
+    "model": "Model (optional)",
+    "serialNumber": "Serial number (optional)",
+    "location": "Location (optional)",
+    "locationPlaceholder": "Choose room",
+    "add": "Add"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "codeRequired": "Code is required",
+    "categoryRequired": "Category is required"
+  },
+  "toast": {
+    "added": "Asset added"
+  },
+  "empty": {
+    "title": "No assets found",
+    "description": "Try a different search term or adjust the filters."
+  },
+  "card": {
+    "notAssigned": "Not assigned",
+    "openTickets_one": "{{count}} open ticket",
+    "openTickets_other": "{{count}} open tickets"
+  },
+  "detail": {
+    "notFound": "Asset not found.",
+    "info": {
+      "title": "Asset information",
+      "code": "Unique code",
+      "category": "Category",
+      "brandModel": "Brand & model",
+      "serialNumber": "Serial number",
+      "location": "Location",
+      "notAssigned": "Not assigned",
+      "purchaseDate": "Purchase date"
+    },
+    "tickets": {
+      "title": "Linked tickets",
+      "newTicket": "New ticket",
+      "empty": "No tickets found for this asset."
+    },
+    "actions": {
+      "title": "Actions",
+      "reportFault": "Report fault"
+    }
+  }
+}

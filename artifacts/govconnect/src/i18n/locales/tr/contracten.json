@@ -1,0 +1,102 @@
+{
+  "title": "Sözleşmeler ve Satın Alma",
+  "subtitleSupplier": "Belediye ile aktif sözleşmeleriniz.",
+  "subtitle": "Bitiş tarihi takibi ve tedarikçi kaydı ile sözleşme kasası.",
+  "expiring_one": "{{count}} sözleşme fesih süresi içinde — işlem gerekli.",
+  "expiring_other": "{{count}} sözleşme fesih süresi içinde — işlem gerekli.",
+  "tabs": {
+    "contracts": "Sözleşmeler",
+    "suppliers": "Tedarikçiler"
+  },
+  "category": {
+    "techniek": "Teknik",
+    "schoonmaak": "Temizlik",
+    "catering": "İkram",
+    "groenvoorziening": "Peyzaj",
+    "beveiliging": "Güvenlik",
+    "overig": "Diğer"
+  },
+  "status": {
+    "actief": "Etkin",
+    "verlopen": "Süresi dolmuş",
+    "opgezegd": "Feshedildi"
+  },
+  "contracts": {
+    "add": "Sözleşme ekle",
+    "newTitle": "Yeni sözleşme",
+    "newDescription": "Sözleşme kasasına bir sözleşme kaydedin.",
+    "empty": "Sözleşme yok",
+    "terminate": "Feshet",
+    "perYear": "{{value}}/yıl",
+    "daysRemaining": "{{count}} gün kaldı",
+    "noticeSuffix": " (fesih süresi {{days}} gün)"
+  },
+  "contractFields": {
+    "name": "Ad",
+    "namePlaceholder": "Örn. Asansör bakımı",
+    "supplier": "Tedarikçi",
+    "supplierPlaceholder": "Tedarikçi seçin",
+    "category": "Kategori",
+    "categoryPlaceholder": "Kategori seçin",
+    "annualValue": "Yıllık değer (€)",
+    "startDate": "Başlangıç tarihi",
+    "endDate": "Bitiş tarihi",
+    "noticePeriod": "Fesih süresi (gün)",
+    "description": "Açıklama (isteğe bağlı)"
+  },
+  "suppliers": {
+    "add": "Tedarikçi ekle",
+    "newTitle": "Yeni tedarikçi",
+    "newDescription": "Kayıt defterine bir tedarikçi kaydedin.",
+    "contractCount_one": "{{count}} sözleşme",
+    "contractCount_other": "{{count}} sözleşme",
+    "portal": "Portal: {{name}}"
+  },
+  "supplierFields": {
+    "name": "Şirket adı",
+    "category": "Kategori",
+    "categoryPlaceholder": "Kategori seçin",
+    "contactName": "İletişim kişisi",
+    "kvkNumber": "Ticaret Odası numarası",
+    "email": "E-posta",
+    "phone": "Telefon"
+  },
+  "documents": {
+    "shared": "Paylaşılan belgeler",
+    "vault": "Dijital kasa",
+    "empty": "Henüz belge yüklenmedi.",
+    "upload": "PDF yükle"
+  },
+  "reviews": {
+    "title": "Değerlendirmeler",
+    "average": "ort. {{score}} / 5",
+    "add": "Değerlendir",
+    "dialogTitle": "Tedarikçiyi değerlendir",
+    "dialogDescription": "Yıllık değerlendirme (1–5 yıldız)",
+    "empty": "Henüz değerlendirme yok.",
+    "year": "Yıl",
+    "score": "Puan (1–5)",
+    "comment": "Açıklama (isteğe bağlı)",
+    "commentPlaceholder": "Puanı açıklayın..."
+  },
+  "validation": {
+    "nameRequired": "Ad zorunludur",
+    "supplierRequired": "Bir tedarikçi seçin",
+    "categoryRequired": "Kategori zorunludur",
+    "startDateRequired": "Başlangıç tarihi zorunludur",
+    "endDateRequired": "Bitiş tarihi zorunludur",
+    "emailInvalid": "Geçersiz e-posta adresi"
+  },
+  "toast": {
+    "documentUploaded": "Belge yüklendi",
+    "registrationFailed": "Kayıt başarısız",
+    "uploadFailed": "Yükleme başarısız",
+    "documentDeleted": "Belge silindi",
+    "deleteFailed": "Silme başarısız",
+    "reviewSaved": "Değerlendirme kaydedildi",
+    "saveFailed": "Kaydetme başarısız",
+    "contractAdded": "Sözleşme eklendi",
+    "supplierAdded": "Tedarikçi eklendi",
+    "contractTerminated": "Sözleşme feshedildi"
+  }
+}

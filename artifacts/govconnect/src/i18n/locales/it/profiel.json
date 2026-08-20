@@ -1,0 +1,37 @@
+{
+  "title": "Il mio profilo",
+  "subtitle": "Gestisci le tue impostazioni personali.",
+  "account": {
+    "title": "Dati dell'account",
+    "name": "Nome",
+    "email": "Indirizzo e-mail",
+    "role": "Ruolo",
+    "department": "Reparto"
+  },
+  "alerts": {
+    "title": "Avvisi di scadenza",
+    "description": "Scegli come vuoi essere avvisato quando un contratto sta per scadere."
+  },
+  "options": {
+    "inapp_only": {
+      "label": "Solo in-app",
+      "description": "Ricevi notifiche solo all'interno dell'applicazione, nessuna e-mail."
+    },
+    "email": {
+      "label": "Solo e-mail",
+      "description": "Ricevi solo un'e-mail per avvisi critici sui contratti, nessuna notifica in-app."
+    },
+    "all": {
+      "label": "In-app ed e-mail (predefinito)",
+      "description": "Ricevi sia una notifica in-app sia un'e-mail per avvisi critici sui contratti."
+    }
+  },
+  "save": "Salva",
+  "saving": "Salvataggio…",
+  "toast": {
+    "savedTitle": "Preferenze salvate",
+    "savedDescription": "Le tue impostazioni di notifica sono state aggiornate.",
+    "errorTitle": "Errore",
+    "errorDescription": "Impossibile salvare le preferenze. Riprova."
+  }
+}

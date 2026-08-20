@@ -1,0 +1,23 @@
+{
+  "title": "Postos de trabalho",
+  "subtitle": "Reserve um posto flexível no escritório.",
+  "colleagueSearchPlaceholder": "Procurar colega por nome...",
+  "noColleagueFound": "Nenhum posto de trabalho encontrado",
+  "colleagueFound_one": "{{count}} posto de trabalho encontrado",
+  "colleagueFound_other": "{{count}} postos de trabalho encontrados",
+  "bookedIn": "Reservado",
+  "chooseDate": "Escolha a data",
+  "allFloors": "Todos os pisos",
+  "emptyTitle": "Nenhum posto de trabalho encontrado",
+  "emptyDesc": "Experimente outro piso ou data.",
+  "available_one": "{{count}} disponível",
+  "available_other": "{{count}} disponíveis",
+  "bookedBy": "Reservado por:",
+  "workplaceTitle": "Posto de trabalho {{name}}",
+  "toastBookedTitle": "Posto de trabalho reservado",
+  "toastBookedDesc": "Para {{date}}",
+  "toastConflictTitle": "Conflito",
+  "toastConflictDesc": "Este posto de trabalho já foi reservado entretanto.",
+  "toastErrorTitle": "Erro",
+  "toastErrorDesc": "Não foi possível reservar o posto de trabalho."
+}

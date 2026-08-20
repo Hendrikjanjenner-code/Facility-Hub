@@ -596,7 +596,7 @@ export async function ensureContractExpiryNotifications(): Promise<void> {
 
         // E-mail outbox: alleen bij email of all
         if (wantsEmail && owner) {
-          const appUrl = process.env["APP_URL"] ?? "https://govconnect.nl";
+          const appUrl = process.env["APP_URL"] ?? "https://letshare4gov.nl";
           await tx
             .insert(emailQueueTable)
             .values({

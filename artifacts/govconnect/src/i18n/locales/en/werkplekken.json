@@ -1,0 +1,23 @@
+{
+  "title": "Workplaces",
+  "subtitle": "Book a flex desk at the office.",
+  "colleagueSearchPlaceholder": "Search colleague by name...",
+  "noColleagueFound": "No workplace found",
+  "colleagueFound_one": "{{count}} workplace found",
+  "colleagueFound_other": "{{count}} workplaces found",
+  "bookedIn": "Booked",
+  "chooseDate": "Choose date",
+  "allFloors": "All floors",
+  "emptyTitle": "No workplaces found",
+  "emptyDesc": "Try a different floor or date.",
+  "available_one": "{{count}} available",
+  "available_other": "{{count}} available",
+  "bookedBy": "Booked by:",
+  "workplaceTitle": "Workplace {{name}}",
+  "toastBookedTitle": "Workplace booked",
+  "toastBookedDesc": "For {{date}}",
+  "toastConflictTitle": "Conflict",
+  "toastConflictDesc": "This workplace has already been booked in the meantime.",
+  "toastErrorTitle": "Error",
+  "toastErrorDesc": "Could not book workplace."
+}

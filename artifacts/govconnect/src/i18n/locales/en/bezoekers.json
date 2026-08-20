@@ -1,0 +1,42 @@
+{
+  "title": "Reception dashboard",
+  "subtitle": "Visitors expected on {{date}}.",
+  "register": "Register visitor",
+  "dialog": {
+    "title": "Register new visitor",
+    "description": "Register a visitor for today. The badge is generated instantly.",
+    "name": "Visitor name",
+    "namePlaceholder": "Full name",
+    "company": "Company (Optional)",
+    "companyPlaceholder": "Company name",
+    "email": "Email address (Optional)",
+    "emailPlaceholder": "Email",
+    "host": "Host",
+    "hostPlaceholder": "Choose employee",
+    "expectedArrival": "Expected arrival",
+    "submit": "Register"
+  },
+  "searchPlaceholder": "Search visitor...",
+  "empty": "No visitors found for today.",
+  "expected": "Expected: {{time}}",
+  "hostLabel": "Host: ",
+  "checkedIn": "In: {{time}}",
+  "checkedOut": "Out: {{time}}",
+  "checkIn": "Check in",
+  "checkOut": "Check out",
+  "visitDone": "Visit completed",
+  "toast": {
+    "registered": "Visitor registered",
+    "statusChanged": "Visitor is now {{status}}"
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "emailInvalid": "Invalid email address",
+    "timeInvalid": "Invalid format (HH:MM)"
+  },
+  "status": {
+    "verwacht": "expected",
+    "aanwezig": "present",
+    "vertrokken": "departed"
+  }
+}

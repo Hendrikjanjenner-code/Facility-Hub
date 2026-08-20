@@ -1,0 +1,53 @@
+{
+  "title": "Kennisbank",
+  "subtitle": "Antwoorden op veelgestelde facilitaire vragen.",
+  "newArticle": "Nieuw artikel",
+  "searchPlaceholder": "Zoek in kennisbank...",
+  "all": "Alles",
+  "noLinkedCategories": "Geen meldingscategorieën gekoppeld",
+  "edit": "Bewerken",
+  "delete": "Verwijderen",
+  "emptyTitle": "Geen artikelen gevonden",
+  "emptyNoResults": "Geen resultaten voor \"{{query}}\"",
+  "emptyNone": "Er zijn nog geen kennisbankartikelen aangemaakt.",
+  "deleteDialog": {
+    "title": "Artikel verwijderen",
+    "confirm": "Weet je zeker dat je <0>\"{{title}}\"</0> permanent wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen"
+  },
+  "form": {
+    "editTitle": "Artikel bewerken",
+    "newTitle": "Nieuw kennisbankartikel",
+    "titleLabel": "Titel",
+    "titlePlaceholder": "Korte, duidelijke titel",
+    "categoryLabel": "Categorie",
+    "bodyLabel": "Inhoud",
+    "bodyPlaceholder": "Geef een duidelijke uitleg of stap-voor-stap instructie...",
+    "tagsLabel": "Tags (komma gescheiden)",
+    "tagsPlaceholder": "bijv. verwarming, storing, klimaat",
+    "linkLabel": "Koppel aan meldingscategorieën",
+    "linkHelp": "Dit artikel verschijnt automatisch als suggestie wanneer een melder een van deze categorieën kiest.",
+    "cancel": "Annuleren",
+    "save": "Opslaan"
+  },
+  "toast": {
+    "deleted": "Artikel verwijderd",
+    "deleteError": "Kon artikel niet verwijderen.",
+    "updated": "Artikel bijgewerkt",
+    "updateError": "Kon artikel niet bijwerken.",
+    "created": "Artikel aangemaakt",
+    "createError": "Kon artikel niet aanmaken.",
+    "errorTitle": "Fout"
+  },
+  "categories": {
+    "algemeen": "Algemeen",
+    "klimaat": "Klimaat",
+    "schoonmaak": "Schoonmaak",
+    "technisch": "Technisch",
+    "sanitair": "Sanitair",
+    "veiligheid": "Veiligheid",
+    "reserveringen": "Reserveringen",
+    "catering": "Catering"
+  }
+}

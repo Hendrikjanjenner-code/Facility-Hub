@@ -1,0 +1,102 @@
+{
+  "title": "Contratos y Compras",
+  "subtitleSupplier": "Sus contratos activos con el ayuntamiento.",
+  "subtitle": "Bóveda de contratos con seguimiento de fechas de fin y registro de proveedores.",
+  "expiring_one": "{{count}} contrato está dentro del plazo de preaviso — se requiere acción.",
+  "expiring_other": "{{count}} contratos están dentro del plazo de preaviso — se requiere acción.",
+  "tabs": {
+    "contracts": "Contratos",
+    "suppliers": "Proveedores"
+  },
+  "category": {
+    "techniek": "Técnica",
+    "schoonmaak": "Limpieza",
+    "catering": "Catering",
+    "groenvoorziening": "Jardinería",
+    "beveiliging": "Seguridad",
+    "overig": "Otros"
+  },
+  "status": {
+    "actief": "Activo",
+    "verlopen": "Vencido",
+    "opgezegd": "Rescindido"
+  },
+  "contracts": {
+    "add": "Añadir contrato",
+    "newTitle": "Nuevo contrato",
+    "newDescription": "Registre un contrato en la bóveda de contratos.",
+    "empty": "Sin contratos",
+    "terminate": "Rescindir",
+    "perYear": "{{value}}/año",
+    "daysRemaining": "quedan {{count}} días",
+    "noticeSuffix": " (plazo de preaviso {{days}} días)"
+  },
+  "contractFields": {
+    "name": "Nombre",
+    "namePlaceholder": "P. ej. Mantenimiento de ascensores",
+    "supplier": "Proveedor",
+    "supplierPlaceholder": "Elegir proveedor",
+    "category": "Categoría",
+    "categoryPlaceholder": "Elegir categoría",
+    "annualValue": "Valor anual (€)",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "noticePeriod": "Plazo de preaviso (días)",
+    "description": "Descripción (opcional)"
+  },
+  "suppliers": {
+    "add": "Añadir proveedor",
+    "newTitle": "Nuevo proveedor",
+    "newDescription": "Registre un proveedor en el registro.",
+    "contractCount_one": "{{count}} contrato",
+    "contractCount_other": "{{count}} contratos",
+    "portal": "Portal: {{name}}"
+  },
+  "supplierFields": {
+    "name": "Nombre de la empresa",
+    "category": "Categoría",
+    "categoryPlaceholder": "Elegir categoría",
+    "contactName": "Persona de contacto",
+    "kvkNumber": "Número de Cámara de Comercio",
+    "email": "Correo electrónico",
+    "phone": "Teléfono"
+  },
+  "documents": {
+    "shared": "Documentos compartidos",
+    "vault": "Bóveda digital",
+    "empty": "Aún no se han subido documentos.",
+    "upload": "Subir PDF"
+  },
+  "reviews": {
+    "title": "Evaluaciones",
+    "average": "prom. {{score}} / 5",
+    "add": "Evaluar",
+    "dialogTitle": "Evaluar proveedor",
+    "dialogDescription": "Evaluación anual (1–5 estrellas)",
+    "empty": "Aún sin evaluaciones.",
+    "year": "Año",
+    "score": "Puntuación (1–5)",
+    "comment": "Comentario (opcional)",
+    "commentPlaceholder": "Explique la puntuación..."
+  },
+  "validation": {
+    "nameRequired": "El nombre es obligatorio",
+    "supplierRequired": "Elija un proveedor",
+    "categoryRequired": "La categoría es obligatoria",
+    "startDateRequired": "La fecha de inicio es obligatoria",
+    "endDateRequired": "La fecha de fin es obligatoria",
+    "emailInvalid": "Dirección de correo no válida"
+  },
+  "toast": {
+    "documentUploaded": "Documento subido",
+    "registrationFailed": "Error en el registro",
+    "uploadFailed": "Error al subir",
+    "documentDeleted": "Documento eliminado",
+    "deleteFailed": "Error al eliminar",
+    "reviewSaved": "Evaluación guardada",
+    "saveFailed": "Error al guardar",
+    "contractAdded": "Contrato añadido",
+    "supplierAdded": "Proveedor añadido",
+    "contractTerminated": "Contrato rescindido"
+  }
+}

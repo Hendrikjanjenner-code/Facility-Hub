@@ -1,0 +1,41 @@
+{
+  "title": "Resumen",
+  "welcome": "Bienvenido de nuevo, {{name}}",
+  "subtitle": "Aquí tiene su resumen de instalaciones para hoy.",
+  "newTicket": "Nueva incidencia",
+  "stats": {
+    "myOpenTickets": "Mis incidencias abiertas",
+    "openTickets": "Incidencias abiertas",
+    "inProgress": "Actualmente en tratamiento",
+    "slaAtRisk": "SLA en riesgo",
+    "slaAtRiskDesc": "En menos de 4 horas o vencido",
+    "myReservations": "Mis reservas",
+    "reservationsToday": "Reservas de hoy",
+    "roomsAndCatering": "Salas y catering",
+    "workplaceBookings": "Reservas de puesto de trabajo",
+    "forToday": "Para hoy",
+    "visitors": "Visitantes",
+    "presentExpected": "Presentes / Esperados",
+    "totalAssets": "Total de activos",
+    "registeredInSystem": "Registrados en el sistema",
+    "poorCondition": "Componentes en mal estado",
+    "poorConditionDesc": "Puntuación ≥ 4 (regular a muy malo)"
+  },
+  "charts": {
+    "ticketsByStatus": "Incidencias por estado",
+    "ticketsByStatusDesc": "Resumen de todas las incidencias activas",
+    "priorityDistribution": "Distribución de prioridades",
+    "priorityDistributionDesc": "Incidencias abiertas"
+  },
+  "satisfaction": {
+    "title": "Satisfacción del cliente",
+    "average": "Media {{score}}/5 — ",
+    "summary": "{{responses}} de {{closed}} incidencias cerradas valoradas ({{rate}}% de tasa de respuesta)",
+    "noRatings": "Aún no se han recibido valoraciones.",
+    "lowestResponseRate": "Menor tasa de respuesta por categoría"
+  },
+  "activity": {
+    "title": "Actividad reciente",
+    "empty": "Sin actividad reciente"
+  }
+}

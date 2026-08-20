@@ -1,0 +1,5 @@
+{
+  "title": "Algo correu mal",
+  "description": "Esta parte da aplicação encontrou um erro. O resto da aplicação continua a funcionar.",
+  "tryAgain": "Tentar novamente"
+}

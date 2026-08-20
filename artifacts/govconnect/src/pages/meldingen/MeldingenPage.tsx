@@ -8,7 +8,8 @@ import {
   getGetSatisfactionReportQueryKey,
 } from "@workspace/api-client-react";
 import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { Ticket, Search, Plus, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -17,11 +18,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getTicketStatusColor, getTicketStatusLabel, getPriorityColor } from "@/lib/status-helpers";
+import { getTicketStatusColor, getPriorityColor } from "@/lib/status-helpers";
 
 const MANAGER_ROLES = ["facilitair_manager", "beheerder"];
 
 export default function MeldingenPage() {
+  const { t } = useTranslation("meldingen");
   const [, setLocation] = useLocation();
   const { data: user } = useGetCurrentUser();
   const [search, setSearch] = useState("");
@@ -55,14 +57,14 @@ export default function MeldingenPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Meldingen</h1>
-          <p className="text-muted-foreground">Beheer en bekijk facilitaire meldingen.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("list.title")}</h1>
+          <p className="text-muted-foreground">{t("list.subtitle")}</p>
         </div>
         
         {user?.role === 'eindgebruiker' && (
           <Button onClick={() => setLocation("/meldingen/nieuw")}>
             <Plus className="mr-2 h-4 w-4" />
-            Nieuwe melding
+            {t("list.newTicket")}
           </Button>
         )}
       </div>
@@ -72,9 +74,9 @@ export default function MeldingenPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium">
-              Responsrate per categorie
+              {t("list.responseRateTitle")}
               <span className="ml-2 text-xs font-normal text-muted-foreground">
-                — percentage gesloten meldingen met beoordeling
+                {t("list.responseRateHint")}
               </span>
             </CardTitle>
           </CardHeader>
@@ -110,9 +112,9 @@ export default function MeldingenPage() {
                 onClick={() => setShowAllRates((v) => !v)}
               >
                 {showAllRates ? (
-                  <><ChevronUp className="h-3 w-3 mr-1" /> Minder tonen</>
+                  <><ChevronUp className="h-3 w-3 mr-1" /> {t("list.showLess")}</>
                 ) : (
-                  <><ChevronDown className="h-3 w-3 mr-1" /> Alle {categoryRates.length} categorieën tonen</>
+                  <><ChevronDown className="h-3 w-3 mr-1" /> {t("list.showAll", { count: categoryRates.length })}</>
                 )}
               </Button>
             )}
@@ -124,7 +126,7 @@ export default function MeldingenPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Zoeken op nummer of titel..." 
+            placeholder={t("list.searchPlaceholder")} 
             className="pl-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -133,38 +135,38 @@ export default function MeldingenPage() {
         <div className="flex flex-wrap sm:flex-nowrap gap-2">
           <Select value={status} onValueChange={setStatus}>
             <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("list.statusPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle statussen</SelectItem>
-              <SelectItem value="nieuw">Nieuw</SelectItem>
-              <SelectItem value="in_behandeling">In behandeling</SelectItem>
-              <SelectItem value="wacht_op_info">Wacht op info</SelectItem>
-              <SelectItem value="ingepland">Ingepland</SelectItem>
-              <SelectItem value="gereed">Gereed</SelectItem>
-              <SelectItem value="gesloten">Gesloten</SelectItem>
+              <SelectItem value="all">{t("list.allStatuses")}</SelectItem>
+              <SelectItem value="nieuw">{t("status.nieuw")}</SelectItem>
+              <SelectItem value="in_behandeling">{t("status.in_behandeling")}</SelectItem>
+              <SelectItem value="wacht_op_info">{t("status.wacht_op_info")}</SelectItem>
+              <SelectItem value="ingepland">{t("status.ingepland")}</SelectItem>
+              <SelectItem value="gereed">{t("status.gereed")}</SelectItem>
+              <SelectItem value="gesloten">{t("status.gesloten")}</SelectItem>
             </SelectContent>
           </Select>
           
           <Select value={priority} onValueChange={setPriority}>
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Prioriteit" />
+              <SelectValue placeholder={t("list.priorityPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle prioriteiten</SelectItem>
-              <SelectItem value="P1">P1 (Kritiek)</SelectItem>
-              <SelectItem value="P2">P2 (Hoog)</SelectItem>
-              <SelectItem value="P3">P3 (Normaal)</SelectItem>
-              <SelectItem value="P4">P4 (Laag)</SelectItem>
+              <SelectItem value="all">{t("list.allPriorities")}</SelectItem>
+              <SelectItem value="P1">{t("priority.P1")}</SelectItem>
+              <SelectItem value="P2">{t("priority.P2")}</SelectItem>
+              <SelectItem value="P3">{t("priority.P3")}</SelectItem>
+              <SelectItem value="P4">{t("priority.P4")}</SelectItem>
             </SelectContent>
           </Select>
 
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Categorie" />
+              <SelectValue placeholder={t("list.categoryPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle categorieën</SelectItem>
+              <SelectItem value="all">{t("list.allCategories")}</SelectItem>
               {categories?.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
               ))}
@@ -182,13 +184,13 @@ export default function MeldingenPage() {
           <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
             <Ticket className="h-6 w-6 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-medium">Geen meldingen gevonden</h3>
+          <h3 className="text-lg font-medium">{t("list.emptyTitle")}</h3>
           <p className="text-sm text-muted-foreground max-w-sm mt-1">
-            Pas uw filters aan of controleer of u de juiste zoekterm heeft gebruikt.
+            {t("list.emptyDesc")}
           </p>
           {user?.role === 'eindgebruiker' && (
             <Button variant="outline" className="mt-4" onClick={() => setLocation("/meldingen/nieuw")}>
-              <Plus className="mr-2 h-4 w-4" /> Maak eerste melding
+              <Plus className="mr-2 h-4 w-4" /> {t("list.createFirst")}
             </Button>
           )}
         </div>
@@ -207,7 +209,7 @@ export default function MeldingenPage() {
                   <div className="flex flex-col gap-1 w-[120px] flex-shrink-0">
                     <span className="font-mono text-sm font-semibold text-primary">{ticket.number}</span>
                     <span className="text-xs text-muted-foreground">
-                      {format(new Date(ticket.createdAt), "d MMM yyyy", { locale: nl })}
+                      {format(new Date(ticket.createdAt), "d MMM yyyy", { locale: getDateFnsLocale() })}
                     </span>
                   </div>
                   
@@ -231,7 +233,7 @@ export default function MeldingenPage() {
                       {ticket.reporterName && (
                         <>
                           <span>•</span>
-                          <span className="truncate">Gemeld door: {ticket.reporterName}</span>
+                          <span className="truncate">{t("list.reportedBy", { name: ticket.reporterName })}</span>
                         </>
                       )}
                     </div>
@@ -243,13 +245,13 @@ export default function MeldingenPage() {
                         {ticket.priority}
                       </Badge>
                       <Badge variant="secondary" className={`${getTicketStatusColor(ticket.status)} border-0 font-medium`}>
-                        {getTicketStatusLabel(ticket.status)}
+                        {t(`status.${ticket.status}`, { defaultValue: ticket.status })}
                       </Badge>
                     </div>
                     
                     {(user?.role !== 'eindgebruiker') && ticket.assigneeName && (
                       <div className="text-xs text-muted-foreground hidden sm:block">
-                        Toegewezen: <span className="font-medium text-foreground">{ticket.assigneeName}</span>
+                        {t("list.assigned")} <span className="font-medium text-foreground">{ticket.assigneeName}</span>
                       </div>
                     )}
                   </div>

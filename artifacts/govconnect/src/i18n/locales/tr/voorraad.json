@@ -1,0 +1,57 @@
+{
+  "title": "Stok yönetimi",
+  "subtitle": "Minimum stok uyarılarıyla web mağazası stok seviyeleri.",
+  "addProduct": "Ürün ekle",
+  "newProduct": "Yeni ürün",
+  "newProductDescription": "Web mağazası kataloğuna bir ürün ekleyin.",
+  "fields": {
+    "name": "Ad",
+    "category": "Kategori",
+    "categoryPlaceholder": "Kategori seçin",
+    "description": "Açıklama (isteğe bağlı)",
+    "price": "Fiyat (€)",
+    "unit": "Birim",
+    "stock": "Stok",
+    "minStock": "Min. stok"
+  },
+  "category": {
+    "kantoorartikelen": "Ofis malzemeleri",
+    "ict": "BT",
+    "meubilair": "Mobilya",
+    "facilitair": "Tesis",
+    "overig": "Diğer"
+  },
+  "alerts_one": "{{count}} ürün minimum stok seviyesinin altında: {{names}}.",
+  "alerts_other": "{{count}} ürün minimum stok seviyesinin altında: {{names}}.",
+  "onlyAlerts": "Yalnızca minimum stok altındaki ürünler",
+  "emptyAlerts": "Stok uyarısı yok",
+  "emptyProducts": "Ürün yok",
+  "table": {
+    "product": "Ürün",
+    "category": "Kategori",
+    "price": "Fiyat",
+    "stock": "Stok",
+    "minimum": "Minimum",
+    "status": "Durum",
+    "action": "İşlem"
+  },
+  "status": {
+    "belowMin": "Minimumun altında",
+    "onTarget": "Yeterli"
+  },
+  "update": "Güncelle",
+  "updateStock": "Stoğu güncelle",
+  "currentStock": "Güncel stok",
+  "minStockLabel": "Minimum stok",
+  "toast": {
+    "added": "Ürün eklendi",
+    "saveFailed": "Kaydetme başarısız",
+    "stockUpdated": "Stok güncellendi",
+    "updateFailed": "Güncelleme başarısız"
+  },
+  "validation": {
+    "nameRequired": "Ad zorunludur",
+    "categoryRequired": "Kategori zorunludur",
+    "priceRequired": "Fiyat zorunludur"
+  }
+}

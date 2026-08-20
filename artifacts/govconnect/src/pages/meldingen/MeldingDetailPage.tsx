@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { format, formatDistanceToNow, isPast } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { 
   useGetTicket, 
   useListTicketComments, 
@@ -57,7 +58,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 
-import { getTicketStatusColor, getTicketStatusLabel, getPriorityColor, cn } from "@/lib/status-helpers";
+import { getTicketStatusColor, getPriorityColor, cn } from "@/lib/status-helpers";
 import {
   Dialog,
   DialogContent,
@@ -78,6 +79,7 @@ const STATUS_FLOW = [
 ];
 
 function SlaTimer({ dueAt, status }: { dueAt?: string | null, status: string }) {
+  const { t } = useTranslation("meldingen");
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [isOverdue, setIsOverdue] = useState(false);
 
@@ -102,8 +104,8 @@ function SlaTimer({ dueAt, status }: { dueAt?: string | null, status: string }) 
     return () => clearInterval(interval);
   }, [dueAt, status]);
 
-  if (!dueAt) return <span className="text-muted-foreground">Geen SLA</span>;
-  if (status === 'gereed' || status === 'gesloten') return <span className="text-muted-foreground">SLA gestopt</span>;
+  if (!dueAt) return <span className="text-muted-foreground">{t("detail.noSla")}</span>;
+  if (status === 'gereed' || status === 'gesloten') return <span className="text-muted-foreground">{t("detail.slaStopped")}</span>;
 
   return (
     <div className={cn("font-mono font-medium flex items-center gap-1.5", isOverdue ? "text-destructive" : "text-primary")}>
@@ -114,6 +116,7 @@ function SlaTimer({ dueAt, status }: { dueAt?: string | null, status: string }) 
 }
 
 export default function MeldingDetailPage({ id }: { id: string }) {
+  const { t } = useTranslation("meldingen");
   const ticketId = parseInt(id);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -166,14 +169,14 @@ export default function MeldingDetailPage({ id }: { id: string }) {
   }
 
   if (!ticket) {
-    return <div>Melding niet gevonden.</div>;
+    return <div>{t("detail.notFound")}</div>;
   }
 
   const handleStatusChange = (newStatus: string) => {
     updateTicket.mutate({ id: ticketId, data: { status: newStatus } }, {
       onSuccess: (data) => {
         queryClient.setQueryData(getGetTicketQueryKey(ticketId), data);
-        toast({ title: "Status bijgewerkt" });
+        toast({ title: t("detail.toastStatusUpdated") });
       }
     });
   };
@@ -182,7 +185,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
     updateTicket.mutate({ id: ticketId, data: { assigneeId: assigneeId === "none" ? null : parseInt(assigneeId) } }, {
       onSuccess: (data) => {
         queryClient.setQueryData(getGetTicketQueryKey(ticketId), data);
-        toast({ title: "Toewijzing bijgewerkt" });
+        toast({ title: t("detail.toastAssigneeUpdated") });
       }
     });
   };
@@ -191,7 +194,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
     updateTicket.mutate({ id: ticketId, data: { priority } }, {
       onSuccess: (data) => {
         queryClient.setQueryData(getGetTicketQueryKey(ticketId), data);
-        toast({ title: "Prioriteit bijgewerkt" });
+        toast({ title: t("detail.toastPriorityUpdated") });
       }
     });
   };
@@ -208,10 +211,10 @@ export default function MeldingDetailPage({ id }: { id: string }) {
             data,
           );
           setSatisfactionDialogOpen(false);
-          toast({ title: "Beoordeling ingediend", description: "Bedankt voor uw feedback!" });
+          toast({ title: t("detail.satisfaction.toastSubmittedTitle"), description: t("detail.satisfaction.toastSubmittedDesc") });
         },
         onError: () => {
-          toast({ variant: "destructive", title: "Fout", description: "Kon beoordeling niet opslaan." });
+          toast({ variant: "destructive", title: t("detail.satisfaction.toastErrorTitle"), description: t("detail.satisfaction.toastErrorDesc") });
         },
       },
     );
@@ -235,9 +238,9 @@ export default function MeldingDetailPage({ id }: { id: string }) {
       <Dialog open={satisfactionDialogOpen} onOpenChange={setSatisfactionDialogOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Hoe tevreden bent u?</DialogTitle>
+            <DialogTitle>{t("detail.satisfaction.title")}</DialogTitle>
             <DialogDescription>
-              Geef een beoordeling voor de afhandeling van deze melding. Uw feedback helpt ons verbeteren.
+              {t("detail.satisfaction.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -261,31 +264,31 @@ export default function MeldingDetailPage({ id }: { id: string }) {
               ))}
             </div>
             <div className="text-center text-sm text-muted-foreground">
-              {satisfactionScore === 0 && "Klik op een ster om te beoordelen"}
-              {satisfactionScore === 1 && "Zeer ontevreden"}
-              {satisfactionScore === 2 && "Ontevreden"}
-              {satisfactionScore === 3 && "Neutraal"}
-              {satisfactionScore === 4 && "Tevreden"}
-              {satisfactionScore === 5 && "Zeer tevreden"}
+              {satisfactionScore === 0 && t("detail.satisfaction.clickToRate")}
+              {satisfactionScore === 1 && t("detail.satisfaction.score1")}
+              {satisfactionScore === 2 && t("detail.satisfaction.score2")}
+              {satisfactionScore === 3 && t("detail.satisfaction.score3")}
+              {satisfactionScore === 4 && t("detail.satisfaction.score4")}
+              {satisfactionScore === 5 && t("detail.satisfaction.score5")}
             </div>
             <div className="space-y-1.5">
-              <Label>Opmerking (optioneel)</Label>
+              <Label>{t("detail.satisfaction.commentLabel")}</Label>
               <Textarea
                 value={satisfactionComment}
                 onChange={(e) => setSatisfactionComment(e.target.value)}
-                placeholder="Heeft u nog aanvullende opmerkingen?"
+                placeholder={t("detail.satisfaction.commentPlaceholder")}
                 className="min-h-[80px]"
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setSatisfactionDialogOpen(false)}>Overslaan</Button>
+            <Button variant="ghost" onClick={() => setSatisfactionDialogOpen(false)}>{t("detail.satisfaction.skip")}</Button>
             <Button
               onClick={handleSatisfactionSubmit}
               disabled={satisfactionScore < 1 || submitSatisfaction.isPending}
             >
               {submitSatisfaction.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Versturen
+              {t("detail.satisfaction.submit")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -302,7 +305,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
               <Badge variant="outline" className="font-mono bg-background">{ticket.number}</Badge>
             </div>
             <p className="text-muted-foreground text-sm flex items-center gap-2 mt-1">
-              Aangemaakt op {format(new Date(ticket.createdAt), "d MMMM yyyy HH:mm", { locale: nl })}
+              {t("detail.createdAt", { date: format(new Date(ticket.createdAt), "d MMMM yyyy HH:mm", { locale: getDateFnsLocale() }) })}
             </p>
           </div>
         </div>
@@ -319,7 +322,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
             ) : (
               <Button variant="outline" size="sm" onClick={() => setSatisfactionDialogOpen(true)}>
                 <Star className="mr-2 h-4 w-4" />
-                Beoordelen
+                {t("detail.rate")}
               </Button>
             )
           )}
@@ -327,11 +330,11 @@ export default function MeldingDetailPage({ id }: { id: string }) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">
-                  Status: {getTicketStatusLabel(ticket.status)}
+                  {t("detail.statusPrefix", { status: t(`status.${ticket.status}`, { defaultValue: ticket.status }) })}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Wijzig status</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("detail.changeStatus")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {STATUS_FLOW.map((s) => (
                   <DropdownMenuItem 
@@ -339,7 +342,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
                     onClick={() => handleStatusChange(s)}
                     className={ticket.status === s ? "bg-muted" : ""}
                   >
-                    {getTicketStatusLabel(s)}
+                    {t(`status.${s}`, { defaultValue: s })}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -369,7 +372,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
                       "text-xs font-medium mt-2 whitespace-nowrap",
                       isCurrent || isCompleted ? "text-foreground" : "text-muted-foreground"
                     )}>
-                      {getTicketStatusLabel(s)}
+                      {t(`status.${s}`, { defaultValue: s })}
                     </span>
                   </div>
                   {idx < STATUS_FLOW.length - 1 && (
@@ -389,7 +392,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
         <div className="md:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Omschrijving</CardTitle>
+              <CardTitle>{t("detail.description")}</CardTitle>
             </CardHeader>
             <CardContent className="prose dark:prose-invert max-w-none text-sm">
               <p className="whitespace-pre-wrap">{ticket.description}</p>
@@ -398,7 +401,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
               <>
                 <Separator />
                 <CardHeader>
-                  <CardTitle className="text-base">Aanvullende informatie</CardTitle>
+                  <CardTitle className="text-base">{t("detail.additionalInfo")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4 text-sm">
@@ -418,13 +421,13 @@ export default function MeldingDetailPage({ id }: { id: string }) {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5" />
-                Opmerkingen & Updates
+                {t("detail.comments")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
                 {!comments?.length ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">Nog geen opmerkingen.</p>
+                  <p className="text-sm text-muted-foreground text-center py-4">{t("detail.noComments")}</p>
                 ) : (
                   comments.map((comment) => (
                     <div key={comment.id} className="flex gap-4">
@@ -435,7 +438,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium">{comment.authorName}</span>
                           <span className="text-xs text-muted-foreground">
-                            {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: nl })}
+                            {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: getDateFnsLocale() })}
                           </span>
                           {comment.authorRole !== 'eindgebruiker' && (
                             <Badge variant="secondary" className="text-[10px] h-4 px-1 py-0">{comment.authorRole?.replace('_', ' ')}</Badge>
@@ -456,7 +459,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
                 </div>
                 <div className="flex-1 space-y-2">
                   <Textarea 
-                    placeholder="Plaats een update of opmerking..." 
+                    placeholder={t("detail.commentPlaceholder")} 
                     value={commentBody}
                     onChange={(e) => setCommentBody(e.target.value)}
                     className="min-h-[80px]"
@@ -464,7 +467,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
                   <div className="flex justify-end">
                     <Button onClick={submitComment} disabled={createComment.isPending || !commentBody.trim()}>
                       {createComment.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-                      Verzenden
+                      {t("detail.send")}
                     </Button>
                   </div>
                 </div>
@@ -476,11 +479,11 @@ export default function MeldingDetailPage({ id }: { id: string }) {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Details</CardTitle>
+              <CardTitle>{t("detail.details")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div className="space-y-1">
-                <span className="text-muted-foreground block">Prioriteit</span>
+                <span className="text-muted-foreground block">{t("detail.priority")}</span>
                 {isPrivileged ? (
                   <Select value={ticket.priority} onValueChange={handlePriorityChange}>
                     <SelectTrigger className="h-8 w-fit">
@@ -506,28 +509,28 @@ export default function MeldingDetailPage({ id }: { id: string }) {
               <Separator />
 
               <div className="space-y-1">
-                <span className="text-muted-foreground block">SLA</span>
+                <span className="text-muted-foreground block">{t("detail.sla")}</span>
                 <SlaTimer dueAt={ticket.slaDueAt} status={ticket.status} />
               </div>
 
               <Separator />
 
               <div className="space-y-1">
-                <span className="text-muted-foreground block">Categorie</span>
+                <span className="text-muted-foreground block">{t("detail.category")}</span>
                 <span className="font-medium">{ticket.categoryName}</span>
               </div>
 
               <Separator />
 
               <div className="space-y-1">
-                <span className="text-muted-foreground block">Locatie</span>
+                <span className="text-muted-foreground block">{t("detail.location")}</span>
                 {ticket.roomName ? (
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <span>{ticket.roomName} {ticket.buildingName ? `(${ticket.buildingName})` : ''}</span>
                   </div>
                 ) : (
-                  <span className="italic text-muted-foreground">Geen locatie</span>
+                  <span className="italic text-muted-foreground">{t("detail.noLocation")}</span>
                 )}
               </div>
 
@@ -535,7 +538,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
                 <>
                   <Separator />
                   <div className="space-y-1">
-                    <span className="text-muted-foreground block">Asset</span>
+                    <span className="text-muted-foreground block">{t("detail.asset")}</span>
                     <div className="flex items-center gap-2">
                       <PcCase className="h-4 w-4 text-muted-foreground" />
                       <span>{ticket.assetName}</span>
@@ -547,7 +550,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
               <Separator />
 
               <div className="space-y-1">
-                <span className="text-muted-foreground block">Gemeld door</span>
+                <span className="text-muted-foreground block">{t("detail.reportedBy")}</span>
                 <div className="flex items-center gap-2">
                   <UserIcon className="h-4 w-4 text-muted-foreground" />
                   <span>{ticket.reporterName}</span>
@@ -557,14 +560,14 @@ export default function MeldingDetailPage({ id }: { id: string }) {
               <Separator />
 
               <div className="space-y-1">
-                <span className="text-muted-foreground block">Toegewezen aan</span>
+                <span className="text-muted-foreground block">{t("detail.assignedTo")}</span>
                 {isPrivileged ? (
                   <Select value={ticket.assigneeId?.toString() || "none"} onValueChange={handleAssigneeChange}>
                     <SelectTrigger className="h-8">
-                      <SelectValue placeholder="Niet toegewezen" />
+                      <SelectValue placeholder={t("detail.notAssigned")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">Niet toegewezen</SelectItem>
+                      <SelectItem value="none">{t("detail.notAssigned")}</SelectItem>
                       {users?.filter(u => u.role !== 'eindgebruiker').map(u => (
                         <SelectItem key={u.id} value={u.id.toString()}>{u.name}</SelectItem>
                       ))}
@@ -573,7 +576,7 @@ export default function MeldingDetailPage({ id }: { id: string }) {
                 ) : (
                   <div className="flex items-center gap-2">
                     <UserIcon className="h-4 w-4 text-muted-foreground" />
-                    <span>{ticket.assigneeName || <span className="italic text-muted-foreground">Niet toegewezen</span>}</span>
+                    <span>{ticket.assigneeName || <span className="italic text-muted-foreground">{t("detail.notAssigned")}</span>}</span>
                   </div>
                 )}
               </div>
@@ -582,14 +585,14 @@ export default function MeldingDetailPage({ id }: { id: string }) {
                 <>
                   <Separator />
                   <div className="space-y-1">
-                    <span className="text-muted-foreground block">Gepland op</span>
+                    <span className="text-muted-foreground block">{t("detail.plannedAt")}</span>
                     {/* Simplified planning view for now */}
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       {ticket.plannedAt ? (
-                        <span>{format(new Date(ticket.plannedAt), "d MMM yyyy HH:mm", { locale: nl })}</span>
+                        <span>{format(new Date(ticket.plannedAt), "d MMM yyyy HH:mm", { locale: getDateFnsLocale() })}</span>
                       ) : (
-                        <span className="italic text-muted-foreground">Niet ingepland</span>
+                        <span className="italic text-muted-foreground">{t("detail.notPlanned")}</span>
                       )}
                     </div>
                   </div>

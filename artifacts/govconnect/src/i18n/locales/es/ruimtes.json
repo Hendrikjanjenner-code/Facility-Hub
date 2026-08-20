@@ -1,0 +1,92 @@
+{
+  "title": "Salas",
+  "subtitle": "Registro de todas las salas de la organización.",
+  "searchPlaceholder": "Buscar por nombre, código o función...",
+  "allBuildings": "Todos los edificios",
+  "allFloors": "Todas las plantas",
+  "bookable": "Reservable",
+  "empty": {
+    "title": "No se encontraron salas",
+    "description": "Ajuste los filtros o compruebe el término de búsqueda."
+  },
+  "areaM2": "{{area}} m²",
+  "persons": "{{count}} pers.",
+  "openTickets_one": "{{count}} incidencia",
+  "openTickets_other": "{{count}} incidencia(s)",
+  "assetCount": "{{count}} activos",
+  "detail": {
+    "notFound": "Sala no encontrada.",
+    "bookableBadge": "Reservable",
+    "dossier": {
+      "title": "Expediente de la sala",
+      "edit": "Editar",
+      "area": "Superficie",
+      "vvo": "SUU",
+      "bvo": "SBC",
+      "department": "Departamento",
+      "capacity": "Ocupación",
+      "capacityValue": "{{count}} personas",
+      "function": "Función",
+      "floorFinish": "Acabado del suelo",
+      "bookability": "Reservabilidad",
+      "bookable": "Reservable",
+      "notBookable": "No reservable",
+      "facilities": "Instalaciones"
+    },
+    "editDialog": {
+      "title": "Editar expediente de la sala",
+      "description": "Ajuste las superficies, la función y el departamento de {{name}}.",
+      "area": "Superficie (m²)",
+      "function": "Función",
+      "vvo": "SUU (m²)",
+      "bvo": "SBC (m²)",
+      "department": "Departamento",
+      "departmentPlaceholder": "Ej.: Atención ciudadana",
+      "capacity": "Ocupación (personas)",
+      "capacityPlaceholder": "Ej.: 12",
+      "bookable": "Reservable",
+      "yes": "Sí",
+      "no": "No"
+    },
+    "tabs": {
+      "assets": "Activos ({{count}})",
+      "tickets": "Incidencias abiertas ({{count}})",
+      "noAssets": "No hay activos vinculados a esta sala.",
+      "noTickets": "No hay incidencias abiertas."
+    },
+    "reservations": {
+      "title": "Reservas de hoy",
+      "empty": "No hay reservas para hoy.",
+      "toPlanboard": "Ir al tablero de planificación"
+    },
+    "history": {
+      "title": "Historial de cambios",
+      "description": "Reorganizaciones y cambios en el expediente de esta sala.",
+      "empty": "Aún no se han registrado cambios.",
+      "unknown": "Desconocido",
+      "reverted": "Revertido",
+      "undo": "Deshacer",
+      "emptyValue": "vacío"
+    },
+    "toast": {
+      "dossierUpdated": "Expediente de la sala actualizado",
+      "roomChangedConflict": "Sala modificada mientras tanto",
+      "roomChangedConflictDesc": "Otra persona acaba de editar esta sala. El cuadro de diálogo se ha cerrado; vuelva a abrirlo para ver los valores actuales.",
+      "updateFailed": "Error al actualizar",
+      "partialUndo": "Cambio revertido parcialmente",
+      "partialUndoDesc": "Omitido (modificado de nuevo más tarde): {{fields}}.",
+      "undone": "Cambio deshecho",
+      "undoFailed": "Error al deshacer"
+    },
+    "fields": {
+      "functionType": "Función",
+      "floorFinish": "Acabado del suelo",
+      "areaM2": "Superficie (m²)",
+      "areaVvoM2": "SUU (m²)",
+      "areaBvoM2": "SBC (m²)",
+      "department": "Departamento",
+      "capacity": "Ocupación (personas)",
+      "bookable": "Reservable"
+    }
+  }
+}

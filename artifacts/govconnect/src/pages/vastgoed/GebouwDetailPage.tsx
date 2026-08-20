@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useGetBuilding,
@@ -61,14 +62,8 @@ import {
 } from "@/lib/pending-upload-helpers";
 import { PendingUploadBanner } from "@/components/vastgoed/PendingUploadBanner";
 const API_BASE = "/api";
-const DOC_CATEGORIES = [
-  { value: "huurcontract", label: "Huurcontract" },
-  { value: "bouwtekening", label: "Bouwtekening" },
-  { value: "energielabel", label: "Energielabel" },
-  { value: "overig", label: "Overig" },
-] as const;
-
-const docCategoryLabel = (v: string) => DOC_CATEGORIES.find((c) => c.value === v)?.label ?? v;
+const DOC_CATEGORY_VALUES = ["huurcontract", "bouwtekening", "energielabel", "overig"] as const;
+type DocCategory = (typeof DOC_CATEGORY_VALUES)[number];
 
 function formatBytes(n: number): string {
   if (n >= 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
@@ -77,6 +72,7 @@ function formatBytes(n: number): string {
 }
 
 function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
+  const { t } = useTranslation("vastgoed");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -141,7 +137,7 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
         id: buildingId,
         data: {
           title: title.trim(),
-          category: category as (typeof DOC_CATEGORIES)[number]["value"],
+          category: category as DocCategory,
           objectPath,
           contentType: meta.contentType,
           sizeBytes: meta.sizeBytes,
@@ -168,10 +164,10 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
           // de succesmelding verdwijnt.
           try {
             await queryClient.invalidateQueries({ queryKey: getListBuildingDocumentsQueryKey(buildingId) });
-            toast({ title: "Document toegevoegd" });
+            toast({ title: t("detail.documents.toast.added") });
           } catch {
             toast({
-              title: "Document opgeslagen, maar vernieuwen van de lijst mislukte.",
+              title: t("detail.documents.toast.refreshFailed"),
               variant: "destructive",
             });
           }
@@ -180,10 +176,7 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
           // Het bestand staat nog in storage maar het record is niet aangemaakt.
           // Bewaar pendingObjectPath zodat de gebruiker het opslaan kan herhalen
           // zonder het bestand opnieuw te hoeven uploaden.
-          setSaveError(
-            "Het bestand is geüpload maar kon niet worden opgeslagen. " +
-            "Controleer uw verbinding en probeer het opnieuw.",
-          );
+          setSaveError(t("detail.documents.toast.saveFailed"));
           setUploading(false);
         },
         onSettled: () => setUploading(false),
@@ -193,7 +186,7 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
 
   const submit = async () => {
     if (!title.trim()) {
-      toast({ title: "Vul een titel in", variant: "destructive" });
+      toast({ title: t("detail.documents.toast.titleRequired"), variant: "destructive" });
       return;
     }
 
@@ -205,11 +198,11 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
     }
 
     if (!file) {
-      toast({ title: "Kies een bestand", variant: "destructive" });
+      toast({ title: t("detail.documents.toast.chooseFile"), variant: "destructive" });
       return;
     }
     if (file.size > 15 * 1024 * 1024) {
-      toast({ title: "Bestand is te groot (max 15 MB)", variant: "destructive" });
+      toast({ title: t("detail.documents.toast.tooLarge"), variant: "destructive" });
       return;
     }
 
@@ -224,7 +217,7 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
       });
       if (!resp.ok) {
         const err = (await resp.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(err?.error ?? "Upload mislukt");
+        throw new Error(err?.error ?? t("detail.documents.toast.uploadFailed"));
       }
       const { objectPath } = (await resp.json()) as { objectPath: string };
       const meta = { contentType: file.type || "application/octet-stream", sizeBytes: file.size };
@@ -244,7 +237,7 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
       saveDocRecord(objectPath, meta);
     } catch (e) {
       setUploading(false);
-      toast({ title: e instanceof Error ? e.message : "Upload mislukt", variant: "destructive" });
+      toast({ title: e instanceof Error ? e.message : t("detail.documents.toast.uploadFailed"), variant: "destructive" });
     }
   };
 
@@ -256,13 +249,13 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button size="sm">
-          <Upload className="h-3.5 w-3.5 mr-1.5" /> Document uploaden
+          <Upload className="h-3.5 w-3.5 mr-1.5" /> {t("detail.documents.upload")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Gebouwdocument uploaden</DialogTitle>
-          <DialogDescription>PDF of afbeelding, maximaal 15 MB.</DialogDescription>
+          <DialogTitle>{t("detail.documents.dialog.title")}</DialogTitle>
+          <DialogDescription>{t("detail.documents.dialog.description")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           {saveError && (
@@ -272,16 +265,16 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
             </Alert>
           )}
           <div className="space-y-1.5">
-            <Label htmlFor="doc-title">Titel</Label>
-            <Input id="doc-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Bijv. Huurcontract 2026" />
+            <Label htmlFor="doc-title">{t("detail.documents.dialog.titleLabel")}</Label>
+            <Input id="doc-title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("detail.documents.dialog.titlePlaceholder")} />
           </div>
           <div className="space-y-1.5">
-            <Label>Categorie</Label>
+            <Label>{t("detail.documents.dialog.category")}</Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {DOC_CATEGORIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                {DOC_CATEGORY_VALUES.map((c) => (
+                  <SelectItem key={c} value={c}>{t(`detail.documents.categories.${c}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -289,15 +282,15 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
           {/* In retry-modus is het bestand al geüpload; geen nieuw bestand nodig. */}
           {!isRetryMode && (
             <div className="space-y-1.5">
-              <Label htmlFor="doc-file">Bestand</Label>
+              <Label htmlFor="doc-file">{t("detail.documents.dialog.file")}</Label>
               <Input id="doc-file" type="file" accept="application/pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
             </div>
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>Annuleren</Button>
+          <Button variant="outline" onClick={() => handleOpenChange(false)}>{t("common.cancel", { ns: "common" })}</Button>
           <Button onClick={submit} disabled={isBusy}>
-            {isBusy ? "Bezig..." : isRetryMode ? "Opnieuw proberen" : "Uploaden"}
+            {isBusy ? t("detail.documents.dialog.busy") : isRetryMode ? t("detail.documents.dialog.retry") : t("detail.documents.dialog.uploadBtn")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -306,6 +299,7 @@ function UploadDocumentDialog({ buildingId }: { buildingId: number }) {
 }
 
 function FloorHistoryPanel({ floorId }: { floorId: number }) {
+  const { t } = useTranslation("vastgoed");
   const [open, setOpen] = useState(false);
   const { data: history, isLoading } = useListFloorDossierHistory(floorId, {
     query: { enabled: open, queryKey: getListFloorDossierHistoryQueryKey(floorId) },
@@ -320,7 +314,7 @@ function FloorHistoryPanel({ floorId }: { floorId: number }) {
       >
         <span className="flex items-center gap-2">
           <History className="h-4 w-4 text-muted-foreground" />
-          Recente herindelingen
+          {t("detail.history.title")}
         </span>
         {open ? (
           <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -338,7 +332,7 @@ function FloorHistoryPanel({ floorId }: { floorId: number }) {
             </div>
           ) : !history?.length ? (
             <p className="text-sm text-muted-foreground p-6 text-center">
-              Geen recente herindelingen op deze verdieping.
+              {t("detail.history.empty")}
             </p>
           ) : (
             <div className="divide-y max-h-80 overflow-y-auto">
@@ -352,16 +346,16 @@ function FloorHistoryPanel({ floorId }: { floorId: number }) {
                       <span className="truncate">{entry.roomName}</span>
                       {entry.isUndo && (
                         <Badge variant="outline" className="text-xs flex-shrink-0">
-                          Ongedaan gemaakt
+                          {t("detail.history.undone")}
                         </Badge>
                       )}
                     </div>
                     <div className="text-xs text-muted-foreground whitespace-nowrap flex-shrink-0">
-                      {format(new Date(entry.changedAt), "d MMM HH:mm", { locale: nl })}
+                      {format(new Date(entry.changedAt), "d MMM HH:mm", { locale: getDateFnsLocale() })}
                     </div>
                   </div>
                   <div className="text-xs text-muted-foreground mt-0.5">
-                    Door: {entry.changedByName ?? "Onbekend"}
+                    {t("detail.history.by", { name: entry.changedByName ?? t("detail.history.unknown") })}
                   </div>
                   {entry.changes.length > 0 && (
                     <div className="mt-1.5 space-y-0.5">
@@ -407,6 +401,7 @@ function VlekEditDialog({
   floorId: number;
   onClose: () => void;
 }) {
+  const { t } = useTranslation("vastgoed");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [department, setDepartment] = useState(room.department ?? "");
@@ -426,21 +421,20 @@ function VlekEditDialog({
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getGetFloorPlanQueryKey(floorId) });
-          toast({ title: "Ruimte bijgewerkt" });
+          toast({ title: t("detail.toast.roomUpdated") });
           onClose();
         },
         onError: (error) => {
           if (error.status === 409) {
             queryClient.invalidateQueries({ queryKey: getGetFloorPlanQueryKey(floorId) });
             toast({
-              title: "Ruimte ondertussen gewijzigd",
-              description:
-                "Iemand anders heeft dit vlekkenplan-item zojuist bewerkt. Sluit de dialoog en probeer het opnieuw.",
+              title: t("detail.toast.roomChangedConflict"),
+              description: t("detail.toast.roomChangedConflictDesc"),
               variant: "destructive",
             });
             onClose();
           } else {
-            toast({ title: "Bijwerken mislukt", variant: "destructive" });
+            toast({ title: t("detail.toast.updateFailed"), variant: "destructive" });
           }
         },
       },
@@ -454,36 +448,36 @@ function VlekEditDialog({
           <Pencil className="h-4 w-4" /> {room.name} <span className="font-mono text-sm text-muted-foreground">({room.code})</span>
         </DialogTitle>
         <DialogDescription>
-          Wijzig afdeling of functie. Het vlekkenplan wordt direct bijgewerkt.
+          {t("detail.vlekEdit.description")}
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="vlek-dept">Afdeling</Label>
+          <Label htmlFor="vlek-dept">{t("detail.vlekEdit.department")}</Label>
           <Input
             id="vlek-dept"
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
-            placeholder="Bijv. Facilitair, ICT, HR"
+            placeholder={t("detail.vlekEdit.departmentPlaceholder")}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="vlek-func">Functie</Label>
+          <Label htmlFor="vlek-func">{t("detail.vlekEdit.function")}</Label>
           <Input
             id="vlek-func"
             value={functionType}
             onChange={(e) => setFunctionType(e.target.value)}
-            placeholder="Bijv. Kantoor, Vergaderruimte"
+            placeholder={t("detail.vlekEdit.functionPlaceholder")}
           />
         </div>
         <div className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground space-y-0.5">
-          <div>Oppervlakte: {room.areaM2 ?? "–"} m²</div>
+          <div>{t("detail.vlekEdit.area", { area: room.areaM2 ?? "–" })}</div>
         </div>
       </div>
       <DialogFooter>
-        <Button variant="outline" onClick={onClose}>Annuleren</Button>
+        <Button variant="outline" onClick={onClose}>{t("common.cancel", { ns: "common" })}</Button>
         <Button onClick={submit} disabled={update.isPending}>
-          {update.isPending ? "Opslaan…" : "Opslaan"}
+          {update.isPending ? t("detail.vlekEdit.saving") : t("common.save", { ns: "common" })}
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -499,6 +493,7 @@ function Vlekkenplan({
   colorBy: "department" | "functionType";
   canManage: boolean;
 }) {
+  const { t } = useTranslation("vastgoed");
   const [, setLocation] = useLocation();
   const [editRoom, setEditRoom] = useState<FloorPlanRoom | null>(null);
   const [filterQuery, setFilterQuery] = useState("");
@@ -510,8 +505,9 @@ function Vlekkenplan({
     const map = new Map<string, string>();
     const vvoByKey = new Map<string, number>();
     const rooms = plan?.rooms ?? [];
+    const unknown = t("detail.vlekkenplan.unknown");
     for (const r of rooms) {
-      const key = (colorBy === "department" ? r.department : r.functionType) ?? "Onbekend";
+      const key = (colorBy === "department" ? r.department : r.functionType) ?? unknown;
       if (!map.has(key)) map.set(key, PALETTE[map.size % PALETTE.length]!);
       vvoByKey.set(key, (vvoByKey.get(key) ?? 0) + (r.areaVvoM2 ?? r.areaM2 ?? 0));
     }
@@ -523,7 +519,7 @@ function Vlekkenplan({
         vvo: vvoByKey.get(label) ?? 0,
       })),
     };
-  }, [plan, colorBy]);
+  }, [plan, colorBy, t]);
 
   const normalizedQuery = filterQuery.trim().toLowerCase();
   const roomMatches = (r: FloorPlanRoom) => {
@@ -538,10 +534,10 @@ function Vlekkenplan({
 
   if (isLoading) return <Skeleton className="h-48 w-full" />;
   if (!plan || plan.rooms.length === 0)
-    return <p className="text-sm text-muted-foreground py-6 text-center">Geen ruimtes op deze verdieping.</p>;
+    return <p className="text-sm text-muted-foreground py-6 text-center">{t("detail.vlekkenplan.noRooms")}</p>;
 
   const totalArea = plan.rooms.reduce((s, r) => s + (r.areaM2 ?? 0), 0) || 1;
-  const keyOf = (r: FloorPlanRoom) => (colorBy === "department" ? r.department : r.functionType) ?? "Onbekend";
+  const keyOf = (r: FloorPlanRoom) => (colorBy === "department" ? r.department : r.functionType) ?? t("detail.vlekkenplan.unknown");
   const matchCount = normalizedQuery ? plan.rooms.filter(roomMatches).length : null;
 
   return (
@@ -552,7 +548,7 @@ function Vlekkenplan({
         <Input
           value={filterQuery}
           onChange={(e) => setFilterQuery(e.target.value)}
-          placeholder="Zoek op afdeling, functie of ruimtenaam…"
+          placeholder={t("detail.vlekkenplan.filterPlaceholder")}
           className="pl-8 pr-8"
           data-testid="vlekkenplan-filter"
         />
@@ -560,7 +556,7 @@ function Vlekkenplan({
           <button
             onClick={() => setFilterQuery("")}
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            aria-label="Filter wissen"
+            aria-label={t("detail.vlekkenplan.clearFilter")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -569,8 +565,8 @@ function Vlekkenplan({
       {matchCount !== null && (
         <p className="text-xs text-muted-foreground -mt-2">
           {matchCount === 0
-            ? "Geen ruimtes gevonden voor deze zoekopdracht."
-            : `${matchCount} van ${plan.rooms.length} ruimte${plan.rooms.length !== 1 ? "s" : ""} gemarkeerd`}
+            ? t("detail.vlekkenplan.noMatches")
+            : t("detail.vlekkenplan.matchCount", { count: plan.rooms.length, matched: matchCount })}
         </p>
       )}
 
@@ -591,7 +587,7 @@ function Vlekkenplan({
                   !matched && "opacity-20 saturate-0 pointer-events-none",
                 )}
                 style={{ flexGrow: Math.max(1, Math.round(share * 100)), flexBasis: `${Math.max(8, share * 100)}%` }}
-                title={canManage ? `${r.name} — klik om afdeling/functie te wijzigen` : `${r.name} (${r.code}) — klik voor details`}
+                title={canManage ? t("detail.vlekkenplan.tileManageHint", { name: r.name }) : t("detail.vlekkenplan.tileDetailHint", { name: r.name, code: r.code })}
                 data-testid={`vlek-${r.code}`}
                 tabIndex={matched ? 0 : -1}
               >
@@ -600,7 +596,7 @@ function Vlekkenplan({
                 <div className="text-[10px] opacity-80">{r.areaM2 ?? "?"} m² · {keyOf(r)}</div>
                 {canManage && (
                   <div className="text-[9px] opacity-50 mt-0.5 flex items-center gap-0.5">
-                    <Pencil className="h-2 w-2 inline" /> bewerken
+                    <Pencil className="h-2 w-2 inline" /> {t("detail.vlekkenplan.edit")}
                   </div>
                 )}
               </button>
@@ -623,16 +619,16 @@ function Vlekkenplan({
                         <div className="text-xs font-mono text-muted-foreground">{r.code}</div>
                       </div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                        <div className="text-muted-foreground">Afdeling</div>
+                        <div className="text-muted-foreground">{t("detail.vlekkenplan.popover.department")}</div>
                         <div className="font-medium">{r.department ?? "–"}</div>
-                        <div className="text-muted-foreground">Functie</div>
+                        <div className="text-muted-foreground">{t("detail.vlekkenplan.popover.function")}</div>
                         <div className="font-medium">{r.functionType ?? "–"}</div>
-                        <div className="text-muted-foreground flex items-center gap-1"><Maximize2 className="h-3 w-3" /> Oppervlakte</div>
+                        <div className="text-muted-foreground flex items-center gap-1"><Maximize2 className="h-3 w-3" /> {t("detail.vlekkenplan.popover.area")}</div>
                         <div className="font-medium">{r.areaM2 != null ? `${r.areaM2} m²` : "–"}</div>
                         {r.capacity != null && (
                           <>
-                            <div className="text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> Bezetting</div>
-                            <div className="font-medium">{r.capacity} personen</div>
+                            <div className="text-muted-foreground flex items-center gap-1"><Users className="h-3 w-3" /> {t("detail.vlekkenplan.popover.capacity")}</div>
+                            <div className="font-medium">{t("detail.vlekkenplan.popover.persons", { count: r.capacity })}</div>
                           </>
                         )}
                       </div>
@@ -642,7 +638,7 @@ function Vlekkenplan({
                         className="w-full"
                         onClick={() => setLocation(`/ruimtes/${r.id}`)}
                       >
-                        Ga naar ruimtepagina <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                        {t("detail.vlekkenplan.popover.goToRoom")} <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
                       </Button>
                     </div>
                   </PopoverContent>
@@ -661,7 +657,7 @@ function Vlekkenplan({
             <span className={cn("h-3 w-3 rounded-sm border-2 inline-block flex-shrink-0", cls)} />
             <span className="capitalize">{label}</span>
             {vvo > 0 && (
-              <span className="text-muted-foreground">— {Math.round(vvo)} m² VVO</span>
+              <span className="text-muted-foreground">{t("detail.vlekkenplan.legendVvo", { area: Math.round(vvo) })}</span>
             )}
           </div>
         ))}
@@ -671,6 +667,7 @@ function Vlekkenplan({
 }
 
 export default function GebouwDetailPage({ id }: { id: string }) {
+  const { t } = useTranslation("vastgoed");
   const buildingId = parseInt(id);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -697,7 +694,7 @@ export default function GebouwDetailPage({ id }: { id: string }) {
       </div>
     );
   }
-  if (!building) return <div>Gebouw niet gevonden.</div>;
+  if (!building) return <div>{t("detail.notFound")}</div>;
 
   const activeFloorId = selectedFloorId ?? building.floors[0]?.id ?? null;
 
@@ -715,15 +712,15 @@ export default function GebouwDetailPage({ id }: { id: string }) {
           </div>
           <p className="text-muted-foreground text-sm flex items-center gap-2 mt-1">
             <MapPin className="h-3.5 w-3.5" />
-            {building.address ?? "-"} • {building.siteName}
+            {building.address ?? t("detail.addressFallback")} • {building.siteName}
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <Card><CardContent className="pt-6"><div className="text-2xl font-bold">{building.floorCount}</div><div className="text-xs text-muted-foreground">Verdiepingen</div></CardContent></Card>
-        <Card><CardContent className="pt-6"><div className="text-2xl font-bold">{building.roomCount}</div><div className="text-xs text-muted-foreground">Ruimtes</div></CardContent></Card>
-        <Card><CardContent className="pt-6"><div className="text-2xl font-bold">{Math.round(building.totalAreaM2)} m²</div><div className="text-xs text-muted-foreground">Totale oppervlakte</div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="text-2xl font-bold">{building.floorCount}</div><div className="text-xs text-muted-foreground">{t("detail.stats.floors")}</div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="text-2xl font-bold">{building.roomCount}</div><div className="text-xs text-muted-foreground">{t("detail.stats.rooms")}</div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="text-2xl font-bold">{Math.round(building.totalAreaM2)} m²</div><div className="text-xs text-muted-foreground">{t("detail.stats.totalArea")}</div></CardContent></Card>
       </div>
 
       <Card>
@@ -731,14 +728,14 @@ export default function GebouwDetailPage({ id }: { id: string }) {
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <LayoutGrid className="h-5 w-5" /> Vlekkenplan
+                <LayoutGrid className="h-5 w-5" /> {t("detail.vlekkenplan.title")}
               </CardTitle>
-              <CardDescription>Schematische indeling per verdieping, blokgrootte naar oppervlakte.</CardDescription>
+              <CardDescription>{t("detail.vlekkenplan.description")}</CardDescription>
             </div>
             <Tabs value={colorBy} onValueChange={(v) => setColorBy(v as typeof colorBy)}>
               <TabsList>
-                <TabsTrigger value="department">Kleur op afdeling</TabsTrigger>
-                <TabsTrigger value="functionType">Kleur op functie</TabsTrigger>
+                <TabsTrigger value="department">{t("detail.vlekkenplan.colorByDepartment")}</TabsTrigger>
+                <TabsTrigger value="functionType">{t("detail.vlekkenplan.colorByFunction")}</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -768,9 +765,9 @@ export default function GebouwDetailPage({ id }: { id: string }) {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" /> Gebouwdocumenten
+                  <FileText className="h-5 w-5" /> {t("detail.documents.title")}
                 </CardTitle>
-                <CardDescription>Huurcontracten, bouwtekeningen en energielabels.</CardDescription>
+                <CardDescription>{t("detail.documents.description")}</CardDescription>
               </div>
               <UploadDocumentDialog buildingId={buildingId} />
             </div>
@@ -781,36 +778,36 @@ export default function GebouwDetailPage({ id }: { id: string }) {
             </div>
             <div className="divide-y">
               {!documents?.length ? (
-                <div className="p-8 text-center text-muted-foreground text-sm">Nog geen documenten geüpload.</div>
+                <div className="p-8 text-center text-muted-foreground text-sm">{t("detail.documents.empty")}</div>
               ) : (
                 documents.map((doc) => (
                   <div key={doc.id} className="p-4 flex items-center justify-between gap-4" data-testid={`document-${doc.id}`}>
                     <div className="min-w-0">
                       <div className="font-medium text-sm truncate">{doc.title}</div>
                       <div className="text-xs text-muted-foreground mt-0.5">
-                        <Badge variant="secondary" className="mr-2">{docCategoryLabel(doc.category)}</Badge>
-                        {formatBytes(doc.sizeBytes)} • {doc.uploadedByName ?? "Onbekend"} • {format(new Date(doc.createdAt), "d MMM yyyy", { locale: nl })}
+                        <Badge variant="secondary" className="mr-2">{t(`detail.documents.categories.${doc.category}`, doc.category)}</Badge>
+                        {formatBytes(doc.sizeBytes)} • {doc.uploadedByName ?? t("detail.documents.unknownUploader")} • {format(new Date(doc.createdAt), "d MMM yyyy", { locale: getDateFnsLocale() })}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <Button variant="ghost" size="icon" asChild>
-                        <a href={`${API_BASE}/storage${doc.objectPath}`} target="_blank" rel="noreferrer" title="Downloaden">
+                        <a href={`${API_BASE}/storage${doc.objectPath}`} target="_blank" rel="noreferrer" title={t("detail.documents.download")}>
                           <Download className="h-4 w-4" />
                         </a>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        title="Verwijderen"
+                        title={t("detail.documents.delete")}
                         onClick={() =>
                           deleteDoc.mutate(
                             { id: doc.id },
                             {
                               onSuccess: () => {
                                 queryClient.invalidateQueries({ queryKey: getListBuildingDocumentsQueryKey(buildingId) });
-                                toast({ title: "Document verwijderd" });
+                                toast({ title: t("detail.documents.toast.deleted") });
                               },
-                              onError: () => toast({ title: "Verwijderen mislukt", variant: "destructive" }),
+                              onError: () => toast({ title: t("detail.documents.toast.deleteFailed"), variant: "destructive" }),
                             },
                           )
                         }

@@ -1,0 +1,57 @@
+{
+  "title": "Gestión de stock",
+  "subtitle": "Niveles de stock de la tienda online con alertas de stock mínimo.",
+  "addProduct": "Añadir producto",
+  "newProduct": "Nuevo producto",
+  "newProductDescription": "Añade un producto al catálogo de la tienda online.",
+  "fields": {
+    "name": "Nombre",
+    "category": "Categoría",
+    "categoryPlaceholder": "Elegir categoría",
+    "description": "Descripción (opcional)",
+    "price": "Precio (€)",
+    "unit": "Unidad",
+    "stock": "Stock",
+    "minStock": "Stock mín."
+  },
+  "category": {
+    "kantoorartikelen": "Material de oficina",
+    "ict": "TI",
+    "meubilair": "Mobiliario",
+    "facilitair": "Instalaciones",
+    "overig": "Otros"
+  },
+  "alerts_one": "{{count}} producto está por debajo del stock mínimo: {{names}}.",
+  "alerts_other": "{{count}} productos están por debajo del stock mínimo: {{names}}.",
+  "onlyAlerts": "Solo productos por debajo del stock mínimo",
+  "emptyAlerts": "Sin alertas de stock",
+  "emptyProducts": "Sin productos",
+  "table": {
+    "product": "Producto",
+    "category": "Categoría",
+    "price": "Precio",
+    "stock": "Stock",
+    "minimum": "Mínimo",
+    "status": "Estado",
+    "action": "Acción"
+  },
+  "status": {
+    "belowMin": "Bajo mínimo",
+    "onTarget": "En nivel"
+  },
+  "update": "Actualizar",
+  "updateStock": "Actualizar stock",
+  "currentStock": "Stock actual",
+  "minStockLabel": "Stock mínimo",
+  "toast": {
+    "added": "Producto añadido",
+    "saveFailed": "Error al guardar",
+    "stockUpdated": "Stock actualizado",
+    "updateFailed": "Error al actualizar"
+  },
+  "validation": {
+    "nameRequired": "El nombre es obligatorio",
+    "categoryRequired": "La categoría es obligatoria",
+    "priceRequired": "El precio es obligatorio"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "title": "Bilgi bankası",
+  "subtitle": "Sık sorulan tesis sorularına yanıtlar.",
+  "newArticle": "Yeni makale",
+  "searchPlaceholder": "Bilgi bankasında ara...",
+  "all": "Tümü",
+  "noLinkedCategories": "Bağlı bildirim kategorisi yok",
+  "edit": "Düzenle",
+  "delete": "Sil",
+  "emptyTitle": "Makale bulunamadı",
+  "emptyNoResults": "\"{{query}}\" için sonuç yok",
+  "emptyNone": "Henüz bilgi bankası makalesi oluşturulmadı.",
+  "deleteDialog": {
+    "title": "Makaleyi sil",
+    "confirm": "<0>\"{{title}}\"</0> öğesini kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    "cancel": "İptal",
+    "delete": "Sil"
+  },
+  "form": {
+    "editTitle": "Makaleyi düzenle",
+    "newTitle": "Yeni bilgi bankası makalesi",
+    "titleLabel": "Başlık",
+    "titlePlaceholder": "Kısa, net başlık",
+    "categoryLabel": "Kategori",
+    "bodyLabel": "İçerik",
+    "bodyPlaceholder": "Net bir açıklama veya adım adım talimat verin...",
+    "tagsLabel": "Etiketler (virgülle ayrılmış)",
+    "tagsPlaceholder": "örn. ısıtma, arıza, iklim",
+    "linkLabel": "Bildirim kategorilerine bağla",
+    "linkHelp": "Bu makale, bildiren kişi bu kategorilerden birini seçtiğinde otomatik olarak öneri olarak görünür.",
+    "cancel": "İptal",
+    "save": "Kaydet"
+  },
+  "toast": {
+    "deleted": "Makale silindi",
+    "deleteError": "Makale silinemedi.",
+    "updated": "Makale güncellendi",
+    "updateError": "Makale güncellenemedi.",
+    "created": "Makale oluşturuldu",
+    "createError": "Makale oluşturulamadı.",
+    "errorTitle": "Hata"
+  },
+  "categories": {
+    "algemeen": "Genel",
+    "klimaat": "İklimlendirme",
+    "schoonmaak": "Temizlik",
+    "technisch": "Teknik",
+    "sanitair": "Sıhhi tesisat",
+    "veiligheid": "Güvenlik",
+    "reserveringen": "Rezervasyonlar",
+    "catering": "Catering"
+  }
+}

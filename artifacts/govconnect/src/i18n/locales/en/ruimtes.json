@@ -1,0 +1,92 @@
+{
+  "title": "Rooms",
+  "subtitle": "Register of all rooms within the organisation.",
+  "searchPlaceholder": "Search by name, code or function...",
+  "allBuildings": "All buildings",
+  "allFloors": "All floors",
+  "bookable": "Bookable",
+  "empty": {
+    "title": "No rooms found",
+    "description": "Adjust your filters or check the search term."
+  },
+  "areaM2": "{{area}} m²",
+  "persons": "{{count}} pers.",
+  "openTickets_one": "{{count}} ticket",
+  "openTickets_other": "{{count}} ticket(s)",
+  "assetCount": "{{count}} assets",
+  "detail": {
+    "notFound": "Room not found.",
+    "bookableBadge": "Bookable",
+    "dossier": {
+      "title": "Room dossier",
+      "edit": "Edit",
+      "area": "Area",
+      "vvo": "NFA",
+      "bvo": "GFA",
+      "department": "Department",
+      "capacity": "Occupancy",
+      "capacityValue": "{{count}} people",
+      "function": "Function",
+      "floorFinish": "Floor finish",
+      "bookability": "Bookability",
+      "bookable": "Bookable",
+      "notBookable": "Not bookable",
+      "facilities": "Facilities"
+    },
+    "editDialog": {
+      "title": "Edit room dossier",
+      "description": "Adjust the areas, function and department of {{name}}.",
+      "area": "Area (m²)",
+      "function": "Function",
+      "vvo": "NFA (m²)",
+      "bvo": "GFA (m²)",
+      "department": "Department",
+      "departmentPlaceholder": "e.g. Civil affairs",
+      "capacity": "Occupancy (people)",
+      "capacityPlaceholder": "e.g. 12",
+      "bookable": "Bookable",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "tabs": {
+      "assets": "Assets ({{count}})",
+      "tickets": "Open tickets ({{count}})",
+      "noAssets": "No assets linked to this room.",
+      "noTickets": "No open tickets."
+    },
+    "reservations": {
+      "title": "Reservations today",
+      "empty": "No reservations for today.",
+      "toPlanboard": "To planning board"
+    },
+    "history": {
+      "title": "Change history",
+      "description": "Reorganisations and dossier changes of this room.",
+      "empty": "No changes recorded yet.",
+      "unknown": "Unknown",
+      "reverted": "Reverted",
+      "undo": "Undo",
+      "emptyValue": "empty"
+    },
+    "toast": {
+      "dossierUpdated": "Room dossier updated",
+      "roomChangedConflict": "Room changed in the meantime",
+      "roomChangedConflictDesc": "Someone else just edited this room. The dialog has been closed — reopen it to see the current values.",
+      "updateFailed": "Update failed",
+      "partialUndo": "Change partially reverted",
+      "partialUndoDesc": "Skipped (changed again later): {{fields}}.",
+      "undone": "Change undone",
+      "undoFailed": "Undo failed"
+    },
+    "fields": {
+      "functionType": "Function",
+      "floorFinish": "Floor finish",
+      "areaM2": "Area (m²)",
+      "areaVvoM2": "NFA (m²)",
+      "areaBvoM2": "GFA (m²)",
+      "department": "Department",
+      "capacity": "Occupancy (people)",
+      "bookable": "Bookable"
+    }
+  }
+}

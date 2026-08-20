@@ -1,0 +1,145 @@
+{
+  "title": "Anahtar ve kart yönetimi",
+  "subtitle": "Kayıt, anahtar planı, teslim ve kayıp prosedürü.",
+  "newKey": "Yeni anahtar veya kart",
+  "stats": {
+    "inRegister": "Kayıtta",
+    "issued": "Teslim edilen",
+    "overdue": "Geç iade edilen"
+  },
+  "searchPlaceholder": "Koda, açıklamaya veya sahibe göre ara...",
+  "filters": {
+    "allTypes": "Tüm türler",
+    "keys": "Anahtarlar",
+    "passes": "Kartlar",
+    "allStatuses": "Tüm durumlar",
+    "overdueBadge": "Gecikmiş"
+  },
+  "type": {
+    "sleutel": "Anahtar",
+    "pas": "Kart"
+  },
+  "status": {
+    "beschikbaar": "Mevcut",
+    "uitgegeven": "Teslim edildi",
+    "vermist": "Kayıp",
+    "geblokkeerd": "Bloke"
+  },
+  "table": {
+    "code": "Kod",
+    "type": "Tür",
+    "description": "Açıklama",
+    "building": "Bina",
+    "doors": "Kapılar",
+    "status": "Durum",
+    "currentHolder": "Mevcut sahip",
+    "dueBy": "İade tarihi",
+    "empty": "Anahtar bulunamadı.",
+    "overdue": "gecikmiş"
+  },
+  "newDialog": {
+    "title": "Yeni anahtar veya kart kaydet",
+    "description": "Kayda bir anahtar veya erişim kartı ekleyin.",
+    "code": "Kod",
+    "codePlaceholder": "Örn. SL-005",
+    "type": "Tür",
+    "descriptionLabel": "Açıklama",
+    "descriptionPlaceholder": "Örn. Arşiv odası anahtarı",
+    "building": "Bina",
+    "none": "Yok / geçersiz",
+    "replacementCost": "Yenileme maliyeti (€)",
+    "add": "Ekle"
+  },
+  "toast": {
+    "codeDescRequired": "Kod ve açıklamayı girin",
+    "added": "Anahtar eklendi",
+    "addFailed": "Ekleme başarısız"
+  },
+  "detail": {
+    "notFound": "Anahtar bulunamadı.",
+    "replacementCostLabel": "Yenileme maliyeti {{cost}}",
+    "issue": "Teslim et",
+    "block": "Blokla",
+    "takeBack": "Geri al",
+    "makeAvailable": "Tekrar kullanılabilir yap",
+    "reportLost": "Kayıp bildir",
+    "actionFailed": "İşlem başarısız",
+    "issueDialog": {
+      "title": "Anahtar teslim et",
+      "description": "{{code}} anahtarının kime teslim edildiğini kaydedin.",
+      "employee": "Çalışan",
+      "employeePlaceholder": "Çalışan seçin",
+      "dueDate": "İade tarihi (isteğe bağlı)",
+      "dueDateHint": "Örn. ziyaretçi kartları veya geçici anahtarlar için.",
+      "note": "Not (isteğe bağlı)",
+      "confirm": "Teslim et"
+    },
+    "lossDialog": {
+      "title": "Kayıp prosedürünü başlat",
+      "description": "Anahtar kayıp olarak kaydedilir, otomatik olarak bir servis masası talebi oluşturulur ve maliyetler{{holder}} tahsil edilir.",
+      "descriptionHolder": " {{name}} adına",
+      "charge": "Maliyet tahsilatı (€)",
+      "chargeHint": "Boş bırakın = kayıttaki yenileme maliyeti.",
+      "note": "Açıklama",
+      "confirm": "Kayıp bildir"
+    },
+    "toast": {
+      "issued": "Anahtar teslim edildi",
+      "blocked": "Anahtar bloke edildi",
+      "returned": "Anahtar geri alındı",
+      "available": "Anahtar yeniden kullanılabilir",
+      "lossStarted": "Kayıp prosedürü başlatıldı",
+      "lossStartedDesc": "Bir servis masası talebi oluşturuldu.",
+      "dueUpdated": "İade tarihi güncellendi",
+      "doorAdded": "Kapı eklendi",
+      "doorRemoved": "Kapı kaldırıldı"
+    },
+    "issuedBanner": {
+      "issuedTo": "Şuna teslim edildi: ",
+      "since": " {{date}} tarihinden beri",
+      "overdue": "• İade tarihi geçti:",
+      "dueBy": "• İade tarihi:",
+      "overdueBadge": "gecikmiş",
+      "editDueDate": "İade tarihini değiştir"
+    },
+    "dueDialog": {
+      "title": "İade tarihini değiştir",
+      "description": "{{name}} için iade tarihini ayarlayın. Tarihi kaldırmak için boş bırakın.",
+      "label": "İade tarihi",
+      "hint": "İade tarihini kaldırmak için boş bırakın."
+    },
+    "keyPlan": {
+      "title": "Anahtar planı",
+      "description": "Bu {{type}} öğesinin açtığı kapılar ve silindirler.",
+      "addDoor": "Kapı",
+      "empty": "Henüz bağlı kapı yok.",
+      "doorDialog": {
+        "title": "Anahtar planına kapı ekle",
+        "description": "Açıklama",
+        "descriptionPlaceholder": "Örn. Silindir C-06, arşiv kapısı",
+        "room": "Oda (isteğe bağlı)",
+        "none": "Yok / geçersiz",
+        "add": "Ekle"
+      }
+    },
+    "issueHistory": {
+      "title": "Teslim geçmişi",
+      "description": "Bu {{type}} öğesini kimin kullandığı veya kullandığı.",
+      "empty": "Henüz teslim edilmedi.",
+      "unknown": "Bilinmiyor",
+      "returned": "Geri alındı",
+      "inUse": "Kullanımda",
+      "issuedBy": "• teslim eden {{name}}",
+      "dueBy": "• iade tarihi {{date}}",
+      "overdue": " ⚠ gecikmiş"
+    },
+    "lossReports": {
+      "title": "Kayıp bildirimleri",
+      "reportedOn": "{{date}} tarihinde bildirildi",
+      "lastHolder": "• son sahip: ",
+      "reportedBy": "{{name}} tarafından bildirildi. ",
+      "viewTicket": "{{number}} talebini görüntüle"
+    },
+    "createdOn": "{{date}} tarihinde oluşturuldu."
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "brand": "LetShare4gov",
+  "nav": {
+    "dashboard": "Dashboard",
+    "meldingen": "Meldingen",
+    "reserveringen": "Reserveringen",
+    "werkplekken": "Werkplekken",
+    "bezoekers": "Bezoekers",
+    "vastgoed": "Vastgoed",
+    "ruimtes": "Ruimtes",
+    "sleutelbeheer": "Sleutelbeheer",
+    "assets": "Assets",
+    "contracten": "Contracten",
+    "webshop": "Webshop",
+    "voorraad": "Voorraad",
+    "duurzaamheid": "Duurzaamheid",
+    "mjop": "MJOP",
+    "catering": "Catering",
+    "kennisbank": "Kennisbank"
+  },
+  "shell": {
+    "notifications": "Notificaties",
+    "markAllRead": "Alles gelezen",
+    "noNotifications": "Geen notificaties",
+    "role": "Rol",
+    "settings": "Instellingen",
+    "logout": "Uitloggen",
+    "language": "Taal",
+    "guestReadOnly": "Gastmodus – alleen lezen"
+  },
+  "login": {
+    "title": "Inloggen",
+    "subtitle": "Voer uw inloggegevens in om toegang te krijgen tot uw dashboard.",
+    "email": "E-mailadres",
+    "emailPlaceholder": "naam@organisatie.nl",
+    "password": "Wachtwoord",
+    "submit": "Inloggen",
+    "failed": "Inloggen mislukt. Controleer uw gegevens.",
+    "demo": "Demo accounts (1-klik login)",
+    "tagline": "De dagelijkse cockpit voor facilitair Nederland.",
+    "taglineSub": "Snel, overzichtelijk en betrouwbaar. Ontworpen voor overheidsorganisaties om meldingen, reserveringen en vastgoed moeiteloos te beheren.",
+    "copyright": "Alle rechten voorbehouden.",
+    "emailInvalid": "Ongeldig e-mailadres",
+    "passwordRequired": "Wachtwoord is verplicht",
+    "guestLink": "Toegang als gast"
+  },
+  "guest": {
+    "title": "Gasttoegang",
+    "subtitle": "Voer het gastwachtwoord in om LetShare4gov als gast te bekijken (alleen lezen).",
+    "password": "Gastwachtwoord",
+    "submit": "Bekijk als gast",
+    "failed": "Ongeldig wachtwoord.",
+    "backToLogin": "Terug naar inloggen"
+  },
+  "common": {
+    "loading": "Laden…",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "back": "Terug",
+    "search": "Zoeken",
+    "error": "Er is iets misgegaan"
+  }
+}

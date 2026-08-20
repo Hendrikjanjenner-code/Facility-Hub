@@ -3,6 +3,8 @@ import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { 
   useListAssets, 
   useCreateAsset,
@@ -40,10 +42,10 @@ import { cn } from "@/lib/utils";
 
 const ASSET_STATUSES = ['in_gebruik', 'in_onderhoud', 'defect', 'afgeschreven'];
 
-const schema = z.object({
-  name: z.string().min(2, "Naam is verplicht"),
-  code: z.string().min(2, "Code is verplicht"),
-  category: z.string().min(2, "Categorie is verplicht"),
+const makeSchema = (t: TFunction) => z.object({
+  name: z.string().min(2, t("validation.nameRequired")),
+  code: z.string().min(2, t("validation.codeRequired")),
+  category: z.string().min(2, t("validation.categoryRequired")),
   brand: z.string().optional(),
   model: z.string().optional(),
   serialNumber: z.string().optional(),
@@ -51,6 +53,18 @@ const schema = z.object({
   status: z.string().default("in_gebruik"),
   purchaseDate: z.string().optional(),
 });
+
+type AssetFormValues = {
+  name: string;
+  code: string;
+  category: string;
+  brand?: string;
+  model?: string;
+  serialNumber?: string;
+  roomId?: number | null;
+  status: string;
+  purchaseDate?: string;
+};
 
 function getAssetStatusColor(status: string) {
   switch(status) {
@@ -63,6 +77,7 @@ function getAssetStatusColor(status: string) {
 }
 
 export default function AssetsPage() {
+  const { t } = useTranslation("assets");
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -79,8 +94,8 @@ export default function AssetsPage() {
   const { data: rooms } = useListRooms();
   const createAsset = useCreateAsset();
 
-  const form = useForm<z.infer<typeof schema>>({
-    resolver: zodResolver(schema),
+  const form = useForm<AssetFormValues>({
+    resolver: zodResolver(makeSchema(t)),
     defaultValues: {
       name: "",
       code: "",
@@ -89,10 +104,10 @@ export default function AssetsPage() {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof schema>) => {
+  const onSubmit = (values: AssetFormValues) => {
     createAsset.mutate({ data: values as any }, {
       onSuccess: () => {
-        toast({ title: "Asset toegevoegd" });
+        toast({ title: t("toast.added") });
         setIsNewDialogOpen(false);
         form.reset();
         queryClient.invalidateQueries({ queryKey: ["/api/assets"] });
@@ -106,8 +121,8 @@ export default function AssetsPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Assets</h1>
-          <p className="text-muted-foreground">Beheer apparatuur, meubilair en inventaris.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
         
         {(user?.role === 'beheerder' || user?.role === 'facilitair_manager') && (
@@ -115,14 +130,14 @@ export default function AssetsPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Asset toevoegen
+                {t("addAsset")}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Nieuw asset registreren</DialogTitle>
+                <DialogTitle>{t("dialog.title")}</DialogTitle>
                 <DialogDescription>
-                  Voeg een nieuw object toe aan het vastgoedregister.
+                  {t("dialog.description")}
                 </DialogDescription>
               </DialogHeader>
               <Form {...form}>
@@ -133,9 +148,9 @@ export default function AssetsPage() {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Naam</FormLabel>
+                          <FormLabel>{t("dialog.name")}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Bijv. Bureaustoel Ergonomic" {...field} />
+                            <Input placeholder={t("dialog.namePlaceholder")} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -146,9 +161,9 @@ export default function AssetsPage() {
                       name="code"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Asset Code</FormLabel>
+                          <FormLabel>{t("dialog.code")}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Bijv. INV-2026-001" {...field} />
+                            <Input placeholder={t("dialog.codePlaceholder")} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -162,9 +177,9 @@ export default function AssetsPage() {
                       name="category"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Categorie</FormLabel>
+                          <FormLabel>{t("dialog.category")}</FormLabel>
                           <FormControl>
-                            <Input placeholder="Bijv. Meubilair" {...field} />
+                            <Input placeholder={t("dialog.categoryPlaceholder")} {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -175,16 +190,16 @@ export default function AssetsPage() {
                       name="status"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Status</FormLabel>
+                          <FormLabel>{t("dialog.status")}</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
                               <SelectTrigger>
-                                <SelectValue placeholder="Kies status" />
+                                <SelectValue placeholder={t("dialog.statusPlaceholder")} />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               {ASSET_STATUSES.map(s => (
-                                <SelectItem key={s} value={s}>{s.replace('_', ' ')}</SelectItem>
+                                <SelectItem key={s} value={s}>{t(`status.${s}`, s.replace('_', ' '))}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -200,7 +215,7 @@ export default function AssetsPage() {
                       name="brand"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Merk (Optioneel)</FormLabel>
+                          <FormLabel>{t("dialog.brand")}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -213,7 +228,7 @@ export default function AssetsPage() {
                       name="model"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Model (Optioneel)</FormLabel>
+                          <FormLabel>{t("dialog.model")}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -226,7 +241,7 @@ export default function AssetsPage() {
                       name="serialNumber"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Serienummer (Optioneel)</FormLabel>
+                          <FormLabel>{t("dialog.serialNumber")}</FormLabel>
                           <FormControl>
                             <Input {...field} />
                           </FormControl>
@@ -241,11 +256,11 @@ export default function AssetsPage() {
                     name="roomId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Locatie (Optioneel)</FormLabel>
+                        <FormLabel>{t("dialog.location")}</FormLabel>
                         <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString() || ""}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Kies ruimte" />
+                              <SelectValue placeholder={t("dialog.locationPlaceholder")} />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -260,10 +275,10 @@ export default function AssetsPage() {
                   />
 
                   <DialogFooter className="pt-4">
-                    <Button type="button" variant="ghost" onClick={() => setIsNewDialogOpen(false)}>Annuleren</Button>
+                    <Button type="button" variant="ghost" onClick={() => setIsNewDialogOpen(false)}>{t("common.cancel", { ns: "common" })}</Button>
                     <Button type="submit" disabled={createAsset.isPending}>
                       {createAsset.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Toevoegen
+                      {t("dialog.add")}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -277,7 +292,7 @@ export default function AssetsPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Zoeken op naam of code..." 
+            placeholder={t("searchPlaceholder")} 
             className="pl-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -286,10 +301,10 @@ export default function AssetsPage() {
         <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center">
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Alle categorieën" />
+              <SelectValue placeholder={t("allCategories")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle categorieën</SelectItem>
+              <SelectItem value="all">{t("allCategories")}</SelectItem>
               {categories.map(c => (
                 <SelectItem key={c} value={c}>{c}</SelectItem>
               ))}
@@ -305,9 +320,9 @@ export default function AssetsPage() {
       ) : !assets?.length ? (
         <div className="text-center py-24 bg-card rounded-lg border border-dashed flex flex-col items-center justify-center">
           <PcCase className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">Geen assets gevonden</h3>
+          <h3 className="text-lg font-medium">{t("empty.title")}</h3>
           <p className="text-sm text-muted-foreground max-w-sm mt-1">
-            Probeer een andere zoekterm of pas de filters aan.
+            {t("empty.description")}
           </p>
         </div>
       ) : (
@@ -328,7 +343,7 @@ export default function AssetsPage() {
                     </div>
                   </div>
                   <Badge variant="secondary" className={cn("capitalize border-transparent font-medium whitespace-nowrap ml-2", getAssetStatusColor(asset.status))}>
-                    {asset.status.replace('_', ' ')}
+                    {t(`status.${asset.status}`, asset.status.replace('_', ' '))}
                   </Badge>
                 </div>
                 
@@ -340,7 +355,7 @@ export default function AssetsPage() {
                   <div className="flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
                     <span className="truncate">
-                      {asset.roomName ? `${asset.roomName} (${asset.buildingName})` : <span className="italic">Niet toegewezen</span>}
+                      {asset.roomName ? `${asset.roomName} (${asset.buildingName})` : <span className="italic">{t("card.notAssigned")}</span>}
                     </span>
                   </div>
                 </div>
@@ -348,7 +363,7 @@ export default function AssetsPage() {
               {asset.openTicketCount && asset.openTicketCount > 0 ? (
                 <div className="bg-destructive/5 px-4 py-2 border-t border-destructive/10 text-xs text-destructive font-medium flex items-center">
                   <span className="h-2 w-2 rounded-full bg-destructive mr-2 animate-pulse" />
-                  {asset.openTicketCount} open {asset.openTicketCount === 1 ? 'melding' : 'meldingen'}
+                  {t("card.openTickets", { count: asset.openTicketCount })}
                 </div>
               ) : null}
             </Card>

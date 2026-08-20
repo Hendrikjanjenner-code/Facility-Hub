@@ -1,0 +1,23 @@
+{
+  "title": "Postazioni",
+  "subtitle": "Prenota una postazione flessibile in ufficio.",
+  "colleagueSearchPlaceholder": "Cerca collega per nome...",
+  "noColleagueFound": "Nessuna postazione trovata",
+  "colleagueFound_one": "{{count}} postazione trovata",
+  "colleagueFound_other": "{{count}} postazioni trovate",
+  "bookedIn": "Prenotato",
+  "chooseDate": "Scegli la data",
+  "allFloors": "Tutti i piani",
+  "emptyTitle": "Nessuna postazione trovata",
+  "emptyDesc": "Prova un altro piano o un'altra data.",
+  "available_one": "{{count}} disponibile",
+  "available_other": "{{count}} disponibili",
+  "bookedBy": "Prenotato da:",
+  "workplaceTitle": "Postazione {{name}}",
+  "toastBookedTitle": "Postazione prenotata",
+  "toastBookedDesc": "Per {{date}}",
+  "toastConflictTitle": "Conflitto",
+  "toastConflictDesc": "Questa postazione è già stata prenotata nel frattempo.",
+  "toastErrorTitle": "Errore",
+  "toastErrorDesc": "Impossibile prenotare la postazione."
+}

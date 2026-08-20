@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { format, addDays, subDays, setHours, parseISO } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { 
   useListReservations, 
   useListRooms, 
@@ -27,6 +28,7 @@ import { getReservationStatusColor, cn } from "@/lib/status-helpers";
 import { NewReservationDialog } from "./NewReservationDialog";
 
 export default function ReserveringenPage() {
+  const { t } = useTranslation("reserveringen");
   const [, setLocation] = useLocation();
   const { data: user } = useGetCurrentUser();
   const [date, setDate] = useState<Date>(new Date());
@@ -48,21 +50,21 @@ export default function ReserveringenPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Reserveringen</h1>
-          <p className="text-muted-foreground">Beheer ruimte- en cateringreserveringen.</p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("list.title")}</h1>
+          <p className="text-muted-foreground">{t("list.subtitle")}</p>
         </div>
         
         <div className="flex items-center gap-2">
           <Tabs value={view} onValueChange={(v) => setView(v as "planbord" | "list")} className="hidden sm:flex">
             <TabsList>
-              <TabsTrigger value="planbord"><LayoutGrid className="h-4 w-4 mr-2" /> Planbord</TabsTrigger>
-              <TabsTrigger value="list"><LayoutList className="h-4 w-4 mr-2" /> Lijst</TabsTrigger>
+              <TabsTrigger value="planbord"><LayoutGrid className="h-4 w-4 mr-2" /> {t("list.planboard")}</TabsTrigger>
+              <TabsTrigger value="list"><LayoutList className="h-4 w-4 mr-2" /> {t("list.listView")}</TabsTrigger>
             </TabsList>
           </Tabs>
           
           <Button onClick={() => setIsNewDialogOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
-            Nieuwe reservering
+            {t("list.newReservation")}
           </Button>
         </div>
       </div>
@@ -70,11 +72,11 @@ export default function ReserveringenPage() {
       <div className="flex items-center justify-between bg-card p-2 rounded-lg border shadow-sm w-fit">
         <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" onClick={handlePrevDay}><ChevronLeft className="h-5 w-5" /></Button>
-          <Button variant="ghost" onClick={handleToday} className="px-3">Vandaag</Button>
+          <Button variant="ghost" onClick={handleToday} className="px-3">{t("list.today")}</Button>
           <Button variant="ghost" size="icon" onClick={handleNextDay}><ChevronRight className="h-5 w-5" /></Button>
         </div>
         <div className="px-4 font-medium min-w-[160px] text-center capitalize">
-          {format(date, "EEEE d MMMM", { locale: nl })}
+          {format(date, "EEEE d MMMM", { locale: getDateFnsLocale() })}
         </div>
       </div>
 
@@ -88,7 +90,7 @@ export default function ReserveringenPage() {
             {/* Header Row */}
             <div className="flex border-b bg-muted/30">
               <div className="w-48 flex-shrink-0 p-3 font-semibold text-sm border-r flex items-center">
-                Ruimte
+                {t("list.room")}
               </div>
               <div className="flex-1 flex">
                 {hours.map(h => (
@@ -107,7 +109,7 @@ export default function ReserveringenPage() {
                   <div key={room.id} className="flex hover:bg-muted/10 transition-colors">
                     <div className="w-48 flex-shrink-0 p-3 border-r">
                       <p className="font-medium text-sm truncate">{room.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{room.capacity} pers. • {room.buildingName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{t("list.roomInfo", { capacity: room.capacity, building: room.buildingName })}</p>
                     </div>
                     <div className="flex-1 relative flex">
                       {/* Grid lines */}
@@ -142,7 +144,7 @@ export default function ReserveringenPage() {
                               <div 
                                 className="absolute top-0 bottom-0 bg-primary/20 rounded-l-md border border-primary/30 border-r-0 border-dashed"
                                 style={{ left: `-${(setupWidth / width) * 100}%`, width: `${(setupWidth / width) * 100}%` }}
-                                title={`Opbouw: ${res.setupBufferMin} min`}
+                                title={t("list.setup", { min: res.setupBufferMin })}
                               />
                             )}
                             
@@ -152,7 +154,7 @@ export default function ReserveringenPage() {
                             )}>
                               <div className="font-semibold truncate">{res.title}</div>
                               <div className="text-muted-foreground truncate">{res.startTime} - {res.endTime}</div>
-                              {res.status === 'ingecheckt' && <div className="absolute top-1 right-1 h-2 w-2 rounded-full bg-green-500" title="Ingecheckt" />}
+                              {res.status === 'ingecheckt' && <div className="absolute top-1 right-1 h-2 w-2 rounded-full bg-green-500" title={t("list.checkedIn")} />}
                             </div>
                             
                             {/* Cleanup buffer */}
@@ -160,7 +162,7 @@ export default function ReserveringenPage() {
                               <div 
                                 className="absolute top-0 bottom-0 bg-primary/20 rounded-r-md border border-primary/30 border-l-0 border-dashed"
                                 style={{ right: `-${(cleanupWidth / width) * 100}%`, width: `${(cleanupWidth / width) * 100}%` }}
-                                title={`Schoonmaak: ${res.cleanupBufferMin} min`}
+                                title={t("list.cleanup", { min: res.cleanupBufferMin })}
                               />
                             )}
                           </div>
@@ -171,7 +173,7 @@ export default function ReserveringenPage() {
                 );
               })}
               {!rooms?.length && (
-                <div className="p-8 text-center text-muted-foreground">Geen boekbare ruimtes gevonden.</div>
+                <div className="p-8 text-center text-muted-foreground">{t("list.noBookableRooms")}</div>
               )}
             </div>
           </div>
@@ -199,16 +201,16 @@ export default function ReserveringenPage() {
                 <div className="flex items-center gap-3">
                   {res.cateringOrders?.length > 0 && (
                     <Badge variant="outline" className="bg-orange-50 text-orange-800 border-orange-200 dark:bg-orange-900/20 dark:text-orange-300">
-                      Catering ({res.cateringOrders.length})
+                      {t("list.catering", { count: res.cateringOrders.length })}
                     </Badge>
                   )}
                   <Badge variant="secondary" className={getReservationStatusColor(res.status)}>
-                    {res.status}
+                    {t(`status.${res.status}`, { defaultValue: res.status })}
                   </Badge>
                 </div>
               </div>
             )) : (
-              <div className="p-8 text-center text-muted-foreground">Geen reserveringen voor deze datum.</div>
+              <div className="p-8 text-center text-muted-foreground">{t("list.noReservations")}</div>
             )}
           </div>
         </Card>

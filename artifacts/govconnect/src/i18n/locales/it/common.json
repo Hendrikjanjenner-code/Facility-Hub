@@ -1,0 +1,63 @@
+{
+  "brand": "LetShare4gov",
+  "nav": {
+    "dashboard": "Dashboard",
+    "meldingen": "Segnalazioni",
+    "reserveringen": "Prenotazioni",
+    "werkplekken": "Postazioni",
+    "bezoekers": "Visitatori",
+    "vastgoed": "Immobili",
+    "ruimtes": "Sale",
+    "sleutelbeheer": "Gestione chiavi",
+    "assets": "Asset",
+    "contracten": "Contratti",
+    "webshop": "Negozio online",
+    "voorraad": "Scorte",
+    "duurzaamheid": "Sostenibilità",
+    "mjop": "Piano di manutenzione",
+    "catering": "Catering",
+    "kennisbank": "Base di conoscenza"
+  },
+  "shell": {
+    "notifications": "Notifiche",
+    "markAllRead": "Segna tutte come lette",
+    "noNotifications": "Nessuna notifica",
+    "role": "Ruolo",
+    "settings": "Impostazioni",
+    "logout": "Esci",
+    "language": "Lingua",
+    "guestReadOnly": "Modalità ospite – sola lettura"
+  },
+  "login": {
+    "title": "Accedi",
+    "subtitle": "Inserisci le tue credenziali per accedere alla dashboard.",
+    "email": "Indirizzo e-mail",
+    "emailPlaceholder": "nome@organizzazione.it",
+    "password": "Password",
+    "submit": "Accedi",
+    "failed": "Accesso non riuscito. Controlla i tuoi dati.",
+    "demo": "Account demo (accesso con 1 clic)",
+    "tagline": "Il cockpit quotidiano per il facility management pubblico.",
+    "taglineSub": "Veloce, chiaro e affidabile. Progettato per consentire alle organizzazioni pubbliche di gestire segnalazioni, prenotazioni e immobili senza sforzo.",
+    "copyright": "Tutti i diritti riservati.",
+    "emailInvalid": "Indirizzo e-mail non valido",
+    "passwordRequired": "La password è obbligatoria",
+    "guestLink": "Accesso ospite"
+  },
+  "guest": {
+    "title": "Accesso ospite",
+    "subtitle": "Inserisci la password ospite per visualizzare LetShare4gov come ospite (sola lettura).",
+    "password": "Password ospite",
+    "submit": "Visualizza come ospite",
+    "failed": "Password non valida.",
+    "backToLogin": "Torna all'accesso"
+  },
+  "common": {
+    "loading": "Caricamento…",
+    "save": "Salva",
+    "cancel": "Annulla",
+    "back": "Indietro",
+    "search": "Cerca",
+    "error": "Qualcosa è andato storto"
+  }
+}

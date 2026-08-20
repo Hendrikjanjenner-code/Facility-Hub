@@ -1,0 +1,133 @@
+{
+  "title": "Duurzaamheid",
+  "subtitle": "Energie-, gas- en waterverbruik plus afvalregistratie en rapportages.",
+  "importCsv": "CSV importeren",
+  "meterType": {
+    "elektriciteit": "Elektriciteit",
+    "gas": "Gas",
+    "water": "Water"
+  },
+  "wasteCategory": {
+    "restafval": "Restafval",
+    "papier": "Papier",
+    "gft": "GFT",
+    "plastic": "Plastic",
+    "glas": "Glas",
+    "chemisch": "Chemisch"
+  },
+  "tabs": {
+    "report": "Rapportage",
+    "meters": "Meterstanden",
+    "waste": "Afvalregistratie"
+  },
+  "filter": {
+    "label": "Filteren op",
+    "building": "Gebouw",
+    "allBuildings": "Alle gebouwen",
+    "from": "Van",
+    "to": "Tot en met",
+    "clear": "Filters wissen",
+    "exportCsv": "Exporteer CSV",
+    "exportEmptyTitle": "Geen data om te exporteren voor de geselecteerde filters",
+    "quarter": "Kwartaal:",
+    "badgeBuilding": "Gebouw: {{value}}",
+    "badgeFrom": "Van: {{value}}",
+    "badgeTo": "T/m: {{value}}"
+  },
+  "empty": {
+    "title": "Geen data voor dit gebouw en deze periode",
+    "hintPrefix": "Pas de filters aan of ",
+    "hintLink": "wis alle filters",
+    "hintSuffix": " om alle beschikbare gegevens te tonen."
+  },
+  "charts": {
+    "monthlyUsage": "Maandelijks verbruik",
+    "monthlyUsageDescription": "Elektriciteit (kWh), gas en water (m³) — alle gebouwen",
+    "electricity": "Elektriciteit (kWh)",
+    "gas": "Gas (m³)",
+    "water": "Water (m³)",
+    "wasteByCategory": "Afval per categorie",
+    "wasteByCategoryDescription": "Totaal geregistreerd gewicht (kg)",
+    "wasteByMonth": "Afval per maand",
+    "wasteByMonthDescription": "Gewicht per categorie per maand (kg)"
+  },
+  "meters": {
+    "csvFormat": "CSV-formaat:",
+    "csvExample": "— bijv.",
+    "addReading": "Meterstand invoeren",
+    "registerTitle": "Meterstand registreren",
+    "registerDescription": "Voer de cumulatieve meterstand in.",
+    "building": "Gebouw",
+    "buildingPlaceholder": "Kies gebouw",
+    "type": "Metertype",
+    "typePlaceholder": "Kies type",
+    "date": "Datum",
+    "reading": "Meterstand",
+    "readingWithUnit": "Meterstand ({{unit}})",
+    "correctTitle": "Meterstand corrigeren",
+    "deleteTitle": "Meterstand verwijderen?",
+    "deleteBody": "Stand van {{value}} {{unit}} op {{date}} voor {{building}} wordt permanent verwijderd. Verbruiksberekeningen worden direct herberekend.",
+    "table": {
+      "date": "Datum",
+      "building": "Gebouw",
+      "type": "Type",
+      "reading": "Stand",
+      "source": "Bron",
+      "registeredBy": "Geregistreerd door"
+    },
+    "source": {
+      "csvImport": "CSV-import",
+      "manual": "Handmatig"
+    }
+  },
+  "waste": {
+    "add": "Afval registreren",
+    "title": "Afvalregistratie",
+    "description": "Registreer opgehaald afval per categorie.",
+    "building": "Gebouw",
+    "buildingPlaceholder": "Kies gebouw",
+    "category": "Categorie",
+    "categoryPlaceholder": "Kies categorie",
+    "date": "Datum",
+    "weight": "Gewicht (kg)",
+    "correctTitle": "Afvalregistratie corrigeren",
+    "deleteTitle": "Afvalregistratie verwijderen?",
+    "deleteBody": "{{weight}} kg {{category}} op {{date}} voor {{building}} wordt permanent verwijderd. Rapportages en exports worden direct herberekend.",
+    "table": {
+      "date": "Datum",
+      "building": "Gebouw",
+      "category": "Categorie",
+      "weight": "Gewicht",
+      "registeredBy": "Geregistreerd door"
+    }
+  },
+  "actions": {
+    "correct": "Corrigeren",
+    "delete": "Verwijderen"
+  },
+  "validation": {
+    "buildingRequired": "Kies een gebouw",
+    "meterTypeRequired": "Kies een metertype",
+    "dateRequired": "Datum is verplicht",
+    "readingRequired": "Meterstand is verplicht",
+    "categoryRequired": "Kies een categorie",
+    "weightRequired": "Gewicht is verplicht"
+  },
+  "toast": {
+    "invalidCsvTitle": "Ongeldig CSV-formaat",
+    "invalidCsvDescription": "Verwachte kolommen: gebouw;type;datum;stand (datum als JJJJ-MM-DD).",
+    "noValidRows": "Geen geldige rijen gevonden in het CSV-bestand",
+    "importDone": "CSV-import voltooid",
+    "importUnmatched": "{{message}} ({{count}} rijen niet herkend)",
+    "importFailed": "Import mislukt",
+    "wasteCorrected": "Afvalregistratie gecorrigeerd",
+    "correctFailed": "Correctie mislukt",
+    "wasteDeleted": "Afvalregistratie verwijderd",
+    "deleteFailed": "Verwijderen mislukt",
+    "readingCorrected": "Meterstand gecorrigeerd",
+    "readingDeleted": "Meterstand verwijderd",
+    "readingRegistered": "Meterstand geregistreerd",
+    "saveFailed": "Opslaan mislukt",
+    "wasteSaved": "Afvalregistratie opgeslagen"
+  }
+}

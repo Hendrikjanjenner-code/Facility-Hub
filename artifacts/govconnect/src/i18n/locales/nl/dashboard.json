@@ -1,0 +1,41 @@
+{
+  "title": "Overzicht",
+  "welcome": "Welkom terug, {{name}}",
+  "subtitle": "Hier is uw facilitaire overzicht voor vandaag.",
+  "newTicket": "Nieuwe melding",
+  "stats": {
+    "myOpenTickets": "Mijn open meldingen",
+    "openTickets": "Open meldingen",
+    "inProgress": "Momenteel in behandeling",
+    "slaAtRisk": "SLA in gevaar",
+    "slaAtRiskDesc": "Binnen 4 uur of verlopen",
+    "myReservations": "Mijn reserveringen",
+    "reservationsToday": "Reserveringen vandaag",
+    "roomsAndCatering": "Ruimtes & catering",
+    "workplaceBookings": "Werkplekboekingen",
+    "forToday": "Voor vandaag",
+    "visitors": "Bezoekers",
+    "presentExpected": "Aanwezig / Verwacht",
+    "totalAssets": "Totaal assets",
+    "registeredInSystem": "Geregistreerd in systeem",
+    "poorCondition": "Bouwdelen slechte conditie",
+    "poorConditionDesc": "Score ≥ 4 (matig t/m zeer slecht)"
+  },
+  "charts": {
+    "ticketsByStatus": "Meldingen per status",
+    "ticketsByStatusDesc": "Overzicht van alle actieve meldingen",
+    "priorityDistribution": "Prioriteitsverdeling",
+    "priorityDistributionDesc": "Openstaande meldingen"
+  },
+  "satisfaction": {
+    "title": "Klanttevredenheid",
+    "average": "Gemiddeld {{score}}/5 — ",
+    "summary": "{{responses}} van de {{closed}} gesloten meldingen beoordeeld ({{rate}}% responsrate)",
+    "noRatings": "Nog geen beoordelingen ontvangen.",
+    "lowestResponseRate": "Laagste responsrate per categorie"
+  },
+  "activity": {
+    "title": "Recente activiteit",
+    "empty": "Geen recente activiteit"
+  }
+}

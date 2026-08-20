@@ -1,0 +1,42 @@
+{
+  "title": "Painel da receção",
+  "subtitle": "Visitantes esperados em {{date}}.",
+  "register": "Registar visitante",
+  "dialog": {
+    "title": "Registar novo visitante",
+    "description": "Registe um visitante para hoje. O crachá é gerado de imediato.",
+    "name": "Nome do visitante",
+    "namePlaceholder": "Nome completo",
+    "company": "Empresa (Opcional)",
+    "companyPlaceholder": "Nome da empresa",
+    "email": "Endereço de e-mail (Opcional)",
+    "emailPlaceholder": "E-mail",
+    "host": "Anfitrião",
+    "hostPlaceholder": "Escolher colaborador",
+    "expectedArrival": "Chegada prevista",
+    "submit": "Registar"
+  },
+  "searchPlaceholder": "Procurar visitante...",
+  "empty": "Nenhum visitante encontrado para hoje.",
+  "expected": "Previsto: {{time}}",
+  "hostLabel": "Anfitrião: ",
+  "checkedIn": "Entrada: {{time}}",
+  "checkedOut": "Saída: {{time}}",
+  "checkIn": "Registar entrada",
+  "checkOut": "Registar saída",
+  "visitDone": "Visita concluída",
+  "toast": {
+    "registered": "Visitante registado",
+    "statusChanged": "O visitante está agora {{status}}"
+  },
+  "validation": {
+    "nameRequired": "O nome é obrigatório",
+    "emailInvalid": "Endereço de e-mail inválido",
+    "timeInvalid": "Formato inválido (HH:MM)"
+  },
+  "status": {
+    "verwacht": "previsto",
+    "aanwezig": "presente",
+    "vertrokken": "saiu"
+  }
+}

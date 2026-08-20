@@ -1,0 +1,23 @@
+{
+  "title": "Çalışma alanları",
+  "subtitle": "Ofiste esnek bir masa rezerve edin.",
+  "colleagueSearchPlaceholder": "İş arkadaşını ada göre ara...",
+  "noColleagueFound": "Çalışma alanı bulunamadı",
+  "colleagueFound_one": "{{count}} çalışma alanı bulundu",
+  "colleagueFound_other": "{{count}} çalışma alanı bulundu",
+  "bookedIn": "Rezerve edildi",
+  "chooseDate": "Tarih seçin",
+  "allFloors": "Tüm katlar",
+  "emptyTitle": "Çalışma alanı bulunamadı",
+  "emptyDesc": "Farklı bir kat veya tarih deneyin.",
+  "available_one": "{{count}} müsait",
+  "available_other": "{{count}} müsait",
+  "bookedBy": "Rezerve eden:",
+  "workplaceTitle": "Çalışma alanı {{name}}",
+  "toastBookedTitle": "Çalışma alanı rezerve edildi",
+  "toastBookedDesc": "{{date}} için",
+  "toastConflictTitle": "Çakışma",
+  "toastConflictDesc": "Bu çalışma alanı bu arada zaten rezerve edilmiş.",
+  "toastErrorTitle": "Hata",
+  "toastErrorDesc": "Çalışma alanı rezerve edilemedi."
+}

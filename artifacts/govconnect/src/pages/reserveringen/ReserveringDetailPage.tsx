@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { format } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { 
   useGetReservation, 
   useUpdateReservation,
@@ -29,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getReservationStatusColor } from "@/lib/status-helpers";
 
 export default function ReserveringDetailPage({ id }: { id: string }) {
+  const { t } = useTranslation("reserveringen");
   const reservationId = parseInt(id);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -50,14 +52,14 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
   }
 
   if (!reservation) {
-    return <div>Reservering niet gevonden.</div>;
+    return <div>{t("detail.notFound")}</div>;
   }
 
   const handleStatusChange = (status: string) => {
     updateReservation.mutate({ id: reservationId, data: { status } }, {
       onSuccess: (data) => {
         queryClient.setQueryData(getGetReservationQueryKey(reservationId), data);
-        toast({ title: `Reservering ${status}` });
+        toast({ title: t("detail.toastStatus", { status: t(`status.${status}`, { defaultValue: status }) }) });
       }
     });
   };
@@ -76,11 +78,11 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold tracking-tight">{reservation.title}</h1>
             <Badge variant="secondary" className={getReservationStatusColor(reservation.status)}>
-              {reservation.status}
+              {t(`status.${reservation.status}`, { defaultValue: reservation.status })}
             </Badge>
           </div>
           <p className="text-muted-foreground text-sm flex items-center gap-2 mt-1">
-            Geboekt door {reservation.userName}
+            {t("detail.bookedBy", { name: reservation.userName })}
           </p>
         </div>
       </div>
@@ -89,28 +91,28 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
         <div className="md:col-span-3 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Details</CardTitle>
+              <CardTitle>{t("detail.details")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <CalendarDays className="h-4 w-4" />
-                    <span className="text-sm">Datum</span>
+                    <span className="text-sm">{t("detail.date")}</span>
                   </div>
-                  <p className="font-medium capitalize">{format(new Date(reservation.date), "EEEE d MMMM yyyy", { locale: nl })}</p>
+                  <p className="font-medium capitalize">{format(new Date(reservation.date), "EEEE d MMMM yyyy", { locale: getDateFnsLocale() })}</p>
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock className="h-4 w-4" />
-                    <span className="text-sm">Tijd</span>
+                    <span className="text-sm">{t("detail.time")}</span>
                   </div>
                   <p className="font-medium">{reservation.startTime} - {reservation.endTime}</p>
                 </div>
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="h-4 w-4" />
-                    <span className="text-sm">Locatie</span>
+                    <span className="text-sm">{t("detail.location")}</span>
                   </div>
                   <p className="font-medium">{reservation.roomName || reservation.workplaceName}</p>
                   <p className="text-xs text-muted-foreground">{reservation.buildingName}</p>
@@ -119,9 +121,9 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Users className="h-4 w-4" />
-                      <span className="text-sm">Personen</span>
+                      <span className="text-sm">{t("detail.persons")}</span>
                     </div>
-                    <p className="font-medium">{reservation.attendees} personen</p>
+                    <p className="font-medium">{t("detail.personsCount", { count: reservation.attendees })}</p>
                   </div>
                 )}
               </div>
@@ -130,18 +132,18 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-medium mb-3 text-sm">Operationele planning (Buffers)</h4>
+                    <h4 className="font-medium mb-3 text-sm">{t("detail.buffersTitle")}</h4>
                     <div className="grid grid-cols-2 gap-4 bg-muted/30 p-3 rounded-lg border">
                       {reservation.setupBufferMin > 0 && (
                         <div>
-                          <p className="text-xs text-muted-foreground">Opbouw</p>
-                          <p className="font-medium text-sm">{reservation.setupBufferMin} minuten</p>
+                          <p className="text-xs text-muted-foreground">{t("detail.setup")}</p>
+                          <p className="font-medium text-sm">{t("detail.minutes", { count: reservation.setupBufferMin })}</p>
                         </div>
                       )}
                       {reservation.cleanupBufferMin > 0 && (
                         <div>
-                          <p className="text-xs text-muted-foreground">Schoonmaak</p>
-                          <p className="font-medium text-sm">{reservation.cleanupBufferMin} minuten</p>
+                          <p className="text-xs text-muted-foreground">{t("detail.cleanup")}</p>
+                          <p className="font-medium text-sm">{t("detail.minutes", { count: reservation.cleanupBufferMin })}</p>
                         </div>
                       )}
                     </div>
@@ -155,7 +157,7 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
                   <div>
                     <div className="flex items-center gap-2 mb-4">
                       <Coffee className="h-5 w-5 text-primary" />
-                      <h4 className="font-medium text-base">Catering bestelling</h4>
+                      <h4 className="font-medium text-base">{t("detail.cateringOrder")}</h4>
                     </div>
                     <div className="space-y-3">
                       {reservation.cateringOrders.map((order) => (
@@ -170,7 +172,7 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
                       ))}
                     </div>
                     <div className="mt-4 pt-3 border-t flex justify-between items-center font-medium">
-                      <span>Totaal catering</span>
+                      <span>{t("detail.cateringTotal")}</span>
                       <span>€{totalPrice.toFixed(2)}</span>
                     </div>
                   </div>
@@ -186,10 +188,10 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <QrCode className="h-5 w-5" />
-                  Snelle check-in
+                  {t("detail.quickCheckin")}
                 </CardTitle>
                 <CardDescription>
-                  Scan of klik om in te checken bij de ruimte.
+                  {t("detail.quickCheckinDesc")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -198,7 +200,7 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
                     <QrCode className="h-full w-full text-slate-200 group-hover:text-slate-300 transition-colors" />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="bg-primary/10 text-primary font-bold px-4 py-2 rounded-full backdrop-blur-sm border border-primary/20">
-                        ZAL SCANNEN
+                        {t("detail.willScan")}
                       </div>
                     </div>
                   </div>
@@ -207,15 +209,15 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
                 {reservation.status === 'ingecheckt' && (
                   <div className="flex flex-col items-center justify-center p-6 bg-green-50 text-green-700 border border-green-200 rounded-xl">
                     <CheckCircle2 className="h-12 w-12 mb-2" />
-                    <p className="font-medium">Ingecheckt</p>
-                    <p className="text-xs opacity-80 mt-1">U kunt de ruimte gebruiken.</p>
+                    <p className="font-medium">{t("detail.checkedIn")}</p>
+                    <p className="text-xs opacity-80 mt-1">{t("detail.checkedInDesc")}</p>
                   </div>
                 )}
                 
                 {reservation.status === 'uitgecheckt' && (
                   <div className="flex flex-col items-center justify-center p-6 bg-slate-50 text-slate-600 border rounded-xl">
                     <XCircle className="h-12 w-12 mb-2" />
-                    <p className="font-medium">Uitgecheckt</p>
+                    <p className="font-medium">{t("detail.checkedOut")}</p>
                   </div>
                 )}
 
@@ -225,14 +227,14 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
                     disabled={reservation.status !== 'bevestigd' || updateReservation.isPending}
                     onClick={() => handleStatusChange('ingecheckt')}
                   >
-                    Inchecken
+                    {t("detail.checkIn")}
                   </Button>
                   <Button 
                     variant={reservation.status === 'ingecheckt' ? 'default' : 'outline'} 
                     disabled={reservation.status !== 'ingecheckt' || updateReservation.isPending}
                     onClick={() => handleStatusChange('uitgecheckt')}
                   >
-                    Uitchecken
+                    {t("detail.checkOut")}
                   </Button>
                 </div>
               </CardContent>
@@ -242,7 +244,7 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
           {(user?.role === 'facilitair_manager' || user?.role === 'beheerder') && reservation.status !== 'geannuleerd' && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Beheer</CardTitle>
+                <CardTitle className="text-lg">{t("detail.manage")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
@@ -251,7 +253,7 @@ export default function ReserveringDetailPage({ id }: { id: string }) {
                   disabled={updateReservation.isPending}
                   onClick={() => handleStatusChange('geannuleerd')}
                 >
-                  Annuleer reservering
+                  {t("detail.cancelReservation")}
                 </Button>
               </CardContent>
             </Card>

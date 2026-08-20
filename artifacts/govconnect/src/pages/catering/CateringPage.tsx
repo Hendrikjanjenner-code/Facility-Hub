@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { format, addDays, subDays } from "date-fns";
-import { nl } from "date-fns/locale";
+import { useTranslation } from "react-i18next";
+import { getDateFnsLocale } from "@/i18n";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronLeft,
@@ -22,13 +23,6 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-
-const STATUS_LABELS: Record<string, string> = {
-  bevestigd: "Bevestigd",
-  ingecheckt: "Ingecheckt",
-  uitgecheckt: "Uitgecheckt",
-  geannuleerd: "Geannuleerd",
-};
 
 const STATUS_COLORS: Record<string, string> = {
   bevestigd: "bg-blue-100 text-blue-800 border-blue-200",
@@ -65,6 +59,7 @@ async function fetchDailySummary(dateStr: string): Promise<DailySummary> {
 }
 
 export default function CateringPage() {
+  const { t } = useTranslation("catering");
   const [date, setDate] = useState<Date>(new Date());
   const [printDate, setPrintDate] = useState<Date>(new Date());
   const [showCancelledInPrint, setShowCancelledInPrint] = useState(false);
@@ -116,8 +111,8 @@ export default function CateringPage() {
   const handleToday = () => setDate(new Date());
 
   const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
-  const formattedDate = format(date, "EEEE d MMMM yyyy", { locale: nl });
-  const formattedPrintDate = format(printDate, "EEEE d MMMM yyyy", { locale: nl });
+  const formattedDate = format(date, "EEEE d MMMM yyyy", { locale: getDateFnsLocale() });
+  const formattedPrintDate = format(printDate, "EEEE d MMMM yyyy", { locale: getDateFnsLocale() });
 
   const activePrintSummary = printSummary ?? null;
 
@@ -134,7 +129,7 @@ export default function CateringPage() {
       <div className="print-header hidden">
         <div className="flex items-center gap-2 mb-1">
           <UtensilsCrossed className="h-5 w-5" />
-          <h1 className="text-2xl font-bold">Catering — daglijst</h1>
+          <h1 className="text-2xl font-bold">{t("printTitle")}</h1>
         </div>
         <p className="text-sm capitalize">{formattedPrintDate}</p>
         <hr className="mt-3 mb-0 border-gray-400" />
@@ -145,7 +140,7 @@ export default function CateringPage() {
         <div className="print-only hidden">
           {/* Totals */}
           <div className="mb-4">
-            <h2 className="text-base font-semibold mb-2">Totalen voor de dag</h2>
+            <h2 className="text-base font-semibold mb-2">{t("totals")}</h2>
             <div className="grid grid-cols-3 gap-2">
               {activePrintSummary!.totals.map((total) => (
                 <div
@@ -161,8 +156,7 @@ export default function CateringPage() {
 
           {/* Reservations */}
           <h2 className="text-sm font-semibold uppercase tracking-wide mb-2">
-            {printReservations.length} reservering
-            {printReservations.length !== 1 ? "en" : ""} met catering
+            {t("withCatering", { count: printReservations.length })}
           </h2>
           <div className="space-y-3">
             {printReservations.map((reservation) => (
@@ -183,18 +177,18 @@ export default function CateringPage() {
                       <div className="text-xs text-gray-500">{reservation.buildingName}</div>
                     )}
                     {reservation.attendees != null && (
-                      <div className="text-xs text-gray-500">{reservation.attendees} personen</div>
+                      <div className="text-xs text-gray-500">{t("persons", { count: reservation.attendees })}</div>
                     )}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="font-semibold text-sm">{reservation.title}</span>
                       <span className="text-xs border rounded px-1">
-                        {STATUS_LABELS[reservation.status] ?? reservation.status}
+                        {t(`status.${reservation.status}`, { defaultValue: reservation.status })}
                       </span>
                       {reservation.cateringDeliveredAt && (
                         <span className="text-xs border rounded px-1 border-green-600 text-green-700">
-                          Geleverd
+                          {t("delivered")}
                         </span>
                       )}
                     </div>
@@ -205,7 +199,7 @@ export default function CateringPage() {
                           className="text-sm bg-gray-100 rounded px-2 py-0.5"
                         >
                           <strong>{item.quantity}×</strong>{" "}
-                          {item.itemName ?? `Item ${item.cateringItemId}`}
+                          {item.itemName ?? t("itemFallback", { id: item.cateringItemId })}
                         </span>
                       ))}
                     </div>
@@ -220,8 +214,7 @@ export default function CateringPage() {
       {activePrintSummary && printReservations.length === 0 && (
         <div className="print-only hidden">
           <p className="text-sm text-gray-600">
-            Geen cateringbestellingen voor{" "}
-            <span className="font-medium">{formattedPrintDate}</span>.
+            {t("noOrdersForPrint", { date: formattedPrintDate })}
           </p>
         </div>
       )}
@@ -231,10 +224,10 @@ export default function CateringPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <UtensilsCrossed className="h-7 w-7 text-primary" />
-            Catering
+            {t("title")}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Dagelijks bestellingsoverzicht voor de cateraar
+            {t("subtitle")}
           </p>
         </div>
 
@@ -252,7 +245,7 @@ export default function CateringPage() {
           </Button>
           {!isToday && (
             <Button variant="outline" size="sm" onClick={handleToday}>
-              Vandaag
+              {t("today")}
             </Button>
           )}
 
@@ -264,7 +257,7 @@ export default function CateringPage() {
               onChange={(e) => setShowCancelledInPrint(e.target.checked)}
               className="rounded border-input"
             />
-            Geannuleerd meeprinten
+            {t("printCancelled")}
           </label>
 
           {/* Print date picker + print button */}
@@ -292,8 +285,8 @@ export default function CateringPage() {
                 }
               }}
               className="text-sm bg-transparent border-none outline-none cursor-pointer"
-              aria-label="Afdrukkdatum kiezen"
-              title="Kies de datum voor de afdruk"
+              aria-label={t("printDateLabel")}
+              title={t("printDateTitle")}
             />
           </div>
           <Button
@@ -303,14 +296,14 @@ export default function CateringPage() {
             disabled={isPrintFetching || isPrintError}
             title={
               isPrintError
-                ? "Ophalen mislukt — probeer opnieuw"
+                ? t("printErrorTitle")
                 : isPrintFetching
-                ? "Gegevens worden geladen…"
-                : `Afdrukken voor ${formattedPrintDate}`
+                ? t("printLoadingTitle")
+                : t("printForDate", { date: formattedPrintDate })
             }
           >
             <Printer className="h-4 w-4 mr-1.5" />
-            {isPrintFetching ? "Laden…" : "Afdrukken"}
+            {isPrintFetching ? t("loading") : t("print")}
           </Button>
         </div>
       </div>
@@ -325,10 +318,9 @@ export default function CateringPage() {
         <Card className="print-hidden">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <UtensilsCrossed className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <h3 className="text-lg font-semibold mb-1">Geen cateringbestellingen</h3>
+            <h3 className="text-lg font-semibold mb-1">{t("emptyTitle")}</h3>
             <p className="text-muted-foreground text-sm">
-              Er zijn geen cateringbestellingen voor{" "}
-              <span className="font-medium">{formattedDate}</span>.
+              {t("emptyDescription", { date: formattedDate })}
             </p>
           </CardContent>
         </Card>
@@ -339,7 +331,7 @@ export default function CateringPage() {
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Package className="h-4 w-4 text-primary" />
-                Totalen voor de dag
+                {t("totals")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -362,8 +354,7 @@ export default function CateringPage() {
           {/* Tijdlijn van leveringen */}
           <div>
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-              Tijdlijn — {summary.reservations.length} reservering
-              {summary.reservations.length !== 1 ? "en" : ""} met catering
+              {t("timeline", { count: summary.reservations.length })}
             </h2>
             <div className="space-y-3">
               {summary.reservations.map((reservation) => {
@@ -409,7 +400,7 @@ export default function CateringPage() {
                           {reservation.attendees != null && (
                             <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
                               <Users className="h-3.5 w-3.5 flex-shrink-0" />
-                              {reservation.attendees} personen
+                              {t("persons", { count: reservation.attendees })}
                             </div>
                           )}
                         </div>
@@ -434,7 +425,7 @@ export default function CateringPage() {
                                 STATUS_COLORS[reservation.status] ?? ""
                               )}
                             >
-                              {STATUS_LABELS[reservation.status] ?? reservation.status}
+                              {t(`status.${reservation.status}`, { defaultValue: reservation.status })}
                             </Badge>
                           </div>
 
@@ -449,7 +440,7 @@ export default function CateringPage() {
                                 )}
                               >
                                 <span className="font-semibold text-primary">{item.quantity}×</span>
-                                <span>{item.itemName ?? `Item ${item.cateringItemId}`}</span>
+                                <span>{item.itemName ?? t("itemFallback", { id: item.cateringItemId })}</span>
                               </div>
                             ))}
                           </div>
@@ -471,12 +462,12 @@ export default function CateringPage() {
                               {delivered ? (
                                 <>
                                   <CheckCircle2 className="h-3.5 w-3.5" />
-                                  Geleverd
+                                  {t("delivered")}
                                 </>
                               ) : (
                                 <>
                                   <Circle className="h-3.5 w-3.5" />
-                                  Markeer als geleverd
+                                  {t("markDelivered")}
                                 </>
                               )}
                             </Button>

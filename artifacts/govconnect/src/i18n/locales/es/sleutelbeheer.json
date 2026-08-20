@@ -1,0 +1,145 @@
+{
+  "title": "Gestión de llaves y tarjetas",
+  "subtitle": "Registro, plan de llaves, entrega y procedimiento de pérdida.",
+  "newKey": "Nueva llave o tarjeta",
+  "stats": {
+    "inRegister": "En registro",
+    "issued": "Entregadas",
+    "overdue": "Devueltas con retraso"
+  },
+  "searchPlaceholder": "Buscar por código, descripción o titular...",
+  "filters": {
+    "allTypes": "Todos los tipos",
+    "keys": "Llaves",
+    "passes": "Tarjetas",
+    "allStatuses": "Todos los estados",
+    "overdueBadge": "Con retraso"
+  },
+  "type": {
+    "sleutel": "Llave",
+    "pas": "Tarjeta"
+  },
+  "status": {
+    "beschikbaar": "Disponible",
+    "uitgegeven": "Entregada",
+    "vermist": "Perdida",
+    "geblokkeerd": "Bloqueada"
+  },
+  "table": {
+    "code": "Código",
+    "type": "Tipo",
+    "description": "Descripción",
+    "building": "Edificio",
+    "doors": "Puertas",
+    "status": "Estado",
+    "currentHolder": "Titular actual",
+    "dueBy": "Devolver antes de",
+    "empty": "No se encontraron llaves.",
+    "overdue": "con retraso"
+  },
+  "newDialog": {
+    "title": "Registrar nueva llave o tarjeta",
+    "description": "Añada una llave o tarjeta de acceso al registro.",
+    "code": "Código",
+    "codePlaceholder": "Ej.: SL-005",
+    "type": "Tipo",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Ej.: Llave de la sala de archivo",
+    "building": "Edificio",
+    "none": "Ninguno / N/D",
+    "replacementCost": "Coste de reposición (€)",
+    "add": "Añadir"
+  },
+  "toast": {
+    "codeDescRequired": "Introduzca el código y la descripción",
+    "added": "Llave añadida",
+    "addFailed": "Error al añadir"
+  },
+  "detail": {
+    "notFound": "Llave no encontrada.",
+    "replacementCostLabel": "Coste de reposición {{cost}}",
+    "issue": "Entregar",
+    "block": "Bloquear",
+    "takeBack": "Recoger",
+    "makeAvailable": "Volver a poner disponible",
+    "reportLost": "Notificar pérdida",
+    "actionFailed": "La acción falló",
+    "issueDialog": {
+      "title": "Entregar llave",
+      "description": "Registre a quién se entrega {{code}}.",
+      "employee": "Empleado",
+      "employeePlaceholder": "Elegir empleado",
+      "dueDate": "Fecha de devolución (opcional)",
+      "dueDateHint": "Ej.: para tarjetas de visitante o llaves temporales.",
+      "note": "Nota (opcional)",
+      "confirm": "Entregar"
+    },
+    "lossDialog": {
+      "title": "Iniciar procedimiento de pérdida",
+      "description": "La llave se registra como perdida, se crea automáticamente una incidencia de service desk y se cargan los costes{{holder}}.",
+      "descriptionHolder": " a {{name}}",
+      "charge": "Liquidación de costes (€)",
+      "chargeHint": "Dejar vacío = coste de reposición del registro.",
+      "note": "Aclaración",
+      "confirm": "Notificar pérdida"
+    },
+    "toast": {
+      "issued": "Llave entregada",
+      "blocked": "Llave bloqueada",
+      "returned": "Llave recogida",
+      "available": "Llave disponible de nuevo",
+      "lossStarted": "Procedimiento de pérdida iniciado",
+      "lossStartedDesc": "Se ha creado una incidencia de service desk.",
+      "dueUpdated": "Fecha de devolución actualizada",
+      "doorAdded": "Puerta añadida",
+      "doorRemoved": "Puerta eliminada"
+    },
+    "issuedBanner": {
+      "issuedTo": "Entregada a ",
+      "since": " desde {{date}}",
+      "overdue": "• Fecha de devolución superada:",
+      "dueBy": "• Devolver antes de:",
+      "overdueBadge": "con retraso",
+      "editDueDate": "Cambiar fecha de devolución"
+    },
+    "dueDialog": {
+      "title": "Cambiar fecha de devolución",
+      "description": "Ajuste la fecha de devolución para {{name}}. Deje vacío para eliminar la fecha.",
+      "label": "Fecha de devolución",
+      "hint": "Deje vacío para eliminar la fecha de devolución."
+    },
+    "keyPlan": {
+      "title": "Plan de llaves",
+      "description": "Puertas y cilindros que abre esta {{type}}.",
+      "addDoor": "Puerta",
+      "empty": "Aún no hay puertas vinculadas.",
+      "doorDialog": {
+        "title": "Añadir puerta al plan de llaves",
+        "description": "Descripción",
+        "descriptionPlaceholder": "Ej.: Cilindro C-06, puerta de archivo",
+        "room": "Sala (opcional)",
+        "none": "Ninguna / N/D",
+        "add": "Añadir"
+      }
+    },
+    "issueHistory": {
+      "title": "Historial de entregas",
+      "description": "Quién usó o usa esta {{type}}.",
+      "empty": "Aún no entregada.",
+      "unknown": "Desconocido",
+      "returned": "Recogida",
+      "inUse": "En uso",
+      "issuedBy": "• entregada por {{name}}",
+      "dueBy": "• devolver antes de {{date}}",
+      "overdue": " ⚠ con retraso"
+    },
+    "lossReports": {
+      "title": "Notificaciones de pérdida",
+      "reportedOn": "Notificado el {{date}}",
+      "lastHolder": "• último titular: ",
+      "reportedBy": "Notificado por {{name}}. ",
+      "viewTicket": "Ver incidencia {{number}}"
+    },
+    "createdOn": "Creado el {{date}}."
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Asset",
+  "subtitle": "Gestisci attrezzature, arredi e inventario.",
+  "addAsset": "Aggiungi asset",
+  "searchPlaceholder": "Cerca per nome o codice...",
+  "allCategories": "Tutte le categorie",
+  "status": {
+    "in_gebruik": "In uso",
+    "in_onderhoud": "In manutenzione",
+    "defect": "Guasto",
+    "afgeschreven": "Dismesso"
+  },
+  "dialog": {
+    "title": "Registra nuovo asset",
+    "description": "Aggiungi un nuovo oggetto al registro del patrimonio.",
+    "name": "Nome",
+    "namePlaceholder": "Es. Sedia da ufficio ergonomica",
+    "code": "Codice asset",
+    "codePlaceholder": "Es. INV-2026-001",
+    "category": "Categoria",
+    "categoryPlaceholder": "Es. Arredi",
+    "status": "Stato",
+    "statusPlaceholder": "Scegli stato",
+    "brand": "Marca (facoltativo)",
+    "model": "Modello (facoltativo)",
+    "serialNumber": "Numero di serie (facoltativo)",
+    "location": "Posizione (facoltativo)",
+    "locationPlaceholder": "Scegli locale",
+    "add": "Aggiungi"
+  },
+  "validation": {
+    "nameRequired": "Il nome è obbligatorio",
+    "codeRequired": "Il codice è obbligatorio",
+    "categoryRequired": "La categoria è obbligatoria"
+  },
+  "toast": {
+    "added": "Asset aggiunto"
+  },
+  "empty": {
+    "title": "Nessun asset trovato",
+    "description": "Prova un altro termine di ricerca o modifica i filtri."
+  },
+  "card": {
+    "notAssigned": "Non assegnato",
+    "openTickets_one": "{{count}} segnalazione aperta",
+    "openTickets_other": "{{count}} segnalazioni aperte"
+  },
+  "detail": {
+    "notFound": "Asset non trovato.",
+    "info": {
+      "title": "Informazioni asset",
+      "code": "Codice univoco",
+      "category": "Categoria",
+      "brandModel": "Marca e modello",
+      "serialNumber": "Numero di serie",
+      "location": "Posizione",
+      "notAssigned": "Non assegnato",
+      "purchaseDate": "Data di acquisto"
+    },
+    "tickets": {
+      "title": "Segnalazioni collegate",
+      "newTicket": "Nuova segnalazione",
+      "empty": "Nessuna segnalazione trovata per questo asset."
+    },
+    "actions": {
+      "title": "Azioni",
+      "reportFault": "Segnala guasto"
+    }
+  }
+}

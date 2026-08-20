@@ -1,0 +1,70 @@
+{
+  "title": "Ativos",
+  "subtitle": "Faça a gestão de equipamentos, mobiliário e inventário.",
+  "addAsset": "Adicionar ativo",
+  "searchPlaceholder": "Procurar por nome ou código...",
+  "allCategories": "Todas as categorias",
+  "status": {
+    "in_gebruik": "Em uso",
+    "in_onderhoud": "Em manutenção",
+    "defect": "Avariado",
+    "afgeschreven": "Abatido"
+  },
+  "dialog": {
+    "title": "Registar novo ativo",
+    "description": "Adicione um novo objeto ao registo de património.",
+    "name": "Nome",
+    "namePlaceholder": "Ex.: Cadeira de escritório ergonómica",
+    "code": "Código do ativo",
+    "codePlaceholder": "Ex.: INV-2026-001",
+    "category": "Categoria",
+    "categoryPlaceholder": "Ex.: Mobiliário",
+    "status": "Estado",
+    "statusPlaceholder": "Escolher estado",
+    "brand": "Marca (opcional)",
+    "model": "Modelo (opcional)",
+    "serialNumber": "Número de série (opcional)",
+    "location": "Localização (opcional)",
+    "locationPlaceholder": "Escolher sala",
+    "add": "Adicionar"
+  },
+  "validation": {
+    "nameRequired": "O nome é obrigatório",
+    "codeRequired": "O código é obrigatório",
+    "categoryRequired": "A categoria é obrigatória"
+  },
+  "toast": {
+    "added": "Ativo adicionado"
+  },
+  "empty": {
+    "title": "Nenhum ativo encontrado",
+    "description": "Tente outro termo de pesquisa ou ajuste os filtros."
+  },
+  "card": {
+    "notAssigned": "Não atribuído",
+    "openTickets_one": "{{count}} pedido aberto",
+    "openTickets_other": "{{count}} pedidos abertos"
+  },
+  "detail": {
+    "notFound": "Ativo não encontrado.",
+    "info": {
+      "title": "Informação do ativo",
+      "code": "Código único",
+      "category": "Categoria",
+      "brandModel": "Marca e modelo",
+      "serialNumber": "Número de série",
+      "location": "Localização",
+      "notAssigned": "Não atribuído",
+      "purchaseDate": "Data de aquisição"
+    },
+    "tickets": {
+      "title": "Pedidos associados",
+      "newTicket": "Novo pedido",
+      "empty": "Nenhum pedido encontrado para este ativo."
+    },
+    "actions": {
+      "title": "Ações",
+      "reportFault": "Comunicar avaria"
+    }
+  }
+}

@@ -8,6 +8,7 @@ import { Route, Switch, useLocation, Router as WouterRouter } from 'wouter';
 import { useGetCurrentUser } from '@workspace/api-client-react';
 
 import LoginPage from './pages/login/LoginPage';
+import GastPage from './pages/gast/GastPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import MeldingenPage from './pages/meldingen/MeldingenPage';
 import MeldingenNieuwPage from './pages/meldingen/MeldingenNieuwPage';
@@ -79,6 +80,7 @@ function Router() {
     <RoutedErrorBoundary>
       <Switch>
         <Route path="/login" component={LoginPage} />
+        <Route path="/gast" component={GastPage} />
         
         <Route path="/">{(params) => <ProtectedRoute component={DashboardPage} />}</Route>
         

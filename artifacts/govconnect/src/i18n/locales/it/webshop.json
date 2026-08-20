@@ -1,0 +1,128 @@
+{
+  "title": "Negozio online",
+  "subtitleSupplier": "Ordini inviati a te.",
+  "subtitle": "Ordina materiale per ufficio e prodotti per i servizi con controllo del budget.",
+  "cart": {
+    "button": "Carrello",
+    "title": "Carrello",
+    "empty": "Il tuo carrello è vuoto.",
+    "pricePerUnit": "{{price}} per {{unit}}",
+    "increaseExceeds": "L'aumento supera il budget",
+    "budgetLabel": "Budget {{department}} ({{year}})",
+    "remaining": "Budget residuo",
+    "cartLabel": "Carrello",
+    "nearBudgetPrefix": "Quasi al limite del budget — ",
+    "availableAfter": "Ancora {{amount}} disponibili dopo l'invio.",
+    "exceedsWarning": "Attenzione: questo ordine supera il budget residuo.",
+    "blockedTitle": "Ordine bloccato",
+    "blockedBody": "Il budget residuo è insufficiente per questo ordine. Il deficit è di <1>{{amount}}</1>. Contatta il tuo responsabile per aumentare il budget o modificare la politica.",
+    "underThreshold": "Sotto la soglia di {{amount}} — sarà approvato automaticamente",
+    "total": "Totale",
+    "submitAuto": "Effettua ordine (approvato automaticamente)",
+    "submit": "Invia ordine per l'approvazione"
+  },
+  "supplierPortal": {
+    "title": "Ordini per te",
+    "empty": "Nessun ordine ancora inviato.",
+    "markDelivered": "Segna come consegnato"
+  },
+  "supplierStatus": {
+    "verstuurd": "Inviato",
+    "verwerkt": "Elaborato"
+  },
+  "table": {
+    "order": "Ordine",
+    "items": "Articoli",
+    "amount": "Importo",
+    "status": "Stato",
+    "action": "Azione",
+    "requester": "Richiedente",
+    "budgetEffect": "Effetto sul budget",
+    "supplier": "Fornitore",
+    "lineItem": "{{quantity}}× {{name}}"
+  },
+  "tabs": {
+    "catalog": "Catalogo",
+    "ordersManager": "Ordini e approvazione",
+    "ordersMine": "I miei ordini",
+    "budgets": "Budget"
+  },
+  "catalog": {
+    "searchPlaceholder": "Cerca nel catalogo...",
+    "allCategories": "Tutte le categorie",
+    "notInStock": "Non disponibile",
+    "inStock": "{{stock}} {{unit}} disponibili",
+    "addToCart": "Aggiungi al carrello"
+  },
+  "orders": {
+    "empty": "Nessun ordine ancora",
+    "remaining": "Residuo: {{amount}}",
+    "overBudget": "Sopra budget",
+    "approve": "Approva",
+    "reject": "Rifiuta",
+    "approvalBlocked": "Approvazione bloccata dalla politica di budget",
+    "markOrdered": "Segna come ordinato",
+    "send": "Invia",
+    "delivered": "Consegnato",
+    "processed": "Elaborato"
+  },
+  "budgets": {
+    "thresholdTitle": "Soglia di approvazione",
+    "adjust": "Modifica",
+    "thresholdDescription": "Gli ordini fino a <1>{{amount}}</1> vengono approvati automaticamente senza revisione del responsabile.",
+    "thresholdZeroNote": " (Soglia a €0 = approvazione del responsabile sempre richiesta)",
+    "spent": "Speso: {{amount}}",
+    "remaining": "Residuo: {{amount}}",
+    "budget": "Budget: {{amount}}",
+    "pending": "In attesa: {{amount}}",
+    "afterApproval": "Dopo aver approvato tutte le richieste aperte",
+    "onOverBudget": "In caso di sforamento del budget:",
+    "mark": "Segna",
+    "block": "Blocca"
+  },
+  "reject": {
+    "title": "Rifiuta ordine",
+    "placeholder": "Motivo del rifiuto (facoltativo)",
+    "confirm": "Rifiuta"
+  },
+  "send": {
+    "title": "Invia al fornitore",
+    "chooseSupplier": "Scegli fornitore",
+    "selectPlaceholder": "Seleziona fornitore",
+    "confirm": "Invia"
+  },
+  "threshold": {
+    "title": "Imposta soglia di approvazione",
+    "label": "Importo massimo per l'approvazione automatica (€)",
+    "placeholder": "es. 50",
+    "help": "Gli ordini fino a questo importo vengono approvati immediatamente. Imposta 0 per disabilitare l'approvazione automatica."
+  },
+  "status": {
+    "ingediend": "Inviato",
+    "goedgekeurd": "Approvato",
+    "afgekeurd": "Rifiutato",
+    "besteld": "Ordinato",
+    "geleverd": "Consegnato"
+  },
+  "toast": {
+    "addedToCart": "{{name}} aggiunto al carrello",
+    "budgetExceededDescription": "⚠️ Il tuo carrello supera il budget residuo ({{amount}}). Gli ordini sono bloccati finché il budget non viene modificato.",
+    "qtyNotIncreased": "Quantità non aumentata",
+    "qtyExceedsDescription": "L'aumento supera il budget residuo ({{remaining}}). Il deficit diventa {{shortfall}}. Contatta il tuo responsabile per modificare il budget.",
+    "orderAutoApproved": "Ordine {{number}} approvato automaticamente",
+    "orderSubmitted": "Ordine {{number}} inviato",
+    "autoApprovedDescription": "Ordine sotto la soglia di {{amount}}, approvato immediatamente.",
+    "submittedDescription": "Il tuo ordine è in attesa di approvazione.",
+    "orderFailed": "Ordine non riuscito",
+    "orderStatusChanged": "Ordine {{status}}",
+    "actionFailed": "Azione non riuscita",
+    "sentToSupplier": "Ordine inviato al fornitore",
+    "sendFailed": "Invio non riuscito",
+    "markedProcessed": "Ordine contrassegnato come elaborato",
+    "failed": "Non riuscito",
+    "thresholdSet": "Soglia di approvazione impostata a {{amount}}",
+    "saveFailed": "Salvataggio non riuscito",
+    "policyMark": "{{department}}: politica impostata su segnala",
+    "policyBlock": "{{department}}: politica impostata su blocca"
+  }
+}

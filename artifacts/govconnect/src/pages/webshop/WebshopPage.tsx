@@ -12,6 +12,8 @@ import {
   getListSuppliersQueryKey,
 } from "@workspace/api-client-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation, Trans } from "react-i18next";
+import { getIntlLocale } from "@/i18n";
 import {
   ShoppingCart, Search, Plus, Minus, Trash2, Loader2, PackageCheck,
   CheckCircle2, XCircle, Wallet, ClipboardList, AlertTriangle, Send,
@@ -38,7 +40,7 @@ import { cn } from "@/lib/utils";
 
 type CartLine = { productId: number; name: string; unit: string; price: number; quantity: number; stock: number };
 
-const eur = (v: number) => v.toLocaleString("nl-NL", { style: "currency", currency: "EUR" });
+const eur = (v: number) => v.toLocaleString(getIntlLocale(), { style: "currency", currency: "EUR" });
 
 function orderStatusBadge(status: string) {
   switch (status) {
@@ -51,14 +53,15 @@ function orderStatusBadge(status: string) {
   }
 }
 
-function supplierStatusBadge(status: string | null | undefined) {
+function supplierStatusBadge(status: string | null | undefined, t: (key: string) => string) {
   if (!status) return null;
-  if (status === "verstuurd") return <Badge className="bg-violet-100 text-violet-800 border-transparent text-xs">Verstuurd</Badge>;
-  if (status === "verwerkt") return <Badge className="bg-emerald-100 text-emerald-800 border-transparent text-xs">Verwerkt</Badge>;
+  if (status === "verstuurd") return <Badge className="bg-violet-100 text-violet-800 border-transparent text-xs">{t("supplierStatus.verstuurd")}</Badge>;
+  if (status === "verwerkt") return <Badge className="bg-emerald-100 text-emerald-800 border-transparent text-xs">{t("supplierStatus.verwerkt")}</Badge>;
   return null;
 }
 
 export default function WebshopPage() {
+  const { t } = useTranslation("webshop");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: user } = useGetCurrentUser();
@@ -147,15 +150,15 @@ export default function WebshopPage() {
       const newTotal = cartTotal + p.price * addedQty;
       if (newTotal > myBudget.remaining) {
         toast({
-          title: `${p.name} toegevoegd aan winkelmandje`,
-          description: `⚠️ Je winkelmandje overschrijdt het resterende budget (${eur(myBudget.remaining)}). Bestellen is geblokkeerd totdat het budget is aangepast.`,
+          title: t("toast.addedToCart", { name: p.name }),
+          description: t("toast.budgetExceededDescription", { amount: eur(myBudget.remaining) }),
           variant: "destructive",
         });
         return;
       }
     }
 
-    toast({ title: `${p.name} toegevoegd aan winkelmandje` });
+    toast({ title: t("toast.addedToCart", { name: p.name }) });
   };
 
   const changeQty = (productId: number, delta: number) => {
@@ -165,8 +168,8 @@ export default function WebshopPage() {
         const newTotal = cartTotal + line.price * delta;
         if (newTotal > myBudget.remaining) {
           toast({
-            title: "Hoeveelheid niet verhoogd",
-            description: `Verhogen overschrijdt het resterende budget (${eur(myBudget.remaining)}). Het tekort wordt ${eur(newTotal - myBudget.remaining)}. Neem contact op met je manager om het budget aan te passen.`,
+            title: t("toast.qtyNotIncreased"),
+            description: t("toast.qtyExceedsDescription", { remaining: eur(myBudget.remaining), shortfall: eur(newTotal - myBudget.remaining) }),
             variant: "destructive",
           });
           return;
@@ -188,18 +191,18 @@ export default function WebshopPage() {
           const autoApproved = order.status === "goedgekeurd";
           toast({
             title: autoApproved
-              ? `Bestelling ${order.number} automatisch goedgekeurd`
-              : `Bestelling ${order.number} ingediend`,
+              ? t("toast.orderAutoApproved", { number: order.number })
+              : t("toast.orderSubmitted", { number: order.number }),
             description: autoApproved
-              ? `Bestelling onder drempel van ${threshold ? eur(threshold.thresholdAmount) : "—"}, direct goedgekeurd.`
-              : "Je bestelling wacht op goedkeuring.",
+              ? t("toast.autoApprovedDescription", { amount: threshold ? eur(threshold.thresholdAmount) : "—" })
+              : t("toast.submittedDescription"),
           });
           setCart([]);
           setCartOpen(false);
           queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
           queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
         },
-        onError: (err: any) => toast({ title: "Bestellen mislukt", description: err?.data?.message, variant: "destructive" }),
+        onError: (err: any) => toast({ title: t("toast.orderFailed"), description: err?.data?.message, variant: "destructive" }),
       },
     );
   };
@@ -209,14 +212,14 @@ export default function WebshopPage() {
       { id, data: { status, decisionNote: decisionNote ?? null } },
       {
         onSuccess: () => {
-          toast({ title: `Bestelling ${status}` });
+          toast({ title: t("toast.orderStatusChanged", { status: t(`status.${status}`, { defaultValue: status }) }) });
           setRejectOrderId(null);
           setRejectNote("");
           queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
           queryClient.invalidateQueries({ queryKey: ["/api/shop/products"] });
           queryClient.invalidateQueries({ queryKey: ["/api/budgets"] });
         },
-        onError: (err: any) => toast({ title: "Actie mislukt", description: err?.data?.message, variant: "destructive" }),
+        onError: (err: any) => toast({ title: t("toast.actionFailed"), description: err?.data?.message, variant: "destructive" }),
       },
     );
   };
@@ -227,12 +230,12 @@ export default function WebshopPage() {
       { id: sendDialogOrderId, data: { supplierId: parseInt(sendSupplierId) } },
       {
         onSuccess: () => {
-          toast({ title: "Bestelling verstuurd naar leverancier" });
+          toast({ title: t("toast.sentToSupplier") });
           setSendDialogOrderId(null);
           setSendSupplierId("");
           queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
         },
-        onError: (err: any) => toast({ title: "Versturen mislukt", description: err?.data?.message, variant: "destructive" }),
+        onError: (err: any) => toast({ title: t("toast.sendFailed"), description: err?.data?.message, variant: "destructive" }),
       },
     );
   };
@@ -242,10 +245,10 @@ export default function WebshopPage() {
       { id },
       {
         onSuccess: () => {
-          toast({ title: "Bestelling gemarkeerd als verwerkt" });
+          toast({ title: t("toast.markedProcessed") });
           queryClient.invalidateQueries({ queryKey: ["/api/shop/orders"] });
         },
-        onError: (err: any) => toast({ title: "Mislukt", description: err?.data?.message, variant: "destructive" }),
+        onError: (err: any) => toast({ title: t("toast.failed"), description: err?.data?.message, variant: "destructive" }),
       },
     );
   };
@@ -257,12 +260,12 @@ export default function WebshopPage() {
       { data: { thresholdAmount: amount } },
       {
         onSuccess: () => {
-          toast({ title: `Goedkeuringsdrempel ingesteld op ${eur(amount)}` });
+          toast({ title: t("toast.thresholdSet", { amount: eur(amount) }) });
           setThresholdDialogOpen(false);
           setNewThreshold("");
           queryClient.invalidateQueries({ queryKey: ["/api/shop/approval-threshold"] });
         },
-        onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+        onError: () => toast({ title: t("toast.saveFailed"), variant: "destructive" }),
       },
     );
   };
@@ -274,11 +277,11 @@ export default function WebshopPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Webshop</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
             {isLeverancier
-              ? "Bestellingen die naar u zijn verstuurd."
-              : "Bestel kantoorartikelen en facilitaire producten met budgetbewaking."}
+              ? t("subtitleSupplier")
+              : t("subtitle")}
           </p>
         </div>
 
@@ -287,23 +290,23 @@ export default function WebshopPage() {
             <SheetTrigger asChild>
               <Button variant="outline" className="relative">
                 <ShoppingCart className="mr-2 h-4 w-4" />
-                Winkelmandje
+                {t("cart.button")}
                 {cartCount > 0 && (
                   <Badge className="ml-2 h-5 min-w-5 justify-center rounded-full px-1">{cartCount}</Badge>
                 )}
               </Button>
             </SheetTrigger>
             <SheetContent className="flex flex-col">
-              <SheetHeader><SheetTitle>Winkelmandje</SheetTitle></SheetHeader>
+              <SheetHeader><SheetTitle>{t("cart.title")}</SheetTitle></SheetHeader>
               <div className="flex-1 overflow-auto py-4 space-y-3">
                 {!cart.length ? (
-                  <p className="text-sm text-muted-foreground text-center py-12">Je winkelmandje is leeg.</p>
+                  <p className="text-sm text-muted-foreground text-center py-12">{t("cart.empty")}</p>
                 ) : (
                   cart.map((l) => (
                     <div key={l.productId} className="flex items-center justify-between gap-2 border rounded-md p-3">
                       <div className="min-w-0">
                         <p className="text-sm font-medium truncate">{l.name}</p>
-                        <p className="text-xs text-muted-foreground">{eur(l.price)} per {l.unit}</p>
+                        <p className="text-xs text-muted-foreground">{t("cart.pricePerUnit", { price: eur(l.price), unit: l.unit })}</p>
                       </div>
                       <div className="flex items-center gap-1">
                         <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => changeQty(l.productId, -1)}><Minus className="h-3 w-3" /></Button>
@@ -320,7 +323,7 @@ export default function WebshopPage() {
                               className={cn("h-7 w-7", wouldBlock && "border-orange-400 text-orange-500 hover:border-orange-500 hover:text-orange-600")}
                               onClick={() => changeQty(l.productId, 1)}
                               disabled={l.quantity >= l.stock}
-                              title={wouldBlock ? "Verhogen overschrijdt het budget" : undefined}
+                              title={wouldBlock ? t("cart.increaseExceeds") : undefined}
                             >
                               {wouldBlock ? <AlertTriangle className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
                             </Button>
@@ -335,8 +338,8 @@ export default function WebshopPage() {
               <SheetFooter className="flex-col gap-3 sm:flex-col">
                 {myBudget && (
                   <div className="w-full text-xs text-muted-foreground border rounded-md p-3 space-y-2">
-                    <div className="flex justify-between"><span>Budget {myBudget.department} ({myBudget.year})</span><span>{eur(myBudget.amount)}</span></div>
-                    <div className="flex justify-between"><span>Resterend budget</span><span className={cn(cartTotal > myBudget.remaining && "text-destructive font-medium")}>{eur(myBudget.remaining)}</span></div>
+                    <div className="flex justify-between"><span>{t("cart.budgetLabel", { department: myBudget.department, year: myBudget.year })}</span><span>{eur(myBudget.amount)}</span></div>
+                    <div className="flex justify-between"><span>{t("cart.remaining")}</span><span className={cn(cartTotal > myBudget.remaining && "text-destructive font-medium")}>{eur(myBudget.remaining)}</span></div>
                     {cart.length > 0 && (() => {
                       const pct = myBudget.remaining > 0 ? Math.min((cartTotal / myBudget.remaining) * 100, 100) : 100;
                       const overBudget = cartTotal > myBudget.remaining;
@@ -346,7 +349,7 @@ export default function WebshopPage() {
                       return (
                         <div className="space-y-1 pt-0.5">
                           <div className="flex justify-between">
-                            <span>Winkelmandje</span>
+                            <span>{t("cart.cartLabel")}</span>
                             <span className={cn(labelColor)}>{eur(cartTotal)}</span>
                           </div>
                           <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
@@ -357,42 +360,41 @@ export default function WebshopPage() {
                           </div>
                           {!overBudget && (
                             <p className={cn(nearBudget ? "text-amber-600" : "text-muted-foreground")}>
-                              {nearBudget ? "Bijna op budget — " : ""}
-                              Nog {eur(myBudget.remaining - cartTotal)} beschikbaar na indienen.
+                              {nearBudget ? t("cart.nearBudgetPrefix") : ""}
+                              {t("cart.availableAfter", { amount: eur(myBudget.remaining - cartTotal) })}
                             </p>
                           )}
                         </div>
                       );
                     })()}
-                    {cartTotal > myBudget.remaining && !isBlocked && <p className="text-amber-600">Let op: deze bestelling overschrijdt het resterende budget.</p>}
+                    {cartTotal > myBudget.remaining && !isBlocked && <p className="text-amber-600">{t("cart.exceedsWarning")}</p>}
                   </div>
                 )}
                 {isBlocked && (
                   <div className="w-full rounded-md border border-destructive/40 bg-destructive/10 p-3 space-y-1.5">
                     <div className="flex items-center gap-2 text-destructive font-semibold text-sm">
                       <ShieldAlert className="h-4 w-4 shrink-0" />
-                      Bestelling geblokkeerd
+                      {t("cart.blockedTitle")}
                     </div>
                     <p className="text-xs text-destructive leading-snug">
-                      Het resterende budget is onvoldoende voor deze bestelling. Het tekort bedraagt <strong>{eur(budgetShortfall)}</strong>.
-                      Neem contact op met je manager om het budget te verhogen of het beleid aan te passen.
+                      <Trans t={t} i18nKey="cart.blockedBody" values={{ amount: eur(budgetShortfall) }} components={{ 1: <strong /> }} />
                     </p>
                   </div>
                 )}
                 {threshold && threshold.thresholdAmount > 0 && cartTotal <= threshold.thresholdAmount && (
                   <div className="w-full text-xs text-green-700 bg-green-50 border border-green-200 rounded-md p-2 flex items-center gap-2">
                     <CheckCircle2 className="h-3.5 w-3.5" />
-                    Onder drempel van {eur(threshold.thresholdAmount)} — wordt automatisch goedgekeurd
+                    {t("cart.underThreshold", { amount: eur(threshold.thresholdAmount) })}
                   </div>
                 )}
                 <div className="w-full flex items-center justify-between font-semibold">
-                  <span>Totaal</span><span>{eur(cartTotal)}</span>
+                  <span>{t("cart.total")}</span><span>{eur(cartTotal)}</span>
                 </div>
                 <Button className="w-full" disabled={!cart.length || createOrder.isPending || isBlocked} onClick={placeOrder}>
                   {createOrder.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {threshold && threshold.thresholdAmount > 0 && cartTotal <= threshold.thresholdAmount
-                    ? "Bestelling plaatsen (automatisch goedgekeurd)"
-                    : "Bestelling indienen ter goedkeuring"}
+                    ? t("cart.submitAuto")
+                    : t("cart.submit")}
                 </Button>
               </SheetFooter>
             </SheetContent>
@@ -406,24 +408,24 @@ export default function WebshopPage() {
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               <Truck className="h-4 w-4 text-primary" />
-              Bestellingen voor u
+              {t("supplierPortal.title")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             {!supplierOrders.length ? (
               <div className="text-center py-16 text-muted-foreground">
                 <Truck className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                <p className="text-sm">Nog geen bestellingen verstuurd.</p>
+                <p className="text-sm">{t("supplierPortal.empty")}</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Bestelling</TableHead>
-                    <TableHead>Artikelen</TableHead>
-                    <TableHead>Bedrag</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actie</TableHead>
+                    <TableHead>{t("table.order")}</TableHead>
+                    <TableHead>{t("table.items")}</TableHead>
+                    <TableHead>{t("table.amount")}</TableHead>
+                    <TableHead>{t("table.status")}</TableHead>
+                    <TableHead className="text-right">{t("table.action")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -432,14 +434,14 @@ export default function WebshopPage() {
                       <TableCell>
                         <div className="font-medium">{o.number}</div>
                         <div className="text-xs text-muted-foreground">
-                          {new Date(o.createdAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}
+                          {new Date(o.createdAt).toLocaleDateString(getIntlLocale(), { day: "numeric", month: "short" })}
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground max-w-[220px]">
-                        {o.lines.map((l) => `${l.quantity}× ${l.productName}`).join(", ")}
+                        {o.lines.map((l) => t("table.lineItem", { quantity: l.quantity, name: l.productName })).join(", ")}
                       </TableCell>
                       <TableCell className="font-medium">{eur(o.totalAmount)}</TableCell>
-                      <TableCell>{supplierStatusBadge((o as any).supplierStatus)}</TableCell>
+                      <TableCell>{supplierStatusBadge((o as any).supplierStatus, t)}</TableCell>
                       <TableCell className="text-right">
                         {(o as any).supplierStatus === "verstuurd" && (
                           <Button
@@ -449,11 +451,11 @@ export default function WebshopPage() {
                             disabled={markDelivered.isPending}
                             onClick={() => handleMarkDelivered(o.id)}
                           >
-                            <CheckCheck className="mr-1 h-3.5 w-3.5" />Geleverd markeren
+                            <CheckCheck className="mr-1 h-3.5 w-3.5" />{t("supplierPortal.markDelivered")}
                           </Button>
                         )}
                         {(o as any).supplierStatus === "verwerkt" && (
-                          <span className="text-xs text-muted-foreground">Verwerkt</span>
+                          <span className="text-xs text-muted-foreground">{t("orders.processed")}</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -469,12 +471,12 @@ export default function WebshopPage() {
       {!isLeverancier && (
         <Tabs defaultValue="catalogus">
           <TabsList>
-            <TabsTrigger value="catalogus">Catalogus</TabsTrigger>
+            <TabsTrigger value="catalogus">{t("tabs.catalog")}</TabsTrigger>
             <TabsTrigger value="bestellingen">
-              {isManager ? "Bestellingen & goedkeuring" : "Mijn bestellingen"}
+              {isManager ? t("tabs.ordersManager") : t("tabs.ordersMine")}
               {isManager && pendingOrders.length > 0 && <Badge className="ml-2 h-5 min-w-5 justify-center rounded-full px-1">{pendingOrders.length}</Badge>}
             </TabsTrigger>
-            {isManager && <TabsTrigger value="budgetten">Budgetten</TabsTrigger>}
+            {isManager && <TabsTrigger value="budgetten">{t("tabs.budgets")}</TabsTrigger>}
           </TabsList>
 
           {/* Catalogus */}
@@ -482,12 +484,12 @@ export default function WebshopPage() {
             <div className="flex flex-col sm:flex-row gap-4 bg-card p-4 rounded-lg border shadow-sm">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Zoeken in de catalogus..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
+                <Input placeholder={t("catalog.searchPlaceholder")} className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="w-[200px]"><SelectValue placeholder="Alle categorieën" /></SelectTrigger>
+                <SelectTrigger className="w-[200px]"><SelectValue placeholder={t("catalog.allCategories")} /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Alle categorieën</SelectItem>
+                  <SelectItem value="all">{t("catalog.allCategories")}</SelectItem>
                   {categories.map((c) => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -513,7 +515,7 @@ export default function WebshopPage() {
                       <div className="flex items-center justify-between pt-2">
                         <span className="font-bold">{eur(p.price)} <span className="text-xs font-normal text-muted-foreground">/ {p.unit}</span></span>
                         <span className={cn("text-xs", p.stock === 0 ? "text-destructive font-medium" : p.belowMinStock ? "text-amber-600" : "text-muted-foreground")}>
-                          {p.stock === 0 ? "Niet op voorraad" : `${p.stock} ${p.unit} op voorraad`}
+                          {p.stock === 0 ? t("catalog.notInStock") : t("catalog.inStock", { stock: p.stock, unit: p.unit })}
                         </span>
                       </div>
                     </CardContent>
@@ -535,7 +537,7 @@ export default function WebshopPage() {
                             ) : (
                               <ShoppingCart className="mr-2 h-4 w-4" />
                             )}
-                            In winkelmandje
+                            {t("catalog.addToCart")}
                           </Button>
                         );
                       })()}
@@ -551,7 +553,7 @@ export default function WebshopPage() {
             {!orders?.length ? (
               <div className="text-center py-24 bg-card rounded-lg border border-dashed flex flex-col items-center">
                 <ClipboardList className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium">Nog geen bestellingen</h3>
+                <h3 className="text-lg font-medium">{t("orders.empty")}</h3>
               </div>
             ) : (
               <Card>
@@ -559,14 +561,14 @@ export default function WebshopPage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Bestelling</TableHead>
-                        {isManager && <TableHead>Aanvrager</TableHead>}
-                        <TableHead>Artikelen</TableHead>
-                        <TableHead>Bedrag</TableHead>
-                        {isManager && <TableHead>Budgeteffect</TableHead>}
-                        <TableHead>Status</TableHead>
-                        {isManager && <TableHead>Leverancier</TableHead>}
-                        {isManager && <TableHead className="text-right">Actie</TableHead>}
+                        <TableHead>{t("table.order")}</TableHead>
+                        {isManager && <TableHead>{t("table.requester")}</TableHead>}
+                        <TableHead>{t("table.items")}</TableHead>
+                        <TableHead>{t("table.amount")}</TableHead>
+                        {isManager && <TableHead>{t("table.budgetEffect")}</TableHead>}
+                        <TableHead>{t("table.status")}</TableHead>
+                        {isManager && <TableHead>{t("table.supplier")}</TableHead>}
+                        {isManager && <TableHead className="text-right">{t("table.action")}</TableHead>}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -577,7 +579,7 @@ export default function WebshopPage() {
                             <TableCell>
                               <div className="font-medium">{o.number}</div>
                               <div className="text-xs text-muted-foreground">
-                                {new Date(o.createdAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                                {new Date(o.createdAt).toLocaleDateString(getIntlLocale(), { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                               </div>
                             </TableCell>
                             {isManager && (
@@ -587,7 +589,7 @@ export default function WebshopPage() {
                               </TableCell>
                             )}
                             <TableCell className="text-sm text-muted-foreground max-w-[220px]">
-                              {o.lines.map((l) => `${l.quantity}× ${l.productName}`).join(", ")}
+                              {o.lines.map((l) => t("table.lineItem", { quantity: l.quantity, name: l.productName })).join(", ")}
                             </TableCell>
                             <TableCell className="font-medium">{eur(o.totalAmount)}</TableCell>
                             {isManager && (
@@ -595,12 +597,12 @@ export default function WebshopPage() {
                                 {deptBudget ? (
                                   <div className="text-xs space-y-0.5">
                                     <div className={cn("font-medium", deptBudget.remaining < 0 ? "text-destructive" : deptBudget.remaining < o.totalAmount ? "text-amber-600" : "text-muted-foreground")}>
-                                      Resterend: {eur(deptBudget.remaining)}
+                                      {t("orders.remaining", { amount: eur(deptBudget.remaining) })}
                                     </div>
                                     {o.budgetExceeded && (
                                       <div className="flex items-center gap-1 text-destructive font-medium">
                                         <AlertTriangle className="h-3 w-3" />
-                                        Boven budget
+                                        {t("orders.overBudget")}
                                       </div>
                                     )}
                                   </div>
@@ -610,7 +612,7 @@ export default function WebshopPage() {
                               </TableCell>
                             )}
                             <TableCell>
-                              <Badge variant="secondary" className={cn("capitalize border-transparent", orderStatusBadge(o.status))}>{o.status}</Badge>
+                              <Badge variant="secondary" className={cn("border-transparent", orderStatusBadge(o.status))}>{t(`status.${o.status}`, { defaultValue: o.status })}</Badge>
                               {o.decisionNote && <div className="text-xs text-muted-foreground mt-1 max-w-[200px]">{o.decisionNote}</div>}
                             </TableCell>
                             {isManager && (
@@ -618,7 +620,7 @@ export default function WebshopPage() {
                                 {(o as any).supplierName ? (
                                   <div className="space-y-0.5">
                                     <div className="text-xs font-medium">{(o as any).supplierName}</div>
-                                    {supplierStatusBadge((o as any).supplierStatus)}
+                                    {supplierStatusBadge((o as any).supplierStatus, t)}
                                   </div>
                                 ) : (
                                   <span className="text-xs text-muted-foreground">—</span>
@@ -639,15 +641,15 @@ export default function WebshopPage() {
                                           disabled={updateOrder.isPending}
                                           onClick={() => decideOrder(o.id, "goedgekeurd")}
                                         >
-                                          <CheckCircle2 className="mr-1 h-3.5 w-3.5" />Goedkeuren
+                                          <CheckCircle2 className="mr-1 h-3.5 w-3.5" />{t("orders.approve")}
                                         </Button>
                                         <Button size="sm" variant="outline" className="text-destructive" disabled={updateOrder.isPending} onClick={() => setRejectOrderId(o.id)}>
-                                          <XCircle className="mr-1 h-3.5 w-3.5" />Afkeuren
+                                          <XCircle className="mr-1 h-3.5 w-3.5" />{t("orders.reject")}
                                         </Button>
                                       </div>
                                       {isBlocked && (
                                         <p className="text-xs text-destructive flex items-center gap-1">
-                                          <ShieldAlert className="h-3 w-3" />Goedkeuring geblokkeerd door budgetbeleid
+                                          <ShieldAlert className="h-3 w-3" />{t("orders.approvalBlocked")}
                                         </p>
                                       )}
                                     </div>
@@ -655,10 +657,10 @@ export default function WebshopPage() {
                                 })()}
                                 {o.status === "goedgekeurd" && (
                                   <div className="flex gap-1 justify-end">
-                                    <Button size="sm" variant="outline" disabled={updateOrder.isPending} onClick={() => decideOrder(o.id, "besteld")}>Markeer besteld</Button>
+                                    <Button size="sm" variant="outline" disabled={updateOrder.isPending} onClick={() => decideOrder(o.id, "besteld")}>{t("orders.markOrdered")}</Button>
                                     {!(o as any).supplierStatus && (
                                       <Button size="sm" variant="outline" className="text-violet-700" disabled={sendToSupplier.isPending} onClick={() => { setSendDialogOrderId(o.id); setSendSupplierId((o as any).supplierId?.toString() ?? ""); }}>
-                                        <Send className="mr-1 h-3 w-3" />Versturen
+                                        <Send className="mr-1 h-3 w-3" />{t("orders.send")}
                                       </Button>
                                     )}
                                   </div>
@@ -666,11 +668,11 @@ export default function WebshopPage() {
                                 {o.status === "besteld" && (
                                   <div className="flex gap-1 justify-end">
                                     <Button size="sm" variant="outline" disabled={updateOrder.isPending} onClick={() => decideOrder(o.id, "geleverd")}>
-                                      <PackageCheck className="mr-1 h-3.5 w-3.5" />Geleverd
+                                      <PackageCheck className="mr-1 h-3.5 w-3.5" />{t("orders.delivered")}
                                     </Button>
                                     {!(o as any).supplierStatus && (
                                       <Button size="sm" variant="outline" className="text-violet-700" disabled={sendToSupplier.isPending} onClick={() => { setSendDialogOrderId(o.id); setSendSupplierId((o as any).supplierId?.toString() ?? ""); }}>
-                                        <Send className="mr-1 h-3 w-3" />Versturen
+                                        <Send className="mr-1 h-3 w-3" />{t("orders.send")}
                                       </Button>
                                     )}
                                   </div>
@@ -696,19 +698,17 @@ export default function WebshopPage() {
                   <CardTitle className="text-base flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <Settings className="h-4 w-4 text-primary" />
-                      Goedkeuringsdrempel
+                      {t("budgets.thresholdTitle")}
                     </span>
                     <Button size="sm" variant="outline" onClick={() => { setNewThreshold(threshold?.thresholdAmount?.toString() ?? "0"); setThresholdDialogOpen(true); }}>
-                      Aanpassen
+                      {t("budgets.adjust")}
                     </Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
                   <p className="text-sm text-muted-foreground">
-                    Bestellingen tot en met{" "}
-                    <strong>{threshold ? eur(threshold.thresholdAmount) : "—"}</strong>{" "}
-                    worden automatisch goedgekeurd zonder manager-beoordeling.
-                    {threshold?.thresholdAmount === 0 && " (Drempel op €0 = altijd manager-goedkeuring vereist)"}
+                    <Trans t={t} i18nKey="budgets.thresholdDescription" values={{ amount: threshold ? eur(threshold.thresholdAmount) : "—" }} components={{ 1: <strong /> }} />
+                    {threshold?.thresholdAmount === 0 && t("budgets.thresholdZeroNote")}
                   </p>
                 </CardContent>
               </Card>
@@ -729,12 +729,12 @@ export default function WebshopPage() {
                       <CardContent className="space-y-3">
                         <Progress value={pct} className={cn(pct >= 90 && "[&>div]:bg-destructive")} />
                         <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Besteed: {eur(b.spent)}</span>
-                          <span className={cn("font-medium", b.remaining < 0 && "text-destructive")}>Resterend: {eur(b.remaining)}</span>
+                          <span className="text-muted-foreground">{t("budgets.spent", { amount: eur(b.spent) })}</span>
+                          <span className={cn("font-medium", b.remaining < 0 && "text-destructive")}>{t("budgets.remaining", { amount: eur(b.remaining) })}</span>
                         </div>
                         <div className="flex justify-between text-xs text-muted-foreground">
-                          <span>Budget: {eur(b.amount)}</span>
-                          {b.pending > 0 && <span>In aanvraag: {eur(b.pending)}</span>}
+                          <span>{t("budgets.budget", { amount: eur(b.amount) })}</span>
+                          {b.pending > 0 && <span>{t("budgets.pending", { amount: eur(b.pending) })}</span>}
                         </div>
                         {b.pending > 0 && (() => {
                           const afterApproval = Math.round((b.remaining - b.pending) * 100) / 100;
@@ -743,13 +743,13 @@ export default function WebshopPage() {
                               "flex items-center justify-between text-xs border-t pt-2 font-medium",
                               afterApproval < 0 ? "text-destructive" : "text-muted-foreground",
                             )}>
-                              <span>Na goedkeuring alle open aanvragen</span>
+                              <span>{t("budgets.afterApproval")}</span>
                               <span>{eur(afterApproval)}</span>
                             </div>
                           );
                         })()}
                         <div className="border-t pt-2">
-                          <p className="text-xs text-muted-foreground mb-1.5">Bij budgetoverschrijding:</p>
+                          <p className="text-xs text-muted-foreground mb-1.5">{t("budgets.onOverBudget")}</p>
                           <div className="flex gap-2">
                             <Button
                               size="sm"
@@ -761,15 +761,15 @@ export default function WebshopPage() {
                                   { id: b.id, data: { overBudgetPolicy: "markeren" } },
                                   {
                                     onSuccess: () => {
-                                      toast({ title: `${b.department}: beleid ingesteld op markeren` });
+                                      toast({ title: t("toast.policyMark", { department: b.department }) });
                                       queryClient.invalidateQueries({ queryKey: getListBudgetsQueryKey() });
                                     },
-                                    onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+                                    onError: () => toast({ title: t("toast.saveFailed"), variant: "destructive" }),
                                   },
                                 )
                               }
                             >
-                              <ShieldCheck className="mr-1 h-3 w-3" />Markeren
+                              <ShieldCheck className="mr-1 h-3 w-3" />{t("budgets.mark")}
                             </Button>
                             <Button
                               size="sm"
@@ -781,15 +781,15 @@ export default function WebshopPage() {
                                   { id: b.id, data: { overBudgetPolicy: "blokkeren" } },
                                   {
                                     onSuccess: () => {
-                                      toast({ title: `${b.department}: beleid ingesteld op blokkeren` });
+                                      toast({ title: t("toast.policyBlock", { department: b.department }) });
                                       queryClient.invalidateQueries({ queryKey: getListBudgetsQueryKey() });
                                     },
-                                    onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+                                    onError: () => toast({ title: t("toast.saveFailed"), variant: "destructive" }),
                                   },
                                 )
                               }
                             >
-                              <ShieldAlert className="mr-1 h-3 w-3" />Blokkeren
+                              <ShieldAlert className="mr-1 h-3 w-3" />{t("budgets.block")}
                             </Button>
                           </div>
                         </div>
@@ -806,12 +806,12 @@ export default function WebshopPage() {
       {/* Reject dialog */}
       <Dialog open={rejectOrderId !== null} onOpenChange={(open) => !open && setRejectOrderId(null)}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Bestelling afkeuren</DialogTitle></DialogHeader>
-          <Textarea placeholder="Reden van afkeuring (optioneel)" value={rejectNote} onChange={(e) => setRejectNote(e.target.value)} />
+          <DialogHeader><DialogTitle>{t("reject.title")}</DialogTitle></DialogHeader>
+          <Textarea placeholder={t("reject.placeholder")} value={rejectNote} onChange={(e) => setRejectNote(e.target.value)} />
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setRejectOrderId(null)}>Annuleren</Button>
+            <Button variant="ghost" onClick={() => setRejectOrderId(null)}>{t("common.cancel", { ns: "common" })}</Button>
             <Button variant="destructive" disabled={updateOrder.isPending} onClick={() => rejectOrderId && decideOrder(rejectOrderId, "afgekeurd", rejectNote || undefined)}>
-              {updateOrder.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Afkeuren
+              {updateOrder.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("reject.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -820,11 +820,11 @@ export default function WebshopPage() {
       {/* Send to supplier dialog */}
       <Dialog open={sendDialogOrderId !== null} onOpenChange={(open) => !open && setSendDialogOrderId(null)}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Versturen naar leverancier</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("send.title")}</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <Label>Kies leverancier</Label>
+            <Label>{t("send.chooseSupplier")}</Label>
             <Select value={sendSupplierId} onValueChange={setSendSupplierId}>
-              <SelectTrigger><SelectValue placeholder="Selecteer leverancier" /></SelectTrigger>
+              <SelectTrigger><SelectValue placeholder={t("send.selectPlaceholder")} /></SelectTrigger>
               <SelectContent>
                 {suppliers?.map((s) => (
                   <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
@@ -833,10 +833,10 @@ export default function WebshopPage() {
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setSendDialogOrderId(null)}>Annuleren</Button>
+            <Button variant="ghost" onClick={() => setSendDialogOrderId(null)}>{t("common.cancel", { ns: "common" })}</Button>
             <Button disabled={!sendSupplierId || sendToSupplier.isPending} onClick={handleSendToSupplier}>
               {sendToSupplier.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <Send className="mr-2 h-4 w-4" />Versturen
+              <Send className="mr-2 h-4 w-4" />{t("send.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -845,25 +845,25 @@ export default function WebshopPage() {
       {/* Threshold dialog */}
       <Dialog open={thresholdDialogOpen} onOpenChange={setThresholdDialogOpen}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Goedkeuringsdrempel instellen</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t("threshold.title")}</DialogTitle></DialogHeader>
           <div className="space-y-2">
-            <Label>Maximumbedrag voor automatische goedkeuring (€)</Label>
+            <Label>{t("threshold.label")}</Label>
             <Input
               type="number"
               min="0"
               step="10"
-              placeholder="bijv. 50"
+              placeholder={t("threshold.placeholder")}
               value={newThreshold}
               onChange={(e) => setNewThreshold(e.target.value)}
             />
             <p className="text-xs text-muted-foreground">
-              Bestellingen tot en met dit bedrag worden direct goedgekeurd. Stel in op 0 om automatische goedkeuring uit te schakelen.
+              {t("threshold.help")}
             </p>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setThresholdDialogOpen(false)}>Annuleren</Button>
+            <Button variant="ghost" onClick={() => setThresholdDialogOpen(false)}>{t("common.cancel", { ns: "common" })}</Button>
             <Button disabled={updateThreshold.isPending} onClick={handleSaveThreshold}>
-              {updateThreshold.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Opslaan
+              {updateThreshold.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{t("common.save", { ns: "common" })}
             </Button>
           </DialogFooter>
         </DialogContent>

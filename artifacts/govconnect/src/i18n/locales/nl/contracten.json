@@ -1,0 +1,102 @@
+{
+  "title": "Contracten & Inkoop",
+  "subtitleSupplier": "Uw lopende contracten met de gemeente.",
+  "subtitle": "Contractenkluis met einddatum-bewaking en leveranciersregister.",
+  "expiring_one": "{{count}} contract valt binnen de opzegtermijn — actie vereist.",
+  "expiring_other": "{{count}} contracten vallen binnen de opzegtermijn — actie vereist.",
+  "tabs": {
+    "contracts": "Contracten",
+    "suppliers": "Leveranciers"
+  },
+  "category": {
+    "techniek": "Techniek",
+    "schoonmaak": "Schoonmaak",
+    "catering": "Catering",
+    "groenvoorziening": "Groenvoorziening",
+    "beveiliging": "Beveiliging",
+    "overig": "Overig"
+  },
+  "status": {
+    "actief": "Actief",
+    "verlopen": "Verlopen",
+    "opgezegd": "Opgezegd"
+  },
+  "contracts": {
+    "add": "Contract toevoegen",
+    "newTitle": "Nieuw contract",
+    "newDescription": "Leg een contract vast in de contractenkluis.",
+    "empty": "Geen contracten",
+    "terminate": "Opzeggen",
+    "perYear": "{{value}}/jaar",
+    "daysRemaining": "nog {{count}} dagen",
+    "noticeSuffix": " (opzegtermijn {{days}} dgn)"
+  },
+  "contractFields": {
+    "name": "Naam",
+    "namePlaceholder": "Bijv. Onderhoud liften",
+    "supplier": "Leverancier",
+    "supplierPlaceholder": "Kies leverancier",
+    "category": "Categorie",
+    "categoryPlaceholder": "Kies categorie",
+    "annualValue": "Jaarwaarde (€)",
+    "startDate": "Startdatum",
+    "endDate": "Einddatum",
+    "noticePeriod": "Opzegtermijn (dagen)",
+    "description": "Omschrijving (optioneel)"
+  },
+  "suppliers": {
+    "add": "Leverancier toevoegen",
+    "newTitle": "Nieuwe leverancier",
+    "newDescription": "Registreer een leverancier in het register.",
+    "contractCount_one": "{{count}} contract",
+    "contractCount_other": "{{count}} contracten",
+    "portal": "Portaal: {{name}}"
+  },
+  "supplierFields": {
+    "name": "Bedrijfsnaam",
+    "category": "Categorie",
+    "categoryPlaceholder": "Kies categorie",
+    "contactName": "Contactpersoon",
+    "kvkNumber": "KvK-nummer",
+    "email": "E-mail",
+    "phone": "Telefoon"
+  },
+  "documents": {
+    "shared": "Gedeelde documenten",
+    "vault": "Digitale kluis",
+    "empty": "Nog geen documenten geüpload.",
+    "upload": "PDF uploaden"
+  },
+  "reviews": {
+    "title": "Beoordelingen",
+    "average": "gem. {{score}} / 5",
+    "add": "Beoordelen",
+    "dialogTitle": "Leverancier beoordelen",
+    "dialogDescription": "Jaarlijkse evaluatie (1–5 sterren)",
+    "empty": "Nog geen beoordelingen.",
+    "year": "Jaar",
+    "score": "Score (1–5)",
+    "comment": "Toelichting (optioneel)",
+    "commentPlaceholder": "Geef een toelichting op de score..."
+  },
+  "validation": {
+    "nameRequired": "Naam is verplicht",
+    "supplierRequired": "Kies een leverancier",
+    "categoryRequired": "Categorie is verplicht",
+    "startDateRequired": "Startdatum is verplicht",
+    "endDateRequired": "Einddatum is verplicht",
+    "emailInvalid": "Ongeldig e-mailadres"
+  },
+  "toast": {
+    "documentUploaded": "Document geüpload",
+    "registrationFailed": "Registratie mislukt",
+    "uploadFailed": "Upload mislukt",
+    "documentDeleted": "Document verwijderd",
+    "deleteFailed": "Verwijderen mislukt",
+    "reviewSaved": "Beoordeling opgeslagen",
+    "saveFailed": "Opslaan mislukt",
+    "contractAdded": "Contract toegevoegd",
+    "supplierAdded": "Leverancier toegevoegd",
+    "contractTerminated": "Contract opgezegd"
+  }
+}

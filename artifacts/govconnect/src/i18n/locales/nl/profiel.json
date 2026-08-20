@@ -1,0 +1,37 @@
+{
+  "title": "Mijn profiel",
+  "subtitle": "Beheer uw persoonlijke instellingen.",
+  "account": {
+    "title": "Accountgegevens",
+    "name": "Naam",
+    "email": "E-mailadres",
+    "role": "Rol",
+    "department": "Afdeling"
+  },
+  "alerts": {
+    "title": "Vervalwaarschuwingen",
+    "description": "Kies hoe u gewaarschuwd wilt worden als een contract op korte termijn verloopt."
+  },
+  "options": {
+    "inapp_only": {
+      "label": "Alleen in-app",
+      "description": "U ontvangt meldingen alleen binnen de applicatie, geen e-mails."
+    },
+    "email": {
+      "label": "Alleen e-mail",
+      "description": "U ontvangt uitsluitend een e-mail bij kritieke contractwaarschuwingen, geen in-app melding."
+    },
+    "all": {
+      "label": "In-app én e-mail (standaard)",
+      "description": "U ontvangt zowel een in-app melding als een e-mail bij kritieke contractwaarschuwingen."
+    }
+  },
+  "save": "Opslaan",
+  "saving": "Opslaan…",
+  "toast": {
+    "savedTitle": "Voorkeuren opgeslagen",
+    "savedDescription": "Uw meldingsinstellingen zijn bijgewerkt.",
+    "errorTitle": "Fout",
+    "errorDescription": "Kon voorkeuren niet opslaan. Probeer het opnieuw."
+  }
+}

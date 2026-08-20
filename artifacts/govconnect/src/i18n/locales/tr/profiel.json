@@ -1,0 +1,37 @@
+{
+  "title": "Profilim",
+  "subtitle": "Kişisel ayarlarınızı yönetin.",
+  "account": {
+    "title": "Hesap bilgileri",
+    "name": "Ad",
+    "email": "E-posta adresi",
+    "role": "Rol",
+    "department": "Departman"
+  },
+  "alerts": {
+    "title": "Süre dolum uyarıları",
+    "description": "Bir sözleşmenin süresi dolmak üzereyken nasıl bilgilendirilmek istediğinizi seçin."
+  },
+  "options": {
+    "inapp_only": {
+      "label": "Yalnızca uygulama içi",
+      "description": "Bildirimleri yalnızca uygulama içinde alırsınız, e-posta gönderilmez."
+    },
+    "email": {
+      "label": "Yalnızca e-posta",
+      "description": "Kritik sözleşme uyarılarında yalnızca e-posta alırsınız, uygulama içi bildirim gönderilmez."
+    },
+    "all": {
+      "label": "Uygulama içi ve e-posta (varsayılan)",
+      "description": "Kritik sözleşme uyarılarında hem uygulama içi bildirim hem de e-posta alırsınız."
+    }
+  },
+  "save": "Kaydet",
+  "saving": "Kaydediliyor…",
+  "toast": {
+    "savedTitle": "Tercihler kaydedildi",
+    "savedDescription": "Bildirim ayarlarınız güncellendi.",
+    "errorTitle": "Hata",
+    "errorDescription": "Tercihler kaydedilemedi. Lütfen tekrar deneyin."
+  }
+}

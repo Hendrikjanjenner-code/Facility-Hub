@@ -1,0 +1,92 @@
+{
+  "title": "Salas",
+  "subtitle": "Registo de todas as salas da organização.",
+  "searchPlaceholder": "Procurar por nome, código ou função...",
+  "allBuildings": "Todos os edifícios",
+  "allFloors": "Todos os pisos",
+  "bookable": "Reservável",
+  "empty": {
+    "title": "Nenhuma sala encontrada",
+    "description": "Ajuste os filtros ou verifique o termo de pesquisa."
+  },
+  "areaM2": "{{area}} m²",
+  "persons": "{{count}} pes.",
+  "openTickets_one": "{{count}} pedido",
+  "openTickets_other": "{{count}} pedido(s)",
+  "assetCount": "{{count}} ativos",
+  "detail": {
+    "notFound": "Sala não encontrada.",
+    "bookableBadge": "Reservável",
+    "dossier": {
+      "title": "Processo da sala",
+      "edit": "Editar",
+      "area": "Área",
+      "vvo": "ANU",
+      "bvo": "ABC",
+      "department": "Departamento",
+      "capacity": "Ocupação",
+      "capacityValue": "{{count}} pessoas",
+      "function": "Função",
+      "floorFinish": "Acabamento do piso",
+      "bookability": "Reservabilidade",
+      "bookable": "Reservável",
+      "notBookable": "Não reservável",
+      "facilities": "Comodidades"
+    },
+    "editDialog": {
+      "title": "Editar processo da sala",
+      "description": "Ajuste as áreas, a função e o departamento de {{name}}.",
+      "area": "Área (m²)",
+      "function": "Função",
+      "vvo": "ANU (m²)",
+      "bvo": "ABC (m²)",
+      "department": "Departamento",
+      "departmentPlaceholder": "Ex.: Serviços ao cidadão",
+      "capacity": "Ocupação (pessoas)",
+      "capacityPlaceholder": "Ex.: 12",
+      "bookable": "Reservável",
+      "yes": "Sim",
+      "no": "Não"
+    },
+    "tabs": {
+      "assets": "Ativos ({{count}})",
+      "tickets": "Pedidos abertos ({{count}})",
+      "noAssets": "Nenhum ativo associado a esta sala.",
+      "noTickets": "Nenhum pedido em aberto."
+    },
+    "reservations": {
+      "title": "Reservas de hoje",
+      "empty": "Sem reservas para hoje.",
+      "toPlanboard": "Ir para o quadro de planeamento"
+    },
+    "history": {
+      "title": "Histórico de alterações",
+      "description": "Reorganizações e alterações ao processo desta sala.",
+      "empty": "Ainda sem alterações registadas.",
+      "unknown": "Desconhecido",
+      "reverted": "Revertido",
+      "undo": "Reverter",
+      "emptyValue": "vazio"
+    },
+    "toast": {
+      "dossierUpdated": "Processo da sala atualizado",
+      "roomChangedConflict": "Sala alterada entretanto",
+      "roomChangedConflictDesc": "Outra pessoa acabou de editar esta sala. A caixa de diálogo foi fechada — reabra-a para ver os valores atuais.",
+      "updateFailed": "Falha ao atualizar",
+      "partialUndo": "Alteração parcialmente revertida",
+      "partialUndoDesc": "Ignorado (alterado novamente depois): {{fields}}.",
+      "undone": "Alteração anulada",
+      "undoFailed": "Falha ao anular"
+    },
+    "fields": {
+      "functionType": "Função",
+      "floorFinish": "Acabamento do piso",
+      "areaM2": "Área (m²)",
+      "areaVvoM2": "ANU (m²)",
+      "areaBvoM2": "ABC (m²)",
+      "department": "Departamento",
+      "capacity": "Ocupação (pessoas)",
+      "bookable": "Reservável"
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "title": "Varlıklar",
+  "subtitle": "Ekipmanları, mobilyaları ve envanteri yönetin.",
+  "addAsset": "Varlık ekle",
+  "searchPlaceholder": "Ada veya koda göre ara...",
+  "allCategories": "Tüm kategoriler",
+  "status": {
+    "in_gebruik": "Kullanımda",
+    "in_onderhoud": "Bakımda",
+    "defect": "Arızalı",
+    "afgeschreven": "Kayıttan düşürüldü"
+  },
+  "dialog": {
+    "title": "Yeni varlık kaydet",
+    "description": "Mülk kaydına yeni bir nesne ekleyin.",
+    "name": "Ad",
+    "namePlaceholder": "Örn. Ergonomik ofis koltuğu",
+    "code": "Varlık kodu",
+    "codePlaceholder": "Örn. INV-2026-001",
+    "category": "Kategori",
+    "categoryPlaceholder": "Örn. Mobilya",
+    "status": "Durum",
+    "statusPlaceholder": "Durum seçin",
+    "brand": "Marka (isteğe bağlı)",
+    "model": "Model (isteğe bağlı)",
+    "serialNumber": "Seri numarası (isteğe bağlı)",
+    "location": "Konum (isteğe bağlı)",
+    "locationPlaceholder": "Oda seçin",
+    "add": "Ekle"
+  },
+  "validation": {
+    "nameRequired": "Ad zorunludur",
+    "codeRequired": "Kod zorunludur",
+    "categoryRequired": "Kategori zorunludur"
+  },
+  "toast": {
+    "added": "Varlık eklendi"
+  },
+  "empty": {
+    "title": "Varlık bulunamadı",
+    "description": "Farklı bir arama terimi deneyin veya filtreleri ayarlayın."
+  },
+  "card": {
+    "notAssigned": "Atanmadı",
+    "openTickets_one": "{{count}} açık talep",
+    "openTickets_other": "{{count}} açık talep"
+  },
+  "detail": {
+    "notFound": "Varlık bulunamadı.",
+    "info": {
+      "title": "Varlık bilgileri",
+      "code": "Benzersiz kod",
+      "category": "Kategori",
+      "brandModel": "Marka ve model",
+      "serialNumber": "Seri numarası",
+      "location": "Konum",
+      "notAssigned": "Atanmadı",
+      "purchaseDate": "Satın alma tarihi"
+    },
+    "tickets": {
+      "title": "Bağlı talepler",
+      "newTicket": "Yeni talep",
+      "empty": "Bu varlık için talep bulunamadı."
+    },
+    "actions": {
+      "title": "İşlemler",
+      "reportFault": "Arıza bildir"
+    }
+  }
+}

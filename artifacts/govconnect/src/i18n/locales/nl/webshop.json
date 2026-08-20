@@ -1,0 +1,128 @@
+{
+  "title": "Webshop",
+  "subtitleSupplier": "Bestellingen die naar u zijn verstuurd.",
+  "subtitle": "Bestel kantoorartikelen en facilitaire producten met budgetbewaking.",
+  "cart": {
+    "button": "Winkelmandje",
+    "title": "Winkelmandje",
+    "empty": "Je winkelmandje is leeg.",
+    "pricePerUnit": "{{price}} per {{unit}}",
+    "increaseExceeds": "Verhogen overschrijdt het budget",
+    "budgetLabel": "Budget {{department}} ({{year}})",
+    "remaining": "Resterend budget",
+    "cartLabel": "Winkelmandje",
+    "nearBudgetPrefix": "Bijna op budget — ",
+    "availableAfter": "Nog {{amount}} beschikbaar na indienen.",
+    "exceedsWarning": "Let op: deze bestelling overschrijdt het resterende budget.",
+    "blockedTitle": "Bestelling geblokkeerd",
+    "blockedBody": "Het resterende budget is onvoldoende voor deze bestelling. Het tekort bedraagt <1>{{amount}}</1>. Neem contact op met je manager om het budget te verhogen of het beleid aan te passen.",
+    "underThreshold": "Onder drempel van {{amount}} — wordt automatisch goedgekeurd",
+    "total": "Totaal",
+    "submitAuto": "Bestelling plaatsen (automatisch goedgekeurd)",
+    "submit": "Bestelling indienen ter goedkeuring"
+  },
+  "supplierPortal": {
+    "title": "Bestellingen voor u",
+    "empty": "Nog geen bestellingen verstuurd.",
+    "markDelivered": "Geleverd markeren"
+  },
+  "supplierStatus": {
+    "verstuurd": "Verstuurd",
+    "verwerkt": "Verwerkt"
+  },
+  "table": {
+    "order": "Bestelling",
+    "items": "Artikelen",
+    "amount": "Bedrag",
+    "status": "Status",
+    "action": "Actie",
+    "requester": "Aanvrager",
+    "budgetEffect": "Budgeteffect",
+    "supplier": "Leverancier",
+    "lineItem": "{{quantity}}× {{name}}"
+  },
+  "tabs": {
+    "catalog": "Catalogus",
+    "ordersManager": "Bestellingen & goedkeuring",
+    "ordersMine": "Mijn bestellingen",
+    "budgets": "Budgetten"
+  },
+  "catalog": {
+    "searchPlaceholder": "Zoeken in de catalogus...",
+    "allCategories": "Alle categorieën",
+    "notInStock": "Niet op voorraad",
+    "inStock": "{{stock}} {{unit}} op voorraad",
+    "addToCart": "In winkelmandje"
+  },
+  "orders": {
+    "empty": "Nog geen bestellingen",
+    "remaining": "Resterend: {{amount}}",
+    "overBudget": "Boven budget",
+    "approve": "Goedkeuren",
+    "reject": "Afkeuren",
+    "approvalBlocked": "Goedkeuring geblokkeerd door budgetbeleid",
+    "markOrdered": "Markeer besteld",
+    "send": "Versturen",
+    "delivered": "Geleverd",
+    "processed": "Verwerkt"
+  },
+  "budgets": {
+    "thresholdTitle": "Goedkeuringsdrempel",
+    "adjust": "Aanpassen",
+    "thresholdDescription": "Bestellingen tot en met <1>{{amount}}</1> worden automatisch goedgekeurd zonder manager-beoordeling.",
+    "thresholdZeroNote": " (Drempel op €0 = altijd manager-goedkeuring vereist)",
+    "spent": "Besteed: {{amount}}",
+    "remaining": "Resterend: {{amount}}",
+    "budget": "Budget: {{amount}}",
+    "pending": "In aanvraag: {{amount}}",
+    "afterApproval": "Na goedkeuring alle open aanvragen",
+    "onOverBudget": "Bij budgetoverschrijding:",
+    "mark": "Markeren",
+    "block": "Blokkeren"
+  },
+  "reject": {
+    "title": "Bestelling afkeuren",
+    "placeholder": "Reden van afkeuring (optioneel)",
+    "confirm": "Afkeuren"
+  },
+  "send": {
+    "title": "Versturen naar leverancier",
+    "chooseSupplier": "Kies leverancier",
+    "selectPlaceholder": "Selecteer leverancier",
+    "confirm": "Versturen"
+  },
+  "threshold": {
+    "title": "Goedkeuringsdrempel instellen",
+    "label": "Maximumbedrag voor automatische goedkeuring (€)",
+    "placeholder": "bijv. 50",
+    "help": "Bestellingen tot en met dit bedrag worden direct goedgekeurd. Stel in op 0 om automatische goedkeuring uit te schakelen."
+  },
+  "status": {
+    "ingediend": "Ingediend",
+    "goedgekeurd": "Goedgekeurd",
+    "afgekeurd": "Afgekeurd",
+    "besteld": "Besteld",
+    "geleverd": "Geleverd"
+  },
+  "toast": {
+    "addedToCart": "{{name}} toegevoegd aan winkelmandje",
+    "budgetExceededDescription": "⚠️ Je winkelmandje overschrijdt het resterende budget ({{amount}}). Bestellen is geblokkeerd totdat het budget is aangepast.",
+    "qtyNotIncreased": "Hoeveelheid niet verhoogd",
+    "qtyExceedsDescription": "Verhogen overschrijdt het resterende budget ({{remaining}}). Het tekort wordt {{shortfall}}. Neem contact op met je manager om het budget aan te passen.",
+    "orderAutoApproved": "Bestelling {{number}} automatisch goedgekeurd",
+    "orderSubmitted": "Bestelling {{number}} ingediend",
+    "autoApprovedDescription": "Bestelling onder drempel van {{amount}}, direct goedgekeurd.",
+    "submittedDescription": "Je bestelling wacht op goedkeuring.",
+    "orderFailed": "Bestellen mislukt",
+    "orderStatusChanged": "Bestelling {{status}}",
+    "actionFailed": "Actie mislukt",
+    "sentToSupplier": "Bestelling verstuurd naar leverancier",
+    "sendFailed": "Versturen mislukt",
+    "markedProcessed": "Bestelling gemarkeerd als verwerkt",
+    "failed": "Mislukt",
+    "thresholdSet": "Goedkeuringsdrempel ingesteld op {{amount}}",
+    "saveFailed": "Opslaan mislukt",
+    "policyMark": "{{department}}: beleid ingesteld op markeren",
+    "policyBlock": "{{department}}: beleid ingesteld op blokkeren"
+  }
+}

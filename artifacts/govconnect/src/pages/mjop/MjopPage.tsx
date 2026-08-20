@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation, useSearch } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -82,7 +83,6 @@ import {
 import { cn } from "@/lib/utils";
 import {
   scoreColor,
-  scoreLabel,
   taakStatusColor,
   taakStatusLabel,
   TAAK_TYPES,
@@ -304,30 +304,40 @@ function useBegroting(scenarioId: number | null) {
 }
 
 type JaarplanResult = { aangemaakt: number; taken: { id: number; title: string; estimatedCost: number }[]; message?: string };
-const bouwdeelSchema = z.object({
-  code: z.string().min(2, "Code is verplicht"),
-  name: z.string().min(2, "Naam is verplicht"),
-  category: z.string().min(1, "Categorie is verplicht"),
-  nlSfbCode: z.string().optional().nullable(),
-  buildingId: z.number({ message: "Gebouw is verplicht" }),
-  floorId: z.number().optional().nullable(),
-  material: z.string().optional(),
-  installYear: z.coerce.number().int().min(1900).max(2100),
-  expectedLifespanYears: z.coerce.number().int().min(1).max(150),
-  replacementCost: z.coerce.number().min(0),
-  notes: z.string().optional(),
-});
 
-const taakSchema = z.object({
-  bouwdeelId: z.number({ message: "Bouwdeel is verplicht" }),
-  title: z.string().min(2, "Titel is verplicht"),
-  description: z.string().optional(),
-  taskType: z.string().min(1, "Type is verplicht"),
-  plannedYear: z.coerce.number().int().min(2020).max(2100),
-  estimatedCost: z.coerce.number().min(0),
-});
+type TFunc = (key: string, options?: Record<string, unknown>) => string;
+
+const makeBouwdeelSchema = (t: TFunc) =>
+  z.object({
+    code: z.string().min(2, t("nieuwBouwdeel.validation.code")),
+    name: z.string().min(2, t("nieuwBouwdeel.validation.name")),
+    category: z.string().min(1, t("nieuwBouwdeel.validation.category")),
+    nlSfbCode: z.string().optional().nullable(),
+    buildingId: z.number({ message: t("nieuwBouwdeel.validation.building") }),
+    floorId: z.number().optional().nullable(),
+    material: z.string().optional(),
+    installYear: z.coerce.number().int().min(1900).max(2100),
+    expectedLifespanYears: z.coerce.number().int().min(1).max(150),
+    replacementCost: z.coerce.number().min(0),
+    notes: z.string().optional(),
+  });
+
+type BouwdeelForm = z.infer<ReturnType<typeof makeBouwdeelSchema>>;
+
+const makeTaakSchema = (t: TFunc) =>
+  z.object({
+    bouwdeelId: z.number({ message: t("nieuweTaak.validation.bouwdeel") }),
+    title: z.string().min(2, t("nieuweTaak.validation.title")),
+    description: z.string().optional(),
+    taskType: z.string().min(1, t("nieuweTaak.validation.type")),
+    plannedYear: z.coerce.number().int().min(2020).max(2100),
+    estimatedCost: z.coerce.number().min(0),
+  });
+
+type TaakForm = z.infer<ReturnType<typeof makeTaakSchema>>;
 
 function NieuwBouwdeelDialog() {
+  const { t } = useTranslation("mjop");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -346,8 +356,8 @@ function NieuwBouwdeelDialog() {
       ),
     ) ?? [];
 
-  const form = useForm<z.infer<typeof bouwdeelSchema>>({
-    resolver: zodResolver(bouwdeelSchema),
+  const form = useForm<BouwdeelForm>({
+    resolver: zodResolver(makeBouwdeelSchema(t)),
     defaultValues: {
       code: "",
       name: "",
@@ -369,12 +379,12 @@ function NieuwBouwdeelDialog() {
     }
   };
 
-  const onSubmit = (values: z.infer<typeof bouwdeelSchema>) => {
+  const onSubmit = (values: BouwdeelForm) => {
     createBouwdeel.mutate(
       { data: values },
       {
         onSuccess: () => {
-          toast({ title: "Bouwdeel geregistreerd" });
+          toast({ title: t("nieuwBouwdeel.toastSuccess") });
           setOpen(false);
           form.reset();
           setSelectedKengetalId("");
@@ -382,7 +392,7 @@ function NieuwBouwdeelDialog() {
           queryClient.invalidateQueries({ queryKey: ["/api/bouwdelen"] });
         },
         onError: () =>
-          toast({ title: "Registreren mislukt", variant: "destructive" }),
+          toast({ title: t("nieuwBouwdeel.toastError"), variant: "destructive" }),
       },
     );
   };
@@ -392,14 +402,14 @@ function NieuwBouwdeelDialog() {
       <DialogTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Bouwdeel registreren
+          {t("nieuwBouwdeel.trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Nieuw bouwdeel registreren</DialogTitle>
+          <DialogTitle>{t("nieuwBouwdeel.title")}</DialogTitle>
           <DialogDescription>
-            Koppel het bouwdeel aan de bestaande gebouwstructuur.
+            {t("nieuwBouwdeel.description")}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -410,9 +420,9 @@ function NieuwBouwdeelDialog() {
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Code</FormLabel>
+                    <FormLabel>{t("nieuwBouwdeel.code")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Bijv. BD-DAK-001" {...field} />
+                      <Input placeholder={t("nieuwBouwdeel.codePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -423,9 +433,9 @@ function NieuwBouwdeelDialog() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Naam</FormLabel>
+                    <FormLabel>{t("nieuwBouwdeel.name")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Bijv. Bitumen dakbedekking" {...field} />
+                      <Input placeholder={t("nieuwBouwdeel.namePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -438,17 +448,17 @@ function NieuwBouwdeelDialog() {
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categorie</FormLabel>
+                    <FormLabel>{t("nieuwBouwdeel.category")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Kies categorie" />
+                          <SelectValue placeholder={t("nieuwBouwdeel.categoryPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {CATEGORIES.map((c) => (
                           <SelectItem key={c} value={c} className="capitalize">
-                            {c}
+                            {t(`categories.${c}`, { defaultValue: c })}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -462,18 +472,18 @@ function NieuwBouwdeelDialog() {
                 name="nlSfbCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>NL-SfB code (optioneel)</FormLabel>
+                    <FormLabel>{t("nieuwBouwdeel.nlSfb")}</FormLabel>
                     <Select
                       onValueChange={(v) => field.onChange(v === "__none__" ? null : v)}
                       value={field.value ?? "__none__"}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Kies NL-SfB code" />
+                          <SelectValue placeholder={t("nieuwBouwdeel.nlSfbPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="__none__">— Geen —</SelectItem>
+                        <SelectItem value="__none__">{t("nieuwBouwdeel.none")}</SelectItem>
                         {NL_SFB_CODES.map((c) => (
                           <SelectItem key={c.code} value={c.code}>
                             {c.label}
@@ -492,9 +502,9 @@ function NieuwBouwdeelDialog() {
                 name="material"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Materiaal (optioneel)</FormLabel>
+                    <FormLabel>{t("nieuwBouwdeel.material")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Bijv. bitumen, aluminium" {...field} />
+                      <Input placeholder={t("nieuwBouwdeel.materialPlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -505,14 +515,14 @@ function NieuwBouwdeelDialog() {
                 name="buildingId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Gebouw</FormLabel>
+                    <FormLabel>{t("nieuwBouwdeel.building")}</FormLabel>
                     <Select
                       onValueChange={(v) => field.onChange(parseInt(v))}
                       value={field.value?.toString() || ""}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Kies gebouw" />
+                          <SelectValue placeholder={t("nieuwBouwdeel.buildingPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -533,14 +543,14 @@ function NieuwBouwdeelDialog() {
               name="floorId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Verdieping (optioneel)</FormLabel>
+                  <FormLabel>{t("nieuwBouwdeel.floor")}</FormLabel>
                   <Select
                     onValueChange={(v) => field.onChange(parseInt(v))}
                     value={field.value?.toString() || ""}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Kies verdieping" />
+                        <SelectValue placeholder={t("nieuwBouwdeel.floorPlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -561,7 +571,7 @@ function NieuwBouwdeelDialog() {
                 name="installYear"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Bouwjaar</FormLabel>
+                    <FormLabel>{t("nieuwBouwdeel.installYear")}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -574,7 +584,7 @@ function NieuwBouwdeelDialog() {
                 name="expectedLifespanYears"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Levensduur (jaren)</FormLabel>
+                    <FormLabel>{t("nieuwBouwdeel.lifespan")}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -587,7 +597,7 @@ function NieuwBouwdeelDialog() {
                 name="replacementCost"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Vervangingskosten (€)</FormLabel>
+                    <FormLabel>{t("nieuwBouwdeel.replacementCost")}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -600,11 +610,11 @@ function NieuwBouwdeelDialog() {
             {kengetallen.length > 0 && (
               <div className="rounded-md border p-3 space-y-2 bg-muted/40">
                 <p className="text-xs font-medium text-muted-foreground">
-                  Voorstel uit kostenbibliotheek
+                  {t("nieuwBouwdeel.kengetalTitle")}
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label className="text-xs">Kengetal</Label>
+                    <Label className="text-xs">{t("nieuwBouwdeel.kengetal")}</Label>
                     <Select
                       value={selectedKengetalId}
                       onValueChange={(v) => {
@@ -613,7 +623,7 @@ function NieuwBouwdeelDialog() {
                       }}
                     >
                       <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="Kies een kengetal…" />
+                        <SelectValue placeholder={t("nieuwBouwdeel.kengetalPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {kengetallen.map((k) => (
@@ -626,7 +636,7 @@ function NieuwBouwdeelDialog() {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-xs">
-                      Hoeveelheid ({kengetallen.find((k) => k.id.toString() === selectedKengetalId)?.unit ?? "eenheid"})
+                      {t("nieuwBouwdeel.quantity", { unit: kengetallen.find((k) => k.id.toString() === selectedKengetalId)?.unit ?? t("nieuwBouwdeel.unitFallback") })}
                     </Label>
                     <Input
                       type="number"
@@ -646,7 +656,7 @@ function NieuwBouwdeelDialog() {
                   if (!kg || isNaN(qty) || qty <= 0) return null;
                   return (
                     <p className="text-xs text-muted-foreground">
-                      Voorstel: {euro(kg.pricePerUnit)} × {qty} {kg.unit} = <span className="font-semibold text-foreground">{euro(Math.round(kg.pricePerUnit * qty))}</span>
+                      {t("nieuwBouwdeel.proposal", { price: euro(kg.pricePerUnit), qty, unit: kg.unit })}<span className="font-semibold text-foreground">{euro(Math.round(kg.pricePerUnit * qty))}</span>
                     </p>
                   );
                 })()}
@@ -654,13 +664,13 @@ function NieuwBouwdeelDialog() {
             )}
             <DialogFooter className="pt-4">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                Annuleren
+                {t("nieuwBouwdeel.cancel")}
               </Button>
               <Button type="submit" disabled={createBouwdeel.isPending}>
                 {createBouwdeel.isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Registreren
+                {t("nieuwBouwdeel.register")}
               </Button>
             </DialogFooter>
           </form>
@@ -685,6 +695,7 @@ export function NieuweTaakDialog({
   externalOpen?: boolean;
   onExternalOpenChange?: (open: boolean) => void;
 } = {}) {
+  const { t } = useTranslation("mjop");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [internalOpen, setInternalOpen] = useState(false);
@@ -697,8 +708,8 @@ export function NieuweTaakDialog({
     ? (v: boolean) => onExternalOpenChange?.(v)
     : setInternalOpen;
 
-  const form = useForm<z.infer<typeof taakSchema>>({
-    resolver: zodResolver(taakSchema),
+  const form = useForm<TaakForm>({
+    resolver: zodResolver(makeTaakSchema(t)),
     defaultValues: {
       title: "",
       taskType: prefill?.taskType ?? "onderhoud",
@@ -722,19 +733,19 @@ export function NieuweTaakDialog({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const onSubmit = (values: z.infer<typeof taakSchema>) => {
+  const onSubmit = (values: TaakForm) => {
     createTaak.mutate(
       { data: values },
       {
         onSuccess: () => {
-          toast({ title: "MJOP-taak toegevoegd" });
+          toast({ title: t("nieuweTaak.toastSuccess") });
           setOpen(false);
           form.reset();
           queryClient.invalidateQueries({ queryKey: ["/api/mjop-taken"] });
           queryClient.invalidateQueries({ queryKey: ["/api/mjop/jaarplanning"] });
         },
         onError: () =>
-          toast({ title: "Toevoegen mislukt", variant: "destructive" }),
+          toast({ title: t("nieuweTaak.toastError"), variant: "destructive" }),
       },
     );
   };
@@ -745,15 +756,15 @@ export function NieuweTaakDialog({
         <DialogTrigger asChild>
           <Button variant="outline">
             <Plus className="mr-2 h-4 w-4" />
-            MJOP-taak
+            {t("nieuweTaak.trigger")}
           </Button>
         </DialogTrigger>
       )}
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>Nieuwe MJOP-taak</DialogTitle>
+          <DialogTitle>{t("nieuweTaak.title")}</DialogTitle>
           <DialogDescription>
-            Plan onderhoud, vervanging of inspectie voor een bouwdeel.
+            {t("nieuweTaak.description")}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -763,14 +774,14 @@ export function NieuweTaakDialog({
               name="bouwdeelId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bouwdeel</FormLabel>
+                  <FormLabel>{t("nieuweTaak.bouwdeel")}</FormLabel>
                   <Select
                     onValueChange={(v) => field.onChange(parseInt(v))}
                     value={field.value?.toString() || ""}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Kies bouwdeel" />
+                        <SelectValue placeholder={t("nieuweTaak.bouwdeelPlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -790,9 +801,9 @@ export function NieuweTaakDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Titel</FormLabel>
+                  <FormLabel>{t("nieuweTaak.titleLabel")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Bijv. Dakbedekking vervangen" {...field} />
+                    <Input placeholder={t("nieuweTaak.titlePlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -804,7 +815,7 @@ export function NieuweTaakDialog({
                 name="taskType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Type</FormLabel>
+                    <FormLabel>{t("nieuweTaak.type")}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -812,9 +823,9 @@ export function NieuweTaakDialog({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {TAAK_TYPES.map((t) => (
-                          <SelectItem key={t} value={t} className="capitalize">
-                            {t}
+                        {TAAK_TYPES.map((tt) => (
+                          <SelectItem key={tt} value={tt} className="capitalize">
+                            {t(`taakTypes.${tt}`, { defaultValue: tt })}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -828,7 +839,7 @@ export function NieuweTaakDialog({
                 name="plannedYear"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Gepland jaar</FormLabel>
+                    <FormLabel>{t("nieuweTaak.plannedYear")}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -841,7 +852,7 @@ export function NieuweTaakDialog({
                 name="estimatedCost"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Kostenraming (€)</FormLabel>
+                    <FormLabel>{t("nieuweTaak.estimatedCost")}</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -855,7 +866,7 @@ export function NieuweTaakDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Toelichting (optioneel)</FormLabel>
+                  <FormLabel>{t("nieuweTaak.toelichting")}</FormLabel>
                   <FormControl>
                     <Textarea rows={3} {...field} />
                   </FormControl>
@@ -865,13 +876,13 @@ export function NieuweTaakDialog({
             />
             <DialogFooter className="pt-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                Annuleren
+                {t("nieuweTaak.cancel")}
               </Button>
               <Button type="submit" disabled={createTaak.isPending}>
                 {createTaak.isPending && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Toevoegen
+                {t("nieuweTaak.add")}
               </Button>
             </DialogFooter>
           </form>
@@ -890,6 +901,7 @@ function KengetalDialog({
   onDone: () => void;
   initial?: KostenKengetal;
 }) {
+  const { t } = useTranslation("mjop");
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(initial?.name ?? "");
@@ -904,7 +916,7 @@ function KengetalDialog({
   const handleSubmit = () => {
     const price = parseFloat(pricePerUnit);
     if (!name.trim() || !category.trim() || !unit.trim() || isNaN(price)) {
-      toast({ title: "Vul alle verplichte velden in", variant: "destructive" });
+      toast({ title: t("kengetalDialog.validation"), variant: "destructive" });
       return;
     }
     const payload = {
@@ -918,12 +930,12 @@ function KengetalDialog({
     };
     if (initial) {
       updateK.mutate({ id: initial.id, ...payload }, {
-        onSuccess: () => { toast({ title: "Kengetal bijgewerkt" }); setOpen(false); onDone(); },
-        onError: () => toast({ title: "Bijwerken mislukt", variant: "destructive" }),
+        onSuccess: () => { toast({ title: t("kengetalDialog.toastUpdated") }); setOpen(false); onDone(); },
+        onError: () => toast({ title: t("kengetalDialog.toastUpdateError"), variant: "destructive" }),
       });
     } else {
       createK.mutate(payload, {
-        onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+        onError: () => toast({ title: t("kengetalDialog.toastSaveError"), variant: "destructive" }),
       });
     }
   };
@@ -938,30 +950,30 @@ function KengetalDialog({
         ) : (
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Kengetal toevoegen
+            {t("kengetalDialog.add")}
           </Button>
         )}
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{initial ? "Kengetal bewerken" : "Nieuw kengetal"}</DialogTitle>
+          <DialogTitle>{initial ? t("kengetalDialog.editTitle") : t("kengetalDialog.newTitle")}</DialogTitle>
           <DialogDescription>
-            Stel de prijs per eenheid in voor dit element uit de kostenbibliotheek.
+            {t("kengetalDialog.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label>Naam</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bijv. Bitumen dakbedekking" />
+              <Label>{t("kengetalDialog.naam")}</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("kengetalDialog.naamPlaceholder")} />
             </div>
             <div className="space-y-1">
-              <Label>Categorie</Label>
+              <Label>{t("kengetalDialog.categorie")}</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger><SelectValue placeholder="Kies categorie" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder={t("kengetalDialog.categoriePlaceholder")} /></SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.map((c) => (
-                    <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>
+                    <SelectItem key={c} value={c} className="capitalize">{t(`categories.${c}`, { defaultValue: c })}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -969,11 +981,11 @@ function KengetalDialog({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <Label>NL-SfB code (optioneel)</Label>
+              <Label>{t("kengetalDialog.nlSfb")}</Label>
               <Select value={nlSfbCode} onValueChange={setNlSfbCode}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">— Geen —</SelectItem>
+                  <SelectItem value="__none__">{t("kengetalDialog.none")}</SelectItem>
                   {NL_SFB_CODES.map((c) => (
                     <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
                   ))}
@@ -981,24 +993,24 @@ function KengetalDialog({
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Eenheid</Label>
-              <Input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="m², stuk, m" />
+              <Label>{t("kengetalDialog.eenheid")}</Label>
+              <Input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder={t("kengetalDialog.eenheidPlaceholder")} />
             </div>
           </div>
           <div className="space-y-1">
-            <Label>Prijs per eenheid (€)</Label>
+            <Label>{t("kengetalDialog.prijs")}</Label>
             <Input type="number" value={pricePerUnit} onChange={(e) => setPricePerUnit(e.target.value)} placeholder="0.00" />
           </div>
           <div className="space-y-1">
-            <Label>Notities (optioneel)</Label>
-            <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Bijv. inclusief arbeid en materieel" />
+            <Label>{t("kengetalDialog.notities")}</Label>
+            <Textarea rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t("kengetalDialog.notitiesPlaceholder")} />
           </div>
         </div>
         <DialogFooter className="pt-2">
-          <Button variant="ghost" onClick={() => setOpen(false)}>Annuleren</Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>{t("kengetalDialog.cancel")}</Button>
           <Button onClick={handleSubmit} disabled={createK.isPending || updateK.isPending}>
             {(createK.isPending || updateK.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Opslaan
+            {t("kengetalDialog.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1007,15 +1019,16 @@ function KengetalDialog({
 }
 
 function KostenbibliotheekTab({ canManage }: { canManage: boolean }) {
+  const { t } = useTranslation("mjop");
   const { toast } = useToast();
   const { data: kengetallen, isLoading } = useKengetallen();
   const deleteK = useDeleteKengetal();
 
   const handleDelete = (id: number, name: string) => {
-    if (!confirm(`Kengetal "${name}" verwijderen?`)) return;
+    if (!confirm(t("kostenbibliotheek.deleteConfirm", { name }))) return;
     deleteK.mutate(id, {
-      onSuccess: () => toast({ title: "Kengetal verwijderd" }),
-      onError: () => toast({ title: "Verwijderen mislukt", variant: "destructive" }),
+      onSuccess: () => toast({ title: t("kostenbibliotheek.toastDeleted") }),
+      onError: () => toast({ title: t("kostenbibliotheek.toastDeleteError"), variant: "destructive" }),
     });
   };
 
@@ -1026,7 +1039,7 @@ function KostenbibliotheekTab({ canManage }: { canManage: boolean }) {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">
-            Kengetallen (€ per eenheid) worden als voorstel gebruikt bij het invullen van vervangingskosten voor bouwdelen.
+            {t("kostenbibliotheek.intro")}
           </p>
         </div>
         {canManage && <KengetalDialog onDone={() => {}} />}
@@ -1036,19 +1049,19 @@ function KostenbibliotheekTab({ canManage }: { canManage: boolean }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Naam</TableHead>
-                <TableHead>Categorie</TableHead>
-                <TableHead>NL-SfB</TableHead>
-                <TableHead>Eenheid</TableHead>
-                <TableHead className="text-right">Prijs / eenheid</TableHead>
-                {canManage && <TableHead className="text-right">Acties</TableHead>}
+                <TableHead>{t("kostenbibliotheek.header.naam")}</TableHead>
+                <TableHead>{t("kostenbibliotheek.header.categorie")}</TableHead>
+                <TableHead>{t("kostenbibliotheek.header.nlSfb")}</TableHead>
+                <TableHead>{t("kostenbibliotheek.header.eenheid")}</TableHead>
+                <TableHead className="text-right">{t("kostenbibliotheek.header.prijs")}</TableHead>
+                {canManage && <TableHead className="text-right">{t("kostenbibliotheek.header.acties")}</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
               {!kengetallen?.length ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                    Nog geen kengetallen in de bibliotheek.
+                    {t("kostenbibliotheek.empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -1060,7 +1073,7 @@ function KostenbibliotheekTab({ canManage }: { canManage: boolean }) {
                         <p className="text-xs text-muted-foreground font-normal">{k.notes}</p>
                       )}
                     </TableCell>
-                    <TableCell className="capitalize">{k.category}</TableCell>
+                    <TableCell className="capitalize">{t(`categories.${k.category}`, { defaultValue: k.category })}</TableCell>
                     <TableCell>
                       {k.nlSfbCode ? (
                         <Badge variant="outline" className="text-xs font-mono">{k.nlSfbCode}</Badge>
@@ -1101,6 +1114,7 @@ function KostenbibliotheekTab({ canManage }: { canManage: boolean }) {
 // ── Scenarioplanning ──────────────────────────────────────────────────────────
 
 function ScenarioDialog({ onDone }: { onDone: () => void }) {
+  const { t } = useTranslation("mjop");
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -1110,11 +1124,11 @@ function ScenarioDialog({ onDone }: { onDone: () => void }) {
 
   const handleSubmit = () => {
     if (!name.trim()) {
-      toast({ title: "Naam is verplicht", variant: "destructive" });
+      toast({ title: t("scenario.validationName"), variant: "destructive" });
       return;
     }
     createS.mutate({ name: name.trim(), type, description: description || null, buildingId: null, isActive: false }, {
-      onError: () => toast({ title: "Opslaan mislukt", variant: "destructive" }),
+      onError: () => toast({ title: t("scenario.toastSaveError"), variant: "destructive" }),
     });
   };
 
@@ -1123,39 +1137,39 @@ function ScenarioDialog({ onDone }: { onDone: () => void }) {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Plus className="mr-2 h-4 w-4" />
-          Scenario toevoegen
+          {t("scenario.add")}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Nieuw scenario</DialogTitle>
-          <DialogDescription>Stel een meerjarenbegrotingsscenario in.</DialogDescription>
+          <DialogTitle>{t("scenario.newTitle")}</DialogTitle>
+          <DialogDescription>{t("scenario.description")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1">
-            <Label>Naam</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bijv. Alleen noodzakelijk" />
+            <Label>{t("scenario.naam")}</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("scenario.naamPlaceholder")} />
           </div>
           <div className="space-y-1">
-            <Label>Type</Label>
+            <Label>{t("scenario.type")}</Label>
             <Select value={type} onValueChange={setType}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="noodzakelijk">Alleen noodzakelijk</SelectItem>
-                <SelectItem value="hoog">Instandhouding hoog niveau</SelectItem>
+                <SelectItem value="noodzakelijk">{t("scenario.typeNoodzakelijk")}</SelectItem>
+                <SelectItem value="hoog">{t("scenario.typeHoog")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-1">
-            <Label>Omschrijving (optioneel)</Label>
+            <Label>{t("scenario.omschrijving")}</Label>
             <Textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
         </div>
         <DialogFooter className="pt-2">
-          <Button variant="ghost" onClick={() => setOpen(false)}>Annuleren</Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>{t("scenario.cancel")}</Button>
           <Button onClick={handleSubmit} disabled={createS.isPending}>
             {createS.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Opslaan
+            {t("scenario.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -1164,6 +1178,7 @@ function ScenarioDialog({ onDone }: { onDone: () => void }) {
 }
 
 function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
+  const { t } = useTranslation("mjop");
   const { toast } = useToast();
   const { data: scenarios, isLoading } = useScenarios();
   const updateS = useUpdateScenario();
@@ -1187,18 +1202,18 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
   const handleActivate = (s: MjopScenario) => {
     updateS.mutate({ id: s.id, isActive: !s.isActive }, {
       onSuccess: () => {
-        toast({ title: s.isActive ? "Scenario gedeactiveerd" : "Scenario geactiveerd" });
+        toast({ title: s.isActive ? t("scenario.toastDeactivated") : t("scenario.toastActivated") });
         qc.invalidateQueries({ queryKey: ["/api/mjop/scenarios"] });
       },
-      onError: () => toast({ title: "Bijwerken mislukt", variant: "destructive" }),
+      onError: () => toast({ title: t("scenario.toastUpdateError"), variant: "destructive" }),
     });
   };
 
   const handleDelete = (s: MjopScenario) => {
-    if (!confirm(`Scenario "${s.name}" verwijderen?`)) return;
+    if (!confirm(t("scenario.deleteConfirm", { name: s.name }))) return;
     deleteS.mutate(s.id, {
-      onSuccess: () => toast({ title: "Scenario verwijderd" }),
-      onError: () => toast({ title: "Verwijderen mislukt", variant: "destructive" }),
+      onSuccess: () => toast({ title: t("scenario.toastDeleted") }),
+      onError: () => toast({ title: t("scenario.toastDeleteError"), variant: "destructive" }),
     });
   };
 
@@ -1210,12 +1225,12 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
         setJaarplanResult(data);
         toast({
           title: data.aangemaakt > 0
-            ? `${data.aangemaakt} taak${data.aangemaakt === 1 ? "" : "en"} aangemaakt voor ${jaarplanJaar}`
-            : "Geen nieuwe taken",
+            ? t("scenario.tasksCreated", { count: data.aangemaakt, year: jaarplanJaar })
+            : t("scenario.noNewTasks"),
           description: data.message,
         });
       },
-      onError: (err) => toast({ title: "Genereren mislukt", description: err.message, variant: "destructive" }),
+      onError: (err) => toast({ title: t("scenario.generateError"), description: err.message, variant: "destructive" }),
     });
   };
 
@@ -1227,13 +1242,13 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
         {/* Scenario list */}
         <Card>
           <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Scenario's</CardTitle>
+            <CardTitle className="text-base">{t("scenario.listTitle")}</CardTitle>
             {canManage && <ScenarioDialog onDone={() => {}} />}
           </CardHeader>
           <CardContent className="space-y-2">
             {!scenarios?.length ? (
               <p className="text-sm text-muted-foreground text-center py-6">
-                Nog geen scenario's aangemaakt.
+                {t("scenario.listEmpty")}
               </p>
             ) : (
               scenarios.map((s) => (
@@ -1255,7 +1270,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
                       <div>
                         <p className="font-medium text-sm">{s.name}</p>
                         <p className="text-xs text-muted-foreground capitalize">
-                          {s.type === "noodzakelijk" ? "Alleen noodzakelijk" : "Instandhouding hoog niveau"}
+                          {s.type === "noodzakelijk" ? t("scenario.typeNoodzakelijk") : t("scenario.typeHoog")}
                         </p>
                       </div>
                     </div>
@@ -1265,7 +1280,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7"
-                          title={s.isActive ? "Deactiveer" : "Activeer"}
+                          title={s.isActive ? t("scenario.deactivate") : t("scenario.activate")}
                           onClick={() => handleActivate(s)}
                           disabled={updateS.isPending}
                         >
@@ -1296,9 +1311,9 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center justify-between">
-                <span>Totaaloverzicht — {viewScenario.name}</span>
+                <span>{t("scenario.overviewTitle", { name: viewScenario.name })}</span>
                 <Badge variant="outline" className="text-xs">
-                  {begroting.reduce((s, e) => s + e.taken.length, 0)} vervangingen
+                  {t("scenario.replacementsCount", { n: begroting.reduce((s, e) => s + e.taken.length, 0) })}
                 </Badge>
               </CardTitle>
             </CardHeader>
@@ -1306,12 +1321,12 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
               <div className="text-2xl font-bold mb-4">
                 {euro(begroting.reduce((s, e) => s + e.totalCost, 0))}
                 <span className="text-sm font-normal text-muted-foreground ml-2">
-                  totaal ({begroting[0]?.year ?? "—"} – {begroting[begroting.length - 1]?.year ?? "—"})
+                  {t("scenario.totalRange", { from: begroting[0]?.year ?? "—", to: begroting[begroting.length - 1]?.year ?? "—" })}
                 </span>
               </div>
               {begroting.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  Geen vervangingen voorzien binnen de horizon van 15 jaar.
+                  {t("scenario.noReplacements")}
                 </p>
               )}
             </CardContent>
@@ -1325,15 +1340,15 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <CalendarDays className="h-4 w-4" />
-              Jaarplan genereren — {viewScenario.name}
+              {t("scenario.jaarplanTitle", { name: viewScenario.name })}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Genereer MJOP-taken voor het gekozen jaar op basis van de begrotingsberekening van dit scenario. Bouwdelen die al een taak hebben voor dat jaar worden overgeslagen.
+              {t("scenario.jaarplanIntro")}
             </p>
             <div className="flex items-center gap-3">
-              <label className="text-sm font-medium whitespace-nowrap">Jaar:</label>
+              <label className="text-sm font-medium whitespace-nowrap">{t("scenario.year")}</label>
               <Input
                 type="number"
                 min={new Date().getFullYear()}
@@ -1346,22 +1361,22 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
                 onClick={handleGeneerJaarplan}
                 disabled={geneerJaarplan.isPending || !viewId}
               >
-                {geneerJaarplan.isPending ? "Bezig…" : "Genereer jaarplan"}
+                {geneerJaarplan.isPending ? t("scenario.generating") : t("scenario.generate")}
               </Button>
             </div>
             {jaarplanResult && (
               <div className="rounded-lg border bg-muted/30 p-3 space-y-2">
                 <p className="text-sm font-medium">
                   {jaarplanResult.aangemaakt > 0
-                    ? `${jaarplanResult.aangemaakt} taak${jaarplanResult.aangemaakt === 1 ? "" : "en"} aangemaakt voor ${jaarplanJaar}`
-                    : jaarplanResult.message ?? "Geen nieuwe taken aangemaakt"}
+                    ? t("scenario.tasksCreated", { count: jaarplanResult.aangemaakt, year: jaarplanJaar })
+                    : jaarplanResult.message ?? t("scenario.noNewTasksCreated")}
                 </p>
                 {jaarplanResult.taken.length > 0 && (
                   <div className="space-y-1">
-                    {jaarplanResult.taken.map((t) => (
-                      <div key={t.id} className="flex items-center justify-between text-xs bg-background rounded px-2 py-1.5">
-                        <span>{t.title}</span>
-                        <span className="font-medium tabular-nums ml-3">{euro(t.estimatedCost)}</span>
+                    {jaarplanResult.taken.map((tk) => (
+                      <div key={tk.id} className="flex items-center justify-between text-xs bg-background rounded px-2 py-1.5">
+                        <span>{tk.title}</span>
+                        <span className="font-medium tabular-nums ml-3">{euro(tk.estimatedCost)}</span>
                       </div>
                     ))}
                   </div>
@@ -1378,10 +1393,10 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500" />
-              Onderhoudsadvies — {viewScenario.name}
+              {t("scenario.adviesTitle", { name: viewScenario.name })}
               {advies && advies.length > 0 && (
                 <Badge variant="secondary" className="ml-auto text-xs">
-                  {advies.length} {advies.length === 1 ? "aanbeveling" : "aanbevelingen"}
+                  {t("scenario.aanbeveling", { count: advies.length })}
                 </Badge>
               )}
             </CardTitle>
@@ -1394,8 +1409,8 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
                 <CheckCircle2 className="h-10 w-10 mx-auto mb-3 opacity-40 text-green-500" />
                 <p className="text-sm">
                   {viewScenario.type === "noodzakelijk"
-                    ? "Geen bouwdelen vereisen op dit moment noodzakelijk onderhoud of vervanging."
-                    : "Geen bouwdelen vereisen momenteel een actie volgens dit scenario."}
+                    ? t("scenario.adviesEmptyNoodzakelijk")
+                    : t("scenario.adviesEmptyHoog")}
                 </p>
               </div>
             ) : (
@@ -1404,17 +1419,17 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
                   const groep = advies.filter((a) => a.urgencyLevel === level);
                   if (!groep.length) return null;
                   const labelMap = {
-                    kritiek: { label: "Kritiek", icon: <ShieldAlert className="h-3.5 w-3.5" />, cls: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800" },
-                    hoog: { label: "Hoog", icon: <AlertTriangle className="h-3.5 w-3.5" />, cls: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800" },
-                    gemiddeld: { label: "Gemiddeld", icon: <Info className="h-3.5 w-3.5" />, cls: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800" },
-                    laag: { label: "Laag", icon: <Circle className="h-3.5 w-3.5" />, cls: "bg-muted text-muted-foreground border-border" },
+                    kritiek: { label: t("scenario.urgency.kritiek"), icon: <ShieldAlert className="h-3.5 w-3.5" />, cls: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800" },
+                    hoog: { label: t("scenario.urgency.hoog"), icon: <AlertTriangle className="h-3.5 w-3.5" />, cls: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800" },
+                    gemiddeld: { label: t("scenario.urgency.gemiddeld"), icon: <Info className="h-3.5 w-3.5" />, cls: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800" },
+                    laag: { label: t("scenario.urgency.laag"), icon: <Circle className="h-3.5 w-3.5" />, cls: "bg-muted text-muted-foreground border-border" },
                   };
                   const { label, icon, cls } = labelMap[level];
                   return (
                     <div key={level} className="space-y-1.5">
                       <div className={cn("flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-md border w-fit", cls)}>
                         {icon}
-                        {label} ({groep.length})
+                        {t("scenario.urgencyGroup", { label, n: groep.length })}
                       </div>
                       {groep.map((item) => (
                         <div
@@ -1433,7 +1448,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
                                   variant="secondary"
                                   className={cn("text-xs border-transparent px-1.5 py-0", scoreColor(item.latestScore))}
                                 >
-                                  Score {item.latestScore}
+                                  {t("scenario.scoreShort", { score: item.latestScore })}
                                 </Badge>
                               )}
                             </div>
@@ -1459,7 +1474,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base">
-              Meerjarenbegroting — {viewScenario.name}
+              {t("scenario.meerjarenTitle", { name: viewScenario.name })}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -1468,7 +1483,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
             ) : !begroting?.length ? (
               <div className="text-center py-12 text-muted-foreground">
                 <TrendingUp className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                <p className="text-sm">Geen vervangingen gepland binnen de planningshorizon (15 jaar).</p>
+                <p className="text-sm">{t("scenario.noPlanned")}</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -1492,7 +1507,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
                         {euro(e.totalCost)}
                       </span>
                       <span className="text-xs text-muted-foreground w-16">
-                        {e.taken.length} {e.taken.length === 1 ? "element" : "elementen"}
+                        {t("scenario.element", { count: e.taken.length })}
                       </span>
                     </div>
                   ))}
@@ -1500,7 +1515,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
 
                 {/* Detail per year */}
                 <div className="space-y-3 pt-2 border-t">
-                  <h4 className="text-sm font-medium text-muted-foreground">Vervangingen per jaar</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground">{t("scenario.replacementsPerYear")}</h4>
                   {begroting.map((e) => (
                     <div key={e.year}>
                       <div className="flex items-center justify-between mb-1">
@@ -1508,17 +1523,17 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
                         <span className="text-sm font-semibold">{euro(e.totalCost)}</span>
                       </div>
                       <div className="space-y-1">
-                        {e.taken.map((t, i) => (
+                        {e.taken.map((tk, i) => (
                           <div key={i} className="flex items-start justify-between text-xs bg-muted/50 rounded px-2 py-1.5">
                             <div>
-                              <span className="font-mono text-muted-foreground mr-1">{t.bouwdeelCode}</span>
-                              <span>{t.bouwdeelName}</span>
-                              {t.buildingName && (
-                                <span className="text-muted-foreground ml-1">({t.buildingName})</span>
+                              <span className="font-mono text-muted-foreground mr-1">{tk.bouwdeelCode}</span>
+                              <span>{tk.bouwdeelName}</span>
+                              {tk.buildingName && (
+                                <span className="text-muted-foreground ml-1">({tk.buildingName})</span>
                               )}
-                              <p className="text-muted-foreground mt-0.5">{t.reason}</p>
+                              <p className="text-muted-foreground mt-0.5">{tk.reason}</p>
                             </div>
-                            <span className="font-medium tabular-nums ml-3 shrink-0">{euro(t.cost)}</span>
+                            <span className="font-medium tabular-nums ml-3 shrink-0">{euro(tk.cost)}</span>
                           </div>
                         ))}
                       </div>
@@ -1537,6 +1552,7 @@ function ScenarioplanningTab({ canManage }: { canManage: boolean }) {
 // ── Hoofdpagina ───────────────────────────────────────────────────────────────
 
 export default function MjopPage() {
+  const { t } = useTranslation("mjop");
   const [, setLocation] = useLocation();
   const searchString = useSearch();
   const { toast } = useToast();
@@ -1602,14 +1618,14 @@ export default function MjopPage() {
       {
         onSuccess: (taak) => {
           toast({
-            title: "Melding aangemaakt",
-            description: `Servicedesk-ticket ${taak.ticketNumber ?? ""} is aangemaakt.`,
+            title: t("toastMeldingCreated"),
+            description: t("toastMeldingDescription", { ticket: taak.ticketNumber ?? "" }),
           });
           queryClient.invalidateQueries({ queryKey: ["/api/mjop-taken"] });
           queryClient.invalidateQueries({ queryKey: ["/api/tickets"] });
         },
         onError: () =>
-          toast({ title: "Omzetten mislukt", variant: "destructive" }),
+          toast({ title: t("toastConvertError"), variant: "destructive" }),
       },
     );
   };
@@ -1638,10 +1654,9 @@ export default function MjopPage() {
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">MJOP</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("page.title")}</h1>
           <p className="text-muted-foreground">
-            Meerjarenonderhoudsplan: NL-SfB-classificatie, NEN 2767-conditiemeting,
-            kostenbibliotheek en scenarioplanning.
+            {t("page.subtitle")}
           </p>
         </div>
         {canManage && (
@@ -1660,7 +1675,7 @@ export default function MjopPage() {
               <Building2 className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Totaal bouwdelen</p>
+              <p className="text-sm text-muted-foreground">{t("page.totalBouwdelen")}</p>
               <p className="text-2xl font-bold">{totalBouwdelen}</p>
             </div>
           </CardContent>
@@ -1670,7 +1685,7 @@ export default function MjopPage() {
         <Card
           className="cursor-pointer hover:border-destructive/60 transition-colors group"
           onClick={goToSlechteConditie}
-          title="Klik om te filteren op bouwdelen met slechte conditie (score ≥ 4)"
+          title={t("page.badConditionCardTitle")}
         >
           <CardContent className="p-4 flex items-center gap-4">
             <div className="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
@@ -1678,14 +1693,14 @@ export default function MjopPage() {
             </div>
             <div className="flex-1">
               <p className="text-sm text-muted-foreground group-hover:text-destructive transition-colors">
-                Slechte conditie (≥ 4)
+                {t("page.badCondition")}
               </p>
               <p className="text-2xl font-bold text-red-600 dark:text-red-400">
                 {slechteConditieCount}
               </p>
             </div>
             <span className="text-xs text-muted-foreground group-hover:text-destructive transition-colors">
-              bekijk →
+              {t("page.view")}
             </span>
           </CardContent>
         </Card>
@@ -1696,7 +1711,7 @@ export default function MjopPage() {
               <Search className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Niet gemeten</p>
+              <p className="text-sm text-muted-foreground">{t("page.notMeasured")}</p>
               <p className="text-2xl font-bold">{nietGemetenCount}</p>
             </div>
           </CardContent>
@@ -1707,23 +1722,23 @@ export default function MjopPage() {
         <TabsList>
           <TabsTrigger value="bouwdelen">
             <Building2 className="mr-2 h-4 w-4" />
-            Bouwdelen
+            {t("tabs.bouwdelen")}
           </TabsTrigger>
           <TabsTrigger value="taken">
             <ListChecks className="mr-2 h-4 w-4" />
-            Taken
+            {t("tabs.taken")}
           </TabsTrigger>
           <TabsTrigger value="jaarplanning">
             <CalendarRange className="mr-2 h-4 w-4" />
-            Jaarplanning
+            {t("tabs.jaarplanning")}
           </TabsTrigger>
           <TabsTrigger value="kostenbibliotheek">
             <BookOpen className="mr-2 h-4 w-4" />
-            Kostenbibliotheek
+            {t("tabs.kostenbibliotheek")}
           </TabsTrigger>
           <TabsTrigger value="scenarioplanning">
             <TrendingUp className="mr-2 h-4 w-4" />
-            Scenarioplanning
+            {t("tabs.scenarioplanning")}
           </TabsTrigger>
         </TabsList>
 
@@ -1733,11 +1748,11 @@ export default function MjopPage() {
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="flex items-center gap-1.5 px-3 py-1 text-sm bg-destructive/10 text-destructive border-destructive/20">
                 <Wrench className="h-3.5 w-3.5" />
-                Slechte conditie (score ≥ {scoreFilter})
+                {t("filters.badConditionBadge", { score: scoreFilter })}
                 <button
                   onClick={clearScoreFilter}
                   className="ml-1 rounded-full hover:bg-destructive/20 transition-colors p-0.5"
-                  aria-label="Filter verwijderen"
+                  aria-label={t("filters.removeFilter")}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -1748,7 +1763,7 @@ export default function MjopPage() {
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Zoeken op naam of code..."
+                placeholder={t("filters.searchPlaceholder")}
                 className="pl-9"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -1756,23 +1771,23 @@ export default function MjopPage() {
             </div>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Alle categorieën" />
+                <SelectValue placeholder={t("filters.allCategories")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Alle categorieën</SelectItem>
+                <SelectItem value="all">{t("filters.allCategories")}</SelectItem>
                 {CATEGORIES.map((c) => (
                   <SelectItem key={c} value={c} className="capitalize">
-                    {c}
+                    {t(`categories.${c}`, { defaultValue: c })}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={nlSfbFilter} onValueChange={setNlSfbFilter}>
               <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder="Alle NL-SfB codes" />
+                <SelectValue placeholder={t("filters.allNlSfb")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Alle NL-SfB codes</SelectItem>
+                <SelectItem value="all">{t("filters.allNlSfb")}</SelectItem>
                 {NL_SFB_CODES.map((c) => (
                   <SelectItem key={c.code} value={c.code}>
                     {c.label}
@@ -1782,12 +1797,12 @@ export default function MjopPage() {
             </Select>
             <Select value={scoreFilter} onValueChange={setScoreFilter}>
               <SelectTrigger className="w-[210px]">
-                <SelectValue placeholder="Alle condities" />
+                <SelectValue placeholder={t("filters.allConditions")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Alle condities</SelectItem>
-                <SelectItem value="4">Slechte conditie (score ≥ 4)</SelectItem>
-                <SelectItem value="5">Zeer slecht (score ≥ 5)</SelectItem>
+                <SelectItem value="all">{t("filters.allConditions")}</SelectItem>
+                <SelectItem value="4">{t("filters.badCondition4")}</SelectItem>
+                <SelectItem value="5">{t("filters.veryBad5")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1801,9 +1816,9 @@ export default function MjopPage() {
           ) : !bouwdelen?.length ? (
             <div className="text-center py-24 bg-card rounded-lg border border-dashed flex flex-col items-center justify-center">
               <Wrench className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">Geen bouwdelen gevonden</h3>
+              <h3 className="text-lg font-medium">{t("bouwdelen.emptyTitle")}</h3>
               <p className="text-sm text-muted-foreground max-w-sm mt-1">
-                Registreer een bouwdeel of pas de filters aan.
+                {t("bouwdelen.emptyDescription")}
               </p>
             </div>
           ) : (
@@ -1839,11 +1854,11 @@ export default function MjopPage() {
                             scoreColor(b.laatsteScore),
                           )}
                         >
-                          Conditie {b.laatsteScore}
+                          {t("bouwdelen.conditie", { score: b.laatsteScore })}
                         </Badge>
                       ) : (
                         <Badge variant="outline" className="ml-2 whitespace-nowrap">
-                          Niet gemeten
+                          {t("page.notMeasured")}
                         </Badge>
                       )}
                     </div>
@@ -1858,18 +1873,18 @@ export default function MjopPage() {
                       <div className="flex items-center gap-2 capitalize">
                         <Wrench className="h-4 w-4" />
                         <span>
-                          {b.category} • {b.installYear} •{" "}
-                          {b.expectedLifespanYears} jr levensduur
+                          {t(`categories.${b.category}`, { defaultValue: b.category })} • {b.installYear} •{" "}
+                          {t("bouwdelen.lifespan", { years: b.expectedLifespanYears })}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Euro className="h-4 w-4" />
-                        <span>Vervanging: {euro(b.replacementCost)}</span>
+                        <span>{t("bouwdelen.replacement", { cost: euro(b.replacementCost) })}</span>
                       </div>
                     </div>
                     {b.openTaken > 0 && (
                       <div className="mt-3 text-xs font-medium text-primary">
-                        {b.openTaken} open {b.openTaken === 1 ? "taak" : "taken"}
+                        {t("bouwdelen.openTaken", { count: b.openTaken })}
                       </div>
                     )}
                   </CardContent>
@@ -1884,10 +1899,10 @@ export default function MjopPage() {
           <div className="flex flex-col sm:flex-row gap-4 bg-card p-4 rounded-lg border shadow-sm">
             <Select value={taakJaar} onValueChange={setTaakJaar}>
               <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Alle jaren" />
+                <SelectValue placeholder={t("filters.allYears")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Alle jaren</SelectItem>
+                <SelectItem value="all">{t("filters.allYears")}</SelectItem>
                 {jaren.map((j) => (
                   <SelectItem key={j} value={String(j)}>
                     {j}
@@ -1897,13 +1912,13 @@ export default function MjopPage() {
             </Select>
             <Select value={taakStatus} onValueChange={setTaakStatus}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Alle statussen" />
+                <SelectValue placeholder={t("filters.allStatuses")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Alle statussen</SelectItem>
-                <SelectItem value="gepland">Gepland</SelectItem>
-                <SelectItem value="in_uitvoering">In uitvoering</SelectItem>
-                <SelectItem value="afgerond">Afgerond</SelectItem>
+                <SelectItem value="all">{t("filters.allStatuses")}</SelectItem>
+                <SelectItem value="gepland">{t("taakStatus.gepland")}</SelectItem>
+                <SelectItem value="in_uitvoering">{t("taakStatus.in_uitvoering")}</SelectItem>
+                <SelectItem value="afgerond">{t("taakStatus.afgerond")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -1913,13 +1928,13 @@ export default function MjopPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Taak</TableHead>
-                    <TableHead>Bouwdeel</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Jaar</TableHead>
-                    <TableHead className="text-right">Kostenraming</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Melding</TableHead>
+                    <TableHead>{t("taken.header.taak")}</TableHead>
+                    <TableHead>{t("taken.header.bouwdeel")}</TableHead>
+                    <TableHead>{t("taken.header.type")}</TableHead>
+                    <TableHead>{t("taken.header.jaar")}</TableHead>
+                    <TableHead className="text-right">{t("taken.header.kostenraming")}</TableHead>
+                    <TableHead>{t("taken.header.status")}</TableHead>
+                    <TableHead className="text-right">{t("taken.header.melding")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -1929,52 +1944,52 @@ export default function MjopPage() {
                         colSpan={7}
                         className="text-center py-12 text-muted-foreground"
                       >
-                        Geen MJOP-taken gevonden.
+                        {t("taken.empty")}
                       </TableCell>
                     </TableRow>
                   ) : (
-                    taken.map((t) => (
-                      <TableRow key={t.id}>
-                        <TableCell className="font-medium">{t.title}</TableCell>
+                    taken.map((tk) => (
+                      <TableRow key={tk.id}>
+                        <TableCell className="font-medium">{tk.title}</TableCell>
                         <TableCell className="text-muted-foreground">
-                          <span className="font-mono text-xs">{t.bouwdeelCode}</span>{" "}
-                          {t.bouwdeelName}
+                          <span className="font-mono text-xs">{tk.bouwdeelCode}</span>{" "}
+                          {tk.bouwdeelName}
                         </TableCell>
-                        <TableCell className="capitalize">{t.taskType}</TableCell>
-                        <TableCell>{t.plannedYear}</TableCell>
+                        <TableCell className="capitalize">{t(`taakTypes.${tk.taskType}`, { defaultValue: tk.taskType })}</TableCell>
+                        <TableCell>{tk.plannedYear}</TableCell>
                         <TableCell className="text-right">
-                          {euro(t.estimatedCost)}
+                          {euro(tk.estimatedCost)}
                         </TableCell>
                         <TableCell>
                           <Badge
                             variant="secondary"
                             className={cn(
                               "border-transparent",
-                              taakStatusColor(t.status),
+                              taakStatusColor(tk.status),
                             )}
                           >
-                            {taakStatusLabel(t.status)}
+                            {taakStatusLabel(tk.status, t)}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          {t.ticketId ? (
+                          {tk.ticketId ? (
                             <Button
                               variant="link"
                               size="sm"
                               className="h-auto p-0"
-                              onClick={() => setLocation(`/meldingen/${t.ticketId}`)}
+                              onClick={() => setLocation(`/meldingen/${tk.ticketId}`)}
                             >
-                              {t.ticketNumber}
+                              {tk.ticketNumber}
                             </Button>
                           ) : canManage ? (
                             <Button
                               variant="outline"
                               size="sm"
                               disabled={convert.isPending}
-                              onClick={() => onConvert(t.id)}
+                              onClick={() => onConvert(tk.id)}
                             >
                               <Ticket className="mr-1.5 h-3.5 w-3.5" />
-                              Naar melding
+                              {t("taken.toMelding")}
                             </Button>
                           ) : (
                             <span className="text-muted-foreground text-xs">—</span>
@@ -1994,16 +2009,16 @@ export default function MjopPage() {
           {!jaarplanning?.length ? (
             <div className="text-center py-24 bg-card rounded-lg border border-dashed">
               <CalendarRange className="h-12 w-12 text-muted-foreground mb-4 mx-auto" />
-              <h3 className="text-lg font-medium">Nog geen jaarplanning</h3>
+              <h3 className="text-lg font-medium">{t("jaarplanning.emptyTitle")}</h3>
               <p className="text-sm text-muted-foreground mt-1">
-                Voeg MJOP-taken toe om de meerjarenplanning op te bouwen.
+                {t("jaarplanning.emptyDescription")}
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Kostenraming per jaar (geplande taken)</CardTitle>
+                  <CardTitle className="text-base">{t("jaarplanning.costPerYear")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {jaarplanning.map((j) => (
@@ -2031,16 +2046,16 @@ export default function MjopPage() {
                       <CardTitle className="text-lg flex items-center justify-between">
                         {j.year}
                         <span className="text-sm font-normal text-muted-foreground">
-                          {j.taskCount} {j.taskCount === 1 ? "taak" : "taken"}
+                          {t("jaarplanning.taskCount", { count: j.taskCount })}
                         </span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div className="text-2xl font-bold">{euro(j.totalCost)}</div>
                       <div className="flex flex-wrap gap-1.5">
-                        {j.byType.map((t) => (
-                          <Badge key={t.key} variant="outline" className="capitalize">
-                            {t.key}: {t.count}
+                        {j.byType.map((bt) => (
+                          <Badge key={bt.key} variant="outline" className="capitalize">
+                            {t(`taakTypes.${bt.key}`, { defaultValue: bt.key })}: {bt.count}
                           </Badge>
                         ))}
                       </div>
@@ -2051,7 +2066,7 @@ export default function MjopPage() {
                             variant="secondary"
                             className={cn("border-transparent", taakStatusColor(s.key))}
                           >
-                            {taakStatusLabel(s.key)}: {s.count}
+                            {taakStatusLabel(s.key, t)}: {s.count}
                           </Badge>
                         ))}
                       </div>

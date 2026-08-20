@@ -1,0 +1,102 @@
+{
+  "title": "Contracts & Procurement",
+  "subtitleSupplier": "Your active contracts with the municipality.",
+  "subtitle": "Contract vault with end-date monitoring and supplier register.",
+  "expiring_one": "{{count}} contract falls within the notice period — action required.",
+  "expiring_other": "{{count}} contracts fall within the notice period — action required.",
+  "tabs": {
+    "contracts": "Contracts",
+    "suppliers": "Suppliers"
+  },
+  "category": {
+    "techniek": "Technical",
+    "schoonmaak": "Cleaning",
+    "catering": "Catering",
+    "groenvoorziening": "Landscaping",
+    "beveiliging": "Security",
+    "overig": "Other"
+  },
+  "status": {
+    "actief": "Active",
+    "verlopen": "Expired",
+    "opgezegd": "Terminated"
+  },
+  "contracts": {
+    "add": "Add contract",
+    "newTitle": "New contract",
+    "newDescription": "Record a contract in the contract vault.",
+    "empty": "No contracts",
+    "terminate": "Terminate",
+    "perYear": "{{value}}/year",
+    "daysRemaining": "{{count}} days left",
+    "noticeSuffix": " (notice period {{days}} days)"
+  },
+  "contractFields": {
+    "name": "Name",
+    "namePlaceholder": "E.g. Lift maintenance",
+    "supplier": "Supplier",
+    "supplierPlaceholder": "Choose supplier",
+    "category": "Category",
+    "categoryPlaceholder": "Choose category",
+    "annualValue": "Annual value (€)",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "noticePeriod": "Notice period (days)",
+    "description": "Description (optional)"
+  },
+  "suppliers": {
+    "add": "Add supplier",
+    "newTitle": "New supplier",
+    "newDescription": "Register a supplier in the register.",
+    "contractCount_one": "{{count}} contract",
+    "contractCount_other": "{{count}} contracts",
+    "portal": "Portal: {{name}}"
+  },
+  "supplierFields": {
+    "name": "Company name",
+    "category": "Category",
+    "categoryPlaceholder": "Choose category",
+    "contactName": "Contact person",
+    "kvkNumber": "Chamber of Commerce number",
+    "email": "Email",
+    "phone": "Phone"
+  },
+  "documents": {
+    "shared": "Shared documents",
+    "vault": "Digital vault",
+    "empty": "No documents uploaded yet.",
+    "upload": "Upload PDF"
+  },
+  "reviews": {
+    "title": "Reviews",
+    "average": "avg. {{score}} / 5",
+    "add": "Review",
+    "dialogTitle": "Review supplier",
+    "dialogDescription": "Annual evaluation (1–5 stars)",
+    "empty": "No reviews yet.",
+    "year": "Year",
+    "score": "Score (1–5)",
+    "comment": "Comment (optional)",
+    "commentPlaceholder": "Provide an explanation for the score..."
+  },
+  "validation": {
+    "nameRequired": "Name is required",
+    "supplierRequired": "Choose a supplier",
+    "categoryRequired": "Category is required",
+    "startDateRequired": "Start date is required",
+    "endDateRequired": "End date is required",
+    "emailInvalid": "Invalid email address"
+  },
+  "toast": {
+    "documentUploaded": "Document uploaded",
+    "registrationFailed": "Registration failed",
+    "uploadFailed": "Upload failed",
+    "documentDeleted": "Document deleted",
+    "deleteFailed": "Delete failed",
+    "reviewSaved": "Review saved",
+    "saveFailed": "Saving failed",
+    "contractAdded": "Contract added",
+    "supplierAdded": "Supplier added",
+    "contractTerminated": "Contract terminated"
+  }
+}

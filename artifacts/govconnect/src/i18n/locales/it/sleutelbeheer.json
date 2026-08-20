@@ -1,0 +1,145 @@
+{
+  "title": "Gestione chiavi e tessere",
+  "subtitle": "Registro, piano chiavi, consegna e procedura di smarrimento.",
+  "newKey": "Nuova chiave o tessera",
+  "stats": {
+    "inRegister": "In registro",
+    "issued": "Consegnate",
+    "overdue": "Restituite in ritardo"
+  },
+  "searchPlaceholder": "Cerca per codice, descrizione o titolare...",
+  "filters": {
+    "allTypes": "Tutti i tipi",
+    "keys": "Chiavi",
+    "passes": "Tessere",
+    "allStatuses": "Tutti gli stati",
+    "overdueBadge": "In ritardo"
+  },
+  "type": {
+    "sleutel": "Chiave",
+    "pas": "Tessera"
+  },
+  "status": {
+    "beschikbaar": "Disponibile",
+    "uitgegeven": "Consegnata",
+    "vermist": "Smarrita",
+    "geblokkeerd": "Bloccata"
+  },
+  "table": {
+    "code": "Codice",
+    "type": "Tipo",
+    "description": "Descrizione",
+    "building": "Edificio",
+    "doors": "Porte",
+    "status": "Stato",
+    "currentHolder": "Titolare attuale",
+    "dueBy": "Restituire entro",
+    "empty": "Nessuna chiave trovata.",
+    "overdue": "in ritardo"
+  },
+  "newDialog": {
+    "title": "Registra nuova chiave o tessera",
+    "description": "Aggiungi una chiave o una tessera di accesso al registro.",
+    "code": "Codice",
+    "codePlaceholder": "Es. SL-005",
+    "type": "Tipo",
+    "descriptionLabel": "Descrizione",
+    "descriptionPlaceholder": "Es. Chiave archivio",
+    "building": "Edificio",
+    "none": "Nessuno / N/D",
+    "replacementCost": "Costo di sostituzione (€)",
+    "add": "Aggiungi"
+  },
+  "toast": {
+    "codeDescRequired": "Inserisci codice e descrizione",
+    "added": "Chiave aggiunta",
+    "addFailed": "Aggiunta non riuscita"
+  },
+  "detail": {
+    "notFound": "Chiave non trovata.",
+    "replacementCostLabel": "Costo di sostituzione {{cost}}",
+    "issue": "Consegna",
+    "block": "Blocca",
+    "takeBack": "Ritira",
+    "makeAvailable": "Rendi di nuovo disponibile",
+    "reportLost": "Segnala smarrimento",
+    "actionFailed": "Azione non riuscita",
+    "issueDialog": {
+      "title": "Consegna chiave",
+      "description": "Registra a chi viene consegnata {{code}}.",
+      "employee": "Collaboratore",
+      "employeePlaceholder": "Scegli collaboratore",
+      "dueDate": "Data di restituzione (facoltativa)",
+      "dueDateHint": "Es. per tessere visitatori o chiavi temporanee.",
+      "note": "Nota (facoltativa)",
+      "confirm": "Consegna"
+    },
+    "lossDialog": {
+      "title": "Avvia procedura di smarrimento",
+      "description": "La chiave viene registrata come smarrita, viene creata automaticamente una segnalazione al service desk e i costi vengono addebitati{{holder}}.",
+      "descriptionHolder": " a {{name}}",
+      "charge": "Addebito costi (€)",
+      "chargeHint": "Lascia vuoto = costo di sostituzione dal registro.",
+      "note": "Spiegazione",
+      "confirm": "Segnala smarrimento"
+    },
+    "toast": {
+      "issued": "Chiave consegnata",
+      "blocked": "Chiave bloccata",
+      "returned": "Chiave ritirata",
+      "available": "Chiave di nuovo disponibile",
+      "lossStarted": "Procedura di smarrimento avviata",
+      "lossStartedDesc": "È stata creata una segnalazione al service desk.",
+      "dueUpdated": "Data di restituzione aggiornata",
+      "doorAdded": "Porta aggiunta",
+      "doorRemoved": "Porta rimossa"
+    },
+    "issuedBanner": {
+      "issuedTo": "Consegnata a ",
+      "since": " dal {{date}}",
+      "overdue": "• Data di restituzione superata:",
+      "dueBy": "• Restituire entro:",
+      "overdueBadge": "in ritardo",
+      "editDueDate": "Modifica data di restituzione"
+    },
+    "dueDialog": {
+      "title": "Modifica data di restituzione",
+      "description": "Modifica la data di restituzione per {{name}}. Lascia vuoto per rimuovere la data.",
+      "label": "Data di restituzione",
+      "hint": "Lascia vuoto per rimuovere la data di restituzione."
+    },
+    "keyPlan": {
+      "title": "Piano chiavi",
+      "description": "Porte e cilindri che questa {{type}} apre.",
+      "addDoor": "Porta",
+      "empty": "Ancora nessuna porta collegata.",
+      "doorDialog": {
+        "title": "Aggiungi porta al piano chiavi",
+        "description": "Descrizione",
+        "descriptionPlaceholder": "Es. Cilindro C-06, porta archivio",
+        "room": "Locale (facoltativo)",
+        "none": "Nessuno / N/D",
+        "add": "Aggiungi"
+      }
+    },
+    "issueHistory": {
+      "title": "Cronologia consegne",
+      "description": "Chi ha usato o usa questa {{type}}.",
+      "empty": "Non ancora consegnata.",
+      "unknown": "Sconosciuto",
+      "returned": "Ritirata",
+      "inUse": "In uso",
+      "issuedBy": "• consegnata da {{name}}",
+      "dueBy": "• restituire entro {{date}}",
+      "overdue": " ⚠ in ritardo"
+    },
+    "lossReports": {
+      "title": "Segnalazioni di smarrimento",
+      "reportedOn": "Segnalato il {{date}}",
+      "lastHolder": "• ultimo titolare: ",
+      "reportedBy": "Segnalato da {{name}}. ",
+      "viewTicket": "Visualizza segnalazione {{number}}"
+    },
+    "createdOn": "Creato il {{date}}."
+  }
+}

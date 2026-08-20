@@ -1,0 +1,70 @@
+{
+  "title": "Assets",
+  "subtitle": "Beheer apparatuur, meubilair en inventaris.",
+  "addAsset": "Asset toevoegen",
+  "searchPlaceholder": "Zoeken op naam of code...",
+  "allCategories": "Alle categorieën",
+  "status": {
+    "in_gebruik": "In gebruik",
+    "in_onderhoud": "In onderhoud",
+    "defect": "Defect",
+    "afgeschreven": "Afgeschreven"
+  },
+  "dialog": {
+    "title": "Nieuw asset registreren",
+    "description": "Voeg een nieuw object toe aan het vastgoedregister.",
+    "name": "Naam",
+    "namePlaceholder": "Bijv. Bureaustoel Ergonomic",
+    "code": "Asset Code",
+    "codePlaceholder": "Bijv. INV-2026-001",
+    "category": "Categorie",
+    "categoryPlaceholder": "Bijv. Meubilair",
+    "status": "Status",
+    "statusPlaceholder": "Kies status",
+    "brand": "Merk (Optioneel)",
+    "model": "Model (Optioneel)",
+    "serialNumber": "Serienummer (Optioneel)",
+    "location": "Locatie (Optioneel)",
+    "locationPlaceholder": "Kies ruimte",
+    "add": "Toevoegen"
+  },
+  "validation": {
+    "nameRequired": "Naam is verplicht",
+    "codeRequired": "Code is verplicht",
+    "categoryRequired": "Categorie is verplicht"
+  },
+  "toast": {
+    "added": "Asset toegevoegd"
+  },
+  "empty": {
+    "title": "Geen assets gevonden",
+    "description": "Probeer een andere zoekterm of pas de filters aan."
+  },
+  "card": {
+    "notAssigned": "Niet toegewezen",
+    "openTickets_one": "{{count}} open melding",
+    "openTickets_other": "{{count}} open meldingen"
+  },
+  "detail": {
+    "notFound": "Asset niet gevonden.",
+    "info": {
+      "title": "Asset Informatie",
+      "code": "Unieke Code",
+      "category": "Categorie",
+      "brandModel": "Merk & Model",
+      "serialNumber": "Serienummer",
+      "location": "Locatie",
+      "notAssigned": "Niet toegewezen",
+      "purchaseDate": "Aanschafdatum"
+    },
+    "tickets": {
+      "title": "Gekoppelde Meldingen",
+      "newTicket": "Nieuwe melding",
+      "empty": "Geen meldingen gevonden voor dit asset."
+    },
+    "actions": {
+      "title": "Acties",
+      "reportFault": "Storing melden"
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "title": "Web mağazası",
+  "subtitleSupplier": "Size gönderilen siparişler.",
+  "subtitle": "Bütçe takibiyle ofis malzemeleri ve tesis ürünleri sipariş edin.",
+  "cart": {
+    "button": "Sepet",
+    "title": "Sepet",
+    "empty": "Sepetiniz boş.",
+    "pricePerUnit": "{{unit}} başına {{price}}",
+    "increaseExceeds": "Artırmak bütçeyi aşıyor",
+    "budgetLabel": "Bütçe {{department}} ({{year}})",
+    "remaining": "Kalan bütçe",
+    "cartLabel": "Sepet",
+    "nearBudgetPrefix": "Bütçe sınırına yakın — ",
+    "availableAfter": "Gönderdikten sonra hâlâ {{amount}} kullanılabilir.",
+    "exceedsWarning": "Dikkat: bu sipariş kalan bütçeyi aşıyor.",
+    "blockedTitle": "Sipariş engellendi",
+    "blockedBody": "Kalan bütçe bu sipariş için yetersiz. Açık <1>{{amount}}</1>. Bütçeyi artırmak veya politikayı değiştirmek için yöneticinizle iletişime geçin.",
+    "underThreshold": "{{amount}} eşiğinin altında — otomatik olarak onaylanacak",
+    "total": "Toplam",
+    "submitAuto": "Sipariş ver (otomatik onaylı)",
+    "submit": "Siparişi onaya gönder"
+  },
+  "supplierPortal": {
+    "title": "Sizin için siparişler",
+    "empty": "Henüz sipariş gönderilmedi.",
+    "markDelivered": "Teslim edildi olarak işaretle"
+  },
+  "supplierStatus": {
+    "verstuurd": "Gönderildi",
+    "verwerkt": "İşlendi"
+  },
+  "table": {
+    "order": "Sipariş",
+    "items": "Ürünler",
+    "amount": "Tutar",
+    "status": "Durum",
+    "action": "İşlem",
+    "requester": "Talep eden",
+    "budgetEffect": "Bütçe etkisi",
+    "supplier": "Tedarikçi",
+    "lineItem": "{{quantity}}× {{name}}"
+  },
+  "tabs": {
+    "catalog": "Katalog",
+    "ordersManager": "Siparişler ve onay",
+    "ordersMine": "Siparişlerim",
+    "budgets": "Bütçeler"
+  },
+  "catalog": {
+    "searchPlaceholder": "Katalogda ara...",
+    "allCategories": "Tüm kategoriler",
+    "notInStock": "Stokta yok",
+    "inStock": "{{stock}} {{unit}} stokta",
+    "addToCart": "Sepete ekle"
+  },
+  "orders": {
+    "empty": "Henüz sipariş yok",
+    "remaining": "Kalan: {{amount}}",
+    "overBudget": "Bütçe üstü",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "approvalBlocked": "Bütçe politikası nedeniyle onay engellendi",
+    "markOrdered": "Sipariş edildi olarak işaretle",
+    "send": "Gönder",
+    "delivered": "Teslim edildi",
+    "processed": "İşlendi"
+  },
+  "budgets": {
+    "thresholdTitle": "Onay eşiği",
+    "adjust": "Ayarla",
+    "thresholdDescription": "<1>{{amount}}</1> tutarına kadar olan siparişler yönetici incelemesi olmadan otomatik onaylanır.",
+    "thresholdZeroNote": " (Eşik €0 = her zaman yönetici onayı gerekir)",
+    "spent": "Harcanan: {{amount}}",
+    "remaining": "Kalan: {{amount}}",
+    "budget": "Bütçe: {{amount}}",
+    "pending": "Beklemede: {{amount}}",
+    "afterApproval": "Tüm açık talepler onaylandıktan sonra",
+    "onOverBudget": "Bütçe aşıldığında:",
+    "mark": "İşaretle",
+    "block": "Engelle"
+  },
+  "reject": {
+    "title": "Siparişi reddet",
+    "placeholder": "Reddetme nedeni (isteğe bağlı)",
+    "confirm": "Reddet"
+  },
+  "send": {
+    "title": "Tedarikçiye gönder",
+    "chooseSupplier": "Tedarikçi seç",
+    "selectPlaceholder": "Tedarikçi seçin",
+    "confirm": "Gönder"
+  },
+  "threshold": {
+    "title": "Onay eşiğini ayarla",
+    "label": "Otomatik onay için maksimum tutar (€)",
+    "placeholder": "örn. 50",
+    "help": "Bu tutara kadar olan siparişler hemen onaylanır. Otomatik onayı devre dışı bırakmak için 0 olarak ayarlayın."
+  },
+  "status": {
+    "ingediend": "Gönderildi",
+    "goedgekeurd": "Onaylandı",
+    "afgekeurd": "Reddedildi",
+    "besteld": "Sipariş edildi",
+    "geleverd": "Teslim edildi"
+  },
+  "toast": {
+    "addedToCart": "{{name}} sepete eklendi",
+    "budgetExceededDescription": "⚠️ Sepetiniz kalan bütçeyi aşıyor ({{amount}}). Bütçe ayarlanana kadar sipariş engellendi.",
+    "qtyNotIncreased": "Miktar artırılmadı",
+    "qtyExceedsDescription": "Artırmak kalan bütçeyi aşıyor ({{remaining}}). Açık {{shortfall}} olur. Bütçeyi ayarlamak için yöneticinizle iletişime geçin.",
+    "orderAutoApproved": "Sipariş {{number}} otomatik onaylandı",
+    "orderSubmitted": "Sipariş {{number}} gönderildi",
+    "autoApprovedDescription": "Sipariş {{amount}} eşiğinin altında, hemen onaylandı.",
+    "submittedDescription": "Siparişiniz onay bekliyor.",
+    "orderFailed": "Sipariş başarısız",
+    "orderStatusChanged": "Sipariş {{status}}",
+    "actionFailed": "İşlem başarısız",
+    "sentToSupplier": "Sipariş tedarikçiye gönderildi",
+    "sendFailed": "Gönderme başarısız",
+    "markedProcessed": "Sipariş işlendi olarak işaretlendi",
+    "failed": "Başarısız",
+    "thresholdSet": "Onay eşiği {{amount}} olarak ayarlandı",
+    "saveFailed": "Kaydetme başarısız",
+    "policyMark": "{{department}}: politika işaretle olarak ayarlandı",
+    "policyBlock": "{{department}}: politika engelle olarak ayarlandı"
+  }
+}

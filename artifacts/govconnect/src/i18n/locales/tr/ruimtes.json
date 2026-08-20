@@ -1,0 +1,92 @@
+{
+  "title": "Odalar",
+  "subtitle": "Organizasyondaki tüm odaların kaydı.",
+  "searchPlaceholder": "Ada, koda veya fonksiyona göre ara...",
+  "allBuildings": "Tüm binalar",
+  "allFloors": "Tüm katlar",
+  "bookable": "Rezerve edilebilir",
+  "empty": {
+    "title": "Oda bulunamadı",
+    "description": "Filtrelerinizi ayarlayın veya arama terimini kontrol edin."
+  },
+  "areaM2": "{{area}} m²",
+  "persons": "{{count}} kişi",
+  "openTickets_one": "{{count}} talep",
+  "openTickets_other": "{{count}} talep",
+  "assetCount": "{{count}} varlık",
+  "detail": {
+    "notFound": "Oda bulunamadı.",
+    "bookableBadge": "Rezerve edilebilir",
+    "dossier": {
+      "title": "Oda dosyası",
+      "edit": "Düzenle",
+      "area": "Alan",
+      "vvo": "Net alan",
+      "bvo": "Brüt alan",
+      "department": "Departman",
+      "capacity": "Doluluk",
+      "capacityValue": "{{count}} kişi",
+      "function": "Fonksiyon",
+      "floorFinish": "Zemin kaplaması",
+      "bookability": "Rezerve edilebilirlik",
+      "bookable": "Rezerve edilebilir",
+      "notBookable": "Rezerve edilemez",
+      "facilities": "Olanaklar"
+    },
+    "editDialog": {
+      "title": "Oda dosyasını düzenle",
+      "description": "{{name}} odasının alanlarını, fonksiyonunu ve departmanını ayarlayın.",
+      "area": "Alan (m²)",
+      "function": "Fonksiyon",
+      "vvo": "Net alan (m²)",
+      "bvo": "Brüt alan (m²)",
+      "department": "Departman",
+      "departmentPlaceholder": "Örn. Vatandaş işleri",
+      "capacity": "Doluluk (kişi)",
+      "capacityPlaceholder": "Örn. 12",
+      "bookable": "Rezerve edilebilir",
+      "yes": "Evet",
+      "no": "Hayır"
+    },
+    "tabs": {
+      "assets": "Varlıklar ({{count}})",
+      "tickets": "Açık talepler ({{count}})",
+      "noAssets": "Bu odaya bağlı varlık yok.",
+      "noTickets": "Açık talep yok."
+    },
+    "reservations": {
+      "title": "Bugünkü rezervasyonlar",
+      "empty": "Bugün için rezervasyon yok.",
+      "toPlanboard": "Planlama panosuna git"
+    },
+    "history": {
+      "title": "Değişiklik geçmişi",
+      "description": "Bu odanın yeniden düzenlemeleri ve dosya değişiklikleri.",
+      "empty": "Henüz kaydedilmiş değişiklik yok.",
+      "unknown": "Bilinmiyor",
+      "reverted": "Geri alındı",
+      "undo": "Geri al",
+      "emptyValue": "boş"
+    },
+    "toast": {
+      "dossierUpdated": "Oda dosyası güncellendi",
+      "roomChangedConflict": "Oda bu sırada değiştirildi",
+      "roomChangedConflictDesc": "Başka biri bu odayı az önce düzenledi. Pencere kapatıldı — güncel değerleri görmek için tekrar açın.",
+      "updateFailed": "Güncelleme başarısız",
+      "partialUndo": "Değişiklik kısmen geri alındı",
+      "partialUndoDesc": "Atlandı (daha sonra tekrar değiştirildi): {{fields}}.",
+      "undone": "Değişiklik geri alındı",
+      "undoFailed": "Geri alma başarısız"
+    },
+    "fields": {
+      "functionType": "Fonksiyon",
+      "floorFinish": "Zemin kaplaması",
+      "areaM2": "Alan (m²)",
+      "areaVvoM2": "Net alan (m²)",
+      "areaBvoM2": "Brüt alan (m²)",
+      "department": "Departman",
+      "capacity": "Doluluk (kişi)",
+      "bookable": "Rezerve edilebilir"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "brand": "LetShare4gov",
+  "nav": {
+    "dashboard": "Panel",
+    "meldingen": "Bildirimler",
+    "reserveringen": "Rezervasyonlar",
+    "werkplekken": "Çalışma alanları",
+    "bezoekers": "Ziyaretçiler",
+    "vastgoed": "Gayrimenkul",
+    "ruimtes": "Odalar",
+    "sleutelbeheer": "Anahtar yönetimi",
+    "assets": "Varlıklar",
+    "contracten": "Sözleşmeler",
+    "webshop": "Çevrimiçi mağaza",
+    "voorraad": "Stok",
+    "duurzaamheid": "Sürdürülebilirlik",
+    "mjop": "Bakım planı",
+    "catering": "İkram",
+    "kennisbank": "Bilgi bankası"
+  },
+  "shell": {
+    "notifications": "Bildirimler",
+    "markAllRead": "Tümünü okundu işaretle",
+    "noNotifications": "Bildirim yok",
+    "role": "Rol",
+    "settings": "Ayarlar",
+    "logout": "Çıkış yap",
+    "language": "Dil",
+    "guestReadOnly": "Misafir modu – salt okunur"
+  },
+  "login": {
+    "title": "Giriş yap",
+    "subtitle": "Panelinize erişmek için giriş bilgilerinizi girin.",
+    "email": "E-posta adresi",
+    "emailPlaceholder": "ad@kurum.gov.tr",
+    "password": "Parola",
+    "submit": "Giriş yap",
+    "failed": "Giriş başarısız. Bilgilerinizi kontrol edin.",
+    "demo": "Demo hesaplar (tek tıkla giriş)",
+    "tagline": "Kamu tesis yönetimi için günlük kokpit.",
+    "taglineSub": "Hızlı, net ve güvenilir. Kamu kurumlarının bildirimleri, rezervasyonları ve gayrimenkulleri zahmetsizce yönetmesi için tasarlandı.",
+    "copyright": "Tüm hakları saklıdır.",
+    "emailInvalid": "Geçersiz e-posta adresi",
+    "passwordRequired": "Parola zorunludur",
+    "guestLink": "Misafir erişimi"
+  },
+  "guest": {
+    "title": "Misafir erişimi",
+    "subtitle": "LetShare4gov'u misafir olarak görüntülemek için misafir parolasını girin (salt okunur).",
+    "password": "Misafir parolası",
+    "submit": "Misafir olarak görüntüle",
+    "failed": "Geçersiz parola.",
+    "backToLogin": "Girişe geri dön"
+  },
+  "common": {
+    "loading": "Yükleniyor…",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "back": "Geri",
+    "search": "Ara",
+    "error": "Bir şeyler ters gitti"
+  }
+}

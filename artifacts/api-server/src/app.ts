@@ -48,6 +48,19 @@ app.use(cookieParser(sessionSecret));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Gastsessies zijn strikt alleen-lezen: blokkeer alle schrijfmethoden,
+// behalve uitloggen. De gastvlag zit in een ondertekende cookie die alleen
+// door /api/auth/guest-login wordt gezet.
+app.use("/api", (req, res, next) => {
+  const isGuest = req.signedCookies?.["gc_guest"] === "1";
+  const isWrite = !["GET", "HEAD", "OPTIONS"].includes(req.method);
+  if (isGuest && isWrite && req.path !== "/auth/logout") {
+    res.status(403).json({ message: "Gasttoegang is alleen-lezen" });
+    return;
+  }
+  next();
+});
+
 app.use("/api", router);
 
 export default app;

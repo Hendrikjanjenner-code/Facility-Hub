@@ -61,40 +61,44 @@ function serializeReading(r: {
 router.get("/meter-readings", async (req, res): Promise<void> => {
   const conditions: SQL[] = [];
   if (typeof req.query.buildingId === "string" && req.query.buildingId)
-    conditions.push(eq(wasteRegistrationsTable.buildingId, Number(req.query.buildingId)));
-  const rows = await wasteBaseQuery()
+    conditions.push(eq(meterReadingsTable.buildingId, Number(req.query.buildingId)));
+  if (typeof req.query.meterType === "string" && req.query.meterType)
+    conditions.push(eq(meterReadingsTable.meterType, req.query.meterType));
+  const rows = await readingBaseQuery()
     .where(conditions.length ? and(...conditions) : undefined)
-    .orderBy(desc(wasteRegistrationsTable.registrationDate));
-  res.json(rows.map(serializeWaste));
+    .orderBy(desc(meterReadingsTable.readingDate));
+  res.json(rows.map(serializeReading));
 });
 
-router.post("/waste-registrations", async (req, res): Promise<void> => {
-  const parsed = CreateWasteRegistrationBody.safeParse(req.body);
-  if (!parsed.success || !WASTE_CATEGORIES.includes(parsed.data.category)) {
+router.post("/meter-readings", async (req, res): Promise<void> => {
+  const parsed = CreateMeterReadingBody.safeParse(req.body);
+  if (!parsed.success || !METER_TYPES.includes(parsed.data.meterType)) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
   }
   const d = parsed.data;
-  if (!d.buildingId) {
-    res.status(400).json({ message: "buildingId is verplicht" });
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(d.readingDate) || !(d.value >= 0)) {
+    res.status(400).json({ message: "Ongeldige datum of meterstand" });
     return;
   }
   const [created] = await db
-    .insert(wasteRegistrationsTable)
+    .insert(meterReadingsTable)
     .values({
-      buildingId: d.buildingId as number,
-      registrationDate: d.registrationDate,
-      category: d.category,
-      weightKg: d.weightKg,
+      buildingId: d.buildingId,
+      meterType: d.meterType,
+      readingDate: d.readingDate,
+      value: d.value,
+      unit: d.unit,
+      source: "handmatig",
       registeredById: req.currentUser!.id,
     })
     .returning();
-  const [row] = await wasteBaseQuery().where(eq(wasteRegistrationsTable.id, id));
+  const [row] = await readingBaseQuery().where(eq(meterReadingsTable.id, created!.id));
   res.status(201).json(serializeReading(row!));
 });
 
 router.post("/meter-readings/import", async (req, res): Promise<void> => {
-  const parsed = CreateWasteRegistrationBody.safeParse(req.body);
+  const parsed = ImportMeterReadingsBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ message: "Ongeldige invoer" });
     return;
@@ -133,7 +137,7 @@ router.patch("/meter-readings/:id", async (req, res): Promise<void> => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
 
-  const updates: Partial<typeof wasteRegistrationsTable.$inferInsert> = {};
+  const updates: Partial<typeof meterReadingsTable.$inferInsert> = {};
   const b = req.body ?? {};
   if (b.readingDate !== undefined) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(b.readingDate)) {
@@ -179,11 +183,11 @@ router.patch("/meter-readings/:id", async (req, res): Promise<void> => {
   });
 
   if (!updated) { res.status(404).json({ message: "Meterstand niet gevonden" }); return; }
-  const [row] = await wasteBaseQuery().where(eq(wasteRegistrationsTable.id, id));
-  res.json(serializeWaste(row!));
+  const [row] = await readingBaseQuery().where(eq(meterReadingsTable.id, id));
+  res.json(serializeReading(row!));
 });
 
-router.delete("/waste-registrations/:id", async (req, res): Promise<void> => {
+router.delete("/meter-readings/:id", async (req, res): Promise<void> => {
   const id = Number(req.params.id);
   if (Number.isNaN(id)) { res.status(400).json({ message: "Ongeldig id" }); return; }
 
@@ -404,7 +408,7 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
   const usageByMonth = new Map<string, { usage: number; unit: string }>();
   const grouped = new Map<string, typeof readings>();
   for (const r of readings) {
-    const key = `${w.registrationDate.slice(0, 7)}|${w.category}`;
+    const key = `${r.buildingId}|${r.meterType}`;
     if (!grouped.has(key)) grouped.set(key, []);
     grouped.get(key)!.push(r);
   }
@@ -439,7 +443,7 @@ router.get("/sustainability/report", async (req, res): Promise<void> => {
       const usage = cur.value - prev.value;
       if (usage < 0) continue;
       const month = cur.readingDate.slice(0, 7);
-    const key = `${w.registrationDate.slice(0, 7)}|${w.category}`;
+      const key = `${month}|${cur.meterType}`;
       const entry = usageByMonth.get(key) ?? { usage: 0, unit: cur.unit };
       entry.usage += usage;
       usageByMonth.set(key, entry);

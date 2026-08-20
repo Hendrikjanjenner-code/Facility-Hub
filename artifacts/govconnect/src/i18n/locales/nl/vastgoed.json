@@ -1,0 +1,107 @@
+{
+  "title": "Vastgoedstructuur",
+  "subtitle": "Overzicht van organisatie, vestigingen, gebouwen en verdiepingen.",
+  "tree": {
+    "title": "Structuurboom",
+    "description": "Navigeer door de hiërarchie om ruimtes te bekijken.",
+    "buildingDossier": "Gebouwdossier",
+    "showRooms": "Toon ruimtes",
+    "floorLevel": "{{name}} (Niveau {{level}})",
+    "siteCity": "{{name}} ({{city}})",
+    "roomCount_one": "{{count}} ruimte",
+    "roomCount_other": "{{count}} ruimtes"
+  },
+  "detail": {
+    "notFound": "Gebouw niet gevonden.",
+    "addressFallback": "-",
+    "stats": {
+      "floors": "Verdiepingen",
+      "rooms": "Ruimtes",
+      "totalArea": "Totale oppervlakte"
+    },
+    "vlekkenplan": {
+      "title": "Vlekkenplan",
+      "description": "Schematische indeling per verdieping, blokgrootte naar oppervlakte.",
+      "colorByDepartment": "Kleur op afdeling",
+      "colorByFunction": "Kleur op functie",
+      "noRooms": "Geen ruimtes op deze verdieping.",
+      "filterPlaceholder": "Zoek op afdeling, functie of ruimtenaam…",
+      "clearFilter": "Filter wissen",
+      "noMatches": "Geen ruimtes gevonden voor deze zoekopdracht.",
+      "matchCount_one": "{{matched}} van {{count}} ruimte gemarkeerd",
+      "matchCount_other": "{{matched}} van {{count}} ruimtes gemarkeerd",
+      "unknown": "Onbekend",
+      "tileManageHint": "{{name}} — klik om afdeling/functie te wijzigen",
+      "tileDetailHint": "{{name}} ({{code}}) — klik voor details",
+      "edit": "bewerken",
+      "popover": {
+        "department": "Afdeling",
+        "function": "Functie",
+        "area": "Oppervlakte",
+        "capacity": "Bezetting",
+        "persons": "{{count}} personen",
+        "goToRoom": "Ga naar ruimtepagina"
+      },
+      "legendVvo": "— {{area}} m² VVO"
+    },
+    "vlekEdit": {
+      "description": "Wijzig afdeling of functie. Het vlekkenplan wordt direct bijgewerkt.",
+      "department": "Afdeling",
+      "departmentPlaceholder": "Bijv. Facilitair, ICT, HR",
+      "function": "Functie",
+      "functionPlaceholder": "Bijv. Kantoor, Vergaderruimte",
+      "area": "Oppervlakte: {{area}} m²",
+      "saving": "Opslaan…"
+    },
+    "history": {
+      "title": "Recente herindelingen",
+      "empty": "Geen recente herindelingen op deze verdieping.",
+      "undone": "Ongedaan gemaakt",
+      "by": "Door: {{name}}",
+      "unknown": "Onbekend"
+    },
+    "documents": {
+      "title": "Gebouwdocumenten",
+      "description": "Huurcontracten, bouwtekeningen en energielabels.",
+      "upload": "Document uploaden",
+      "empty": "Nog geen documenten geüpload.",
+      "download": "Downloaden",
+      "delete": "Verwijderen",
+      "unknownUploader": "Onbekend",
+      "dialog": {
+        "title": "Gebouwdocument uploaden",
+        "description": "PDF of afbeelding, maximaal 15 MB.",
+        "titleLabel": "Titel",
+        "titlePlaceholder": "Bijv. Huurcontract 2026",
+        "category": "Categorie",
+        "file": "Bestand",
+        "busy": "Bezig...",
+        "retry": "Opnieuw proberen",
+        "uploadBtn": "Uploaden"
+      },
+      "categories": {
+        "huurcontract": "Huurcontract",
+        "bouwtekening": "Bouwtekening",
+        "energielabel": "Energielabel",
+        "overig": "Overig"
+      },
+      "toast": {
+        "titleRequired": "Vul een titel in",
+        "chooseFile": "Kies een bestand",
+        "tooLarge": "Bestand is te groot (max 15 MB)",
+        "uploadFailed": "Upload mislukt",
+        "added": "Document toegevoegd",
+        "refreshFailed": "Document opgeslagen, maar vernieuwen van de lijst mislukte.",
+        "saveFailed": "Het bestand is geüpload maar kon niet worden opgeslagen. Controleer uw verbinding en probeer het opnieuw.",
+        "deleted": "Document verwijderd",
+        "deleteFailed": "Verwijderen mislukt"
+      }
+    },
+    "toast": {
+      "roomUpdated": "Ruimte bijgewerkt",
+      "roomChangedConflict": "Ruimte ondertussen gewijzigd",
+      "roomChangedConflictDesc": "Iemand anders heeft dit vlekkenplan-item zojuist bewerkt. Sluit de dialoog en probeer het opnieuw.",
+      "updateFailed": "Bijwerken mislukt"
+    }
+  }
+}

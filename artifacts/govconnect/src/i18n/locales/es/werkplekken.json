@@ -1,0 +1,23 @@
+{
+  "title": "Puestos de trabajo",
+  "subtitle": "Reserve un puesto flexible en la oficina.",
+  "colleagueSearchPlaceholder": "Buscar compañero por nombre...",
+  "noColleagueFound": "No se encontró ningún puesto de trabajo",
+  "colleagueFound_one": "{{count}} puesto de trabajo encontrado",
+  "colleagueFound_other": "{{count}} puestos de trabajo encontrados",
+  "bookedIn": "Reservado",
+  "chooseDate": "Elija fecha",
+  "allFloors": "Todas las plantas",
+  "emptyTitle": "No se encontraron puestos de trabajo",
+  "emptyDesc": "Pruebe con otra planta o fecha.",
+  "available_one": "{{count}} disponible",
+  "available_other": "{{count}} disponibles",
+  "bookedBy": "Reservado por:",
+  "workplaceTitle": "Puesto de trabajo {{name}}",
+  "toastBookedTitle": "Puesto de trabajo reservado",
+  "toastBookedDesc": "Para {{date}}",
+  "toastConflictTitle": "Conflicto",
+  "toastConflictDesc": "Este puesto de trabajo ya ha sido reservado mientras tanto.",
+  "toastErrorTitle": "Error",
+  "toastErrorDesc": "No se pudo reservar el puesto de trabajo."
+}

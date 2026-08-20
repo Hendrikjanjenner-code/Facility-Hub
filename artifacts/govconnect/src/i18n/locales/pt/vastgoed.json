@@ -1,0 +1,107 @@
+{
+  "title": "Estrutura imobiliária",
+  "subtitle": "Visão geral da organização, instalações, edifícios e pisos.",
+  "tree": {
+    "title": "Árvore de estrutura",
+    "description": "Navegue pela hierarquia para ver as salas.",
+    "buildingDossier": "Processo do edifício",
+    "showRooms": "Mostrar salas",
+    "floorLevel": "{{name}} (Nível {{level}})",
+    "siteCity": "{{name}} ({{city}})",
+    "roomCount_one": "{{count}} sala",
+    "roomCount_other": "{{count}} salas"
+  },
+  "detail": {
+    "notFound": "Edifício não encontrado.",
+    "addressFallback": "-",
+    "stats": {
+      "floors": "Pisos",
+      "rooms": "Salas",
+      "totalArea": "Área total"
+    },
+    "vlekkenplan": {
+      "title": "Plano de ocupação",
+      "description": "Distribuição esquemática por piso, tamanho do bloco conforme a área.",
+      "colorByDepartment": "Cor por departamento",
+      "colorByFunction": "Cor por função",
+      "noRooms": "Sem salas neste piso.",
+      "filterPlaceholder": "Procurar por departamento, função ou nome da sala…",
+      "clearFilter": "Limpar filtro",
+      "noMatches": "Nenhuma sala encontrada para esta pesquisa.",
+      "matchCount_one": "{{matched}} de {{count}} sala destacada",
+      "matchCount_other": "{{matched}} de {{count}} salas destacadas",
+      "unknown": "Desconhecido",
+      "tileManageHint": "{{name}} — clique para alterar departamento/função",
+      "tileDetailHint": "{{name}} ({{code}}) — clique para ver detalhes",
+      "edit": "editar",
+      "popover": {
+        "department": "Departamento",
+        "function": "Função",
+        "area": "Área",
+        "capacity": "Ocupação",
+        "persons": "{{count}} pessoas",
+        "goToRoom": "Ir para a página da sala"
+      },
+      "legendVvo": "— {{area}} m² ANU"
+    },
+    "vlekEdit": {
+      "description": "Altere o departamento ou a função. O plano de ocupação é atualizado de imediato.",
+      "department": "Departamento",
+      "departmentPlaceholder": "Ex.: Serviços gerais, TI, RH",
+      "function": "Função",
+      "functionPlaceholder": "Ex.: Escritório, Sala de reuniões",
+      "area": "Área: {{area}} m²",
+      "saving": "A guardar…"
+    },
+    "history": {
+      "title": "Reorganizações recentes",
+      "empty": "Sem reorganizações recentes neste piso.",
+      "undone": "Anulado",
+      "by": "Por: {{name}}",
+      "unknown": "Desconhecido"
+    },
+    "documents": {
+      "title": "Documentos do edifício",
+      "description": "Contratos de arrendamento, plantas e certificados energéticos.",
+      "upload": "Carregar documento",
+      "empty": "Ainda sem documentos carregados.",
+      "download": "Descarregar",
+      "delete": "Eliminar",
+      "unknownUploader": "Desconhecido",
+      "dialog": {
+        "title": "Carregar documento do edifício",
+        "description": "PDF ou imagem, máximo 15 MB.",
+        "titleLabel": "Título",
+        "titlePlaceholder": "Ex.: Contrato de arrendamento 2026",
+        "category": "Categoria",
+        "file": "Ficheiro",
+        "busy": "A processar...",
+        "retry": "Tentar novamente",
+        "uploadBtn": "Carregar"
+      },
+      "categories": {
+        "huurcontract": "Contrato de arrendamento",
+        "bouwtekening": "Planta de construção",
+        "energielabel": "Certificado energético",
+        "overig": "Outro"
+      },
+      "toast": {
+        "titleRequired": "Introduza um título",
+        "chooseFile": "Escolha um ficheiro",
+        "tooLarge": "O ficheiro é demasiado grande (máx. 15 MB)",
+        "uploadFailed": "Falha no carregamento",
+        "added": "Documento adicionado",
+        "refreshFailed": "Documento guardado, mas a atualização da lista falhou.",
+        "saveFailed": "O ficheiro foi carregado mas não pôde ser guardado. Verifique a ligação e tente novamente.",
+        "deleted": "Documento eliminado",
+        "deleteFailed": "Falha ao eliminar"
+      }
+    },
+    "toast": {
+      "roomUpdated": "Sala atualizada",
+      "roomChangedConflict": "Sala alterada entretanto",
+      "roomChangedConflictDesc": "Outra pessoa acabou de editar este item do plano de ocupação. Feche a caixa de diálogo e tente novamente.",
+      "updateFailed": "Falha ao atualizar"
+    }
+  }
+}

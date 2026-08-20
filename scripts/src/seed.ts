@@ -1,4 +1,4 @@
-/* Seed GovConnect 2.0 with rich Dutch sample data. Idempotent: truncates all tables first. */
+/* Seed LetShare4gov with rich Dutch sample data. Idempotent: truncates all tables first. */
 import { db } from "@workspace/db";
 import {
   usersTable,
@@ -446,7 +446,7 @@ async function main() {
     { userId: u("emma").id, title: "Reservering bevestigd", body: "Teamoverleg Burgerzaken vandaag om 09:00 in De Rijn.", kind: "reservering", linkPath: "/reserveringen/" + reservations[0]!.id, read: true, createdAt: hoursAgo(24) },
     { userId: u("fatima").id, title: "Je bezoeker is gearriveerd", body: "Peter van den Berg heeft ingecheckt bij de receptie.", kind: "bezoeker", linkPath: "/bezoekers", read: false, createdAt: hoursAgo(2) },
     { userId: u("joris").id, title: "Nieuwe cateringbestelling", body: "Bij Raadscommissie Ruimte vanavond is catering besteld voor 45 personen.", kind: "reservering", linkPath: "/reserveringen/" + reservations[1]!.id, read: false, createdAt: hoursAgo(12) },
-    { userId: u("linda").id, title: "Systeemonderhoud", body: "Zaterdag tussen 22:00 en 23:00 is GovConnect kort niet beschikbaar.", kind: "systeem", linkPath: null, read: false, createdAt: hoursAgo(30) },
+    { userId: u("linda").id, title: "Systeemonderhoud", body: "Zaterdag tussen 22:00 en 23:00 is LetShare4gov kort niet beschikbaar.", kind: "systeem", linkPath: null, read: false, createdAt: hoursAgo(30) },
   ]);
 
   // MJOP: bouwdelen gekoppeld aan de gebouwstructuur

@@ -1,0 +1,102 @@
+{
+  "title": "Contratti e Acquisti",
+  "subtitleSupplier": "I tuoi contratti attivi con il comune.",
+  "subtitle": "Archivio contratti con monitoraggio delle date di scadenza e registro fornitori.",
+  "expiring_one": "{{count}} contratto rientra nel periodo di preavviso — azione richiesta.",
+  "expiring_other": "{{count}} contratti rientrano nel periodo di preavviso — azione richiesta.",
+  "tabs": {
+    "contracts": "Contratti",
+    "suppliers": "Fornitori"
+  },
+  "category": {
+    "techniek": "Tecnica",
+    "schoonmaak": "Pulizie",
+    "catering": "Catering",
+    "groenvoorziening": "Giardinaggio",
+    "beveiliging": "Sicurezza",
+    "overig": "Altro"
+  },
+  "status": {
+    "actief": "Attivo",
+    "verlopen": "Scaduto",
+    "opgezegd": "Rescisso"
+  },
+  "contracts": {
+    "add": "Aggiungi contratto",
+    "newTitle": "Nuovo contratto",
+    "newDescription": "Registra un contratto nell'archivio contratti.",
+    "empty": "Nessun contratto",
+    "terminate": "Rescindi",
+    "perYear": "{{value}}/anno",
+    "daysRemaining": "ancora {{count}} giorni",
+    "noticeSuffix": " (preavviso {{days}} giorni)"
+  },
+  "contractFields": {
+    "name": "Nome",
+    "namePlaceholder": "Es. Manutenzione ascensori",
+    "supplier": "Fornitore",
+    "supplierPlaceholder": "Scegli fornitore",
+    "category": "Categoria",
+    "categoryPlaceholder": "Scegli categoria",
+    "annualValue": "Valore annuo (€)",
+    "startDate": "Data di inizio",
+    "endDate": "Data di fine",
+    "noticePeriod": "Preavviso (giorni)",
+    "description": "Descrizione (facoltativo)"
+  },
+  "suppliers": {
+    "add": "Aggiungi fornitore",
+    "newTitle": "Nuovo fornitore",
+    "newDescription": "Registra un fornitore nel registro.",
+    "contractCount_one": "{{count}} contratto",
+    "contractCount_other": "{{count}} contratti",
+    "portal": "Portale: {{name}}"
+  },
+  "supplierFields": {
+    "name": "Ragione sociale",
+    "category": "Categoria",
+    "categoryPlaceholder": "Scegli categoria",
+    "contactName": "Referente",
+    "kvkNumber": "Numero Camera di Commercio",
+    "email": "E-mail",
+    "phone": "Telefono"
+  },
+  "documents": {
+    "shared": "Documenti condivisi",
+    "vault": "Cassaforte digitale",
+    "empty": "Nessun documento ancora caricato.",
+    "upload": "Carica PDF"
+  },
+  "reviews": {
+    "title": "Valutazioni",
+    "average": "media {{score}} / 5",
+    "add": "Valuta",
+    "dialogTitle": "Valuta fornitore",
+    "dialogDescription": "Valutazione annuale (1–5 stelle)",
+    "empty": "Nessuna valutazione ancora.",
+    "year": "Anno",
+    "score": "Punteggio (1–5)",
+    "comment": "Commento (facoltativo)",
+    "commentPlaceholder": "Spiega il punteggio..."
+  },
+  "validation": {
+    "nameRequired": "Il nome è obbligatorio",
+    "supplierRequired": "Scegli un fornitore",
+    "categoryRequired": "La categoria è obbligatoria",
+    "startDateRequired": "La data di inizio è obbligatoria",
+    "endDateRequired": "La data di fine è obbligatoria",
+    "emailInvalid": "Indirizzo e-mail non valido"
+  },
+  "toast": {
+    "documentUploaded": "Documento caricato",
+    "registrationFailed": "Registrazione non riuscita",
+    "uploadFailed": "Caricamento non riuscito",
+    "documentDeleted": "Documento eliminato",
+    "deleteFailed": "Eliminazione non riuscita",
+    "reviewSaved": "Valutazione salvata",
+    "saveFailed": "Salvataggio non riuscito",
+    "contractAdded": "Contratto aggiunto",
+    "supplierAdded": "Fornitore aggiunto",
+    "contractTerminated": "Contratto rescisso"
+  }
+}

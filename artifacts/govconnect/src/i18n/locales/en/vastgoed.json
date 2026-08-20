@@ -1,0 +1,107 @@
+{
+  "title": "Property structure",
+  "subtitle": "Overview of organisation, sites, buildings and floors.",
+  "tree": {
+    "title": "Structure tree",
+    "description": "Navigate the hierarchy to view rooms.",
+    "buildingDossier": "Building dossier",
+    "showRooms": "Show rooms",
+    "floorLevel": "{{name}} (Level {{level}})",
+    "siteCity": "{{name}} ({{city}})",
+    "roomCount_one": "{{count}} room",
+    "roomCount_other": "{{count}} rooms"
+  },
+  "detail": {
+    "notFound": "Building not found.",
+    "addressFallback": "-",
+    "stats": {
+      "floors": "Floors",
+      "rooms": "Rooms",
+      "totalArea": "Total area"
+    },
+    "vlekkenplan": {
+      "title": "Space plan",
+      "description": "Schematic layout per floor, block size by area.",
+      "colorByDepartment": "Colour by department",
+      "colorByFunction": "Colour by function",
+      "noRooms": "No rooms on this floor.",
+      "filterPlaceholder": "Search by department, function or room name…",
+      "clearFilter": "Clear filter",
+      "noMatches": "No rooms found for this search.",
+      "matchCount_one": "{{matched}} of {{count}} room highlighted",
+      "matchCount_other": "{{matched}} of {{count}} rooms highlighted",
+      "unknown": "Unknown",
+      "tileManageHint": "{{name}} — click to change department/function",
+      "tileDetailHint": "{{name}} ({{code}}) — click for details",
+      "edit": "edit",
+      "popover": {
+        "department": "Department",
+        "function": "Function",
+        "area": "Area",
+        "capacity": "Occupancy",
+        "persons": "{{count}} people",
+        "goToRoom": "Go to room page"
+      },
+      "legendVvo": "— {{area}} m² NFA"
+    },
+    "vlekEdit": {
+      "description": "Change department or function. The space plan updates instantly.",
+      "department": "Department",
+      "departmentPlaceholder": "e.g. Facilities, IT, HR",
+      "function": "Function",
+      "functionPlaceholder": "e.g. Office, Meeting room",
+      "area": "Area: {{area}} m²",
+      "saving": "Saving…"
+    },
+    "history": {
+      "title": "Recent reorganisations",
+      "empty": "No recent reorganisations on this floor.",
+      "undone": "Undone",
+      "by": "By: {{name}}",
+      "unknown": "Unknown"
+    },
+    "documents": {
+      "title": "Building documents",
+      "description": "Lease contracts, construction drawings and energy labels.",
+      "upload": "Upload document",
+      "empty": "No documents uploaded yet.",
+      "download": "Download",
+      "delete": "Delete",
+      "unknownUploader": "Unknown",
+      "dialog": {
+        "title": "Upload building document",
+        "description": "PDF or image, maximum 15 MB.",
+        "titleLabel": "Title",
+        "titlePlaceholder": "e.g. Lease contract 2026",
+        "category": "Category",
+        "file": "File",
+        "busy": "Working...",
+        "retry": "Try again",
+        "uploadBtn": "Upload"
+      },
+      "categories": {
+        "huurcontract": "Lease contract",
+        "bouwtekening": "Construction drawing",
+        "energielabel": "Energy label",
+        "overig": "Other"
+      },
+      "toast": {
+        "titleRequired": "Enter a title",
+        "chooseFile": "Choose a file",
+        "tooLarge": "File is too large (max 15 MB)",
+        "uploadFailed": "Upload failed",
+        "added": "Document added",
+        "refreshFailed": "Document saved, but refreshing the list failed.",
+        "saveFailed": "The file was uploaded but could not be saved. Check your connection and try again.",
+        "deleted": "Document deleted",
+        "deleteFailed": "Delete failed"
+      }
+    },
+    "toast": {
+      "roomUpdated": "Room updated",
+      "roomChangedConflict": "Room changed in the meantime",
+      "roomChangedConflictDesc": "Someone else just edited this space plan item. Close the dialog and try again.",
+      "updateFailed": "Update failed"
+    }
+  }
+}

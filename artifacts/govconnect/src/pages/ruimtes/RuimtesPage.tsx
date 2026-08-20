@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
+import { useTranslation } from "react-i18next";
 import { useListRooms, useGetStructure } from "@workspace/api-client-react";
 import { DoorOpen, Search, MapPin, Building, CalendarDays } from "lucide-react";
 
@@ -13,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
 export default function RuimtesPage() {
+  const { t } = useTranslation("ruimtes");
   const [location, setLocation] = useLocation();
   
   // Parse URL params
@@ -57,15 +59,15 @@ export default function RuimtesPage() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Ruimtes</h1>
-        <p className="text-muted-foreground">Register van alle ruimtes binnen de organisatie.</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 bg-card p-4 rounded-lg border shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
           <Input 
-            placeholder="Zoeken op naam, code of functie..." 
+            placeholder={t("searchPlaceholder")} 
             className="pl-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -74,10 +76,10 @@ export default function RuimtesPage() {
         <div className="flex flex-wrap sm:flex-nowrap gap-2 items-center">
           <Select value={buildingId} onValueChange={(v) => { setBuildingId(v); setFloorId("all"); }}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Alle gebouwen" />
+              <SelectValue placeholder={t("allBuildings")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle gebouwen</SelectItem>
+              <SelectItem value="all">{t("allBuildings")}</SelectItem>
               {buildings.map(b => (
                 <SelectItem key={b.id} value={b.id.toString()}>{b.name}</SelectItem>
               ))}
@@ -86,10 +88,10 @@ export default function RuimtesPage() {
           
           <Select value={floorId} onValueChange={setFloorId}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Alle verdiepingen" />
+              <SelectValue placeholder={t("allFloors")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Alle verdiepingen</SelectItem>
+              <SelectItem value="all">{t("allFloors")}</SelectItem>
               {floors.map(f => (
                 <SelectItem key={f.id} value={f.id.toString()}>{f.name}</SelectItem>
               ))}
@@ -102,7 +104,7 @@ export default function RuimtesPage() {
               checked={bookableOnly}
               onCheckedChange={(c) => setBookableOnly(c === true)}
             />
-            <Label htmlFor="bookable" className="cursor-pointer">Boekbaar</Label>
+            <Label htmlFor="bookable" className="cursor-pointer">{t("bookable")}</Label>
           </div>
         </div>
       </div>
@@ -114,9 +116,9 @@ export default function RuimtesPage() {
       ) : !filteredRooms?.length ? (
         <div className="text-center py-24 bg-card rounded-lg border border-dashed flex flex-col items-center justify-center">
           <DoorOpen className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium">Geen ruimtes gevonden</h3>
+          <h3 className="text-lg font-medium">{t("empty.title")}</h3>
           <p className="text-sm text-muted-foreground max-w-sm mt-1">
-            Pas uw filters aan of controleer de zoekterm.
+            {t("empty.description")}
           </p>
         </div>
       ) : (
@@ -146,12 +148,12 @@ export default function RuimtesPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {room.areaM2} m²
+                      {t("areaM2", { area: room.areaM2 })}
                     </span>
                     {room.capacity && (
                       <span className="flex items-center gap-1">
                         <DoorOpen className="h-3.5 w-3.5" />
-                        {room.capacity} pers.
+                        {t("persons", { count: room.capacity })}
                       </span>
                     )}
                   </div>
@@ -160,15 +162,15 @@ export default function RuimtesPage() {
                 <div className="flex sm:flex-col items-center sm:items-end gap-2 sm:gap-3 flex-shrink-0 ml-auto w-full sm:w-auto">
                   {room.bookable && (
                     <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300">
-                      <CalendarDays className="mr-1 h-3 w-3" /> Boekbaar
+                      <CalendarDays className="mr-1 h-3 w-3" /> {t("bookable")}
                     </Badge>
                   )}
                   <div className="flex gap-2 text-xs">
                     {(room.openTicketCount || 0) > 0 && (
-                      <span className="text-destructive font-medium">{room.openTicketCount} melding(en)</span>
+                      <span className="text-destructive font-medium">{t("openTickets", { count: room.openTicketCount })}</span>
                     )}
                     {(room.assetCount || 0) > 0 && (
-                      <span className="text-muted-foreground">{room.assetCount} assets</span>
+                      <span className="text-muted-foreground">{t("assetCount", { count: room.assetCount })}</span>
                     )}
                   </div>
                 </div>

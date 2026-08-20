@@ -1,0 +1,63 @@
+{
+  "brand": "LetShare4gov",
+  "nav": {
+    "dashboard": "Dashboard",
+    "meldingen": "Tickets",
+    "reserveringen": "Reservations",
+    "werkplekken": "Workspaces",
+    "bezoekers": "Visitors",
+    "vastgoed": "Real estate",
+    "ruimtes": "Rooms",
+    "sleutelbeheer": "Key management",
+    "assets": "Assets",
+    "contracten": "Contracts",
+    "webshop": "Webshop",
+    "voorraad": "Inventory",
+    "duurzaamheid": "Sustainability",
+    "mjop": "Maintenance plan",
+    "catering": "Catering",
+    "kennisbank": "Knowledge base"
+  },
+  "shell": {
+    "notifications": "Notifications",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications",
+    "role": "Role",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "language": "Language",
+    "guestReadOnly": "Guest mode – read only"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Enter your credentials to access your dashboard.",
+    "email": "Email address",
+    "emailPlaceholder": "name@organisation.com",
+    "password": "Password",
+    "submit": "Sign in",
+    "failed": "Sign-in failed. Please check your details.",
+    "demo": "Demo accounts (1-click login)",
+    "tagline": "The daily cockpit for public-sector facilities.",
+    "taglineSub": "Fast, clear and reliable. Designed for government organisations to manage tickets, reservations and real estate effortlessly.",
+    "copyright": "All rights reserved.",
+    "emailInvalid": "Invalid email address",
+    "passwordRequired": "Password is required",
+    "guestLink": "Guest access"
+  },
+  "guest": {
+    "title": "Guest access",
+    "subtitle": "Enter the guest password to view LetShare4gov as a guest (read only).",
+    "password": "Guest password",
+    "submit": "View as guest",
+    "failed": "Invalid password.",
+    "backToLogin": "Back to sign in"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "search": "Search",
+    "error": "Something went wrong"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "title": "Ruimtes",
+  "subtitle": "Register van alle ruimtes binnen de organisatie.",
+  "searchPlaceholder": "Zoeken op naam, code of functie...",
+  "allBuildings": "Alle gebouwen",
+  "allFloors": "Alle verdiepingen",
+  "bookable": "Boekbaar",
+  "empty": {
+    "title": "Geen ruimtes gevonden",
+    "description": "Pas uw filters aan of controleer de zoekterm."
+  },
+  "areaM2": "{{area}} m²",
+  "persons": "{{count}} pers.",
+  "openTickets_one": "{{count}} melding",
+  "openTickets_other": "{{count}} melding(en)",
+  "assetCount": "{{count}} assets",
+  "detail": {
+    "notFound": "Ruimte niet gevonden.",
+    "bookableBadge": "Boekbaar",
+    "dossier": {
+      "title": "Ruimtedossier",
+      "edit": "Bewerken",
+      "area": "Oppervlakte",
+      "vvo": "VVO",
+      "bvo": "BVO",
+      "department": "Afdeling",
+      "capacity": "Bezetting",
+      "capacityValue": "{{count}} personen",
+      "function": "Functie",
+      "floorFinish": "Vloerafwerking",
+      "bookability": "Boekbaarheid",
+      "bookable": "Boekbaar",
+      "notBookable": "Niet boekbaar",
+      "facilities": "Faciliteiten"
+    },
+    "editDialog": {
+      "title": "Ruimtedossier bewerken",
+      "description": "Pas oppervlaktes, functie en afdeling van {{name}} aan.",
+      "area": "Oppervlakte (m²)",
+      "function": "Functie",
+      "vvo": "VVO (m²)",
+      "bvo": "BVO (m²)",
+      "department": "Afdeling",
+      "departmentPlaceholder": "Bijv. Burgerzaken",
+      "capacity": "Bezetting (personen)",
+      "capacityPlaceholder": "Bijv. 12",
+      "bookable": "Boekbaar",
+      "yes": "Ja",
+      "no": "Nee"
+    },
+    "tabs": {
+      "assets": "Assets ({{count}})",
+      "tickets": "Open meldingen ({{count}})",
+      "noAssets": "Geen assets gekoppeld aan deze ruimte.",
+      "noTickets": "Geen openstaande meldingen."
+    },
+    "reservations": {
+      "title": "Reserveringen Vandaag",
+      "empty": "Geen reserveringen voor vandaag.",
+      "toPlanboard": "Naar planbord"
+    },
+    "history": {
+      "title": "Wijzigingshistorie",
+      "description": "Herindelingen en dossierwijzigingen van deze ruimte.",
+      "empty": "Nog geen wijzigingen geregistreerd.",
+      "unknown": "Onbekend",
+      "reverted": "Teruggedraaid",
+      "undo": "Terugdraaien",
+      "emptyValue": "leeg"
+    },
+    "toast": {
+      "dossierUpdated": "Ruimtedossier bijgewerkt",
+      "roomChangedConflict": "Ruimte ondertussen gewijzigd",
+      "roomChangedConflictDesc": "Iemand anders heeft deze ruimte zojuist bewerkt. De dialoog is gesloten — open hem opnieuw om de actuele waarden te zien.",
+      "updateFailed": "Bijwerken mislukt",
+      "partialUndo": "Wijziging gedeeltelijk teruggedraaid",
+      "partialUndoDesc": "Overgeslagen (later opnieuw gewijzigd): {{fields}}.",
+      "undone": "Wijziging ongedaan gemaakt",
+      "undoFailed": "Ongedaan maken mislukt"
+    },
+    "fields": {
+      "functionType": "Functie",
+      "floorFinish": "Vloerafwerking",
+      "areaM2": "Oppervlakte (m²)",
+      "areaVvoM2": "VVO (m²)",
+      "areaBvoM2": "BVO (m²)",
+      "department": "Afdeling",
+      "capacity": "Bezetting (personen)",
+      "bookable": "Boekbaar"
+    }
+  }
+}

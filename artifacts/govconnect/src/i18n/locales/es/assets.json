@@ -1,0 +1,70 @@
+{
+  "title": "Activos",
+  "subtitle": "Gestione equipos, mobiliario e inventario.",
+  "addAsset": "Añadir activo",
+  "searchPlaceholder": "Buscar por nombre o código...",
+  "allCategories": "Todas las categorías",
+  "status": {
+    "in_gebruik": "En uso",
+    "in_onderhoud": "En mantenimiento",
+    "defect": "Averiado",
+    "afgeschreven": "Dado de baja"
+  },
+  "dialog": {
+    "title": "Registrar nuevo activo",
+    "description": "Añada un nuevo objeto al registro de patrimonio.",
+    "name": "Nombre",
+    "namePlaceholder": "Ej.: Silla de oficina ergonómica",
+    "code": "Código del activo",
+    "codePlaceholder": "Ej.: INV-2026-001",
+    "category": "Categoría",
+    "categoryPlaceholder": "Ej.: Mobiliario",
+    "status": "Estado",
+    "statusPlaceholder": "Elegir estado",
+    "brand": "Marca (opcional)",
+    "model": "Modelo (opcional)",
+    "serialNumber": "Número de serie (opcional)",
+    "location": "Ubicación (opcional)",
+    "locationPlaceholder": "Elegir sala",
+    "add": "Añadir"
+  },
+  "validation": {
+    "nameRequired": "El nombre es obligatorio",
+    "codeRequired": "El código es obligatorio",
+    "categoryRequired": "La categoría es obligatoria"
+  },
+  "toast": {
+    "added": "Activo añadido"
+  },
+  "empty": {
+    "title": "No se encontraron activos",
+    "description": "Pruebe otro término de búsqueda o ajuste los filtros."
+  },
+  "card": {
+    "notAssigned": "No asignado",
+    "openTickets_one": "{{count}} incidencia abierta",
+    "openTickets_other": "{{count}} incidencias abiertas"
+  },
+  "detail": {
+    "notFound": "Activo no encontrado.",
+    "info": {
+      "title": "Información del activo",
+      "code": "Código único",
+      "category": "Categoría",
+      "brandModel": "Marca y modelo",
+      "serialNumber": "Número de serie",
+      "location": "Ubicación",
+      "notAssigned": "No asignado",
+      "purchaseDate": "Fecha de compra"
+    },
+    "tickets": {
+      "title": "Incidencias vinculadas",
+      "newTicket": "Nueva incidencia",
+      "empty": "No se encontraron incidencias para este activo."
+    },
+    "actions": {
+      "title": "Acciones",
+      "reportFault": "Notificar avería"
+    }
+  }
+}

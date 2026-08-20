@@ -1,0 +1,23 @@
+{
+  "title": "Werkplekken",
+  "subtitle": "Boek een flexplek op kantoor.",
+  "colleagueSearchPlaceholder": "Zoek collega op naam...",
+  "noColleagueFound": "Geen werkplek gevonden",
+  "colleagueFound_one": "{{count}} werkplek gevonden",
+  "colleagueFound_other": "{{count}} werkplekken gevonden",
+  "bookedIn": "Ingeboekt",
+  "chooseDate": "Kies datum",
+  "allFloors": "Alle verdiepingen",
+  "emptyTitle": "Geen werkplekken gevonden",
+  "emptyDesc": "Probeer een andere verdieping of datum.",
+  "available_one": "{{count}} beschikbaar",
+  "available_other": "{{count}} beschikbaar",
+  "bookedBy": "Geboekt door:",
+  "workplaceTitle": "Werkplek {{name}}",
+  "toastBookedTitle": "Werkplek geboekt",
+  "toastBookedDesc": "Voor {{date}}",
+  "toastConflictTitle": "Conflict",
+  "toastConflictDesc": "Deze werkplek is inmiddels al geboekt.",
+  "toastErrorTitle": "Fout",
+  "toastErrorDesc": "Kon werkplek niet boeken."
+}

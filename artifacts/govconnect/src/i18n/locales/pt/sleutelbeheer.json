@@ -1,0 +1,145 @@
+{
+  "title": "Gestão de chaves e cartões",
+  "subtitle": "Registo, plano de chaves, entrega e procedimento de perda.",
+  "newKey": "Nova chave ou cartão",
+  "stats": {
+    "inRegister": "No registo",
+    "issued": "Entregues",
+    "overdue": "Devolvidas com atraso"
+  },
+  "searchPlaceholder": "Procurar por código, descrição ou titular...",
+  "filters": {
+    "allTypes": "Todos os tipos",
+    "keys": "Chaves",
+    "passes": "Cartões",
+    "allStatuses": "Todos os estados",
+    "overdueBadge": "Atrasado"
+  },
+  "type": {
+    "sleutel": "Chave",
+    "pas": "Cartão"
+  },
+  "status": {
+    "beschikbaar": "Disponível",
+    "uitgegeven": "Entregue",
+    "vermist": "Perdida",
+    "geblokkeerd": "Bloqueada"
+  },
+  "table": {
+    "code": "Código",
+    "type": "Tipo",
+    "description": "Descrição",
+    "building": "Edifício",
+    "doors": "Portas",
+    "status": "Estado",
+    "currentHolder": "Titular atual",
+    "dueBy": "Devolver até",
+    "empty": "Nenhuma chave encontrada.",
+    "overdue": "atrasado"
+  },
+  "newDialog": {
+    "title": "Registar nova chave ou cartão",
+    "description": "Adicione uma chave ou cartão de acesso ao registo.",
+    "code": "Código",
+    "codePlaceholder": "Ex.: SL-005",
+    "type": "Tipo",
+    "descriptionLabel": "Descrição",
+    "descriptionPlaceholder": "Ex.: Chave da sala de arquivo",
+    "building": "Edifício",
+    "none": "Nenhum / N/A",
+    "replacementCost": "Custo de substituição (€)",
+    "add": "Adicionar"
+  },
+  "toast": {
+    "codeDescRequired": "Introduza o código e a descrição",
+    "added": "Chave adicionada",
+    "addFailed": "Falha ao adicionar"
+  },
+  "detail": {
+    "notFound": "Chave não encontrada.",
+    "replacementCostLabel": "Custo de substituição {{cost}}",
+    "issue": "Entregar",
+    "block": "Bloquear",
+    "takeBack": "Recolher",
+    "makeAvailable": "Tornar disponível novamente",
+    "reportLost": "Comunicar perda",
+    "actionFailed": "Ação falhou",
+    "issueDialog": {
+      "title": "Entregar chave",
+      "description": "Registe a quem {{code}} é entregue.",
+      "employee": "Colaborador",
+      "employeePlaceholder": "Escolher colaborador",
+      "dueDate": "Data de devolução (opcional)",
+      "dueDateHint": "Ex.: para cartões de visitante ou chaves temporárias.",
+      "note": "Nota (opcional)",
+      "confirm": "Entregar"
+    },
+    "lossDialog": {
+      "title": "Iniciar procedimento de perda",
+      "description": "A chave é registada como perdida, é criado automaticamente um pedido ao service desk e os custos são debitados{{holder}}.",
+      "descriptionHolder": " a {{name}}",
+      "charge": "Débito de custos (€)",
+      "chargeHint": "Deixar vazio = custo de substituição do registo.",
+      "note": "Observação",
+      "confirm": "Comunicar perda"
+    },
+    "toast": {
+      "issued": "Chave entregue",
+      "blocked": "Chave bloqueada",
+      "returned": "Chave recolhida",
+      "available": "Chave novamente disponível",
+      "lossStarted": "Procedimento de perda iniciado",
+      "lossStartedDesc": "Foi criado um pedido ao service desk.",
+      "dueUpdated": "Data de devolução atualizada",
+      "doorAdded": "Porta adicionada",
+      "doorRemoved": "Porta removida"
+    },
+    "issuedBanner": {
+      "issuedTo": "Entregue a ",
+      "since": " desde {{date}}",
+      "overdue": "• Data de devolução ultrapassada:",
+      "dueBy": "• Devolver até:",
+      "overdueBadge": "atrasado",
+      "editDueDate": "Alterar data de devolução"
+    },
+    "dueDialog": {
+      "title": "Alterar data de devolução",
+      "description": "Ajuste a data de devolução para {{name}}. Deixe vazio para remover a data.",
+      "label": "Data de devolução",
+      "hint": "Deixe vazio para remover a data de devolução."
+    },
+    "keyPlan": {
+      "title": "Plano de chaves",
+      "description": "Portas e canhões que esta {{type}} abre.",
+      "addDoor": "Porta",
+      "empty": "Ainda sem portas associadas.",
+      "doorDialog": {
+        "title": "Adicionar porta ao plano de chaves",
+        "description": "Descrição",
+        "descriptionPlaceholder": "Ex.: Canhão C-06, porta de arquivo",
+        "room": "Sala (opcional)",
+        "none": "Nenhuma / N/A",
+        "add": "Adicionar"
+      }
+    },
+    "issueHistory": {
+      "title": "Histórico de entregas",
+      "description": "Quem usou ou está a usar esta {{type}}.",
+      "empty": "Ainda não entregue.",
+      "unknown": "Desconhecido",
+      "returned": "Recolhida",
+      "inUse": "Em uso",
+      "issuedBy": "• entregue por {{name}}",
+      "dueBy": "• devolver até {{date}}",
+      "overdue": " ⚠ atrasado"
+    },
+    "lossReports": {
+      "title": "Comunicações de perda",
+      "reportedOn": "Comunicado em {{date}}",
+      "lastHolder": "• último titular: ",
+      "reportedBy": "Comunicado por {{name}}. ",
+      "viewTicket": "Ver pedido {{number}}"
+    },
+    "createdOn": "Criado em {{date}}."
+  }
+}

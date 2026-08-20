@@ -1,0 +1,133 @@
+{
+  "title": "Sostenibilidad",
+  "subtitle": "Consumo de electricidad, gas y agua, además del registro de residuos e informes.",
+  "importCsv": "Importar CSV",
+  "meterType": {
+    "elektriciteit": "Electricidad",
+    "gas": "Gas",
+    "water": "Agua"
+  },
+  "wasteCategory": {
+    "restafval": "Residuos generales",
+    "papier": "Papel",
+    "gft": "Residuos orgánicos",
+    "plastic": "Plástico",
+    "glas": "Vidrio",
+    "chemisch": "Químico"
+  },
+  "tabs": {
+    "report": "Informe",
+    "meters": "Lecturas de contador",
+    "waste": "Registro de residuos"
+  },
+  "filter": {
+    "label": "Filtrar por",
+    "building": "Edificio",
+    "allBuildings": "Todos los edificios",
+    "from": "Desde",
+    "to": "Hasta",
+    "clear": "Borrar filtros",
+    "exportCsv": "Exportar CSV",
+    "exportEmptyTitle": "No hay datos para exportar con los filtros seleccionados",
+    "quarter": "Trimestre:",
+    "badgeBuilding": "Edificio: {{value}}",
+    "badgeFrom": "Desde: {{value}}",
+    "badgeTo": "Hasta: {{value}}"
+  },
+  "empty": {
+    "title": "Sin datos para este edificio y periodo",
+    "hintPrefix": "Ajusta los filtros o ",
+    "hintLink": "borra todos los filtros",
+    "hintSuffix": " para mostrar todos los datos disponibles."
+  },
+  "charts": {
+    "monthlyUsage": "Consumo mensual",
+    "monthlyUsageDescription": "Electricidad (kWh), gas y agua (m³) — todos los edificios",
+    "electricity": "Electricidad (kWh)",
+    "gas": "Gas (m³)",
+    "water": "Agua (m³)",
+    "wasteByCategory": "Residuos por categoría",
+    "wasteByCategoryDescription": "Peso total registrado (kg)",
+    "wasteByMonth": "Residuos por mes",
+    "wasteByMonthDescription": "Peso por categoría por mes (kg)"
+  },
+  "meters": {
+    "csvFormat": "Formato CSV:",
+    "csvExample": "— p. ej.",
+    "addReading": "Introducir lectura",
+    "registerTitle": "Registrar lectura de contador",
+    "registerDescription": "Introduce la lectura acumulada del contador.",
+    "building": "Edificio",
+    "buildingPlaceholder": "Elegir edificio",
+    "type": "Tipo de contador",
+    "typePlaceholder": "Elegir tipo",
+    "date": "Fecha",
+    "reading": "Lectura",
+    "readingWithUnit": "Lectura ({{unit}})",
+    "correctTitle": "Corregir lectura de contador",
+    "deleteTitle": "¿Eliminar lectura de contador?",
+    "deleteBody": "La lectura de {{value}} {{unit}} del {{date}} para {{building}} se eliminará permanentemente. Los cálculos de consumo se recalcularán de inmediato.",
+    "table": {
+      "date": "Fecha",
+      "building": "Edificio",
+      "type": "Tipo",
+      "reading": "Lectura",
+      "source": "Origen",
+      "registeredBy": "Registrado por"
+    },
+    "source": {
+      "csvImport": "Importación CSV",
+      "manual": "Manual"
+    }
+  },
+  "waste": {
+    "add": "Registrar residuos",
+    "title": "Registro de residuos",
+    "description": "Registra los residuos recogidos por categoría.",
+    "building": "Edificio",
+    "buildingPlaceholder": "Elegir edificio",
+    "category": "Categoría",
+    "categoryPlaceholder": "Elegir categoría",
+    "date": "Fecha",
+    "weight": "Peso (kg)",
+    "correctTitle": "Corregir registro de residuos",
+    "deleteTitle": "¿Eliminar registro de residuos?",
+    "deleteBody": "{{weight}} kg de {{category}} del {{date}} para {{building}} se eliminará permanentemente. Los informes y las exportaciones se recalcularán de inmediato.",
+    "table": {
+      "date": "Fecha",
+      "building": "Edificio",
+      "category": "Categoría",
+      "weight": "Peso",
+      "registeredBy": "Registrado por"
+    }
+  },
+  "actions": {
+    "correct": "Corregir",
+    "delete": "Eliminar"
+  },
+  "validation": {
+    "buildingRequired": "Elige un edificio",
+    "meterTypeRequired": "Elige un tipo de contador",
+    "dateRequired": "La fecha es obligatoria",
+    "readingRequired": "La lectura es obligatoria",
+    "categoryRequired": "Elige una categoría",
+    "weightRequired": "El peso es obligatorio"
+  },
+  "toast": {
+    "invalidCsvTitle": "Formato CSV no válido",
+    "invalidCsvDescription": "Columnas esperadas: gebouw;type;datum;stand (fecha como AAAA-MM-DD).",
+    "noValidRows": "No se encontraron filas válidas en el archivo CSV",
+    "importDone": "Importación CSV completada",
+    "importUnmatched": "{{message}} ({{count}} filas no reconocidas)",
+    "importFailed": "Error en la importación",
+    "wasteCorrected": "Registro de residuos corregido",
+    "correctFailed": "Error en la corrección",
+    "wasteDeleted": "Registro de residuos eliminado",
+    "deleteFailed": "Error al eliminar",
+    "readingCorrected": "Lectura de contador corregida",
+    "readingDeleted": "Lectura de contador eliminada",
+    "readingRegistered": "Lectura de contador registrada",
+    "saveFailed": "Error al guardar",
+    "wasteSaved": "Registro de residuos guardado"
+  }
+}
