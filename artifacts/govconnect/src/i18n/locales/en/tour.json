@@ -1,0 +1,35 @@
+{
+  "aria": "Product tour",
+  "close": "Close tour",
+  "skip": "Skip",
+  "back": "Back",
+  "next": "Next",
+  "done": "Done",
+  "restart": "View the tour",
+  "steps": {
+    "welcome": {
+      "title": "Welcome to LetShare4gov",
+      "body": "This is your facility workspace: tickets, reservations, real estate, maintenance and more in one place. In half a minute we'll show you the essentials."
+    },
+    "navigation": {
+      "title": "All modules at a glance",
+      "body": "Use the menu on the left to move between modules. What you see depends on your role — a service desk agent gets different tools than a caterer or administrator."
+    },
+    "content": {
+      "title": "Your working area",
+      "body": "The content of the selected module appears here: overviews, detail pages and forms. The dashboard shows today's status at a glance."
+    },
+    "language": {
+      "title": "Pick your language",
+      "body": "The entire application is available in six languages. Switch at any time using this button."
+    },
+    "notifications": {
+      "title": "Notifications",
+      "body": "Find updates about your tickets, reservations and tasks here, so you never miss a thing."
+    },
+    "finish": {
+      "title": "Ready to explore",
+      "body": "Feel free to click around — as a guest you can view everything without changing anything. You can restart this tour any time from the profile menu in the bottom left."
+    }
+  }
+}

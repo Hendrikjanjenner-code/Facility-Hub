@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/site/"
+title = "LetShare4gov Marketing"
+description = "Public marketing website for LetShare4gov, a facility-management platform for (semi-)government organizations. Shows all product modules with explanations and screenshots, target roles, a live guest-demo call-to-action, and a contact/interest form. Available in 6 languages (Dutch default)."
+version = "1.0.0"
+id = "artifacts/site"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/site/" ]
+localPort = 21238
+
+[services.development]
+run = "pnpm --filter @workspace/site run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/site", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/site/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21238"
+BASE_PATH = "/site/"

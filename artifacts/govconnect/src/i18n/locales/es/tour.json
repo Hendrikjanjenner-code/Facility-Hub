@@ -1,0 +1,35 @@
+{
+  "aria": "Visita guiada",
+  "close": "Cerrar la visita",
+  "skip": "Omitir",
+  "back": "Atrás",
+  "next": "Siguiente",
+  "done": "Finalizar",
+  "restart": "Ver la visita guiada",
+  "steps": {
+    "welcome": {
+      "title": "Bienvenido a LetShare4gov",
+      "body": "Este es su espacio de gestión de instalaciones: incidencias, reservas, inmuebles, mantenimiento y mucho más en un solo lugar. En medio minuto le mostramos lo esencial."
+    },
+    "navigation": {
+      "title": "Todos los módulos de un vistazo",
+      "body": "Use el menú de la izquierda para moverse entre los módulos. Lo que ve depende de su rol: un agente de service desk tiene herramientas distintas a las de un responsable de catering o un administrador."
+    },
+    "content": {
+      "title": "Su área de trabajo",
+      "body": "Aquí aparece el contenido del módulo seleccionado: resúmenes, páginas de detalle y formularios. El panel muestra de inmediato el estado de hoy."
+    },
+    "language": {
+      "title": "Elija su idioma",
+      "body": "Toda la aplicación está disponible en seis idiomas. Cambie en cualquier momento con este botón."
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "body": "Aquí encontrará novedades sobre sus incidencias, reservas y tareas, para que no se le escape nada."
+    },
+    "finish": {
+      "title": "Listo para explorar",
+      "body": "Explore con libertad: como invitado puede verlo todo sin cambiar nada. Puede reiniciar esta visita en cualquier momento desde el menú de perfil, abajo a la izquierda."
+    }
+  }
+}

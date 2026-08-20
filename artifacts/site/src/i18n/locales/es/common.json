@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "modules": "Módulos",
+    "roles": "Roles",
+    "contact": "Contacto",
+    "demo": "Ver demo"
+  },
+  "hero": {
+    "title": "El ayuntamiento digital para sus edificios, personas y recursos",
+    "subtitle": "Un espacio de trabajo tranquilo para la gestión de instalaciones, diseñado para municipios y organizaciones públicas.",
+    "cta": "Ver demo en vivo",
+    "contact": "Contáctenos"
+  },
+  "modules": {
+    "title": "Todo en un solo lugar",
+    "subtitle": "Adiós a las hojas de cálculo. Desde los tickets hasta la sostenibilidad.",
+    "items": {
+      "dashboard": {
+        "title": "Dashboard",
+        "desc": "Visión en tiempo real de operaciones."
+      },
+      "meldingen": {
+        "title": "Tickets",
+        "desc": "Gestión eficiente de tickets e incidencias."
+      },
+      "reserveringen": {
+        "title": "Reservas",
+        "desc": "Reserva fácil de salas y catering."
+      },
+      "werkplekken": {
+        "title": "Puestos",
+        "desc": "Busque y reserve espacios flexibles."
+      },
+      "bezoekers": {
+        "title": "Visitantes",
+        "desc": "Registro profesional de visitantes."
+      },
+      "vastgoed": {
+        "title": "Inmuebles",
+        "desc": "Visión completa de edificios y plantas."
+      },
+      "ruimtes": {
+        "title": "Salas",
+        "desc": "Planos detallados y gestión de espacios."
+      },
+      "assets": {
+        "title": "Activos",
+        "desc": "Todos sus equipos registrados."
+      },
+      "contracten": {
+        "title": "Contratos",
+        "desc": "Gestión de contratos y proveedores."
+      },
+      "webshop": {
+        "title": "Tienda",
+        "desc": "Pedidos internos e inventario."
+      },
+      "duurzaamheid": {
+        "title": "Sostenibilidad",
+        "desc": "Informes de residuos y energía."
+      },
+      "mjop": {
+        "title": "Mantenimiento",
+        "desc": "Planes a largo plazo y evaluaciones."
+      },
+      "kennisbank": {
+        "title": "Base de datos",
+        "desc": "Protocolos e información accesibles."
+      },
+      "sleutelbeheer": {
+        "title": "Llaves",
+        "desc": "Gestión y registro de llaves y pases."
+      }
+    }
+  },
+  "roles": {
+    "title": "Hecho para todos",
+    "subtitle": "Cada rol tiene necesidades específicas. LetShare4gov se adapta.",
+    "items": {
+      "eindgebruiker": {
+        "title": "Usuario final",
+        "desc": "Crear tickets y reservar de forma sencilla."
+      },
+      "servicedesk": {
+        "title": "Service Desk",
+        "desc": "Gestión clara de solicitudes."
+      },
+      "facilitair_manager": {
+        "title": "Facility Manager",
+        "desc": "Decisiones basadas en datos y planificación."
+      },
+      "cateraar": {
+        "title": "Catering",
+        "desc": "Visión directa de pedidos diarios."
+      },
+      "receptie": {
+        "title": "Recepción",
+        "desc": "Reciba visitantes y mantenga el control."
+      },
+      "beheerder": {
+        "title": "Administrador",
+        "desc": "Control total del sistema y permisos."
+      },
+      "leverancier": {
+        "title": "Proveedor",
+        "desc": "Portal propio para tareas y documentos."
+      }
+    }
+  },
+  "contact": {
+    "title": "¿Listo para el siguiente paso?",
+    "subtitle": "Deje sus datos y descubra qué podemos hacer por su municipio.",
+    "form": {
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "organization": "Organización (opcional)",
+      "message": "Mensaje",
+      "submit": "Enviar solicitud",
+      "submitting": "Enviando...",
+      "successTitle": "Solicitud enviada con éxito",
+      "successDesc": "Gracias por su interés. Le contactaremos en breve.",
+      "error": "Se produjo un error al enviar.",
+      "required": "Campo obligatorio",
+      "invalidEmail": "Dirección de correo no válida",
+      "newRequest": "Nueva solicitud"
+    }
+  },
+  "footer": {
+    "rights": "© {{year}} LetShare4gov. Todos los derechos reservados."
+  }
+}

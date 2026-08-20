@@ -1,0 +1,35 @@
+{
+  "aria": "Ürün turu",
+  "close": "Turu kapat",
+  "skip": "Atla",
+  "back": "Geri",
+  "next": "İleri",
+  "done": "Bitir",
+  "restart": "Turu izle",
+  "steps": {
+    "welcome": {
+      "title": "LetShare4gov'a hoş geldiniz",
+      "body": "Burası tesis yönetimi çalışma alanınız: bildirimler, rezervasyonlar, gayrimenkul, bakım ve daha fazlası tek bir yerde. Yarım dakikada size en önemli bölümleri gösterelim."
+    },
+    "navigation": {
+      "title": "Tüm modüller bir arada",
+      "body": "Modüller arasında geçiş yapmak için soldaki menüyü kullanın. Gördükleriniz rolünüze bağlıdır — bir servis masası çalışanı, bir ikram sorumlusu veya yöneticiden farklı araçlar görür."
+    },
+    "content": {
+      "title": "Çalışma alanınız",
+      "body": "Seçilen modülün içeriği burada görünür: genel bakışlar, detay sayfaları ve formlar. Gösterge paneli bugünün durumunu anında gösterir."
+    },
+    "language": {
+      "title": "Dilinizi seçin",
+      "body": "Uygulamanın tamamı altı dilde kullanılabilir. Bu düğmeyle istediğiniz zaman geçiş yapabilirsiniz."
+    },
+    "notifications": {
+      "title": "Bildirimler",
+      "body": "Bildirimleriniz, rezervasyonlarınız ve görevlerinizle ilgili güncellemeleri burada bulursunuz; böylece hiçbir şeyi kaçırmazsınız."
+    },
+    "finish": {
+      "title": "Keşfetmeye hazırsınız",
+      "body": "Rahatça gezinin — konuk olarak her şeyi değiştirmeden görüntüleyebilirsiniz. Bu turu istediğiniz zaman sol alttaki profil menüsünden yeniden başlatabilirsiniz."
+    }
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "modules": "Modules",
+    "roles": "Roles",
+    "contact": "Contact",
+    "demo": "View live demo"
+  },
+  "hero": {
+    "title": "The digital town hall for your buildings, people, and resources",
+    "subtitle": "One calm workspace for facility management, designed for municipalities and public organizations. Replace fragmented tools with clarity and confidence.",
+    "cta": "View live demo",
+    "contact": "Get in touch"
+  },
+  "modules": {
+    "title": "Everything in one overview",
+    "subtitle": "No more spreadsheets. From tickets to sustainability, all facility processes come together in LetShare4gov.",
+    "items": {
+      "dashboard": {
+        "title": "Dashboard",
+        "desc": "Real-time insights into all operational matters."
+      },
+      "meldingen": {
+        "title": "Tickets",
+        "desc": "Efficient management of tickets and faults."
+      },
+      "reserveringen": {
+        "title": "Reservations",
+        "desc": "Easily book meeting rooms and catering."
+      },
+      "werkplekken": {
+        "title": "Workplaces",
+        "desc": "Find and book flexible workspaces."
+      },
+      "bezoekers": {
+        "title": "Visitors",
+        "desc": "Professional and welcoming visitor registration."
+      },
+      "vastgoed": {
+        "title": "Real Estate",
+        "desc": "Complete overview of buildings and floors."
+      },
+      "ruimtes": {
+        "title": "Rooms",
+        "desc": "Detailed floor plans and room management."
+      },
+      "assets": {
+        "title": "Assets",
+        "desc": "All your equipment and resources registered."
+      },
+      "contracten": {
+        "title": "Contracts",
+        "desc": "Manage contracts and suppliers with notifications."
+      },
+      "webshop": {
+        "title": "Webshop",
+        "desc": "Internal orders and inventory management."
+      },
+      "duurzaamheid": {
+        "title": "Sustainability",
+        "desc": "Reports for waste and energy consumption."
+      },
+      "mjop": {
+        "title": "LTMP",
+        "desc": "Long-term maintenance plans and condition assessments."
+      },
+      "kennisbank": {
+        "title": "Knowledge Base",
+        "desc": "Information and protocols instantly accessible."
+      },
+      "sleutelbeheer": {
+        "title": "Key Management",
+        "desc": "Issuance and registration of keys and passes."
+      }
+    }
+  },
+  "roles": {
+    "title": "Built for everyone in your organization",
+    "subtitle": "Every role has specific needs. LetShare4gov adapts to the user.",
+    "items": {
+      "eindgebruiker": {
+        "title": "End User",
+        "desc": "Create tickets and book workspaces through a simple portal."
+      },
+      "servicedesk": {
+        "title": "Service Desk",
+        "desc": "Clear handling of all facility requests."
+      },
+      "facilitair_manager": {
+        "title": "Facility Manager",
+        "desc": "Data-driven steering, contract management, and long-term planning."
+      },
+      "cateraar": {
+        "title": "Caterer",
+        "desc": "Direct insight into daily reservations and orders."
+      },
+      "receptie": {
+        "title": "Reception",
+        "desc": "Warmly welcome visitors and maintain overview."
+      },
+      "beheerder": {
+        "title": "Administrator",
+        "desc": "Full control over system settings and permissions."
+      },
+      "leverancier": {
+        "title": "Supplier",
+        "desc": "Dedicated portal for assignments and documentation."
+      }
+    }
+  },
+  "contact": {
+    "title": "Ready for the next step?",
+    "subtitle": "Leave your details and discover what LetShare4gov can do for your municipality.",
+    "form": {
+      "name": "Name",
+      "email": "Email Address",
+      "organization": "Organization (optional)",
+      "message": "Message",
+      "submit": "Submit Request",
+      "submitting": "Submitting...",
+      "successTitle": "Request sent successfully",
+      "successDesc": "Thank you for your interest. We will contact you shortly.",
+      "error": "An error occurred while sending.",
+      "required": "Required field",
+      "invalidEmail": "Invalid email address",
+      "newRequest": "New request"
+    }
+  },
+  "footer": {
+    "rights": "© {{year}} LetShare4gov. All rights reserved."
+  }
+}

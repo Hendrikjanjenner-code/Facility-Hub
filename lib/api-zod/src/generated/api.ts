@@ -82,6 +82,45 @@ export const GetCurrentUserResponse = zod.object({
 
 
 /**
+ * @summary Submit a contact/interest request from the marketing site (public)
+ */
+export const createContactRequestBodyNameMax = 200;
+
+export const createContactRequestBodyEmailMax = 320;
+
+export const createContactRequestBodyOrganizationMax = 200;
+
+export const createContactRequestBodyMessageMax = 5000;
+
+
+
+export const CreateContactRequestBody = zod.object({
+  "name": zod.string().min(1).max(createContactRequestBodyNameMax),
+  "email": zod.email().max(createContactRequestBodyEmailMax),
+  "organization": zod.string().max(createContactRequestBodyOrganizationMax).optional(),
+  "message": zod.string().min(1).max(createContactRequestBodyMessageMax)
+})
+
+export const CreateContactRequestResponse = zod.object({
+  "message": zod.string()
+})
+
+
+/**
+ * @summary List contact requests (beheerder/facilitair manager only)
+ */
+export const ListContactRequestsResponseItem = zod.object({
+  "id": zod.int(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "organization": zod.string().nullish(),
+  "message": zod.string(),
+  "createdAt": zod.string()
+})
+export const ListContactRequestsResponse = zod.array(ListContactRequestsResponseItem)
+
+
+/**
  * @summary Update notification preferences for the current user
  */
 export const UpdateMyPreferencesBody = zod.object({

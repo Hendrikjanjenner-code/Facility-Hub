@@ -1,0 +1,35 @@
+{
+  "aria": "Tour del prodotto",
+  "close": "Chiudi il tour",
+  "skip": "Salta",
+  "back": "Indietro",
+  "next": "Avanti",
+  "done": "Fine",
+  "restart": "Guarda il tour",
+  "steps": {
+    "welcome": {
+      "title": "Benvenuto in LetShare4gov",
+      "body": "Questo è il suo spazio di facility management: segnalazioni, prenotazioni, immobili, manutenzione e molto altro in un unico posto. In mezzo minuto le mostriamo l'essenziale."
+    },
+    "navigation": {
+      "title": "Tutti i moduli a colpo d'occhio",
+      "body": "Usi il menu a sinistra per passare da un modulo all'altro. Ciò che vede dipende dal suo ruolo: un operatore del service desk ha strumenti diversi da un addetto catering o da un amministratore."
+    },
+    "content": {
+      "title": "La sua area di lavoro",
+      "body": "Qui compare il contenuto del modulo selezionato: panoramiche, pagine di dettaglio e moduli. La dashboard mostra subito lo stato di oggi."
+    },
+    "language": {
+      "title": "Scelga la sua lingua",
+      "body": "L'intera applicazione è disponibile in sei lingue. Può cambiare in qualsiasi momento con questo pulsante."
+    },
+    "notifications": {
+      "title": "Notifiche",
+      "body": "Qui trova gli aggiornamenti su segnalazioni, prenotazioni e attività, così non si perde nulla."
+    },
+    "finish": {
+      "title": "Pronto a esplorare",
+      "body": "Esplori liberamente: come ospite può vedere tutto senza modificare nulla. Può riavviare questo tour in qualsiasi momento dal menu del profilo, in basso a sinistra."
+    }
+  }
+}

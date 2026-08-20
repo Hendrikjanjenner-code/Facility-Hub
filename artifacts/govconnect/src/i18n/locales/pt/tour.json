@@ -1,0 +1,35 @@
+{
+  "aria": "Apresentação do produto",
+  "close": "Fechar apresentação",
+  "skip": "Ignorar",
+  "back": "Anterior",
+  "next": "Seguinte",
+  "done": "Concluir",
+  "restart": "Ver a apresentação",
+  "steps": {
+    "welcome": {
+      "title": "Bem-vindo ao LetShare4gov",
+      "body": "Este é o seu espaço de gestão de instalações: ocorrências, reservas, imóveis, manutenção e muito mais num só lugar. Em meio minuto mostramos-lhe o essencial."
+    },
+    "navigation": {
+      "title": "Todos os módulos num relance",
+      "body": "Use o menu à esquerda para navegar entre os módulos. O que vê depende da sua função — um agente de service desk tem ferramentas diferentes de um responsável de catering ou administrador."
+    },
+    "content": {
+      "title": "A sua área de trabalho",
+      "body": "O conteúdo do módulo selecionado aparece aqui: vistas gerais, páginas de detalhe e formulários. O painel mostra de imediato o estado de hoje."
+    },
+    "language": {
+      "title": "Escolha o seu idioma",
+      "body": "Toda a aplicação está disponível em seis idiomas. Mude a qualquer momento com este botão."
+    },
+    "notifications": {
+      "title": "Notificações",
+      "body": "Encontre aqui as atualizações sobre as suas ocorrências, reservas e tarefas, para não perder nada."
+    },
+    "finish": {
+      "title": "Pronto para explorar",
+      "body": "Explore à vontade — como convidado pode ver tudo sem alterar nada. Pode reiniciar esta apresentação a qualquer momento no menu de perfil, em baixo à esquerda."
+    }
+  }
+}

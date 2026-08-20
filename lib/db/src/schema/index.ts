@@ -13,3 +13,4 @@ export * from "./knowledge";
 export * from "./keys";
 export * from "./user-preferences";
 export * from "./email-queue";
+export * from "./contact-requests";

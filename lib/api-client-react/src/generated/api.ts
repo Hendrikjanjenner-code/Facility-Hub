@@ -37,6 +37,8 @@ import type {
   CateringItem,
   Conditiemeting,
   ConditiemetingInput,
+  ContactRequest,
+  ContactRequestInput,
   Contract,
   ContractDocument,
   ContractDocumentInput,
@@ -516,6 +518,154 @@ export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUs
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetCurrentUserQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateContactRequestUrl = () => {
+
+
+
+
+  return `/api/contact-requests`
+}
+
+/**
+ * @summary Submit a contact/interest request from the marketing site (public)
+ */
+export const createContactRequest = async (contactRequestInput: ContactRequestInput, options?: Parameters<typeof customFetch>[1]): Promise<ApiMessage> => {
+
+  return customFetch<ApiMessage>(getCreateContactRequestUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(contactRequestInput)
+  }
+);}
+
+
+
+
+
+export const getCreateContactRequestMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createContactRequest>>, TError,{data: BodyType<ContactRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createContactRequest>>, TError,{data: BodyType<ContactRequestInput>}, TContext> => {
+
+const mutationKey = ['createContactRequest'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createContactRequest>>, {data: BodyType<ContactRequestInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createContactRequest(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateContactRequestMutationResult = NonNullable<Awaited<ReturnType<typeof createContactRequest>>>
+    export type CreateContactRequestMutationBody = BodyType<ContactRequestInput>
+    export type CreateContactRequestMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Submit a contact/interest request from the marketing site (public)
+ */
+export const useCreateContactRequest = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createContactRequest>>, TError,{data: BodyType<ContactRequestInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createContactRequest>>,
+        TError,
+        {data: BodyType<ContactRequestInput>},
+        TContext
+      > => {
+      return useMutation(getCreateContactRequestMutationOptions(options));
+    }
+
+export const getListContactRequestsUrl = () => {
+
+
+
+
+  return `/api/contact-requests`
+}
+
+/**
+ * @summary List contact requests (beheerder/facilitair manager only)
+ */
+export const listContactRequests = async ( options?: Parameters<typeof customFetch>[1]): Promise<ContactRequest[]> => {
+
+  return customFetch<ContactRequest[]>(getListContactRequestsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListContactRequestsQueryKey = () => {
+    return [
+    `/api/contact-requests`
+    ] as const;
+    }
+
+
+export const getListContactRequestsQueryOptions = <TData = Awaited<ReturnType<typeof listContactRequests>>, TError = ErrorType<ApiMessage>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listContactRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListContactRequestsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listContactRequests>>> = ({ signal }) => listContactRequests({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listContactRequests>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListContactRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof listContactRequests>>>
+export type ListContactRequestsQueryError = ErrorType<ApiMessage>
+
+
+/**
+ * @summary List contact requests (beheerder/facilitair manager only)
+ */
+
+export function useListContactRequests<TData = Awaited<ReturnType<typeof listContactRequests>>, TError = ErrorType<ApiMessage>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listContactRequests>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListContactRequestsQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

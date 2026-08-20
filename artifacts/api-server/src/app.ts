@@ -54,7 +54,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", (req, res, next) => {
   const isGuest = req.signedCookies?.["gc_guest"] === "1";
   const isWrite = !["GET", "HEAD", "OPTIONS"].includes(req.method);
-  const allowedForGuest = ["/auth/logout", "/auth/login", "/auth/guest-login"];
+  const allowedForGuest = [
+    "/auth/logout",
+    "/auth/login",
+    "/auth/guest-login",
+    // Publiek contactformulier van de marketingsite mag ook tijdens een gastsessie.
+    "/contact-requests",
+  ];
   if (isGuest && isWrite && !allowedForGuest.includes(req.path)) {
     res.status(403).json({ message: "Gasttoegang is alleen-lezen" });
     return;

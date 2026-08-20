@@ -26,6 +26,33 @@ export interface GuestLoginInput {
   password: string;
 }
 
+export interface ContactRequestInput {
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  name: string;
+  /** @maxLength 320 */
+  email: string;
+  /** @maxLength 200 */
+  organization?: string;
+  /**
+     * @minLength 1
+     * @maxLength 5000
+     */
+  message: string;
+}
+
+export interface ContactRequest {
+  id: number;
+  name: string;
+  email: string;
+  /** @nullable */
+  organization?: string | null;
+  message: string;
+  createdAt: string;
+}
+
 export interface DemoAccount {
   email: string;
   name: string;

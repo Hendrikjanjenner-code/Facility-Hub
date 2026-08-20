@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "modules": "Modüller",
+    "roles": "Roller",
+    "contact": "İletişim",
+    "demo": "Demoyu izle"
+  },
+  "hero": {
+    "title": "Binalarınız, insanlar ve kaynaklar için dijital belediye binası",
+    "subtitle": "Belediyeler ve kamu kurumları için tasarlanmış, tesis yönetimi için sakin bir çalışma alanı.",
+    "cta": "Canlı demoyu izle",
+    "contact": "Bize ulaşın"
+  },
+  "modules": {
+    "title": "Her şey tek bir görünümde",
+    "subtitle": "Artık elektronik tablolara son. Taleplerden sürdürülebilirliğe kadar tüm süreçler bir arada.",
+    "items": {
+      "dashboard": {
+        "title": "Kontrol Paneli",
+        "desc": "Operasyonel konulara gerçek zamanlı bakış."
+      },
+      "meldingen": {
+        "title": "Talepler",
+        "desc": "Taleplerin ve arızaların verimli yönetimi."
+      },
+      "reserveringen": {
+        "title": "Rezervasyonlar",
+        "desc": "Toplantı odalarını ve yeme-içme hizmetlerini kolayca ayırtın."
+      },
+      "werkplekken": {
+        "title": "Çalışma Alanları",
+        "desc": "Esnek çalışma alanları bulun ve ayırtın."
+      },
+      "bezoekers": {
+        "title": "Ziyaretçiler",
+        "desc": "Profesyonel ziyaretçi kaydı."
+      },
+      "vastgoed": {
+        "title": "Gayrimenkul",
+        "desc": "Binalar ve katların tam görünümü."
+      },
+      "ruimtes": {
+        "title": "Odalar",
+        "desc": "Detaylı kat planları ve oda yönetimi."
+      },
+      "assets": {
+        "title": "Varlıklar",
+        "desc": "Tüm ekipmanlarınız ve kaynaklarınız kayıt altında."
+      },
+      "contracten": {
+        "title": "Sözleşmeler",
+        "desc": "Sözleşmeleri ve tedarikçileri bildirimlerle yönetin."
+      },
+      "webshop": {
+        "title": "Mağaza",
+        "desc": "İç siparişler ve envanter yönetimi."
+      },
+      "duurzaamheid": {
+        "title": "Sürdürülebilirlik",
+        "desc": "Atık ve enerji tüketimi raporları."
+      },
+      "mjop": {
+        "title": "Bakım Planı",
+        "desc": "Uzun vadeli bakım planları ve durum değerlendirmeleri."
+      },
+      "kennisbank": {
+        "title": "Bilgi Bankası",
+        "desc": "Protokollere ve bilgilere anında erişim."
+      },
+      "sleutelbeheer": {
+        "title": "Anahtar Yönetimi",
+        "desc": "Anahtar ve kartların verilmesi ve kaydı."
+      }
+    }
+  },
+  "roles": {
+    "title": "Kuruluşunuzdaki herkes için tasarlandı",
+    "subtitle": "Her rolün özel ihtiyaçları vardır. LetShare4gov kullanıcıya uyum sağlar.",
+    "items": {
+      "eindgebruiker": {
+        "title": "Son Kullanıcı",
+        "desc": "Basit bir portal üzerinden talep oluşturun ve alan ayırtın."
+      },
+      "servicedesk": {
+        "title": "Hizmet Masası",
+        "desc": "Tüm taleplerin net bir şekilde ele alınması."
+      },
+      "facilitair_manager": {
+        "title": "Tesis Yöneticisi",
+        "desc": "Veriye dayalı kararlar ve uzun vadeli planlama."
+      },
+      "cateraar": {
+        "title": "Katering",
+        "desc": "Günlük rezervasyonlar ve siparişler hakkında doğrudan bilgi."
+      },
+      "receptie": {
+        "title": "Resepsiyon",
+        "desc": "Ziyaretçileri karşılayın ve genel bakışı koruyun."
+      },
+      "beheerder": {
+        "title": "Yönetici",
+        "desc": "Sistem ayarları ve izinler üzerinde tam kontrol."
+      },
+      "leverancier": {
+        "title": "Tedarikçi",
+        "desc": "Görevler ve belgeler için özel portal."
+      }
+    }
+  },
+  "contact": {
+    "title": "Sonraki adıma hazır mısınız?",
+    "subtitle": "Bilgilerinizi bırakın ve belediyeniz için neler yapabileceğimizi keşfedin.",
+    "form": {
+      "name": "İsim",
+      "email": "E-posta Adresi",
+      "organization": "Kurum (isteğe bağlı)",
+      "message": "Mesaj",
+      "submit": "Talebi Gönder",
+      "submitting": "Gönderiliyor...",
+      "successTitle": "Talep başarıyla gönderildi",
+      "successDesc": "İlginiz için teşekkür ederiz. Kısa süre içinde sizinle iletişime geçeceğiz.",
+      "error": "Gönderim sırasında bir hata oluştu.",
+      "required": "Zorunlu alan",
+      "invalidEmail": "Geçersiz e-posta adresi",
+      "newRequest": "Yeni talep"
+    }
+  },
+  "footer": {
+    "rights": "© {{year}} LetShare4gov. Tüm hakları saklıdır."
+  }
+}

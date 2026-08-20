@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "modules": "Moduli",
+    "roles": "Ruoli",
+    "contact": "Contatto",
+    "demo": "Guarda la demo"
+  },
+  "hero": {
+    "title": "Il municipio digitale per edifici, persone e risorse",
+    "subtitle": "Uno spazio di lavoro sereno per il facility management, pensato per i comuni. Sostituisci strumenti frammentati con chiarezza.",
+    "cta": "Guarda la demo dal vivo",
+    "contact": "Contattaci"
+  },
+  "modules": {
+    "title": "Tutto in un'unica vista",
+    "subtitle": "Niente più fogli di calcolo. Dai ticket alla sostenibilità, tutto si unisce.",
+    "items": {
+      "dashboard": {
+        "title": "Dashboard",
+        "desc": "Approfondimenti operativi in tempo reale."
+      },
+      "meldingen": {
+        "title": "Ticket",
+        "desc": "Gestione efficiente di ticket e guasti."
+      },
+      "reserveringen": {
+        "title": "Prenotazioni",
+        "desc": "Prenota facilmente sale e catering."
+      },
+      "werkplekken": {
+        "title": "Postazioni",
+        "desc": "Trova e prenota spazi flessibili."
+      },
+      "bezoekers": {
+        "title": "Visitatori",
+        "desc": "Registrazione visitatori professionale."
+      },
+      "vastgoed": {
+        "title": "Immobili",
+        "desc": "Panoramica completa di edifici e piani."
+      },
+      "ruimtes": {
+        "title": "Stanze",
+        "desc": "Planimetrie dettagliate e gestione degli spazi."
+      },
+      "assets": {
+        "title": "Asset",
+        "desc": "Tutte le attrezzature e risorse registrate."
+      },
+      "contracten": {
+        "title": "Contratti",
+        "desc": "Gestisci contratti e fornitori."
+      },
+      "webshop": {
+        "title": "Webshop",
+        "desc": "Ordini interni e gestione inventario."
+      },
+      "duurzaamheid": {
+        "title": "Sostenibilità",
+        "desc": "Report su rifiuti e consumo energetico."
+      },
+      "mjop": {
+        "title": "Manutenzione",
+        "desc": "Piani a lungo termine e valutazioni."
+      },
+      "kennisbank": {
+        "title": "Knowledge Base",
+        "desc": "Protocolli e informazioni accessibili."
+      },
+      "sleutelbeheer": {
+        "title": "Gestione Chiavi",
+        "desc": "Emissione e registrazione di chiavi e pass."
+      }
+    }
+  },
+  "roles": {
+    "title": "Creato per tutti nell'organizzazione",
+    "subtitle": "Ogni ruolo ha esigenze specifiche. Si adatta all'utente.",
+    "items": {
+      "eindgebruiker": {
+        "title": "Utente Finale",
+        "desc": "Crea ticket e prenota spazi facilmente."
+      },
+      "servicedesk": {
+        "title": "Service Desk",
+        "desc": "Gestione chiara delle richieste."
+      },
+      "facilitair_manager": {
+        "title": "Facility Manager",
+        "desc": "Decisioni basate sui dati e pianificazione."
+      },
+      "cateraar": {
+        "title": "Catering",
+        "desc": "Visione diretta di prenotazioni e ordini."
+      },
+      "receptie": {
+        "title": "Reception",
+        "desc": "Accogli i visitatori e mantieni il controllo."
+      },
+      "beheerder": {
+        "title": "Amministratore",
+        "desc": "Controllo totale su impostazioni e permessi."
+      },
+      "leverancier": {
+        "title": "Fornitore",
+        "desc": "Portale dedicato per incarichi e documenti."
+      }
+    }
+  },
+  "contact": {
+    "title": "Pronto per il prossimo passo?",
+    "subtitle": "Lascia i tuoi dati e scopri cosa possiamo fare per il tuo comune.",
+    "form": {
+      "name": "Nome",
+      "email": "Indirizzo Email",
+      "organization": "Organizzazione (opzionale)",
+      "message": "Messaggio",
+      "submit": "Invia Richiesta",
+      "submitting": "Invio in corso...",
+      "successTitle": "Richiesta inviata con successo",
+      "successDesc": "Grazie per l'interesse. Ti contatteremo a breve.",
+      "error": "Si è verificato un errore durante l'invio.",
+      "required": "Campo obbligatorio",
+      "invalidEmail": "Indirizzo e-mail non valido",
+      "newRequest": "Nuova richiesta"
+    }
+  },
+  "footer": {
+    "rights": "© {{year}} LetShare4gov. Tutti i diritti riservati."
+  }
+}

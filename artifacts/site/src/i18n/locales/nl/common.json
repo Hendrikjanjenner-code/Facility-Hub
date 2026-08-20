@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "modules": "Modules",
+    "roles": "Doelgroepen",
+    "contact": "Contact",
+    "demo": "Bekijk de live demo"
+  },
+  "hero": {
+    "title": "Het digitale stadhuis voor uw gebouwen, mensen en middelen",
+    "subtitle": "Eén rustige werkomgeving voor facilitair beheer, ontworpen voor gemeenten en publieke organisaties. Vervang versnipperde tools door overzicht en vertrouwen.",
+    "cta": "Bekijk de live demo",
+    "contact": "Neem contact op"
+  },
+  "modules": {
+    "title": "Alles in één overzicht",
+    "subtitle": "Geen spreadsheets meer. Van meldingen tot duurzaamheid, alle facilitaire processen komen samen in LetShare4gov.",
+    "items": {
+      "dashboard": {
+        "title": "Dashboard",
+        "desc": "Real-time inzicht in alle operationele zaken."
+      },
+      "meldingen": {
+        "title": "Meldingen",
+        "desc": "Efficiënt beheer van tickets en storingen."
+      },
+      "reserveringen": {
+        "title": "Reserveringen",
+        "desc": "Vergaderruimtes en catering makkelijk boeken."
+      },
+      "werkplekken": {
+        "title": "Werkplekken",
+        "desc": "Flexplekken zoeken en reserveren."
+      },
+      "bezoekers": {
+        "title": "Bezoekers",
+        "desc": "Professionele en gastvrije bezoekersregistratie."
+      },
+      "vastgoed": {
+        "title": "Vastgoed",
+        "desc": "Compleet inzicht in gebouwen en verdiepingen."
+      },
+      "ruimtes": {
+        "title": "Ruimtes",
+        "desc": "Gedetailleerd vlekkenplan en ruimtebeheer."
+      },
+      "assets": {
+        "title": "Assets",
+        "desc": "Al uw middelen en apparatuur geregistreerd."
+      },
+      "contracten": {
+        "title": "Contracten",
+        "desc": "Beheer contracten en leveranciers met notificaties."
+      },
+      "webshop": {
+        "title": "Webshop",
+        "desc": "Interne bestellingen en voorraadbeheer."
+      },
+      "duurzaamheid": {
+        "title": "Duurzaamheid",
+        "desc": "Rapportages voor afval en energieverbruik."
+      },
+      "mjop": {
+        "title": "MJOP",
+        "desc": "Meerjarenonderhoudsplan en conditiemetingen."
+      },
+      "kennisbank": {
+        "title": "Kennisbank",
+        "desc": "Informatie en protocollen direct toegankelijk."
+      },
+      "sleutelbeheer": {
+        "title": "Sleutelbeheer",
+        "desc": "Uitgifte en registratie van sleutels en passen."
+      }
+    }
+  },
+  "roles": {
+    "title": "Gemaakt voor iedereen in uw organisatie",
+    "subtitle": "Iedere rol heeft specifieke behoeften. LetShare4gov past zich aan op de gebruiker.",
+    "items": {
+      "eindgebruiker": {
+        "title": "Eindgebruiker",
+        "desc": "Meldingen maken en werkplekken reserveren via een simpel portaal."
+      },
+      "servicedesk": {
+        "title": "Servicedesk",
+        "desc": "Overzichtelijk afhandelen van alle facilitaire vragen."
+      },
+      "facilitair_manager": {
+        "title": "Facilitair Manager",
+        "desc": "Sturing op basis van data, contracten en langetermijnplannen."
+      },
+      "cateraar": {
+        "title": "Cateraar",
+        "desc": "Direct inzicht in dagelijkse reserveringen en bestellingen."
+      },
+      "receptie": {
+        "title": "Receptie",
+        "desc": "Bezoekers warm ontvangen en overzicht bewaren."
+      },
+      "beheerder": {
+        "title": "Beheerder",
+        "desc": "Volledige controle over systeeminstellingen en rechten."
+      },
+      "leverancier": {
+        "title": "Leverancier",
+        "desc": "Eigen portaal voor opdrachten en documentatie."
+      }
+    }
+  },
+  "contact": {
+    "title": "Klaar voor de volgende stap?",
+    "subtitle": "Laat uw gegevens achter en ontdek wat LetShare4gov voor uw gemeente kan betekenen.",
+    "form": {
+      "name": "Naam",
+      "email": "E-mailadres",
+      "organization": "Organisatie (optioneel)",
+      "message": "Bericht",
+      "submit": "Verstuur aanvraag",
+      "submitting": "Verzenden...",
+      "successTitle": "Aanvraag succesvol verzonden",
+      "successDesc": "Hartelijk dank voor uw interesse. Wij nemen spoedig contact met u op.",
+      "error": "Er is een fout opgetreden bij het verzenden.",
+      "required": "Verplicht veld",
+      "invalidEmail": "Ongeldig e-mailadres",
+      "newRequest": "Nieuwe aanvraag"
+    }
+  },
+  "footer": {
+    "rights": "© {{year}} LetShare4gov. Alle rechten voorbehouden."
+  }
+}

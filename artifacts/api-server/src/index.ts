@@ -123,6 +123,22 @@ try {
   logger.warn({ err }, "Startup-migratie email_queue mislukt; doorgaan");
 }
 
+// Contactaanvragen vanaf de marketingsite: tabel aanmaken als die nog niet bestaat.
+try {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS contact_requests (
+      id           SERIAL PRIMARY KEY,
+      name         TEXT NOT NULL,
+      email        TEXT NOT NULL,
+      organization TEXT,
+      message      TEXT NOT NULL,
+      created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+} catch (err) {
+  logger.warn({ err }, "Startup-migratie contact_requests mislukt; doorgaan");
+}
+
 app.listen(port, (err) => {
   if (err) {
     logger.error({ err }, "Error listening on port");

@@ -25,6 +25,7 @@ import {
   LogOut,
   Settings,
   Check,
+  Compass,
   FileText,
   ShoppingCart,
   Boxes,
@@ -36,6 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { getIntlLocale } from "@/i18n";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
+import { ProductTour, startProductTour } from "@/components/tour/ProductTour";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -288,6 +290,10 @@ function UserMenu({ user }: { user: User }) {
           <Settings className="mr-2 h-4 w-4" />
           <span>{t("shell.settings")}</span>
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => startProductTour()} className="cursor-pointer">
+          <Compass className="mr-2 h-4 w-4" />
+          <span>{t("tour:restart")}</span>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
           <LogOut className="mr-2 h-4 w-4" />
@@ -318,7 +324,7 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className="flex-1 overflow-auto py-4">
-          <nav className="grid gap-1 px-4">
+          <nav className="grid gap-1 px-4" data-tour="nav">
             {filteredNav.map((item) => {
               const active = location === item.href || (item.href !== '/' && location.startsWith(item.href));
               return (
@@ -355,19 +361,24 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
           <div className="flex-1 hidden md:block" />
           <div className="flex items-center gap-4">
-            <LanguageSwitcher />
-            <NotificationsDropdown />
+            <div data-tour="language">
+              <LanguageSwitcher />
+            </div>
+            <div data-tour="notifications">
+              <NotificationsDropdown />
+            </div>
             <div className="md:hidden">
               <UserMenu user={user} />
             </div>
           </div>
         </header>
-        <div className="flex-1 overflow-auto bg-background/50">
+        <div className="flex-1 overflow-auto bg-background/50" data-tour="content">
           <div className="container mx-auto p-4 md:p-6 max-w-7xl">
             {children}
           </div>
         </div>
       </main>
+      <ProductTour user={user} />
     </div>
   );
 }

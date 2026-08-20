@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "modules": "Módulos",
+    "roles": "Perfis",
+    "contact": "Contacto",
+    "demo": "Ver demonstração"
+  },
+  "hero": {
+    "title": "A câmara municipal digital para os seus edifícios, pessoas e recursos",
+    "subtitle": "Um espaço de trabalho sereno para gestão de instalações, concebido para municípios e organizações públicas. Substitua ferramentas fragmentadas por clareza e confiança.",
+    "cta": "Ver demonstração ao vivo",
+    "contact": "Fale connosco"
+  },
+  "modules": {
+    "title": "Tudo numa única visão",
+    "subtitle": "Fim das folhas de cálculo. Dos pedidos à sustentabilidade, todos os processos convergem no LetShare4gov.",
+    "items": {
+      "dashboard": {
+        "title": "Dashboard",
+        "desc": "Visão em tempo real de questões operacionais."
+      },
+      "meldingen": {
+        "title": "Pedidos",
+        "desc": "Gestão eficiente de tickets e falhas."
+      },
+      "reserveringen": {
+        "title": "Reservas",
+        "desc": "Reserve facilmente salas e catering."
+      },
+      "werkplekken": {
+        "title": "Postos de trabalho",
+        "desc": "Encontre e reserve espaços flexíveis."
+      },
+      "bezoekers": {
+        "title": "Visitantes",
+        "desc": "Registo de visitantes profissional."
+      },
+      "vastgoed": {
+        "title": "Imóveis",
+        "desc": "Visão completa de edifícios e pisos."
+      },
+      "ruimtes": {
+        "title": "Salas",
+        "desc": "Plantas detalhadas e gestão de espaços."
+      },
+      "assets": {
+        "title": "Ativos",
+        "desc": "Todos os seus recursos registados."
+      },
+      "contracten": {
+        "title": "Contratos",
+        "desc": "Gira contratos e fornecedores com notificações."
+      },
+      "webshop": {
+        "title": "Loja",
+        "desc": "Encomendas internas e gestão de stock."
+      },
+      "duurzaamheid": {
+        "title": "Sustentabilidade",
+        "desc": "Relatórios de resíduos e energia."
+      },
+      "mjop": {
+        "title": "Plano de Manutenção",
+        "desc": "Planos a longo prazo e avaliações de estado."
+      },
+      "kennisbank": {
+        "title": "Base de Conhecimento",
+        "desc": "Protocolos e informação acessíveis."
+      },
+      "sleutelbeheer": {
+        "title": "Gestão de Chaves",
+        "desc": "Emissão e registo de chaves e cartões."
+      }
+    }
+  },
+  "roles": {
+    "title": "Feito para todos na organização",
+    "subtitle": "Cada perfil tem necessidades específicas. O sistema adapta-se ao utilizador.",
+    "items": {
+      "eindgebruiker": {
+        "title": "Utilizador",
+        "desc": "Crie pedidos e reserve espaços num portal simples."
+      },
+      "servicedesk": {
+        "title": "Service Desk",
+        "desc": "Tratamento claro de todos os pedidos."
+      },
+      "facilitair_manager": {
+        "title": "Gestor de Instalações",
+        "desc": "Decisões baseadas em dados e planeamento."
+      },
+      "cateraar": {
+        "title": "Catering",
+        "desc": "Visão direta das reservas e encomendas diárias."
+      },
+      "receptie": {
+        "title": "Recepção",
+        "desc": "Receba visitantes e mantenha o controlo."
+      },
+      "beheerder": {
+        "title": "Administrador",
+        "desc": "Controlo total de permissões e definições."
+      },
+      "leverancier": {
+        "title": "Fornecedor",
+        "desc": "Portal dedicado para tarefas e documentos."
+      }
+    }
+  },
+  "contact": {
+    "title": "Pronto para o próximo passo?",
+    "subtitle": "Deixe os seus dados e descubra o que podemos fazer por si.",
+    "form": {
+      "name": "Nome",
+      "email": "Email",
+      "organization": "Organização (opcional)",
+      "message": "Mensagem",
+      "submit": "Enviar Pedido",
+      "submitting": "A enviar...",
+      "successTitle": "Pedido enviado com sucesso",
+      "successDesc": "Obrigado pelo seu interesse. Contactaremos em breve.",
+      "error": "Ocorreu um erro ao enviar.",
+      "required": "Campo obrigatório",
+      "invalidEmail": "Endereço de e-mail inválido",
+      "newRequest": "Novo pedido"
+    }
+  },
+  "footer": {
+    "rights": "© {{year}} LetShare4gov. Todos os direitos reservados."
+  }
+}

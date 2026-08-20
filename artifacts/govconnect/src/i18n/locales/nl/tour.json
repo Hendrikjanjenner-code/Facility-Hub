@@ -1,0 +1,35 @@
+{
+  "aria": "Producttour",
+  "close": "Tour sluiten",
+  "skip": "Overslaan",
+  "back": "Terug",
+  "next": "Volgende",
+  "done": "Klaar",
+  "restart": "Rondleiding bekijken",
+  "steps": {
+    "welcome": {
+      "title": "Welkom bij LetShare4gov",
+      "body": "Dit is uw facilitaire werkplek: meldingen, reserveringen, vastgoed, onderhoud en meer op één plek. In een halve minuut laten we u de belangrijkste onderdelen zien."
+    },
+    "navigation": {
+      "title": "Alle modules op een rij",
+      "body": "Via het menu links navigeert u tussen de modules. Welke onderdelen u ziet, hangt af van uw rol — een servicedesk-medewerker ziet andere tools dan een cateraar of beheerder."
+    },
+    "content": {
+      "title": "Uw werkgebied",
+      "body": "Hier verschijnt de inhoud van de gekozen module: overzichten, detailpagina's en formulieren. Het dashboard toont direct de status van vandaag."
+    },
+    "language": {
+      "title": "Kies uw taal",
+      "body": "De hele applicatie is beschikbaar in zes talen. Wissel op elk moment via deze knop."
+    },
+    "notifications": {
+      "title": "Notificaties",
+      "body": "Hier vindt u updates over uw meldingen, reserveringen en taken, zodat u niets mist."
+    },
+    "finish": {
+      "title": "Klaar om te verkennen",
+      "body": "Klik gerust rond — als gast kunt u alles bekijken zonder iets te wijzigen. Deze rondleiding kunt u altijd opnieuw starten via het profielmenu linksonder."
+    }
+  }
+}

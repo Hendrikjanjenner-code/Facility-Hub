@@ -17,11 +17,14 @@ import knowledgeRouter from "./knowledge";
 import satisfactionRouter from "./satisfaction";
 import keysRouter from "./keys";
 import userPreferencesRouter from "./user-preferences";
+import contactRouter from "./contact";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(authRouter);
+// Vóór routers met een kale requireAuth-guard mounten: POST /contact-requests is publiek.
+router.use(contactRouter);
 router.use(ticketsRouter);
 router.use(vastgoedRouter);
 router.use(reservationsRouter);
