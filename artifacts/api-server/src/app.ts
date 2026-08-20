@@ -54,7 +54,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api", (req, res, next) => {
   const isGuest = req.signedCookies?.["gc_guest"] === "1";
   const isWrite = !["GET", "HEAD", "OPTIONS"].includes(req.method);
-  if (isGuest && isWrite && req.path !== "/auth/logout") {
+  const allowedForGuest = ["/auth/logout", "/auth/login", "/auth/guest-login"];
+  if (isGuest && isWrite && !allowedForGuest.includes(req.path)) {
     res.status(403).json({ message: "Gasttoegang is alleen-lezen" });
     return;
   }

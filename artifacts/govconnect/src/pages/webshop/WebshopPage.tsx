@@ -109,7 +109,7 @@ export default function WebshopPage() {
   });
   const markDelivered = useMutation({
     mutationFn: ({ id }: { id: number }) =>
-      fetch(`/api/shop/orders/${id}/mark-delivered`, {
+      fetch(`/api/shop/orders/${id}/supplier-delivered`, {
         method: "POST",
         credentials: "include",
       }).then(async (r) => { if (!r.ok) throw { data: await r.json() }; return r.json(); }),
