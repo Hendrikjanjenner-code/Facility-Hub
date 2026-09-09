@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, ClipboardList } from 'lucide-react';
 
+const customEase = [0.25, 1, 0.5, 1] as const;
+
 export function Scene4() {
   const [phase, setPhase] = useState(0);
 
@@ -20,8 +22,8 @@ export function Scene4() {
       className="absolute inset-0 pl-[18vw] pr-[5vw] flex items-center"
       initial={{ opacity: 0, x: '5vw' }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, y: '-5vh', filter: 'blur(10px)' }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      exit={{ opacity: 0, y: '-5vh' }}
+      transition={{ duration: 0.8, ease: customEase }}
     >
       <div className="w-full flex flex-col justify-center h-full relative">
         
@@ -34,33 +36,34 @@ export function Scene4() {
             phase >= 1 ? { opacity: 1, y: 0, scale: 1 } : 
             { opacity: 0, y: '5vh' }
           }
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.8, ease: customEase }}
         >
           <div className="flex items-center gap-[1.5vw] mb-[2vh]">
-            <div className="bg-primary/10 p-[1.5vw] rounded-xl text-primary">
+            <div className="p-[1.5vw] rounded-xl" style={{ backgroundColor: 'var(--ls4g-blue)', color: 'var(--ls4g-white)' }}>
               <Building2 className="w-[3vw] h-[3vw]" />
             </div>
-            <h2 className="font-display font-bold text-[3.5vw] text-sidebar">
+            <h2 className="font-display font-semibold text-[3.5vw]" style={{ color: 'var(--ls4g-dark)' }}>
               Vastgoed & Gebouwbeheer
             </h2>
           </div>
-          <p className="font-body text-[1.8vw] text-sidebar-muted/70 max-w-[40vw]">
+          <p className="font-body text-[1.8vw] max-w-[40vw]" style={{ color: 'var(--ls4g-text-muted)' }}>
             Interactief vlekkenplan en waterdicht sleutelbeheer.
           </p>
           
           {/* UI Mockup snippet: Vlekkenplan / floorplan */}
           <motion.div 
-            className="mt-[4vh] bg-white rounded-xl shadow-xl border border-black/5 p-[2vw] w-[50vw] h-[20vh] relative overflow-hidden"
-            initial={{ opacity: 0, scale: 0.9, rotateX: 10 }}
-            animate={phase >= 2 ? { opacity: 1, scale: 1, rotateX: 0 } : { opacity: 0, scale: 0.9, rotateX: 10 }}
-            transition={{ duration: 1, type: 'spring', bounce: 0.3 }}
+            className="mt-[4vh] rounded-xl shadow-lg border p-[2vw] w-[50vw] h-[20vh] relative overflow-hidden"
+            style={{ backgroundColor: 'var(--ls4g-white)', borderColor: 'var(--ls4g-border)' }}
+            initial={{ opacity: 0, scale: 0.95, rotateX: 5 }}
+            animate={phase >= 2 ? { opacity: 1, scale: 1, rotateX: 0 } : { opacity: 0, scale: 0.95, rotateX: 5 }}
+            transition={{ duration: 1.2, ease: customEase }}
           >
             {/* Fake floorplan */}
-            <div className="absolute inset-0 m-[2vw] border-2 border-black/10 rounded flex gap-[1vw] p-[1vw]">
-              <div className="flex-1 bg-blue-50 border border-blue-200 rounded flex items-center justify-center text-blue-400 font-mono text-[1vw]">Zuidvleugel</div>
+            <div className="absolute inset-0 m-[2vw] border-2 rounded flex gap-[1vw] p-[1vw]" style={{ borderColor: 'var(--ls4g-border)' }}>
+              <div className="flex-1 rounded flex items-center justify-center font-mono text-[1vw]" style={{ backgroundColor: 'var(--ls4g-bg)', border: '1px solid var(--ls4g-border)', color: 'var(--ls4g-text-muted)' }}>Zuidvleugel</div>
               <div className="flex-1 flex flex-col gap-[1vw]">
-                <div className="flex-1 bg-green-50 border border-green-200 rounded flex items-center justify-center text-green-400 font-mono text-[1vw]">Vergader 1</div>
-                <div className="flex-1 bg-orange-50 border border-orange-200 rounded flex items-center justify-center text-orange-400 font-mono text-[1vw]">Kantine</div>
+                <div className="flex-1 rounded flex items-center justify-center font-mono text-[1vw]" style={{ backgroundColor: 'var(--ls4g-bg)', border: '1px solid var(--ls4g-border)', color: 'var(--ls4g-text-muted)' }}>Vergader 1</div>
+                <div className="flex-1 rounded flex items-center justify-center font-mono text-[1vw]" style={{ backgroundColor: 'var(--ls4g-bg)', border: '1px solid var(--ls4g-border)', color: 'var(--ls4g-text-muted)' }}>Kantine</div>
               </div>
             </div>
           </motion.div>
@@ -74,39 +77,41 @@ export function Scene4() {
             phase >= 3 ? { opacity: 1, y: 0 } : 
             { opacity: 0, y: '8vh' }
           }
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1, ease: customEase }}
         >
           <div className="flex items-center gap-[1.5vw] mb-[2vh]">
-            <div className="bg-primary/10 p-[1.5vw] rounded-xl text-primary">
+            <div className="p-[1.5vw] rounded-xl" style={{ backgroundColor: 'var(--ls4g-blue-dark)', color: 'var(--ls4g-white)' }}>
               <ClipboardList className="w-[3vw] h-[3vw]" />
             </div>
-            <h2 className="font-display font-bold text-[3.5vw] text-sidebar">
+            <h2 className="font-display font-semibold text-[3.5vw]" style={{ color: 'var(--ls4g-dark)' }}>
               MJOP
             </h2>
           </div>
-          <p className="font-body text-[1.8vw] text-sidebar-muted/70 max-w-[40vw]">
+          <p className="font-body text-[1.8vw] max-w-[40vw]" style={{ color: 'var(--ls4g-text-muted)' }}>
             NEN 2767 conditiemeting en financiële scenarioplanning.
           </p>
           
           <motion.div 
-            className="mt-[4vh] bg-white rounded-xl shadow-xl border border-black/5 p-[2vw] w-[50vw]"
-            initial={{ opacity: 0, scale: 0.9, rotateX: -10 }}
-            animate={phase >= 4 ? { opacity: 1, scale: 1, rotateX: 0 } : { opacity: 0, scale: 0.9, rotateX: -10 }}
-            transition={{ duration: 1, type: 'spring', bounce: 0.3 }}
+            className="mt-[4vh] rounded-xl shadow-lg border p-[2vw] w-[50vw]"
+            style={{ backgroundColor: 'var(--ls4g-white)', borderColor: 'var(--ls4g-border)' }}
+            initial={{ opacity: 0, scale: 0.95, rotateX: -5 }}
+            animate={phase >= 4 ? { opacity: 1, scale: 1, rotateX: 0 } : { opacity: 0, scale: 0.95, rotateX: -5 }}
+            transition={{ duration: 1.2, ease: customEase }}
           >
             {/* Chart mockup */}
-            <div className="flex items-end gap-[1vw] h-[10vh] border-b-2 border-black/5 pb-[1vh]">
+            <div className="flex items-end gap-[1vw] h-[10vh] border-b-2 pb-[1vh]" style={{ borderColor: 'var(--ls4g-border)' }}>
               {[30, 45, 60, 40, 80, 50, 70].map((h, i) => (
                 <motion.div 
                   key={i} 
-                  className={`flex-1 rounded-t-sm ${i === 4 ? 'bg-primary' : 'bg-black/10'}`}
+                  className="flex-1 rounded-t-sm"
+                  style={{ backgroundColor: i === 4 ? 'var(--ls4g-blue)' : 'var(--ls4g-border)' }}
                   initial={{ height: 0 }}
                   animate={phase >= 4 ? { height: `${h}%` } : { height: 0 }}
-                  transition={{ duration: 0.8, delay: phase >= 4 ? i * 0.1 : 0, ease: 'circOut' }}
+                  transition={{ duration: 1, delay: phase >= 4 ? i * 0.1 : 0, ease: customEase }}
                 />
               ))}
             </div>
-            <div className="flex justify-between mt-[1vh] font-mono text-[0.8vw] text-black/40">
+            <div className="flex justify-between mt-[1vh] font-mono text-[0.8vw]" style={{ color: 'var(--ls4g-text-muted)' }}>
               <span>2024</span>
               <span>2025</span>
               <span>2026</span>

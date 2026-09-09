@@ -13,7 +13,7 @@
   },
   "modules": {
     "title": "Alles in één overzicht",
-    "subtitle": "Geen spreadsheets meer. Van meldingen tot duurzaamheid, alle facilitaire processen komen samen in LetShare4gov.",
+    "subtitle": "Geen spreadsheets meer. Van meldingen tot duurzaamheid, alle facilitaire processen komen samen in LetShare4Gov.",
     "items": {
       "dashboard": {
         "title": "Dashboard",
@@ -75,7 +75,7 @@
   },
   "roles": {
     "title": "Gemaakt voor iedereen in uw organisatie",
-    "subtitle": "Iedere rol heeft specifieke behoeften. LetShare4gov past zich aan op de gebruiker.",
+    "subtitle": "Iedere rol heeft specifieke behoeften. LetShare4Gov past zich aan op de gebruiker.",
     "items": {
       "eindgebruiker": {
         "title": "Eindgebruiker",
@@ -109,7 +109,7 @@
   },
   "contact": {
     "title": "Klaar voor de volgende stap?",
-    "subtitle": "Laat uw gegevens achter en ontdek wat LetShare4gov voor uw gemeente kan betekenen.",
+    "subtitle": "Laat uw gegevens achter en ontdek wat LetShare4Gov voor uw gemeente kan betekenen.",
     "form": {
       "name": "Naam",
       "email": "E-mailadres",
@@ -126,6 +126,6 @@
     }
   },
   "footer": {
-    "rights": "© {{year}} LetShare4gov. Alle rechten voorbehouden."
+    "rights": "© {{year}} LetShare4Gov. Alle rechten voorbehouden."
   }
 }

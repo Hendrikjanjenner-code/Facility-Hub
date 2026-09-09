@@ -8,7 +8,7 @@
   "restart": "Ver a apresentação",
   "steps": {
     "welcome": {
-      "title": "Bem-vindo ao LetShare4gov",
+      "title": "Bem-vindo ao LetShare4Gov",
       "body": "Este é o seu espaço de gestão de instalações: ocorrências, reservas, imóveis, manutenção e muito mais num só lugar. Em meio minuto mostramos-lhe o essencial."
     },
     "navigation": {

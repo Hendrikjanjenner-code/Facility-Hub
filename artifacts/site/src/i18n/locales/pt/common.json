@@ -13,7 +13,7 @@
   },
   "modules": {
     "title": "Tudo numa única visão",
-    "subtitle": "Fim das folhas de cálculo. Dos pedidos à sustentabilidade, todos os processos convergem no LetShare4gov.",
+    "subtitle": "Fim das folhas de cálculo. Dos pedidos à sustentabilidade, todos os processos convergem no LetShare4Gov.",
     "items": {
       "dashboard": {
         "title": "Dashboard",
@@ -126,6 +126,6 @@
     }
   },
   "footer": {
-    "rights": "© {{year}} LetShare4gov. Todos os direitos reservados."
+    "rights": "© {{year}} LetShare4Gov. Todos os direitos reservados."
   }
 }

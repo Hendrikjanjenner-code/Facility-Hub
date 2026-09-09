@@ -1,5 +1,5 @@
 {
-  "brand": "LetShare4gov",
+  "brand": "LetShare4Gov",
   "nav": {
     "dashboard": "Panel",
     "meldingen": "Incidencias",
@@ -46,7 +46,7 @@
   },
   "guest": {
     "title": "Acceso de invitado",
-    "subtitle": "Introduzca la contraseña de invitado para ver LetShare4gov como invitado (solo lectura).",
+    "subtitle": "Introduzca la contraseña de invitado para ver LetShare4Gov como invitado (solo lectura).",
     "password": "Contraseña de invitado",
     "submit": "Ver como invitado",
     "failed": "Contraseña no válida.",

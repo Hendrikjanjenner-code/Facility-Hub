@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { useState } from "react";
 
 const MODULES = [
   { id: "dashboard", img: "dashboard.png" },
@@ -30,7 +29,7 @@ export function Modules() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
-            className="text-4xl md:text-5xl font-display font-bold text-primary mb-6"
+            className="text-3xl md:text-4xl font-sans font-bold text-[var(--ls4g-text)] mb-4 tracking-tight"
           >
             {t('modules.title')}
           </motion.h2>
@@ -39,7 +38,7 @@ export function Modules() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ delay: 0.1 }}
-            className="text-xl text-foreground/70"
+            className="text-lg md:text-xl text-[var(--ls4g-text-muted)]"
           >
             {t('modules.subtitle')}
           </motion.p>
@@ -56,33 +55,28 @@ export function Modules() {
 }
 
 function ModuleCard({ mod, index, t }: { mod: any; index: number; t: any }) {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.05 }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      className="group relative rounded-2xl bg-background border border-border/60 overflow-hidden hover:shadow-xl hover:border-primary/20 transition-all duration-300 flex flex-col h-full"
+      transition={{ duration: 0.5, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+      className="group relative rounded-[20px] bg-white border border-[var(--ls4g-border)] overflow-hidden shadow-sm hover:shadow-md hover:-translate-y-1 hover:border-[var(--ls4g-blue)] transition-all duration-300 flex flex-col h-full"
     >
-      <div className="aspect-[16/10] bg-muted overflow-hidden relative border-b border-border/40">
-        <motion.img 
+      <div className="aspect-[16/10] bg-[var(--ls4g-bg)] overflow-hidden relative border-b border-[var(--ls4g-border)]">
+        <img 
           src={`${import.meta.env.BASE_URL}screenshots/${mod.img}`}
           alt={t(`modules.items.${mod.id}.title`)}
-          animate={{ scale: isHovered ? 1.05 : 1 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="w-full h-full object-cover object-top"
+          className="w-full h-full object-cover object-top transition-transform duration-500 ease-out"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* Subtle overlay matching brand colors */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--ls4g-dark)]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
       <div className="p-6 flex-1 flex flex-col">
-        <h3 className="text-xl font-display font-semibold text-primary mb-2">
+        <h3 className="text-xl font-sans font-semibold text-[var(--ls4g-text)] mb-2 group-hover:text-[var(--ls4g-blue)] transition-colors">
           {t(`modules.items.${mod.id}.title`)}
         </h3>
-        <p className="text-foreground/70 text-sm leading-relaxed flex-1">
+        <p className="text-[var(--ls4g-text-muted)] text-sm leading-relaxed flex-1">
           {t(`modules.items.${mod.id}.desc`)}
         </p>
       </div>

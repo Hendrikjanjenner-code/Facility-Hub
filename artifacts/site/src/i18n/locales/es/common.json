@@ -75,7 +75,7 @@
   },
   "roles": {
     "title": "Hecho para todos",
-    "subtitle": "Cada rol tiene necesidades específicas. LetShare4gov se adapta.",
+    "subtitle": "Cada rol tiene necesidades específicas. LetShare4Gov se adapta.",
     "items": {
       "eindgebruiker": {
         "title": "Usuario final",
@@ -126,6 +126,6 @@
     }
   },
   "footer": {
-    "rights": "© {{year}} LetShare4gov. Todos los derechos reservados."
+    "rights": "© {{year}} LetShare4Gov. Todos los derechos reservados."
   }
 }

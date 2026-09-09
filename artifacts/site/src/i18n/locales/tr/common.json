@@ -75,7 +75,7 @@
   },
   "roles": {
     "title": "Kuruluşunuzdaki herkes için tasarlandı",
-    "subtitle": "Her rolün özel ihtiyaçları vardır. LetShare4gov kullanıcıya uyum sağlar.",
+    "subtitle": "Her rolün özel ihtiyaçları vardır. LetShare4Gov kullanıcıya uyum sağlar.",
     "items": {
       "eindgebruiker": {
         "title": "Son Kullanıcı",
@@ -126,6 +126,6 @@
     }
   },
   "footer": {
-    "rights": "© {{year}} LetShare4gov. Tüm hakları saklıdır."
+    "rights": "© {{year}} LetShare4Gov. Tüm hakları saklıdır."
   }
 }

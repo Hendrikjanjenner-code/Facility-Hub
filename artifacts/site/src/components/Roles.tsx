@@ -19,17 +19,20 @@ export function Roles() {
   const [activeRole, setActiveRole] = useState(ROLES[0]);
 
   return (
-    <section id="roles" className="py-24 bg-primary text-white overflow-hidden relative">
-      {/* Decorative backdrop */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/10 rounded-full blur-[100px] pointer-events-none" />
-      
+    <section id="roles" className="py-24 bg-[var(--ls4g-dark)] text-white overflow-hidden relative">
+      {/* Restrained geometric overlapping background panels */}
+      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-[600px] h-[800px] opacity-20 pointer-events-none transform rotate-12">
+        <div className="absolute inset-0 bg-[var(--ls4g-dark-surface)] transform skew-x-12 translate-x-10 rounded-3xl" />
+        <div className="absolute inset-0 bg-[#005FCC]/10 transform skew-x-12 -translate-x-10 translate-y-20 rounded-3xl" />
+      </div>
+
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center mb-16">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-4xl md:text-5xl font-display font-bold mb-6"
+            className="text-3xl md:text-4xl font-sans font-bold mb-4 tracking-tight"
           >
             {t('roles.title')}
           </motion.h2>
@@ -38,7 +41,7 @@ export function Roles() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-xl text-white/70"
+            className="text-lg md:text-xl text-white/60"
           >
             {t('roles.subtitle')}
           </motion.p>
@@ -51,10 +54,10 @@ export function Roles() {
                 key={role}
                 onClick={() => setActiveRole(role)}
                 className={clsx(
-                  "text-left px-6 py-4 rounded-xl transition-all duration-300 flex-shrink-0 whitespace-nowrap lg:whitespace-normal font-medium",
+                  "text-left px-6 py-4 rounded-[12px] transition-all duration-300 flex-shrink-0 whitespace-nowrap lg:whitespace-normal font-medium border border-transparent",
                   activeRole === role 
-                    ? "bg-white text-primary shadow-lg scale-105 lg:scale-100 lg:translate-x-2"
-                    : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
+                    ? "bg-[var(--ls4g-blue)]/10 text-white border-[var(--ls4g-blue)]/30 lg:translate-x-2"
+                    : "bg-transparent text-white/50 hover:bg-white/5 hover:text-white"
                 )}
               >
                 {t(`roles.items.${role}.title`)}
@@ -66,19 +69,19 @@ export function Roles() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeRole}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="bg-white/10 backdrop-blur-md border border-white/10 p-8 md:p-12 rounded-3xl w-full"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="bg-[var(--ls4g-dark-surface)] border border-white/5 p-8 md:p-12 rounded-[24px] w-full shadow-2xl"
               >
-                <div className="w-12 h-12 bg-accent rounded-xl flex items-center justify-center mb-6">
-                  <CheckCircle2 className="text-white w-6 h-6" />
+                <div className="w-12 h-12 bg-[var(--ls4g-blue)]/10 rounded-xl flex items-center justify-center mb-6">
+                  <CheckCircle2 className="text-[var(--ls4g-blue)] w-6 h-6" />
                 </div>
-                <h3 className="text-3xl font-display font-bold mb-4">
+                <h3 className="text-2xl font-sans font-semibold mb-4 text-white">
                   {t(`roles.items.${activeRole}.title`)}
                 </h3>
-                <p className="text-xl text-white/80 leading-relaxed">
+                <p className="text-lg text-white/70 leading-relaxed">
                   {t(`roles.items.${activeRole}.desc`)}
                 </p>
               </motion.div>

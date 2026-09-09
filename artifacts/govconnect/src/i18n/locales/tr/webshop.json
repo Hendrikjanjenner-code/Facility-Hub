@@ -106,7 +106,7 @@
   },
   "toast": {
     "addedToCart": "{{name}} sepete eklendi",
-    "budgetExceededDescription": "⚠️ Sepetiniz kalan bütçeyi aşıyor ({{amount}}). Bütçe ayarlanana kadar sipariş engellendi.",
+    "budgetExceededDescription": "⚠ Sepetiniz kalan bütçeyi aşıyor ({{amount}}). Bütçe ayarlanana kadar sipariş engellendi.",
     "qtyNotIncreased": "Miktar artırılmadı",
     "qtyExceedsDescription": "Artırmak kalan bütçeyi aşıyor ({{remaining}}). Açık {{shortfall}} olur. Bütçeyi ayarlamak için yöneticinizle iletişime geçin.",
     "orderAutoApproved": "Sipariş {{number}} otomatik onaylandı",

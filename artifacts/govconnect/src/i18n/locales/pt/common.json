@@ -1,5 +1,5 @@
 {
-  "brand": "LetShare4gov",
+  "brand": "LetShare4Gov",
   "nav": {
     "dashboard": "Painel",
     "meldingen": "Ocorrências",
@@ -46,7 +46,7 @@
   },
   "guest": {
     "title": "Acesso de convidado",
-    "subtitle": "Introduza a palavra-passe de convidado para ver o LetShare4gov como convidado (apenas leitura).",
+    "subtitle": "Introduza a palavra-passe de convidado para ver o LetShare4Gov como convidado (apenas leitura).",
     "password": "Palavra-passe de convidado",
     "submit": "Ver como convidado",
     "failed": "Palavra-passe inválida.",

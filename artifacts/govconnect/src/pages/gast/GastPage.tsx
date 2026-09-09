@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Loader2, Eye } from 'lucide-react';
+import { Loader2, Eye } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Logo } from '@/components/ui/logo';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { LanguageSwitcher } from '@/components/layout/LanguageSwitcher';
 
@@ -50,9 +51,8 @@ export default function GastPage() {
       </div>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-3">
-          <div className="flex items-center gap-2 font-bold text-xl text-primary">
-            <Building2 className="h-6 w-6" />
-            <span>{t('brand')}</span>
+          <div className="mb-2">
+            <Logo />
           </div>
           <CardTitle className="flex items-center gap-2">
             <Eye className="h-5 w-5 text-muted-foreground" />

@@ -8,7 +8,7 @@
   "restart": "Turu izle",
   "steps": {
     "welcome": {
-      "title": "LetShare4gov'a hoş geldiniz",
+      "title": "LetShare4Gov'a hoş geldiniz",
       "body": "Burası tesis yönetimi çalışma alanınız: bildirimler, rezervasyonlar, gayrimenkul, bakım ve daha fazlası tek bir yerde. Yarım dakikada size en önemli bölümleri gösterelim."
     },
     "navigation": {

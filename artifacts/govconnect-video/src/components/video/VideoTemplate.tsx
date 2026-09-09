@@ -17,6 +17,9 @@ const SCENE_DURATIONS = {
   outro: 7000,
 };
 
+// Use LetShare4Gov's restrained cubic-bezier for all transitions
+const customEase = [0.25, 1, 0.5, 1] as const;
+
 export default function VideoTemplate() {
   const { currentScene } = useVideoPlayer({
     durations: SCENE_DURATIONS,
@@ -24,43 +27,54 @@ export default function VideoTemplate() {
 
   return (
     <div
-      className="w-full h-screen overflow-hidden relative font-body text-text-primary"
-      style={{ backgroundColor: 'var(--color-bg-light)' }}
+      className="w-full h-screen overflow-hidden relative font-body"
+      style={{ backgroundColor: 'var(--ls4g-bg)', color: 'var(--ls4g-text)' }}
     >
-      {/* Persistent Grid Background */}
+      {/* Geometric Panel Background inspired by logo */}
       <motion.div
-        className="absolute inset-0 z-0 opacity-40"
-        style={{
-          backgroundImage: 'linear-gradient(var(--color-sidebar-muted) 1px, transparent 1px), linear-gradient(90deg, var(--color-sidebar-muted) 1px, transparent 1px)',
-          backgroundSize: '4vw 4vw',
-          opacity: 0.05
-        }}
-        animate={{ backgroundPosition: ['0vw 0vw', '4vw 4vw'] }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
-      />
-      
-      {/* Dynamic Accent / Background Shape */}
-      <motion.div
-        className="absolute z-0 rounded-full blur-3xl opacity-30"
-        style={{ backgroundColor: 'var(--color-primary)' }}
-        animate={{
-          x: ['-20vw', '50vw', '70vw', '20vw', '80vw', '30vw'][currentScene],
-          y: ['-20vh', '30vh', '-10vh', '60vh', '10vh', '40vh'][currentScene],
-          width: ['60vw', '80vw', '50vw', '60vw', '70vw', '50vw'][currentScene],
-          height: ['60vw', '80vw', '50vw', '60vw', '70vw', '50vw'][currentScene],
-        }}
-        transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-      />
+        className="absolute inset-0 z-0 flex items-center justify-center opacity-5 overflow-hidden"
+      >
+        <motion.div 
+          className="absolute w-[120vw] h-[150vh] origin-center"
+          animate={{ rotate: currentScene % 2 === 0 ? -15 : -10 }}
+          transition={{ duration: 3, ease: customEase }}
+        >
+          {/* Panel 1 */}
+          <motion.div
+            className="absolute top-0 bottom-0 left-[20%] w-[15vw]"
+            style={{ backgroundColor: 'var(--ls4g-dark)' }}
+            animate={{ x: ['0vw', '5vw', '-5vw', '10vw', '0vw', '-10vw'][currentScene] }}
+            transition={{ duration: 2.5, ease: customEase }}
+          />
+          {/* Panel 2 */}
+          <motion.div
+            className="absolute top-0 bottom-0 left-[35%] w-[20vw]"
+            style={{ backgroundColor: 'var(--ls4g-blue)' }}
+            animate={{ x: ['0vw', '-5vw', '5vw', '-10vw', '5vw', '10vw'][currentScene] }}
+            transition={{ duration: 2.8, ease: customEase }}
+          />
+          {/* Panel 3 */}
+          <motion.div
+            className="absolute top-0 bottom-0 left-[55%] w-[10vw]"
+            style={{ backgroundColor: 'var(--ls4g-blue-dark)' }}
+            animate={{ x: ['0vw', '10vw', '-10vw', '0vw', '-5vw', '5vw'][currentScene] }}
+            transition={{ duration: 3.1, ease: customEase }}
+          />
+        </motion.div>
+      </motion.div>
 
       {/* Sidebar motif element (persists but changes width) */}
       <motion.div 
-        className="absolute top-0 bottom-0 left-0 z-10 shadow-2xl"
-        style={{ backgroundColor: 'var(--color-sidebar)' }}
+        className="absolute top-0 bottom-0 left-0 z-10 border-r"
+        style={{ 
+          backgroundColor: 'var(--ls4g-dark-surface)',
+          borderColor: 'var(--ls4g-dark)'
+        }}
         animate={{
           width: ['0vw', '100vw', '15vw', '15vw', '15vw', '0vw'][currentScene],
           opacity: currentScene === 0 || currentScene === 5 ? 0 : 1
         }}
-        transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 1.2, ease: customEase }}
       >
         <motion.div 
           className="absolute top-[4vh] left-[3vw] flex flex-col gap-[2vh]"
@@ -68,11 +82,11 @@ export default function VideoTemplate() {
           transition={{ delay: 0.5 }}
         >
           {/* Fake sidebar items */}
-          <div className="w-[8vw] h-[1.5vh] bg-white/10 rounded-sm mb-[2vh]" />
+          <div className="w-[8vw] h-[1.5vh] rounded-sm mb-[2vh]" style={{ backgroundColor: 'var(--ls4g-blue-dark)' }} />
           {[...Array(6)].map((_, i) => (
             <div key={i} className="flex items-center gap-[1vw]">
-              <div className="w-[1.2vw] h-[1.2vw] bg-white/20 rounded-sm" />
-              <div className="w-[6vw] h-[1vh] bg-white/10 rounded-sm" />
+              <div className="w-[1.2vw] h-[1.2vw] rounded-sm opacity-50" style={{ backgroundColor: 'var(--ls4g-blue)' }} />
+              <div className="w-[6vw] h-[1vh] rounded-sm opacity-20" style={{ backgroundColor: 'var(--ls4g-white)' }} />
             </div>
           ))}
         </motion.div>

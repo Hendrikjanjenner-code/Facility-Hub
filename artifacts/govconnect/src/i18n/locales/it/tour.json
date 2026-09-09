@@ -8,7 +8,7 @@
   "restart": "Guarda il tour",
   "steps": {
     "welcome": {
-      "title": "Benvenuto in LetShare4gov",
+      "title": "Benvenuto in LetShare4Gov",
       "body": "Questo è il suo spazio di facility management: segnalazioni, prenotazioni, immobili, manutenzione e molto altro in un unico posto. In mezzo minuto le mostriamo l'essenziale."
     },
     "navigation": {

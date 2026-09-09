@@ -1,5 +1,5 @@
 {
-  "brand": "LetShare4gov",
+  "brand": "LetShare4Gov",
   "nav": {
     "dashboard": "Dashboard",
     "meldingen": "Tickets",
@@ -46,7 +46,7 @@
   },
   "guest": {
     "title": "Guest access",
-    "subtitle": "Enter the guest password to view LetShare4gov as a guest (read only).",
+    "subtitle": "Enter the guest password to view LetShare4Gov as a guest (read only).",
     "password": "Guest password",
     "submit": "View as guest",
     "failed": "Invalid password.",

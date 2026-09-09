@@ -1,5 +1,5 @@
 {
-  "brand": "LetShare4gov",
+  "brand": "LetShare4Gov",
   "nav": {
     "dashboard": "Dashboard",
     "meldingen": "Segnalazioni",
@@ -46,7 +46,7 @@
   },
   "guest": {
     "title": "Accesso ospite",
-    "subtitle": "Inserisci la password ospite per visualizzare LetShare4gov come ospite (sola lettura).",
+    "subtitle": "Inserisci la password ospite per visualizzare LetShare4Gov come ospite (sola lettura).",
     "password": "Password ospite",
     "submit": "Visualizza come ospite",
     "failed": "Password non valida.",

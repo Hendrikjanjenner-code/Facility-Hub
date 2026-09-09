@@ -11,9 +11,10 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Link } from "wouter";
-import { Building2, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import {
   Form,
   FormControl,
@@ -74,21 +75,27 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen grid md:grid-cols-2">
-      <div className="hidden md:flex flex-col justify-between bg-primary p-10 text-primary-foreground">
-        <div>
-          <div className="flex items-center gap-2 font-bold text-2xl mb-12">
-            <Building2 className="h-8 w-8" />
-            <span>{t("brand")}</span>
+      <div className="relative hidden md:flex flex-col justify-between bg-[#0D141A] p-10 text-white overflow-hidden">
+        {/* Geometric background inspired by the logo */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <div className="absolute top-1/4 -right-12 w-64 h-[120%] bg-[#121B22] transform -skew-x-12 opacity-80 mix-blend-overlay"></div>
+          <div className="absolute top-1/3 -right-8 w-48 h-[120%] bg-[#005FCC] transform -skew-x-12 opacity-20 mix-blend-screen"></div>
+          <div className="absolute top-1/2 -right-4 w-32 h-[120%] bg-[#0094FF] transform -skew-x-12 opacity-10 mix-blend-screen"></div>
+        </div>
+
+        <div className="relative z-10">
+          <div className="mb-12">
+            <Logo variant="light" />
           </div>
           <h1 className="text-4xl font-bold leading-tight max-w-md mb-6">
             {t("login.tagline")}
           </h1>
-          <p className="text-primary-foreground/80 text-lg max-w-md">
+          <p className="text-white/70 text-lg max-w-md font-medium">
             {t("login.taglineSub")}
           </p>
         </div>
-        <div className="text-sm text-primary-foreground/60">
-          &copy; {new Date().getFullYear()} LetShare4gov. {t("login.copyright")}
+        <div className="relative z-10 text-sm text-white/50">
+          &copy; {new Date().getFullYear()} LetShare4Gov. {t("login.copyright")}
         </div>
       </div>
       
@@ -96,9 +103,8 @@ export default function LoginPage() {
         <div className="absolute top-4 right-4 flex items-center gap-2">
           <LanguageSwitcher variant="outline" />
         </div>
-        <div className="md:hidden flex items-center gap-2 font-bold text-2xl text-primary mb-8">
-          <Building2 className="h-8 w-8" />
-          <span>{t("brand")}</span>
+        <div className="md:hidden mb-8">
+          <Logo />
         </div>
 
         <div className="mx-auto w-full max-w-md space-y-8">
@@ -118,7 +124,12 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>{t("login.email")}</FormLabel>
                     <FormControl>
-                      <Input placeholder={t("login.emailPlaceholder")} {...field} />
+                      <Input
+                        type="email"
+                        autoComplete="email"
+                        placeholder={t("login.emailPlaceholder")}
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -131,7 +142,12 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>{t("login.password")}</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input
+                        type="password"
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -173,9 +189,9 @@ export default function LoginPage() {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {demoAccounts.map((account) => (
+                {demoAccounts.map((account, index) => (
                   <Card 
-                    key={account.email} 
+                    key={`${account.email}-${index}`} 
                     className="cursor-pointer hover:border-primary/50 transition-colors"
                     onClick={() => handleDemoClick(account.email)}
                   >

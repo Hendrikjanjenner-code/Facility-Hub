@@ -50,8 +50,13 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" className="py-24 bg-background">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="contact" className="py-24 bg-[var(--ls4g-bg)] relative overflow-hidden">
+      {/* Decorative overlapping geometric paths */}
+      <div className="absolute top-1/2 left-0 -translate-y-1/2 w-[300px] h-[500px] opacity-[0.03] pointer-events-none transform -rotate-12">
+        <div className="absolute inset-0 bg-[#0D141A] transform -skew-x-12 -translate-x-20 rounded-3xl" />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
@@ -59,35 +64,40 @@ export function ContactSection() {
             viewport={{ once: true }}
             className="max-w-lg"
           >
-            <h2 className="text-4xl md:text-5xl font-display font-bold text-primary mb-6">
+            <h2 className="text-4xl md:text-5xl font-sans font-bold text-[var(--ls4g-text)] mb-6 tracking-tight">
               {t('contact.title')}
             </h2>
-            <p className="text-xl text-foreground/70 mb-8">
+            <p className="text-lg md:text-xl text-[var(--ls4g-text-muted)] mb-8">
               {t('contact.subtitle')}
             </p>
-            <div className="w-24 h-1 bg-accent rounded-full mb-8" />
+            <div className="w-16 h-1.5 bg-[var(--ls4g-blue)] rounded-full mb-8" />
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-border/50"
+            className="bg-white p-8 md:p-10 rounded-[24px] shadow-[var(--shadow-xl)] border border-[var(--ls4g-border)] relative"
           >
+            {/* Top-right corner geometric accent */}
+            <div className="absolute top-0 right-0 w-16 h-16 overflow-hidden rounded-tr-[24px] pointer-events-none">
+              <div className="absolute top-[-24px] right-[-24px] w-24 h-24 bg-[var(--ls4g-blue)] opacity-10 transform rotate-45" />
+            </div>
+
             {mutation.isSuccess ? (
               <div className="text-center py-12">
-                <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <CheckCircle2 className="w-10 h-10 text-green-500" />
+                <div className="w-20 h-20 bg-[var(--ls4g-bg)] rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle2 className="w-10 h-10 text-[var(--ls4g-blue)]" />
                 </div>
-                <h3 className="text-2xl font-display font-bold text-primary mb-4">
+                <h3 className="text-2xl font-sans font-bold text-[var(--ls4g-text)] mb-4">
                   {t('contact.form.successTitle')}
                 </h3>
-                <p className="text-foreground/70">
+                <p className="text-[var(--ls4g-text-muted)]">
                   {t('contact.form.successDesc')}
                 </p>
                 <Button 
                   variant="outline" 
-                  className="mt-8"
+                  className="mt-8 rounded-xl h-12 px-6 border-[var(--ls4g-border)] text-[var(--ls4g-text)] hover:bg-[var(--ls4g-bg)] font-semibold"
                   onClick={() => {
                     form.reset();
                     mutation.reset();
@@ -98,7 +108,7 @@ export function ContactSection() {
               </div>
             ) : (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                   {mutation.isError && (
                     <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl flex gap-3 items-start">
                       <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -108,15 +118,15 @@ export function ContactSection() {
                     </div>
                   )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <FormField
                       control={form.control}
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-primary font-medium">{t('contact.form.name')}</FormLabel>
+                          <FormLabel className="text-[var(--ls4g-text)] font-semibold">{t('contact.form.name')}</FormLabel>
                           <FormControl>
-                            <Input className="bg-background h-12 rounded-xl" {...field} />
+                            <Input className="bg-[var(--ls4g-bg)] border-[var(--ls4g-border)] h-12 rounded-[12px] focus-visible:ring-[var(--ls4g-blue)]" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -127,9 +137,9 @@ export function ContactSection() {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-primary font-medium">{t('contact.form.email')}</FormLabel>
+                          <FormLabel className="text-[var(--ls4g-text)] font-semibold">{t('contact.form.email')}</FormLabel>
                           <FormControl>
-                            <Input type="email" className="bg-background h-12 rounded-xl" {...field} />
+                            <Input type="email" className="bg-[var(--ls4g-bg)] border-[var(--ls4g-border)] h-12 rounded-[12px] focus-visible:ring-[var(--ls4g-blue)]" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -142,9 +152,9 @@ export function ContactSection() {
                     name="organization"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-primary font-medium">{t('contact.form.organization')}</FormLabel>
+                        <FormLabel className="text-[var(--ls4g-text)] font-semibold">{t('contact.form.organization')}</FormLabel>
                         <FormControl>
-                          <Input className="bg-background h-12 rounded-xl" {...field} />
+                          <Input className="bg-[var(--ls4g-bg)] border-[var(--ls4g-border)] h-12 rounded-[12px] focus-visible:ring-[var(--ls4g-blue)]" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -156,9 +166,9 @@ export function ContactSection() {
                     name="message"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-primary font-medium">{t('contact.form.message')}</FormLabel>
+                        <FormLabel className="text-[var(--ls4g-text)] font-semibold">{t('contact.form.message')}</FormLabel>
                         <FormControl>
-                          <Textarea className="bg-background min-h-[120px] rounded-xl resize-y" {...field} />
+                          <Textarea className="bg-[var(--ls4g-bg)] border-[var(--ls4g-border)] min-h-[120px] rounded-[12px] resize-y focus-visible:ring-[var(--ls4g-blue)]" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -167,7 +177,7 @@ export function ContactSection() {
 
                   <Button 
                     type="submit" 
-                    className="w-full h-14 rounded-xl text-base font-semibold bg-primary hover:bg-primary/90 text-white"
+                    className="w-full h-14 rounded-[12px] text-base font-semibold bg-[var(--ls4g-blue-dark)] hover:bg-[#004FA8] text-white transition-all shadow-sm"
                     disabled={mutation.isPending}
                   >
                     {mutation.isPending ? t('contact.form.submitting') : t('contact.form.submit')}

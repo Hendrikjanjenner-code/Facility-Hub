@@ -8,7 +8,7 @@
   "restart": "Ver la visita guiada",
   "steps": {
     "welcome": {
-      "title": "Bienvenido a LetShare4gov",
+      "title": "Bienvenido a LetShare4Gov",
       "body": "Este es su espacio de gestión de instalaciones: incidencias, reservas, inmuebles, mantenimiento y mucho más en un solo lugar. En medio minuto le mostramos lo esencial."
     },
     "navigation": {

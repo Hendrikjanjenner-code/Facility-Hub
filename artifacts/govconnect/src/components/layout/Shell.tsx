@@ -39,6 +39,7 @@ import { getIntlLocale } from "@/i18n";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ProductTour, startProductTour } from "@/components/tour/ProductTour";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -317,11 +318,8 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col md:flex-row bg-background">
       {/* Sidebar */}
       <aside className="hidden md:flex w-64 flex-col border-r bg-card h-screen sticky top-0">
-        <div className="flex h-14 items-center border-b px-6">
-          <div className="flex items-center gap-2 font-bold text-lg tracking-tight text-primary">
-            <Building2 className="h-5 w-5" />
-            <span>{t("brand")}</span>
-          </div>
+        <div className="flex h-14 items-center border-b px-4">
+          <Logo />
         </div>
         <div className="flex-1 overflow-auto py-4">
           <nav className="grid gap-1 px-4" data-tour="nav">
@@ -355,9 +353,8 @@ export function Shell({ children }: { children: ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
         <header className="flex h-14 items-center gap-4 border-b bg-card px-4 md:px-6 sticky top-0 z-10">
-          <div className="md:hidden flex-1 flex items-center gap-2 font-bold text-lg text-primary">
-            <Building2 className="h-5 w-5" />
-            <span>{t("brand")}</span>
+          <div className="md:hidden flex-1 flex items-center">
+            <Logo />
           </div>
           <div className="flex-1 hidden md:block" />
           <div className="flex items-center gap-4">

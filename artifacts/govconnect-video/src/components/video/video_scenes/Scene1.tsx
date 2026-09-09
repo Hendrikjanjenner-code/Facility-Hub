@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
+const customEase = [0.25, 1, 0.5, 1] as const;
+
 export function Scene1() {
   const [phase, setPhase] = useState(0);
 
@@ -16,63 +18,67 @@ export function Scene1() {
 
   return (
     <motion.div
-      className="absolute inset-0 flex items-center justify-center bg-white"
+      className="absolute inset-0 flex items-center justify-center"
+      style={{ backgroundColor: 'var(--ls4g-bg)' }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
-      transition={{ duration: 0.8 }}
+      exit={{ opacity: 0, scale: 1.05 }}
+      transition={{ duration: 0.8, ease: customEase }}
     >
       <div className="relative w-full h-full flex items-center justify-center">
         
-        {/* Chaos Element 1: Lijstjes */}
+        {/* Element 1: Losse lijstjes */}
         <motion.div
-          className="absolute shadow-lg bg-yellow-50 border border-yellow-200 p-[2vw] rounded-md transform -rotate-6"
-          initial={{ opacity: 0, y: '15vh', x: '-15vw', rotate: -20 }}
+          className="absolute shadow-sm p-[2vw] rounded-md transform -rotate-6"
+          style={{ backgroundColor: 'var(--ls4g-white)', border: '1px solid var(--ls4g-border)' }}
+          initial={{ opacity: 0, y: '15vh', x: '-15vw', rotate: -10 }}
           animate={
-            phase >= 4 ? { opacity: 0, y: '30vh', rotate: -40, scale: 0.8 } :
-            phase >= 1 ? { opacity: 1, y: '-5vh', x: '-10vw', rotate: -6 } : 
-            { opacity: 0, y: '15vh', x: '-15vw', rotate: -20 }
+            phase >= 4 ? { opacity: 0, y: '30vh', rotate: -20, scale: 0.95 } :
+            phase >= 1 ? { opacity: 1, y: '-5vh', x: '-10vw', rotate: -3 } : 
+            { opacity: 0, y: '15vh', x: '-15vw', rotate: -10 }
           }
-          transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+          transition={{ duration: 1.2, ease: customEase }}
         >
-          <div className="font-display font-bold text-[3vw] text-yellow-800">Losse lijstjes...</div>
-          <div className="w-[10vw] h-[1vh] bg-yellow-200 mt-[1vh] rounded-sm" />
-          <div className="w-[14vw] h-[1vh] bg-yellow-200 mt-[1vh] rounded-sm" />
-          <div className="w-[12vw] h-[1vh] bg-yellow-200 mt-[1vh] rounded-sm" />
+          <div className="font-display font-semibold text-[2.5vw]" style={{ color: 'var(--ls4g-text-muted)' }}>Losse lijstjes...</div>
+          <div className="w-[10vw] h-[1vh] mt-[1vh] rounded-sm" style={{ backgroundColor: 'var(--ls4g-border)' }} />
+          <div className="w-[14vw] h-[1vh] mt-[1vh] rounded-sm" style={{ backgroundColor: 'var(--ls4g-border)' }} />
+          <div className="w-[12vw] h-[1vh] mt-[1vh] rounded-sm" style={{ backgroundColor: 'var(--ls4g-border)' }} />
         </motion.div>
 
-        {/* Chaos Element 2: Mails */}
+        {/* Element 2: Mails */}
         <motion.div
-          className="absolute shadow-xl bg-white border border-gray-200 p-[2vw] rounded-lg transform rotate-3"
-          initial={{ opacity: 0, y: '20vh', x: '10vw', rotate: 15 }}
+          className="absolute shadow-md p-[2vw] rounded-lg transform rotate-3"
+          style={{ backgroundColor: 'var(--ls4g-white)', border: '1px solid var(--ls4g-border)' }}
+          initial={{ opacity: 0, y: '20vh', x: '10vw', rotate: 10 }}
           animate={
-            phase >= 4 ? { opacity: 0, y: '30vh', rotate: 30, scale: 0.8 } :
-            phase >= 2 ? { opacity: 1, y: '5vh', x: '10vw', rotate: 3 } : 
-            { opacity: 0, y: '20vh', x: '10vw', rotate: 15 }
+            phase >= 4 ? { opacity: 0, y: '30vh', rotate: 15, scale: 0.95 } :
+            phase >= 2 ? { opacity: 1, y: '5vh', x: '10vw', rotate: 2 } : 
+            { opacity: 0, y: '20vh', x: '10vw', rotate: 10 }
           }
-          transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+          transition={{ duration: 1.2, ease: customEase }}
         >
-          <div className="text-[1vw] text-gray-400 font-mono mb-[1vh]">From: beheerder@gemeente.nl</div>
-          <div className="font-display font-bold text-[3.5vw] text-blue-900">Eindeloze mails</div>
+          <div className="text-[1vw] font-mono mb-[1vh]" style={{ color: 'var(--ls4g-text-muted)' }}>From: beheerder@gemeente.nl</div>
+          <div className="font-display font-semibold text-[3vw]" style={{ color: 'var(--ls4g-text)' }}>Eindeloze mails</div>
         </motion.div>
 
-        {/* Chaos Element 3: Spreadsheets */}
+        {/* Element 3: Spreadsheets */}
         <motion.div
-          className="absolute shadow-2xl bg-green-50 border border-green-200 p-[2vw] rounded-sm"
-          initial={{ opacity: 0, scale: 0.5, y: '-5vh' }}
+          className="absolute shadow-lg p-[2vw] rounded-lg"
+          style={{ backgroundColor: 'var(--ls4g-dark)', color: 'var(--ls4g-white)' }}
+          initial={{ opacity: 0, scale: 0.9, y: '-5vh' }}
           animate={
-            phase >= 4 ? { opacity: 0, y: '20vh', scale: 1.2, filter: 'blur(20px)' } :
-            phase >= 3 ? { opacity: 1, scale: 1, y: '-2vh', x: '-2vw', rotate: -2 } : 
-            { opacity: 0, scale: 0.5, y: '-5vh' }
+            phase >= 4 ? { opacity: 0, y: '20vh', scale: 1.1 } :
+            phase >= 3 ? { opacity: 1, scale: 1, y: '-2vh', x: '-2vw', rotate: -1 } : 
+            { opacity: 0, scale: 0.9, y: '-5vh' }
           }
-          transition={{ duration: 0.9, type: 'spring', bounce: 0.3 }}
+          transition={{ duration: 1.2, ease: customEase }}
         >
           <div className="flex gap-[0.5vw] mb-[2vh]">
-            <div className="w-[3vw] h-[3vh] bg-green-200 rounded-sm" />
-            <div className="w-[8vw] h-[3vh] bg-green-200 rounded-sm" />
-            <div className="w-[5vw] h-[3vh] bg-green-200 rounded-sm" />
+            <div className="w-[3vw] h-[3vh] rounded-sm" style={{ backgroundColor: 'var(--ls4g-dark-surface)' }} />
+            <div className="w-[8vw] h-[3vh] rounded-sm" style={{ backgroundColor: 'var(--ls4g-blue)' }} />
+            <div className="w-[5vw] h-[3vh] rounded-sm" style={{ backgroundColor: 'var(--ls4g-dark-surface)' }} />
           </div>
-          <div className="font-display font-bold text-[4.5vw] text-green-900 leading-tight">
+          <div className="font-display font-semibold text-[3.5vw] leading-tight" style={{ color: 'var(--ls4g-white)' }}>
             Versnipperde<br/>spreadsheets
           </div>
         </motion.div>

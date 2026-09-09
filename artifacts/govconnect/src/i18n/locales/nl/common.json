@@ -1,5 +1,5 @@
 {
-  "brand": "LetShare4gov",
+  "brand": "LetShare4Gov",
   "nav": {
     "dashboard": "Dashboard",
     "meldingen": "Meldingen",
@@ -46,7 +46,7 @@
   },
   "guest": {
     "title": "Gasttoegang",
-    "subtitle": "Voer het gastwachtwoord in om LetShare4gov als gast te bekijken (alleen lezen).",
+    "subtitle": "Voer het gastwachtwoord in om LetShare4Gov als gast te bekijken (alleen lezen).",
     "password": "Gastwachtwoord",
     "submit": "Bekijk als gast",
     "failed": "Ongeldig wachtwoord.",

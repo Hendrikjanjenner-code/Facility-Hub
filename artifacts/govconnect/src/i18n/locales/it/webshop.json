@@ -106,7 +106,7 @@
   },
   "toast": {
     "addedToCart": "{{name}} aggiunto al carrello",
-    "budgetExceededDescription": "⚠️ Il tuo carrello supera il budget residuo ({{amount}}). Gli ordini sono bloccati finché il budget non viene modificato.",
+    "budgetExceededDescription": "⚠ Il tuo carrello supera il budget residuo ({{amount}}). Gli ordini sono bloccati finché il budget non viene modificato.",
     "qtyNotIncreased": "Quantità non aumentata",
     "qtyExceedsDescription": "L'aumento supera il budget residuo ({{remaining}}). Il deficit diventa {{shortfall}}. Contatta il tuo responsabile per modificare il budget.",
     "orderAutoApproved": "Ordine {{number}} approvato automaticamente",

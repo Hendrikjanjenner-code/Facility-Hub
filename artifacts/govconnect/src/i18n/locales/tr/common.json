@@ -1,5 +1,5 @@
 {
-  "brand": "LetShare4gov",
+  "brand": "LetShare4Gov",
   "nav": {
     "dashboard": "Panel",
     "meldingen": "Bildirimler",
@@ -46,7 +46,7 @@
   },
   "guest": {
     "title": "Misafir erişimi",
-    "subtitle": "LetShare4gov'u misafir olarak görüntülemek için misafir parolasını girin (salt okunur).",
+    "subtitle": "LetShare4Gov'u misafir olarak görüntülemek için misafir parolasını girin (salt okunur).",
     "password": "Misafir parolası",
     "submit": "Misafir olarak görüntüle",
     "failed": "Geçersiz parola.",

@@ -106,7 +106,7 @@
   },
   "toast": {
     "addedToCart": "{{name}} toegevoegd aan winkelmandje",
-    "budgetExceededDescription": "⚠️ Je winkelmandje overschrijdt het resterende budget ({{amount}}). Bestellen is geblokkeerd totdat het budget is aangepast.",
+    "budgetExceededDescription": "⚠ Je winkelmandje overschrijdt het resterende budget ({{amount}}). Bestellen is geblokkeerd totdat het budget is aangepast.",
     "qtyNotIncreased": "Hoeveelheid niet verhoogd",
     "qtyExceedsDescription": "Verhogen overschrijdt het resterende budget ({{remaining}}). Het tekort wordt {{shortfall}}. Neem contact op met je manager om het budget aan te passen.",
     "orderAutoApproved": "Bestelling {{number}} automatisch goedgekeurd",

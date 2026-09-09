@@ -106,7 +106,7 @@
   },
   "toast": {
     "addedToCart": "{{name}} added to cart",
-    "budgetExceededDescription": "⚠️ Your cart exceeds the remaining budget ({{amount}}). Ordering is blocked until the budget is adjusted.",
+    "budgetExceededDescription": "⚠ Your cart exceeds the remaining budget ({{amount}}). Ordering is blocked until the budget is adjusted.",
     "qtyNotIncreased": "Quantity not increased",
     "qtyExceedsDescription": "Increasing exceeds the remaining budget ({{remaining}}). The shortfall becomes {{shortfall}}. Contact your manager to adjust the budget.",
     "orderAutoApproved": "Order {{number}} approved automatically",

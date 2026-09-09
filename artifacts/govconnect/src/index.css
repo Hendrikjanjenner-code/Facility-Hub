@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Spline+Sans+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Geist:wght@400;500;600;700;800&display=swap');
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @plugin "@tailwindcss/typography";
@@ -70,6 +70,21 @@
 
 /* LIGHT MODE */
 :root {
+  --ls4g-dark: 210 33% 8%; /* #0D141A */
+  --ls4g-dark-surface: 206 30% 10%; /* #121B22 */
+  
+  --ls4g-blue: 205 100% 50%; /* #0094FF */
+  --ls4g-blue-dark: 212 100% 40%; /* #005FCC */
+
+  --ls4g-white: 0 0% 100%; /* #FFFFFF */
+  --ls4g-bg: 210 20% 97%; /* #F6F8FA */
+
+  --ls4g-text: 210 33% 8%; /* #0D141A */
+  --ls4g-text-muted: 206 9% 45%; /* #69757E */
+
+  --ls4g-border: 205 23% 88%; /* #DCE3E8 */
+  --ls4g-muted-bg: 207 31% 93%; /* #E9EEF2 */
+
   --button-outline: rgba(0, 0, 0, 0.1);
   --badge-outline: rgba(0, 0, 0, 0.05);
 
@@ -78,57 +93,57 @@
   --elevate-1: rgba(0, 0, 0, 0.03);
   --elevate-2: rgba(0, 0, 0, 0.08);
 
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
-  --border: 214 32% 91%;
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --card-border: 214 32% 91%;
+  --background: var(--ls4g-bg);
+  --foreground: var(--ls4g-text);
+  --border: var(--ls4g-border);
+  --card: var(--ls4g-white);
+  --card-foreground: var(--ls4g-text);
+  --card-border: var(--ls4g-border);
 
-  --sidebar: 222 47% 11%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-border: 222 47% 11%;
-  --sidebar-primary: 200 90% 30%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 217 33% 17%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-ring: 200 90% 30%;
+  --sidebar: var(--ls4g-dark);
+  --sidebar-foreground: var(--ls4g-white);
+  --sidebar-border: var(--ls4g-dark-surface);
+  --sidebar-primary: var(--ls4g-blue);
+  --sidebar-primary-foreground: var(--ls4g-white);
+  --sidebar-accent: var(--ls4g-dark-surface);
+  --sidebar-accent-foreground: var(--ls4g-white);
+  --sidebar-ring: var(--ls4g-blue);
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --popover-border: 214 32% 91%;
+  --popover: var(--ls4g-white);
+  --popover-foreground: var(--ls4g-text);
+  --popover-border: var(--ls4g-border);
 
-  --primary: 200 90% 30%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 214 32% 91%;
-  --secondary-foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
+  --primary: var(--ls4g-blue-dark);
+  --primary-foreground: var(--ls4g-white);
+  --secondary: var(--ls4g-muted-bg);
+  --secondary-foreground: var(--ls4g-text);
+  --muted: var(--ls4g-muted-bg);
+  --muted-foreground: var(--ls4g-text-muted);
+  --accent: var(--ls4g-muted-bg);
+  --accent-foreground: var(--ls4g-text);
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  --input: 214 32% 91%;
-  --ring: 200 90% 30%;
+  --destructive-foreground: var(--ls4g-white);
+  --input: var(--ls4g-border);
+  --ring: var(--ls4g-blue);
 
-  --chart-1: 200 90% 30%;
-  --chart-2: 17 88% 40%;
-  --chart-3: 160 60% 45%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 280 65% 60%;
+  --chart-1: var(--ls4g-blue);
+  --chart-2: var(--ls4g-blue-dark);
+  --chart-3: var(--ls4g-text-muted);
+  --chart-4: var(--ls4g-dark);
+  --chart-5: var(--ls4g-border);
 
-  --app-font-sans: 'Plus Jakarta Sans', sans-serif;
+  --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
-  --app-font-mono: 'Spline Sans Mono', monospace;
-  --radius: 0.5rem;
-  --shadow-2xs: 0px 2px 0px 0px hsl(200 90% 30% / 0.05);
-  --shadow-xs: 0px 2px 0px 0px hsl(200 90% 30% / 0.05);
-  --shadow-sm: 0px 2px 0px 0px hsl(200 90% 30% / 0.05), 0px 1px 2px -1px hsl(200 90% 30% / 0.05);
-  --shadow: 0px 2px 0px 0px hsl(200 90% 30% / 0.05), 0px 1px 2px -1px hsl(200 90% 30% / 0.05);
-  --shadow-md: 0px 2px 0px 0px hsl(200 90% 30% / 0.05), 0px 2px 4px -1px hsl(200 90% 30% / 0.05);
-  --shadow-lg: 0px 2px 0px 0px hsl(200 90% 30% / 0.05), 0px 4px 6px -1px hsl(200 90% 30% / 0.05);
-  --shadow-xl: 0px 2px 0px 0px hsl(200 90% 30% / 0.05), 0px 8px 10px -1px hsl(200 90% 30% / 0.05);
-  --shadow-2xl: 0px 2px 0px 0px hsl(200 90% 30% / 0.05);
+  --app-font-mono: ui-monospace, monospace;
+  --radius: 0.8rem;
+  --shadow-2xs: 0 1px 2px rgba(13, 20, 26, 0.05);
+  --shadow-xs: 0 1px 3px rgba(13, 20, 26, 0.05);
+  --shadow-sm: 0 2px 4px rgba(13, 20, 26, 0.05);
+  --shadow: 0 1px 3px rgba(13, 20, 26, 0.05), 0 4px 6px rgba(13, 20, 26, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(13, 20, 26, 0.05), 0 2px 4px -2px rgba(13, 20, 26, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(13, 20, 26, 0.05), 0 4px 6px -4px rgba(13, 20, 26, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(13, 20, 26, 0.05), 0 8px 10px -6px rgba(13, 20, 26, 0.05);
+  --shadow-2xl: 0 25px 50px -12px rgba(13, 20, 26, 0.05);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
 
@@ -142,6 +157,15 @@
 }
 
 .dark {
+  --ls4g-bg: 210 33% 8%; /* #0D141A */
+  --ls4g-white: 206 30% 10%; /* #121B22 */
+  
+  --ls4g-text: 210 20% 97%; /* #F6F8FA */
+  --ls4g-text-muted: 206 9% 65%;
+
+  --ls4g-border: 206 30% 15%;
+  --ls4g-muted-bg: 206 30% 15%;
+
   --button-outline: rgba(255, 255, 255, 0.1);
   --badge-outline: rgba(255, 255, 255, 0.05);
 
@@ -150,44 +174,44 @@
   --elevate-1: rgba(255, 255, 255, 0.04);
   --elevate-2: rgba(255, 255, 255, 0.09);
 
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
-  --border: 217 33% 17%;
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-  --card-border: 217 33% 17%;
+  --background: var(--ls4g-bg);
+  --foreground: var(--ls4g-text);
+  --border: var(--ls4g-border);
+  --card: var(--ls4g-white);
+  --card-foreground: var(--ls4g-text);
+  --card-border: var(--ls4g-border);
 
-  --sidebar: 222 47% 11%;
-  --sidebar-foreground: 210 40% 98%;
-  --sidebar-border: 217 33% 17%;
-  --sidebar-primary: 200 90% 40%;
+  --sidebar: var(--ls4g-white);
+  --sidebar-foreground: var(--ls4g-text);
+  --sidebar-border: var(--ls4g-border);
+  --sidebar-primary: var(--ls4g-blue);
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 217 33% 17%;
-  --sidebar-accent-foreground: 210 40% 98%;
-  --sidebar-ring: 200 90% 40%;
+  --sidebar-accent: var(--ls4g-border);
+  --sidebar-accent-foreground: var(--ls4g-text);
+  --sidebar-ring: var(--ls4g-blue);
 
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
-  --popover-border: 217 33% 17%;
+  --popover: var(--ls4g-white);
+  --popover-foreground: var(--ls4g-text);
+  --popover-border: var(--ls4g-border);
 
-  --primary: 200 90% 40%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
+  --primary: var(--ls4g-blue-dark);
+  --primary-foreground: 0 0% 100%;
+  --secondary: var(--ls4g-muted-bg);
+  --secondary-foreground: var(--ls4g-text);
+  --muted: var(--ls4g-muted-bg);
+  --muted-foreground: var(--ls4g-text-muted);
+  --accent: var(--ls4g-muted-bg);
+  --accent-foreground: var(--ls4g-text);
   --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --input: 217 33% 17%;
-  --ring: 200 90% 40%;
+  --destructive-foreground: 0 0% 100%;
+  --input: var(--ls4g-border);
+  --ring: var(--ls4g-blue);
   
-  --chart-1: 200 90% 40%;
-  --chart-2: 17 88% 50%;
-  --chart-3: 160 60% 45%;
-  --chart-4: 43 74% 66%;
-  --chart-5: 280 65% 60%;
+  --chart-1: var(--ls4g-blue);
+  --chart-2: var(--ls4g-blue-dark);
+  --chart-3: var(--ls4g-text-muted);
+  --chart-4: var(--ls4g-text);
+  --chart-5: var(--ls4g-border);
 
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.2);
   --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.2);
@@ -265,6 +289,17 @@
   .border.active-elevate-2:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 

@@ -13,7 +13,7 @@
   },
   "modules": {
     "title": "Everything in one overview",
-    "subtitle": "No more spreadsheets. From tickets to sustainability, all facility processes come together in LetShare4gov.",
+    "subtitle": "No more spreadsheets. From tickets to sustainability, all facility processes come together in LetShare4Gov.",
     "items": {
       "dashboard": {
         "title": "Dashboard",
@@ -75,7 +75,7 @@
   },
   "roles": {
     "title": "Built for everyone in your organization",
-    "subtitle": "Every role has specific needs. LetShare4gov adapts to the user.",
+    "subtitle": "Every role has specific needs. LetShare4Gov adapts to the user.",
     "items": {
       "eindgebruiker": {
         "title": "End User",
@@ -109,7 +109,7 @@
   },
   "contact": {
     "title": "Ready for the next step?",
-    "subtitle": "Leave your details and discover what LetShare4gov can do for your municipality.",
+    "subtitle": "Leave your details and discover what LetShare4Gov can do for your municipality.",
     "form": {
       "name": "Name",
       "email": "Email Address",
@@ -126,6 +126,6 @@
     }
   },
   "footer": {
-    "rights": "© {{year}} LetShare4gov. All rights reserved."
+    "rights": "© {{year}} LetShare4Gov. All rights reserved."
   }
 }
