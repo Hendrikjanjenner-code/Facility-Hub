@@ -1,0 +1,751 @@
+Je werkt aan het merk **LetShare4Gov**, een overheidsgerichte variant binnen de LetShare-productfamilie. Voer vanaf nu één consistente visuele identiteit door in **alle bestaande en nieuwe onderdelen van het project**: website, webapp, landingspagina’s, dashboards, animaties, video-assets, presentaties, social visuals, marketingpagina’s, leadgeneratiepagina’s, advertenties en overige commerciële uitingen.
+
+## 1. Merkpositionering
+
+LetShare4Gov moet visueel aanvoelen als:
+
+* professioneel
+* betrouwbaar
+* veilig
+* modern
+* technisch sterk
+* toegankelijk
+* geschikt voor overheid en publieke organisaties
+* premium SaaS
+* rustig en overzichtelijk
+* innovatief zonder futuristisch of speels te worden
+
+De uitstraling moet duidelijk aansluiten op de bestaande LetShare-identiteit, maar LetShare4Gov krijgt een iets meer institutionele en enterprise-gerichte uitstraling.
+
+Gebruik overal exact dezelfde merknaam:
+
+**LetShare4Gov**
+
+Gebruik dus niet:
+
+* Letshare4gov
+* LETSHARE4GOV
+* LetShare Gov
+* LetShare for Gov
+
+Tenzij hoofdletters functioneel noodzakelijk zijn in bijvoorbeeld een kleine UI-label.
+
+---
+
+## 2. Logo
+
+Gebruik het bestaande LetShare4Gov-logo als primaire merkidentiteit.
+
+Het logo bestaat visueel uit:
+
+* een abstract geometrisch beeldmerk opgebouwd uit overlappende verticale panelen
+* donkere / antraciete basiselementen
+* helder elektrisch blauw als accent
+* het woordmerk **LetShare4Gov**
+* “LetShare” en “Gov” in donkere of witte typografie afhankelijk van de achtergrond
+* de **4** in helder blauw als onderscheidend merkteken
+
+Behandel de blauwe “4” als een belangrijk herkenningselement binnen het merk.
+
+Gebruik het logo in verschillende contexten:
+
+### Op lichte achtergrond
+
+Donkere woordmarkering + blauwe 4.
+
+### Op donkere achtergrond
+
+Witte woordmarkering + blauwe 4.
+
+### Compact
+
+Alleen het beeldmerk wanneer er onvoldoende ruimte is.
+
+Plaats nooit:
+
+* slagschaduw achter het logo
+* glow-effecten
+* outlines
+* vervorming
+* gradients over het woordmerk
+* andere kleuren in het logo
+
+Zorg voor voldoende whitespace rondom het logo.
+
+---
+
+## 3. Kleurenpalet
+
+Gebruik een beperkt, consistent kleurenpalet.
+
+### Primary dark
+
+Gebruik voor:
+
+* tekst
+* headers
+* navigatie
+* donkere secties
+* premium/enterprise-uitstraling
+
+Richtkleur:
+
+`#0D141A`
+
+Alternatieve dark surface:
+
+`#121B22`
+
+### LetShare Blue
+
+Primaire accentkleur.
+
+Richtkleur:
+
+`#0094FF`
+
+Gebruik voor:
+
+* CTA-buttons
+* links
+* actieve UI-elementen
+* iconen
+* highlights
+* cijfers
+* de “4” in LetShare4Gov
+* grafische accenten
+* animatiehighlights
+
+### Deep Blue
+
+Gebruik als secundaire blauwe kleur:
+
+`#005FCC`
+
+Gebruik bijvoorbeeld voor:
+
+* hover states
+* gradients
+* grafieken
+* secundaire highlights
+
+### White
+
+`#FFFFFF`
+
+### Off-white / background
+
+`#F6F8FA`
+
+of
+
+`#F3F6F8`
+
+Gebruik voor lichte pagina-achtergronden.
+
+### Neutral grey
+
+Gebruik rustige neutrale grijstinten voor:
+
+* secundaire tekst
+* borders
+* cards
+* formulieren
+
+Bijvoorbeeld:
+
+`#69757E`
+
+`#DCE3E8`
+
+`#E9EEF2`
+
+Voorkom onnodige extra accentkleuren.
+
+Rood, groen en oranje uitsluitend gebruiken wanneer ze functioneel zijn, bijvoorbeeld voor foutmeldingen, status of waarschuwingen.
+
+---
+
+## 4. Gradients
+
+Gradients mogen subtiel worden gebruikt.
+
+Primaire gradient:
+
+`#005FCC → #00A3FF`
+
+of:
+
+`#0078E7 → #00B2FF`
+
+Gebruik gradients uitsluitend voor:
+
+* hero-accenten
+* abstracte achtergrondvormen
+* hover effects
+* motion graphics
+* subtiele interface-elementen
+
+Geen overdreven gradients over volledige pagina’s.
+
+---
+
+## 5. Typografie
+
+Gebruik een moderne sans-serif typografie.
+
+Voorkeursvolgorde:
+
+1. Inter
+2. Manrope
+3. Geist
+4. system-ui
+
+Gebruik bij voorkeur **Inter** wanneer beschikbaar.
+
+Typografie moet:
+
+* strak
+* zeer goed leesbaar
+* zakelijk
+* modern
+* rustig
+
+zijn.
+
+### Headings
+
+Gebruik:
+
+* medium
+* semibold
+* bold
+
+Grote headings mogen compact zijn qua line-height.
+
+Richtlijn:
+
+H1:
+
+* 52–72px desktop
+* 38–48px tablet
+* 32–40px mobiel
+
+H2:
+
+* 36–48px
+
+H3:
+
+* 24–32px
+
+Body:
+
+* 16–18px
+
+Small:
+
+* 13–15px
+
+Gebruik geen decoratieve fonts.
+
+---
+
+## 6. Algemene UI-stijl
+
+Alle interfaces moeten één visuele familie vormen.
+
+Gebruik:
+
+* ruime whitespace
+* duidelijke hiërarchie
+* grote rustige secties
+* subtiele borders
+* zachte hoeken
+* minimale schaduwen
+* hoogwaardige enterprise SaaS-uitstraling
+
+### Border radius
+
+Gebruik bij voorkeur:
+
+* cards: 16–20px
+* buttons: 10–14px
+* forms: 10–12px
+* grote visuele containers: 20–28px
+
+Vermijd extreem ronde pill-vormen, behalve waar functioneel.
+
+---
+
+## 7. Buttons
+
+### Primary CTA
+
+Achtergrond:
+
+`#0094FF`
+
+Tekst:
+
+`#FFFFFF`
+
+Hover:
+
+`#007FDD`
+
+Stijl:
+
+* medium of semibold
+* duidelijke padding
+* subtiele transition
+* geen zware shadow
+
+Voorbeelden:
+
+* Plan een demo
+* Ontdek LetShare4Gov
+* Neem contact op
+* Vraag toegang aan
+* Bekijk mogelijkheden
+
+### Secondary CTA
+
+Witte of transparante achtergrond met donkere tekst en subtiele border.
+
+Op donkere achtergronden:
+
+* transparant
+* witte border
+* witte tekst
+
+---
+
+## 8. Website
+
+Pas de volledige website aan deze huisstijl aan.
+
+Controleer specifiek:
+
+* navbar
+* hero
+* CTA’s
+* formuliercomponenten
+* pricing
+* cards
+* secties
+* footer
+* testimonials
+* productvisualisaties
+* security/privacy-secties
+* productfeatures
+* dashboards
+* login
+* eventuele adminomgeving
+* responsive states
+
+### Hero
+
+Gebruik bij voorkeur:
+
+* donkere tekst op lichte achtergrond
+  of
+* witte tekst op een zeer donkere achtergrond
+
+Voeg subtiele blauwe accenten toe.
+
+Vermijd:
+
+* drukke stockfoto’s
+* willekeurige illustraties
+* generieke startup-gradients
+
+Gebruik liever:
+
+* abstracte geometrische vormen
+* interface screenshots
+* dashboards
+* datavisualisatie
+* platformvisuals
+* motion graphics
+
+---
+
+## 9. Overheidspositionering
+
+Omdat LetShare4Gov gericht is op overheid en publieke organisaties, moeten de marketingpagina’s extra nadruk leggen op:
+
+* veiligheid
+* privacy
+* controle
+* governance
+* transparantie
+* Europese context
+* gegevensbescherming
+* betrouwbaarheid
+* compliance
+* toegankelijkheid
+* publieke samenwerking
+
+Visueel moet dit vertrouwen uitstralen, zonder dat de website eruitziet als een klassieke overheidswebsite.
+
+Dus:
+
+**enterprise SaaS + publieke sector**
+
+niet:
+
+**traditioneel overheidsportaal**
+
+---
+
+## 10. Animaties en motion design
+
+Alle animaties moeten onderdeel voelen van dezelfde merkidentiteit.
+
+Gebruik:
+
+* rustige beweging
+* gecontroleerde easing
+* korte maar hoogwaardige transitions
+* subtiele parallax
+* zachte fade-ins
+* slide-ins
+* mask reveals
+* interface-transitions
+* geometrische panelen geïnspireerd op het logo
+
+Animaties mogen het logo-idee gebruiken waarbij verschillende panelen over elkaar bewegen en uiteindelijk het LetShare4Gov-beeldmerk vormen.
+
+### Motionstijl
+
+Denk aan:
+
+* 300–700ms voor UI-animatie
+* 1–3 seconden voor grotere marketinganimaties
+* cubic-bezier easing
+* gecontroleerde versnelling en vertraging
+
+Vermijd:
+
+* bounce
+* cartoonanimaties
+* confetti
+* overmatige 3D
+* extreem snelle beweging
+* gimmicks
+
+### Logo-intro
+
+Maak indien relevant een korte logo-animatie:
+
+1. donkere geometrische panelen schuiven in beeld
+2. helder blauwe laag beweegt erdoorheen
+3. panelen lijnen uit tot het beeldmerk
+4. woordmerk “LetShare” verschijnt
+5. blauwe “4” verschijnt als accent
+6. “Gov” sluit de animatie af
+
+Totale duur ongeveer 2–3 seconden.
+
+---
+
+## 11. Marketingstijl
+
+Gebruik dezelfde huisstijl voor:
+
+* LinkedIn-posts
+* social cards
+* banners
+* whitepapers
+* one-pagers
+* campagnes
+* salespresentaties
+* eventmateriaal
+* e-mailheaders
+* video thumbnails
+* advertenties
+* brochures
+* case studies
+
+### Marketingvisuals
+
+Werk hoofdzakelijk met:
+
+* donkere vlakken
+* wit
+* elektrisch blauw
+* abstracte geometrische vormen
+* dashboards
+* interfacefragmenten
+* iconografie
+* grote typografie
+
+Houd de composities eenvoudig.
+
+Gebruik maximaal één dominante boodschap per visual.
+
+---
+
+## 12. Iconografie
+
+Gebruik moderne line icons.
+
+Voorkeur:
+
+* Lucide
+* Heroicons
+* vergelijkbare minimalistische icon set
+
+Eigenschappen:
+
+* consistente lijnbreedte
+* geen illustratieve cartoonstijl
+* grotendeels monochroom
+* blauw als accentkleur
+
+---
+
+## 13. Illustraties en grafische elementen
+
+Grafische vormen moeten geïnspireerd zijn op het logo.
+
+Gebruik bijvoorbeeld:
+
+* overlappende panelen
+* transparante vlakken
+* rechthoekige vormen
+* verticale kaarten
+* datablokken
+* subtiele perspectiefwerking
+
+Maak van deze geometrie een herkenbaar visueel systeem.
+
+Gebruik niet zomaar generieke blobs of cirkels.
+
+---
+
+## 14. Cards
+
+Cards hebben:
+
+* lichte of zeer donkere achtergrond
+* subtiele border
+* 16–20px radius
+* beperkte shadow
+* goede spacing
+
+Hover:
+
+* lichte beweging omhoog
+* border of accent mag blauw worden
+* geen overdreven schaalvergroting
+
+---
+
+## 15. Navigatie
+
+De navigatie moet rustig en premium zijn.
+
+Gebruik bijvoorbeeld:
+
+Logo links.
+
+Midden/rechts:
+
+* Platform
+* Oplossingen
+* Voor overheid
+* Security
+* Over LetShare
+* Contact
+
+Primaire CTA:
+**Plan een demo**
+
+Maak de navbar sticky wanneer dat UX-technisch logisch is.
+
+---
+
+## 16. Footer
+
+Gebruik bij voorkeur een donkere footer:
+
+`#0D141A`
+
+Met:
+
+* wit logo
+* blauw accent
+* lichte tekst
+* duidelijke kolommen
+* privacy
+* security
+* contact
+* voorwaarden
+* links naar LetShare
+
+---
+
+## 17. UX en toegankelijkheid
+
+De huisstijl mag nooit toegankelijkheid verslechteren.
+
+Zorg voor:
+
+* WCAG-conforme contrasten
+* duidelijke focus states
+* keyboard navigation
+* correcte labels
+* voldoende tekstgrootte
+* reduced-motion ondersteuning
+* goede responsive weergave
+
+Gebruik `prefers-reduced-motion` voor animaties.
+
+---
+
+## 18. Responsive design
+
+Alle huisstijlcomponenten moeten volledig responsive zijn.
+
+Controleer minimaal:
+
+* 375px mobiel
+* 768px tablet
+* 1024px laptop
+* 1440px desktop
+* 1920px brede schermen
+
+Typografie, spacing en grids moeten vloeiend schalen.
+
+---
+
+## 19. Design tokens
+
+Maak centrale design tokens zodat de huisstijl later gemakkelijk te beheren is.
+
+Gebruik CSS variables of theme tokens, bijvoorbeeld:
+
+```css
+:root {
+  --ls4g-dark: #0D141A;
+  --ls4g-dark-surface: #121B22;
+
+  --ls4g-blue: #0094FF;
+  --ls4g-blue-dark: #005FCC;
+
+  --ls4g-white: #FFFFFF;
+  --ls4g-bg: #F6F8FA;
+
+  --ls4g-text: #0D141A;
+  --ls4g-text-muted: #69757E;
+
+  --ls4g-border: #DCE3E8;
+
+  --ls4g-radius-sm: 10px;
+  --ls4g-radius-md: 16px;
+  --ls4g-radius-lg: 24px;
+}
+```
+
+Gebruik deze tokens consequent in plaats van willekeurige kleuren per component.
+
+---
+
+## 20. Component system
+
+Maak waar mogelijk herbruikbare componenten voor:
+
+* Button
+* Card
+* Section
+* Container
+* Logo
+* Navbar
+* Footer
+* FeatureCard
+* StatCard
+* Testimonial
+* SecurityBadge
+* CTASection
+* FormField
+* Modal
+* DashboardPanel
+
+Gebruik deze componenten overal opnieuw.
+
+---
+
+## 21. Bestaande code
+
+Analyseer eerst het volledige bestaande project.
+
+Inventariseer alle:
+
+* kleuren
+* fonts
+* componenten
+* knoppen
+* spacing
+* shadows
+* borders
+* animaties
+* achtergronden
+* logo’s
+* illustrations
+
+Vervang vervolgens inconsistenties zodat het hele project dezelfde LetShare4Gov-huisstijl gebruikt.
+
+Laat functionaliteit intact.
+
+Verander geen werkende backendlogica tenzij dit noodzakelijk is voor de visuele implementatie.
+
+---
+
+## 22. Codekwaliteit
+
+Maak geen snelle eenmalige CSS-overrides.
+
+Werk structureel.
+
+Gebruik:
+
+* centrale design tokens
+* consistente componenten
+* duidelijke class naming
+* bestaande frameworkconventies
+* theme-based styling
+
+Als het project Tailwind gebruikt:
+voeg de branding toe aan de Tailwind theme/config.
+
+Als het project CSS variables gebruikt:
+centraliseer alles in één themebestand.
+
+Als het project styled-components, shadcn, Material UI of een ander componentframework gebruikt:
+pas het theme op frameworkniveau aan.
+
+---
+
+## 23. Eindresultaat
+
+Na implementatie moet ieder scherm direct herkenbaar zijn als onderdeel van **LetShare4Gov**.
+
+De gebruiker moet overal dezelfde combinatie ervaren van:
+
+**LetShare-technologie**
++
+**enterprise SaaS**
++
+**overheidsvertrouwen**
++
+**security**
++
+**moderne eenvoud**
+
+Houd het visueel minimalistisch, high-end en consistent.
+
+Controleer uiteindelijk het volledige project en verwijder alle stijlen die niet meer binnen de LetShare4Gov-identiteit passen.
+
+Maak het eindresultaat geschikt voor een professionele commerciële lancering richting gemeenten, overheden, uitvoeringsorganisaties en andere publieke instellingen.
