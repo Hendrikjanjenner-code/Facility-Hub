@@ -1,0 +1,224 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "z7lp6u_XoUmVHwmFSqViq"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-03.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 3"
+description = "Text-to-speech audio: Finding the latest information should not mean chasing another colleague, or another update."
+logical_id = "693e85ce-c391-4a11-8297-a2cd77d94802"
+
+[[outputs]]
+id = "62l4Q2i6xS7Ag3dUh7GkZ"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-01.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 1"
+description = "Text-to-speech audio: Every day, public organisations depend on people who keep buildings, spaces and services running."
+logical_id = "923fae23-2966-43e3-a7ca-d741f25b4d2f"
+
+[[outputs]]
+id = "Ue9d_1JTFLQcJYmUdw4Zr"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-05.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 5"
+description = "Text-to-speech audio: Book meeting rooms and workspaces, and see the reservations that shape your day."
+logical_id = "4a1c94e8-d80d-4f7e-ac11-dafa02d585a4"
+
+[[outputs]]
+id = "KHn3O_nopg8o1bIJ-ad67"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-06.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 6"
+description = "Text-to-speech audio: Report issues and plan building maintenance, so teams can see what needs attention."
+logical_id = "72117010-1a4d-4f62-94d4-4341d1f4a38c"
+
+[[outputs]]
+id = "JMX5PcVj9J6VA0ZuQzdz8"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-11.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 11"
+description = "Text-to-speech audio: LetShare for Gov. Book a demo and discover a more connected working day."
+logical_id = "a57f4df7-26c6-42f2-937a-5502707899ed"
+
+[[outputs]]
+id = "Q1UzsgLjP00rhGXhBgKG6"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-07.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 7"
+description = "Text-to-speech audio: Register visitors and help your reception team prepare for the people arriving today."
+logical_id = "835ab15e-2c92-450e-9159-4174a23c43ae"
+
+[[outputs]]
+id = "Uf2pW2T-O32mAi7CZWEMi"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-04.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 4"
+description = "Text-to-speech audio: LetShare for Gov brings everyday facilities work together, with a shared overview for your team."
+logical_id = "4248a908-cba3-4334-bb20-ee1e6e7273a3"
+
+[[outputs]]
+id = "uJXfsLUXdEE7-FH_qMkyg"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-08.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 8"
+description = "Text-to-speech audio: Keep contracts and their documents organised, alongside the facilities work they support."
+logical_id = "d6c358e6-702b-4ae4-92cf-e385528a6156"
+
+[[outputs]]
+id = "HLktSEqPZEANhSPsQVDqG"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-10.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 10"
+description = "Text-to-speech audio: Less time searching. More focus on the places, people and services your organisation supports."
+logical_id = "799db153-c0f5-4352-9b3b-a2bccb64e77b"
+
+[[outputs]]
+id = "k-qP8IHhJ73WO72_sj-mI"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-02.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 2"
+description = "Text-to-speech audio: But scattered emails, paper notes and separate lists can make even simple work harder."
+logical_id = "21ab5bb9-9dae-457d-b5e1-32aeea5feb02"
+
+[[outputs]]
+id = "s7RZ2Aj591ZCE0DnTY6k6"
+uri = "file://attached_assets/generated_audio/letshare4gov/voice-09.mp3"
+type = "audio"
+title = "LetShare4Gov English narration 9"
+description = "Text-to-speech audio: See open requests and recent activity, with the context to decide what comes next."
+logical_id = "3b639044-c7b6-4b8f-bc5c-0e708fe67a2c"
+
+[[outputs]]
+id = "qEgK3Ke5z-I6EFaCvsdPL"
+uri = "file://attached_assets/generated_audio/letshare4gov/score.mp3"
+type = "audio"
+title = "generated_music"
+description = "Generated music: Understated cinematic documentary underscore for a professional film about people working in public buildings. Warm soft piano, restrained ambient strings, gentle acoustic pulse, 85 …"
+logical_id = "be8ea7fb-7cde-4813-9410-442049af4a2e"
+
+[[outputs]]
+id = "bSQNctCDa5hc_m30ZrNmR"
+uri = "file://media/letshare4gov-film/exports/LetShare4Gov_16x9_EN_NL.mp4"
+type = "video"
+title = "LetShare4Gov — 16:9 — Nederlandse ondertitels"
+description = "77 seconden • Engelse voice-over • AI-gegenereerde fotorealistische filmbeelden • MP4"
+logical_id = "48dde9e8-8e19-4868-ab4c-7b41588cb3e5"
+content_hash = "sha256:1d37d9effd8e0d445562c8eb6040822b346bf5a4ba89d820718c579408e77ab9"
+size = 72198881
+mtime_ms = 1789647319717
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:5544e550-66d8-46e4-8617-04ce1e1a4d9d/48dde9e8-8e19-4868-ab4c-7b41588cb3e5/9491d826-3b1e-47fc-87e6-93de56a2258e"
+storage_version_token = "1789647627043940"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "hR7tHJ4AXBTA_pKC4QVEy"
+uri = "file://media/letshare4gov-film/exports/LetShare4Gov_16x9_EN_PT.mp4"
+type = "video"
+title = "LetShare4Gov — 16:9 — Portugese ondertitels"
+description = "77 seconden • Engelse voice-over • AI-gegenereerde fotorealistische filmbeelden • MP4"
+logical_id = "e49a2c98-1bdc-4063-a3d8-1fabb7f365bc"
+content_hash = "sha256:4154144e6984d387b313df285ca4283f6c2ace82bfcee31ddde3eaa3705a050e"
+size = 72223108
+mtime_ms = 1789647321285
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:5544e550-66d8-46e4-8617-04ce1e1a4d9d/e49a2c98-1bdc-4063-a3d8-1fabb7f365bc/0633553f-fb3e-4a8a-bbba-f85f14a8a8eb"
+storage_version_token = "1789647628392834"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "XEXu2qdAH5WCorPA4c0eC"
+uri = "file://media/letshare4gov-film/exports/LetShare4Gov_9x16_EN_NL.mp4"
+type = "video"
+title = "LetShare4Gov — 9:16 — Nederlandse ondertitels"
+description = "77 seconden • Engelse voice-over • AI-gegenereerde fotorealistische filmbeelden • MP4"
+logical_id = "68ff0d2f-8283-40ff-afd0-5fb3894fdf5f"
+content_hash = "sha256:c89f914090885248c57eea57a442c1c3df9e501b5cb032276519013000f5b7f9"
+size = 61578539
+mtime_ms = 1789647461300
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:5544e550-66d8-46e4-8617-04ce1e1a4d9d/68ff0d2f-8283-40ff-afd0-5fb3894fdf5f/1418bb09-9251-45a2-aa98-bdd99f2e9de3"
+storage_version_token = "1789647629760004"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "0_9YSnOp7m2O91PH32BLX"
+uri = "file://media/letshare4gov-film/exports/LetShare4Gov_9x16_EN_PT.mp4"
+type = "video"
+title = "LetShare4Gov — 9:16 — Portugese ondertitels"
+description = "77 seconden • Engelse voice-over • AI-gegenereerde fotorealistische filmbeelden • MP4"
+logical_id = "6f77d5f1-79a1-4a80-8c48-565bbeaef096"
+content_hash = "sha256:042ea60d1cae6fd932554d042d0ca96b7035375d1c913e30fbfc02ae5b94022d"
+size = 61618653
+mtime_ms = 1789647546952
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:5544e550-66d8-46e4-8617-04ce1e1a4d9d/6f77d5f1-79a1-4a80-8c48-565bbeaef096/ae657777-4a29-4a58-9c15-6577a6ccbc53"
+storage_version_token = "1789647630961009"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "3-0BD3BnHhqLWu5Frb4pE"
+uri = "file://media/letshare4gov-film/exports/LetShare4Gov_1x1_EN_NL.mp4"
+type = "video"
+title = "LetShare4Gov — 1:1 — Nederlandse ondertitels"
+description = "77 seconden • Engelse voice-over • AI-gegenereerde fotorealistische filmbeelden • MP4"
+logical_id = "ba5aa721-a8e2-405f-b65b-a70749cf1511"
+content_hash = "sha256:0f4335b83b11f4bee0be98e8d46386a5993dfc8e076762dfe6bd3ea089e18f71"
+size = 46094378
+mtime_ms = 1789647321673
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:5544e550-66d8-46e4-8617-04ce1e1a4d9d/ba5aa721-a8e2-405f-b65b-a70749cf1511/e3ab7d09-72a2-44d8-a7f4-62f7df9bf5b0"
+storage_version_token = "1789647632567725"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "JOhnImCNZNSJndvJsMUzE"
+uri = "file://media/letshare4gov-film/exports/LetShare4Gov_1x1_EN_PT.mp4"
+type = "video"
+title = "LetShare4Gov — 1:1 — Portugese ondertitels"
+description = "77 seconden • Engelse voice-over • AI-gegenereerde fotorealistische filmbeelden • MP4"
+logical_id = "6eb0290c-1cbb-4274-ac51-a984d54d883a"
+content_hash = "sha256:a94e400c37afe7e13f12217e0367c7eec28acce07bd8c0a192e574bd0194f58f"
+size = 46147357
+mtime_ms = 1789647322113
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:5544e550-66d8-46e4-8617-04ce1e1a4d9d/6eb0290c-1cbb-4274-ac51-a984d54d883a/9ae8fd8d-edd0-4ff5-8615-4ad2e4318f3b"
+storage_version_token = "1789647633726576"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "ZIynI3NcI7mDjudGhLk9Z"
+uri = "file://media/letshare4gov-film/exports/LetShare4Gov_4x5_EN_NL.mp4"
+type = "video"
+title = "LetShare4Gov — 4:5 — Nederlandse ondertitels"
+description = "77 seconden • Engelse voice-over • AI-gegenereerde fotorealistische filmbeelden • MP4"
+logical_id = "dbfcb0ed-5e28-492b-bc40-da680d047916"
+content_hash = "sha256:9dd815f9e2e3e23514da8a65376b9461345b98768da017dfc788d81007a922f2"
+size = 52862242
+mtime_ms = 1789647322481
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:5544e550-66d8-46e4-8617-04ce1e1a4d9d/dbfcb0ed-5e28-492b-bc40-da680d047916/ad41a883-2637-4634-80f4-d5efa49a24c0"
+storage_version_token = "1789647634970155"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "iGEYhi9QEduPlxQwTtc9m"
+uri = "file://media/letshare4gov-film/exports/LetShare4Gov_4x5_EN_PT.mp4"
+type = "video"
+title = "LetShare4Gov — 4:5 — Portugese ondertitels"
+description = "77 seconden • Engelse voice-over • AI-gegenereerde fotorealistische filmbeelden • MP4"
+logical_id = "f82217fe-d4e7-45c4-967a-8accaa909941"
+content_hash = "sha256:81ce5e7a55ba92601074da5321f9f6bb2d3bf593cac3d3939c86dc888027c96f"
+size = 52865253
+mtime_ms = 1789647322945
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:5544e550-66d8-46e4-8617-04ce1e1a4d9d/f82217fe-d4e7-45c4-967a-8accaa909941/b6c09323-094a-4dc8-b8b1-2d6c205c5919"
+storage_version_token = "1789647636092336"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "n4eXelRvskWQ6WJY1MaNK"
+uri = "file://media/letshare4gov-film/exports/LetShare4Gov_ondertitels_NL_PT.zip"
+type = "unspecified"
+title = "Losse ondertitels — Nederlands en Portugees"
+description = "SRT- en VTT-bestanden voor alle vier formaten, met korte gebruiksuitleg."
+logical_id = "a5e3fabf-40ef-4ebb-8392-30241c0be071"
+content_hash = "sha256:01dfd19849cde6c0ece0d3373929cd80d9ee40ff1b9b6ef0fabcc06cae0256ce"
+size = 4217
+mtime_ms = 1789647615460
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:5544e550-66d8-46e4-8617-04ce1e1a4d9d/a5e3fabf-40ef-4ebb-8392-30241c0be071/111e83e3-d3bc-4509-b1d7-89ab1e2b01af"
+storage_version_token = "1789647636598305"
+content_type = "application/octet-stream"

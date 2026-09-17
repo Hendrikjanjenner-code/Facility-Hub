@@ -1,0 +1,400 @@
+{
+  "title": "A more connected working day",
+  "brand": "LetShare4Gov",
+  "voice_language": "en-GB",
+  "total_duration": 77.0,
+  "slot_count": 11,
+  "timing_rule": "max(7.0, actual speech duration + 0.65); narration starts slot + 0.25",
+  "timeline": [
+    {
+      "id": 1,
+      "start": 0.0,
+      "duration": 7.0,
+      "speech_start": 0.25,
+      "speech_duration": 6.034286,
+      "speech_end": 6.284286,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-01.mp3"
+    },
+    {
+      "id": 2,
+      "start": 7.0,
+      "duration": 7.0,
+      "speech_start": 7.25,
+      "speech_duration": 5.250612,
+      "speech_end": 12.500612,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-02.mp3"
+    },
+    {
+      "id": 3,
+      "start": 14.0,
+      "duration": 7.0,
+      "speech_start": 14.25,
+      "speech_duration": 5.093878,
+      "speech_end": 19.343878,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-03.mp3"
+    },
+    {
+      "id": 4,
+      "start": 21.0,
+      "duration": 7.0,
+      "speech_start": 21.25,
+      "speech_duration": 5.929796,
+      "speech_end": 27.179796,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-04.mp3"
+    },
+    {
+      "id": 5,
+      "start": 28.0,
+      "duration": 7.0,
+      "speech_start": 28.25,
+      "speech_duration": 4.414694,
+      "speech_end": 32.664694,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-05.mp3"
+    },
+    {
+      "id": 6,
+      "start": 35.0,
+      "duration": 7.0,
+      "speech_start": 35.25,
+      "speech_duration": 4.780408,
+      "speech_end": 40.030408,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-06.mp3"
+    },
+    {
+      "id": 7,
+      "start": 42.0,
+      "duration": 7.0,
+      "speech_start": 42.25,
+      "speech_duration": 4.493061,
+      "speech_end": 46.743061,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-07.mp3"
+    },
+    {
+      "id": 8,
+      "start": 49.0,
+      "duration": 7.0,
+      "speech_start": 49.25,
+      "speech_duration": 5.381224,
+      "speech_end": 54.631224,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-08.mp3"
+    },
+    {
+      "id": 9,
+      "start": 56.0,
+      "duration": 7.0,
+      "speech_start": 56.25,
+      "speech_duration": 5.276735,
+      "speech_end": 61.526735,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-09.mp3"
+    },
+    {
+      "id": 10,
+      "start": 63.0,
+      "duration": 7.0,
+      "speech_start": 63.25,
+      "speech_duration": 6.29551,
+      "speech_end": 69.54551,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-10.mp3"
+    },
+    {
+      "id": 11,
+      "start": 70.0,
+      "duration": 7.0,
+      "speech_start": 70.25,
+      "speech_duration": 4.858776,
+      "speech_end": 75.108776,
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-11.mp3"
+    }
+  ],
+  "sources": {
+    "shot-01-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-01-landscape_2.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-01-landscape_2.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 25177860,
+      "mtime_ns": 1789645270961375166
+    },
+    "shot-02-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-02-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-02-landscape.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 6238000,
+      "mtime_ns": 1789644874017897830
+    },
+    "shot-03-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-03-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-03-landscape.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 7015258,
+      "mtime_ns": 1789645008177470634
+    },
+    "shot-04-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-04-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-04-landscape.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 14572644,
+      "mtime_ns": 1789645124242707820
+    },
+    "shot-05-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-05-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-05-landscape.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 22233298,
+      "mtime_ns": 1789645522129327803
+    },
+    "shot-06-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-06-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-06-landscape.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 5028756,
+      "mtime_ns": 1789645645545400884
+    },
+    "shot-07-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-07-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-07-landscape.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 6952252,
+      "mtime_ns": 1789645748821258928
+    },
+    "shot-08-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-08-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-08-landscape.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 12618026,
+      "mtime_ns": 1789645869665771939
+    },
+    "shot-09-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-09-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-09-landscape.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 9047676,
+      "mtime_ns": 1789646013953225254
+    },
+    "shot-10-landscape": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-10-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-10-landscape.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 8.0,
+      "size": 13715005,
+      "mtime_ns": 1789646138745070753
+    },
+    "shot-01-portrait": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-01-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-01-portrait.mp4",
+      "width": 1080,
+      "height": 1920,
+      "duration": 8.0,
+      "size": 16110679,
+      "mtime_ns": 1789644760657682538
+    },
+    "shot-04-portrait": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-04-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-04-portrait.mp4",
+      "width": 1080,
+      "height": 1920,
+      "duration": 8.0,
+      "size": 11494453,
+      "mtime_ns": 1789645405397610334
+    },
+    "shot-05-portrait": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-05-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-05-portrait.mp4",
+      "width": 1080,
+      "height": 1920,
+      "duration": 8.0,
+      "size": 6571571,
+      "mtime_ns": 1789646943509138335
+    },
+    "shot-07-portrait": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-07-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-07-portrait.mp4",
+      "width": 1080,
+      "height": 1920,
+      "duration": 8.0,
+      "size": 4976873,
+      "mtime_ns": 1789647076917349652
+    },
+    "shot-08-portrait": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-08-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-08-portrait.mp4",
+      "width": 1080,
+      "height": 1920,
+      "duration": 8.0,
+      "size": 11079714,
+      "mtime_ns": 1789647211785100147
+    },
+    "shot-10-portrait": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-10-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-10-portrait.mp4",
+      "width": 1080,
+      "height": 1920,
+      "duration": 8.0,
+      "size": 8323299,
+      "mtime_ns": 1789646252453174130
+    },
+    "9x16-shot-01": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-01-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-01-portrait.mp4",
+      "duration": 8.0,
+      "size": 16110679,
+      "mtime_ns": 1789644760657682538
+    },
+    "9x16-shot-02": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-02-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-02-landscape.mp4",
+      "duration": 8.0,
+      "size": 6238000,
+      "mtime_ns": 1789644874017897830
+    },
+    "9x16-shot-03": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-03-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-03-landscape.mp4",
+      "duration": 8.0,
+      "size": 7015258,
+      "mtime_ns": 1789645008177470634
+    },
+    "9x16-shot-04": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-04-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-04-portrait.mp4",
+      "duration": 8.0,
+      "size": 11494453,
+      "mtime_ns": 1789645405397610334
+    },
+    "9x16-shot-05": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-05-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-05-portrait.mp4",
+      "duration": 8.0,
+      "size": 6571571,
+      "mtime_ns": 1789646943509138335
+    },
+    "9x16-shot-06": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-06-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-06-landscape.mp4",
+      "duration": 8.0,
+      "size": 5028756,
+      "mtime_ns": 1789645645545400884
+    },
+    "9x16-shot-07": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-07-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-07-portrait.mp4",
+      "duration": 8.0,
+      "size": 4976873,
+      "mtime_ns": 1789647076917349652
+    },
+    "9x16-shot-08": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-08-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-08-portrait.mp4",
+      "duration": 8.0,
+      "size": 11079714,
+      "mtime_ns": 1789647211785100147
+    },
+    "9x16-shot-09": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-09-landscape.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-09-landscape.mp4",
+      "duration": 8.0,
+      "size": 9047676,
+      "mtime_ns": 1789646013953225254
+    },
+    "9x16-shot-10": {
+      "path": "/home/runner/workspace/attached_assets/generated_videos/letshare4gov/shot-10-portrait.mp4",
+      "relative_path": "attached_assets/generated_videos/letshare4gov/shot-10-portrait.mp4",
+      "duration": 8.0,
+      "size": 8323299,
+      "mtime_ns": 1789646252453174130
+    }
+  },
+  "crop_centres": {
+    "16x9": {
+      "1": 0.5,
+      "2": 0.5,
+      "3": 0.5,
+      "4": 0.5,
+      "5": 0.5,
+      "6": 0.5,
+      "7": 0.5,
+      "8": 0.5,
+      "9": 0.5,
+      "10": 0.5
+    },
+    "9x16": {
+      "1": 0.5,
+      "2": 0.49,
+      "3": 0.52,
+      "4": 0.5,
+      "5": 0.5,
+      "6": 0.48,
+      "7": 0.51,
+      "8": 0.5,
+      "9": 0.52,
+      "10": 0.5
+    },
+    "1x1": {
+      "1": 0.5,
+      "2": 0.49,
+      "3": 0.52,
+      "4": 0.5,
+      "5": 0.5,
+      "6": 0.48,
+      "7": 0.51,
+      "8": 0.5,
+      "9": 0.52,
+      "10": 0.5
+    },
+    "4x5": {
+      "1": 0.5,
+      "2": 0.49,
+      "3": 0.52,
+      "4": 0.5,
+      "5": 0.5,
+      "6": 0.48,
+      "7": 0.51,
+      "8": 0.5,
+      "9": 0.52,
+      "10": 0.5
+    }
+  },
+  "targets": {
+    "16x9": [
+      1920,
+      1080
+    ],
+    "9x16": [
+      1080,
+      1920
+    ],
+    "1x1": [
+      1080,
+      1080
+    ],
+    "4x5": [
+      1080,
+      1350
+    ]
+  },
+  "caption_safe_margins_px": {
+    "16x9": 82,
+    "9x16": 300,
+    "1x1": 180,
+    "4x5": 220
+  },
+  "cache_key": "bfa4d803cac0c203"
+}

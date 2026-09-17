@@ -1,0 +1,6 @@
+media/letshare4gov-film/exports/LetShare4Gov_16x9_EN_NL.mp4 filter=lfs diff=lfs merge=lfs -text
+media/letshare4gov-film/exports/LetShare4Gov_16x9_EN_PT.mp4 filter=lfs diff=lfs merge=lfs -text
+media/letshare4gov-film/exports/LetShare4Gov_4x5_EN_NL.mp4 filter=lfs diff=lfs merge=lfs -text
+media/letshare4gov-film/exports/LetShare4Gov_4x5_EN_PT.mp4 filter=lfs diff=lfs merge=lfs -text
+media/letshare4gov-film/exports/LetShare4Gov_9x16_EN_NL.mp4 filter=lfs diff=lfs merge=lfs -text
+media/letshare4gov-film/exports/LetShare4Gov_9x16_EN_PT.mp4 filter=lfs diff=lfs merge=lfs -text

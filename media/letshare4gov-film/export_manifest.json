@@ -1,0 +1,122 @@
+{
+  "film": "LetShare4Gov",
+  "generated_by": "media/letshare4gov-film/render.py",
+  "total_duration": 77.0,
+  "outputs": [
+    "media/letshare4gov-film/exports/LetShare4Gov_16x9_EN_NL.mp4",
+    "media/letshare4gov-film/exports/LetShare4Gov_16x9_EN_PT.mp4",
+    "media/letshare4gov-film/exports/LetShare4Gov_1x1_EN_NL.mp4",
+    "media/letshare4gov-film/exports/LetShare4Gov_1x1_EN_PT.mp4",
+    "media/letshare4gov-film/exports/LetShare4Gov_4x5_EN_NL.mp4",
+    "media/letshare4gov-film/exports/LetShare4Gov_4x5_EN_PT.mp4",
+    "media/letshare4gov-film/exports/LetShare4Gov_9x16_EN_NL.mp4",
+    "media/letshare4gov-film/exports/LetShare4Gov_9x16_EN_PT.mp4"
+  ],
+  "captions": [
+    "media/letshare4gov-film/captions_16x9_NL.ass",
+    "media/letshare4gov-film/captions_16x9_PT.ass",
+    "media/letshare4gov-film/captions_1x1_NL.ass",
+    "media/letshare4gov-film/captions_1x1_PT.ass",
+    "media/letshare4gov-film/captions_4x5_NL.ass",
+    "media/letshare4gov-film/captions_4x5_PT.ass",
+    "media/letshare4gov-film/captions_9x16_NL.ass",
+    "media/letshare4gov-film/captions_9x16_PT.ass",
+    "media/letshare4gov-film/captions_NL.srt",
+    "media/letshare4gov-film/captions_NL.vtt",
+    "media/letshare4gov-film/captions_PT.srt",
+    "media/letshare4gov-film/captions_PT.vtt"
+  ],
+  "timeline": "media/letshare4gov-film/render_timeline.json",
+  "audio": {
+    "narration": "normalized loudnorm I=-16 TP=-1.5 LRA=11",
+    "score": "attached_assets/generated_audio/letshare4gov/score.mp3 at volume 0.08",
+    "source_shot_audio": "muted",
+    "sequencing": "48 kHz stereo PCM; eleven non-overlapping segments at exact sample offsets, mixed with instrumental score"
+  },
+  "video": {
+    "codec": "H.264 libx264",
+    "pixel_format": "yuv420p",
+    "audio_codec": "AAC",
+    "faststart": true,
+    "threads": 3
+  },
+  "verified_outputs": [
+    {
+      "path": "media/letshare4gov-film/exports/LetShare4Gov_16x9_EN_NL.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 77.0,
+      "audio_duration": 77.0,
+      "bytes": 72198881,
+      "sha256": "1d37d9effd8e0d445562c8eb6040822b346bf5a4ba89d820718c579408e77ab9"
+    },
+    {
+      "path": "media/letshare4gov-film/exports/LetShare4Gov_16x9_EN_PT.mp4",
+      "width": 1920,
+      "height": 1080,
+      "duration": 77.0,
+      "audio_duration": 77.0,
+      "bytes": 72223108,
+      "sha256": "4154144e6984d387b313df285ca4283f6c2ace82bfcee31ddde3eaa3705a050e"
+    },
+    {
+      "path": "media/letshare4gov-film/exports/LetShare4Gov_1x1_EN_NL.mp4",
+      "width": 1080,
+      "height": 1080,
+      "duration": 77.0,
+      "audio_duration": 77.0,
+      "bytes": 46094378,
+      "sha256": "0f4335b83b11f4bee0be98e8d46386a5993dfc8e076762dfe6bd3ea089e18f71"
+    },
+    {
+      "path": "media/letshare4gov-film/exports/LetShare4Gov_1x1_EN_PT.mp4",
+      "width": 1080,
+      "height": 1080,
+      "duration": 77.0,
+      "audio_duration": 77.0,
+      "bytes": 46147357,
+      "sha256": "a94e400c37afe7e13f12217e0367c7eec28acce07bd8c0a192e574bd0194f58f"
+    },
+    {
+      "path": "media/letshare4gov-film/exports/LetShare4Gov_4x5_EN_NL.mp4",
+      "width": 1080,
+      "height": 1350,
+      "duration": 77.0,
+      "audio_duration": 77.0,
+      "bytes": 52862242,
+      "sha256": "9dd815f9e2e3e23514da8a65376b9461345b98768da017dfc788d81007a922f2"
+    },
+    {
+      "path": "media/letshare4gov-film/exports/LetShare4Gov_4x5_EN_PT.mp4",
+      "width": 1080,
+      "height": 1350,
+      "duration": 77.0,
+      "audio_duration": 77.0,
+      "bytes": 52865253,
+      "sha256": "81ce5e7a55ba92601074da5321f9f6bb2d3bf593cac3d3939c86dc888027c96f"
+    },
+    {
+      "path": "media/letshare4gov-film/exports/LetShare4Gov_9x16_EN_NL.mp4",
+      "width": 1080,
+      "height": 1920,
+      "duration": 77.0,
+      "audio_duration": 77.0,
+      "bytes": 61578539,
+      "sha256": "c89f914090885248c57eea57a442c1c3df9e501b5cb032276519013000f5b7f9"
+    },
+    {
+      "path": "media/letshare4gov-film/exports/LetShare4Gov_9x16_EN_PT.mp4",
+      "width": 1080,
+      "height": 1920,
+      "duration": 77.0,
+      "audio_duration": 77.0,
+      "bytes": 61618653,
+      "sha256": "042ea60d1cae6fd932554d042d0ca96b7035375d1c913e30fbfc02ae5b94022d"
+    }
+  ],
+  "source_manifest": "attached_assets/generated_videos/letshare4gov/shots.json",
+  "latest_render_cache_key": "bfa4d803cac0c203",
+  "latest_render_ratios": [
+    "9x16"
+  ]
+}

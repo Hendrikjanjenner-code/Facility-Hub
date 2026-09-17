@@ -4,3 +4,5 @@
 - [cors string origin gotcha](cors-package-gotcha.md) — `cors({origin: "url"})` sends the header to every origin; use array form + startup validation rejecting `*`.
 - [Express router guard scoping](express-router-guard-scoping.md) — a bare `router.use(requireRole)` leaks into later-mounted routers; always scope guards to path prefixes.
 - [Email outbox reviewer requirements](email-outbox-reviewer.md) — reviewer enforces: no hard retry cap, optimistic lastAttemptAt-match concurrency, hourly queue interval, startup migration, lifecycle cleanup on renewal/deactivation/deletion.
+- [Media generation batching](media-generation-batching.md) — speech and music share a per-Repl rate limit; batch starts and retry only failed segments.
+- [Film audio timing](film-audio-timing.md) — valid duration is not proof of sequenced narration; verify sample placement before mixing.

@@ -1,0 +1,222 @@
+[
+  {
+    "id": "shot-01-landscape",
+    "description": "people arriving at contemporary European civic building",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-01-landscape_2.mp4",
+    "prompt": "Photorealistic live action, cinematic video. Fictional adult professionals arriving at a contemporary European civic building in the morning. Plain unmarked glass facade, no signs, no lettering, no text above doors. Natural daylight, elegant architectural details. Color palette featuring navy blue, restrained blue accents, and neutrals. No direct address.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-01-portrait",
+    "description": "people arriving at contemporary European civic building",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-01-portrait.mp4",
+    "prompt": "Photorealistic live action, cinematic video. Fictional adult professionals arriving at a contemporary European civic building in the morning. Natural daylight, elegant architectural details. Color palette featuring navy blue, restrained blue accents, and neutrals. No animation, no text, no direct address.",
+    "settings": {
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-02-landscape",
+    "description": "facilities coordinator distracted by paper folders and work on desk",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-02-landscape.mp4",
+    "prompt": "Photorealistic live action, cinematic video. A facilities coordinator looking slightly distracted by a messy desk covered in paper folders and work documents. Medium shot, important action composed in the central third of the frame. Neutral and navy blue color palette, realistic office lighting. No text, no animation.",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-03-landscape",
+    "description": "colleague searching physical folders for information",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-03-landscape.mp4",
+    "prompt": "Photorealistic live action, cinematic video. An office colleague actively searching through physical paper folders for information. Medium close-up, important action composed in the central third of the frame. Neutral and restrained blue tones, realistic office environment. No text, no animation, no logos.",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-04-landscape",
+    "description": "small team aligning around laptop (screen NOT shown)",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-04-landscape.mp4",
+    "prompt": "Photorealistic live action, cinematic video. A small team of professionals collaborating and aligning around a laptop in a modern office space. The laptop screen is facing away from the camera and is not shown. Navy blue and neutral color palette, natural lighting. No text, no animation.",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-04-portrait",
+    "description": "small team aligning around laptop (screen NOT shown)",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-04-portrait.mp4",
+    "prompt": "Photorealistic live action, cinematic video. A small team of professionals collaborating and aligning around a laptop in a modern office space. The laptop screen is facing away from the camera and is not shown. Navy blue and neutral color palette, natural lighting. No text, no animation.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing, ui, screens",
+    "settings": {
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-05-landscape",
+    "description": "staff preparing a real meeting room",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-05-landscape.mp4",
+    "prompt": "Photorealistic live action, cinematic video. Staff preparing a real meeting room, arranging plain chairs and tables. Medium shot, important action composed in the central third of the frame. Navy blue and neutral color palette, realistic office lighting. No text, no animation.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-06-landscape",
+    "description": "technician inspecting building corridor fixture without unsafe activity",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-06-landscape.mp4",
+    "prompt": "Photorealistic live action, cinematic video. A technician inspecting a building corridor fixture safely from the ground. Medium shot, important action composed in the central third of the frame. Neutral and restrained blue tones, realistic office environment. No text, no animation.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing, unsafe activity, ladders",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-07-landscape",
+    "description": "adult visitor welcomed at reception",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-07-landscape.mp4",
+    "prompt": "Photorealistic live action, cinematic video. An adult visitor being warmly welcomed at a modern office reception desk. Medium shot, important action composed in the central third of the frame. Navy blue and neutral color palette. No text, no animation.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-08-landscape",
+    "description": "facilities coordinator reviewing plain contract folders with colleague",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-08-landscape.mp4",
+    "prompt": "Photorealistic live action, cinematic video. A facilities coordinator reviewing plain, unmarked contract folders with a colleague. Medium shot, important action composed in the central third of the frame for cropping. Navy blue and neutral color palette, realistic office lighting. No text, no animation.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-09-landscape",
+    "description": "composed professional working focused at desk, screen not visible",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-09-landscape.mp4",
+    "prompt": "Photorealistic live action, cinematic video. A composed professional working focused at their desk. The computer screen is not visible to the camera. Medium shot, important action composed in the central third of the frame. Neutral and restrained blue tones. No text, no animation.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing, visible screens",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-10-landscape",
+    "description": "colleagues walking through bright civic atrium with optimistic calm",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-10-landscape.mp4",
+    "prompt": "Photorealistic live action, cinematic video. Colleagues walking through a bright, contemporary civic atrium with an atmosphere of optimistic calm. Natural daylight, elegant architectural details. Navy blue and neutral color palette. No text, no animation, no direct address.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing",
+    "settings": {
+      "aspectRatio": "16:9",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-10-portrait",
+    "description": "colleagues walking through bright civic atrium with optimistic calm",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-10-portrait.mp4",
+    "prompt": "Photorealistic live action, cinematic video. Colleagues walking through a bright, contemporary civic atrium with an atmosphere of optimistic calm. Natural daylight, elegant architectural details. Navy blue and neutral color palette. No text, no animation, no direct address.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing",
+    "settings": {
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-05-portrait",
+    "description": "staff preparing a real meeting room",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-05-portrait.mp4",
+    "prompt": "Photorealistic live action, cinematic vertical video. Staff preparing a real meeting room, arranging plain chairs and tables. Medium shot, both faces clearly visible inside the central width and upper half of the frame, leaving the bottom clear for subtitles. Navy blue and neutral color palette, realistic office lighting. No text, no animation.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing, cropped faces, off-screen faces",
+    "settings": {
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-07-portrait",
+    "description": "adult visitor welcomed at reception",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-07-portrait.mp4",
+    "prompt": "Photorealistic live action, cinematic vertical video. An adult visitor being warmly welcomed by a receptionist at a modern office desk. Medium shot, both faces clearly visible inside the central width and upper half of the frame, leaving the bottom clear for subtitles. Navy blue and neutral color palette. No text, no animation.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing, cropped faces, off-screen faces",
+    "settings": {
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  },
+  {
+    "id": "shot-08-portrait",
+    "description": "facilities coordinator reviewing plain contract folders with colleague",
+    "path": "attached_assets/generated_videos/letshare4gov/shot-08-portrait.mp4",
+    "prompt": "Photorealistic live action, cinematic vertical video. A facilities coordinator reviewing plain, unmarked contract folders with a colleague. Medium shot, both faces clearly visible inside the central width and upper half of the frame, leaving the bottom clear for subtitles. Navy blue and neutral color palette, realistic office lighting. No text, no animation.",
+    "negativePrompt": "text, letters, words, signage, logos, watermark, writing, cropped faces, off-screen faces",
+    "settings": {
+      "aspectRatio": "9:16",
+      "resolution": "1080p",
+      "durationSeconds": 8,
+      "highQuality": true,
+      "personGeneration": "allow_adult"
+    }
+  }
+]

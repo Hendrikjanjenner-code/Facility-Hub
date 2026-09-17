@@ -1,0 +1,24 @@
+LetShare4Gov — A more connected working day
+
+Speelduur: 77 seconden
+Gesproken taal: Engels
+Ondertitels: Nederlands (NL) of Europees Portugees (PT)
+
+De acht MP4-bestanden hebben de ondertitels in het beeld verwerkt.
+EN in de bestandsnaam verwijst naar de gesproken taal.
+
+Formaten:
+16x9: 1920 × 1080 — breedbeeld, website en presentaties
+9x16: 1080 × 1920 — staand, mobiele/sociale video
+1x1:  1080 × 1080 — vierkant
+4x5:  1080 × 1350 — staande socialemediafeed
+
+De losse SRT- en VTT-bestanden gebruiken dezelfde tijdlijn als alle MP4's.
+Deze hoeven niet nog eens ingeschakeld te worden bij de video's waarin
+ondertitels al zijn ingebrand.
+
+Het gaat om AI-gegenereerde, fotorealistische scènes en een synthetische
+voice-over. De personen en locaties zijn fictief. Dit zijn geen opnamen
+van echte klanten of medewerkers. De eindkaart vermeldt dit ook.
+
+De bestaande animatie, website en app zijn niet vervangen of gepubliceerd.

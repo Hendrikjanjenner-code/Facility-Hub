@@ -1,0 +1,90 @@
+{
+  "title": "A more connected working day",
+  "brand": "LetShare4Gov",
+  "voiceLanguage": "en-GB",
+  "subtitleLanguages": [
+    "nl-NL",
+    "pt-PT"
+  ],
+  "voiceId": "pFZP5JQG7iQjIQuC4Bku",
+  "disclosure": "AI-generated fictional scenes and synthetic narration. Not footage of actual customers or employees.",
+  "lines": [
+    {
+      "id": 1,
+      "en": "Every day, public organisations depend on people who keep buildings, spaces and services running.",
+      "nl": "Elke dag houden mensen gebouwen, werkplekken en diensten van publieke organisaties draaiend.",
+      "pt": "Todos os dias, há pessoas que mantêm os edifícios, os espaços e os serviços públicos a funcionar.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-01.mp3"
+    },
+    {
+      "id": 2,
+      "en": "But scattered emails, paper notes and separate lists can make even simple work harder.",
+      "nl": "Maar losse e-mails, notities en lijstjes maken zelfs eenvoudig werk ingewikkeld.",
+      "pt": "Mas e-mails dispersos, notas em papel e listas separadas complicam até as tarefas mais simples.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-02.mp3"
+    },
+    {
+      "id": 3,
+      "en": "Finding the latest information should not mean chasing another colleague, or another update.",
+      "nl": "Voor actuele informatie zou je niet steeds achter collega’s of nieuwe updates aan moeten.",
+      "pt": "Encontrar informação atualizada não devia exigir procurar um colega ou pedir mais uma atualização.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-03.mp3"
+    },
+    {
+      "id": 4,
+      "en": "LetShare for Gov brings everyday facilities work together, with a shared overview for your team.",
+      "nl": "LetShare4Gov brengt facilitair werk samen, met een gedeeld overzicht voor je team.",
+      "pt": "O LetShare4Gov reúne a gestão diária das instalações numa visão partilhada pela equipa.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-04.mp3"
+    },
+    {
+      "id": 5,
+      "en": "Book meeting rooms and workspaces, and see the reservations that shape your day.",
+      "nl": "Reserveer vergaderruimtes en werkplekken, en bekijk de reserveringen voor je dag.",
+      "pt": "Reserve salas de reunião e postos de trabalho, e consulte as reservas do dia.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-05.mp3"
+    },
+    {
+      "id": 6,
+      "en": "Report issues and plan building maintenance, so teams can see what needs attention.",
+      "nl": "Meld problemen en plan gebouwonderhoud, zodat teams zien wat aandacht nodig heeft.",
+      "pt": "Registe ocorrências e planeie a manutenção dos edifícios, para saber o que precisa de atenção.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-06.mp3"
+    },
+    {
+      "id": 7,
+      "en": "Register visitors and help your reception team prepare for the people arriving today.",
+      "nl": "Registreer bezoekers en help de receptie zich voor te bereiden op hun komst.",
+      "pt": "Registe visitantes e ajude a receção a preparar a chegada de quem vem hoje.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-07.mp3"
+    },
+    {
+      "id": 8,
+      "en": "Keep contracts and their documents organised, alongside the facilities work they support.",
+      "nl": "Houd contracten en documenten overzichtelijk, naast het facilitaire werk dat erbij hoort.",
+      "pt": "Organize os contratos e os seus documentos, a par da gestão das instalações.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-08.mp3"
+    },
+    {
+      "id": 9,
+      "en": "See open requests and recent activity, with the context to decide what comes next.",
+      "nl": "Bekijk open meldingen en recente activiteiten, en bepaal wat de volgende stap is.",
+      "pt": "Consulte os pedidos em aberto e a atividade recente, e decida qual é o próximo passo.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-09.mp3"
+    },
+    {
+      "id": 10,
+      "en": "Less time searching. More focus on the places, people and services your organisation supports.",
+      "nl": "Minder tijd kwijt aan zoeken. Meer aandacht voor de mensen, locaties en diensten van je organisatie.",
+      "pt": "Menos tempo a procurar. Mais atenção aos espaços, às pessoas e aos serviços da sua organização.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-10.mp3"
+    },
+    {
+      "id": 11,
+      "en": "LetShare for Gov. Book a demo and discover a more connected working day.",
+      "nl": "LetShare4Gov. Plan een demo en ontdek hoe je dagelijkse werk beter samenkomt.",
+      "pt": "LetShare4Gov. Marque uma demonstração e descubra um dia de trabalho mais conectado.",
+      "audio": "attached_assets/generated_audio/letshare4gov/voice-11.mp3"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Inter,60,&H00FFFFFF,&H00FFFFFF,&H00101824,&H80101824,0,0,0,0,100,100,0,0,1,4,1,2,70,70,300,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:00.25,0:00:03.30,Default,,0,0,0,,Elke dag houden mensen\Ngebouwen, werkplekken
+Dialogue: 0,0:00:03.30,0:00:06.48,Default,,0,0,0,,en diensten van publieke\Norganisaties draaiend.
+Dialogue: 0,0:00:07.25,0:00:09.99,Default,,0,0,0,,Maar losse e-mails,\Nnotities en lijstjes
+Dialogue: 0,0:00:09.99,0:00:12.70,Default,,0,0,0,,maken zelfs eenvoudig werk\Ningewikkeld.
+Dialogue: 0,0:00:14.25,0:00:16.83,Default,,0,0,0,,Voor actuele informatie zou\Nje niet steeds
+Dialogue: 0,0:00:16.83,0:00:19.54,Default,,0,0,0,,achter collega’s of nieuwe\Nupdates aan moeten.
+Dialogue: 0,0:00:21.25,0:00:24.38,Default,,0,0,0,,LetShare4Gov brengt\Nfacilitair werk samen,
+Dialogue: 0,0:00:24.38,0:00:27.38,Default,,0,0,0,,met een gedeeld overzicht\Nvoor je team.
+Dialogue: 0,0:00:28.25,0:00:30.59,Default,,0,0,0,,Reserveer vergaderruimtes\Nen werkplekken,
+Dialogue: 0,0:00:30.59,0:00:32.86,Default,,0,0,0,,en bekijk de reserveringen\Nvoor je dag.
+Dialogue: 0,0:00:35.25,0:00:37.69,Default,,0,0,0,,Meld problemen en plan\Ngebouwonderhoud,
+Dialogue: 0,0:00:37.69,0:00:40.23,Default,,0,0,0,,zodat teams zien wat\Naandacht nodig heeft.
+Dialogue: 0,0:00:42.25,0:00:44.67,Default,,0,0,0,,Registreer bezoekers en\Nhelp de receptie
+Dialogue: 0,0:00:44.67,0:00:46.94,Default,,0,0,0,,zich voor te bereiden op\Nhun komst.
+Dialogue: 0,0:00:49.25,0:00:52.08,Default,,0,0,0,,Houd contracten en\Ndocumenten overzichtelijk,
+Dialogue: 0,0:00:52.08,0:00:54.83,Default,,0,0,0,,naast het facilitaire werk\Ndat erbij hoort.
+Dialogue: 0,0:00:56.25,0:00:59.22,Default,,0,0,0,,Bekijk open meldingen en\Nrecente activiteiten,
+Dialogue: 0,0:00:59.22,0:01:01.73,Default,,0,0,0,,en bepaal wat de volgende\Nstap is.
+Dialogue: 0,0:01:03.25,0:01:05.45,Default,,0,0,0,,Minder tijd kwijt aan\Nzoeken. Meer
+Dialogue: 0,0:01:05.45,0:01:07.63,Default,,0,0,0,,aandacht voor de mensen,\Nlocaties
+Dialogue: 0,0:01:07.63,0:01:09.75,Default,,0,0,0,,en diensten van je\Norganisatie.
+Dialogue: 0,0:01:10.25,0:01:12.74,Default,,0,0,0,,LetShare4Gov. Plan een demo\Nen ontdek
+Dialogue: 0,0:01:12.74,0:01:15.31,Default,,0,0,0,,hoe je dagelijkse werk\Nbeter samenkomt.
